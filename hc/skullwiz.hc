@@ -346,8 +346,8 @@ void skullwiz_summon(void)
 	self.th_melee = SpiderMeleeBegin;
 	self.th_missile = SpiderJumpBegin;
 	self.th_pain = SpiderPain;
-	self.th_possum = spider_playdead;
-	self.th_possum_up = spider_possum_up;
+	/*self.th_possum = spider_playdead;
+	self.th_possum_up = spider_possum_up;*/
 	self.classname = "monster_spider_yellow_small";
 
 	self.flags (+) FL_MONSTER;
@@ -542,9 +542,7 @@ void SkullMissile_Twist2(void)
 	}
 	
 	if (self.owner.bufftype & BUFFTYPE_LEADER)
-	{
 		HomeThink();
-	}
 }
 
 void SkullMissile_Twist(void)
@@ -707,9 +705,7 @@ void skullwiz_blinkin(void)
 		max_scale = 1.20;
 	
 	if (self.bufftype & BUFFTYPE_LARGE)
-	{
 		max_scale = self.tempscale;
-	}
 
 	if (self.scale >= max_scale)
 	{
@@ -725,11 +721,10 @@ void skullwiz_blinkin(void)
 		//restore monster effects
 		ApplyMonsterBuffEffect(self);
 		
-		self.counter = time+2;	//ws: dont teleport again for 2 seconds, give player a little time to retaliate
+		self.counter = time+1;	//ws: dont teleport again immediately, give player a little time to retaliate
 		
 		skullwiz_run();
 	}
-
 }
 
 void skullwiz_blinkin1 (void) 
@@ -901,10 +896,7 @@ void skullwiz_blink(void) [++ $sktele2..$sktele30]
 		self.scale = 1;
 		
 		if (self.bufftype & BUFFTYPE_LARGE)
-		{
-			self.scale = self.tempscale;			
-		}
-		
+			self.scale = self.tempscale;
 		
 		//temporarily remove monster effects
 		// Must happen before teleport in order to not break the SCALE_TYPE_MASKOUT effect
@@ -1075,7 +1067,7 @@ void skullwiz_stand (void) [++ $skwait1..$skwait26]
 
 void skullwizard_init(void)
 {
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model("models/skullwiz.mdl");
 		precache_model("models/skulbook.mdl");
@@ -1108,11 +1100,6 @@ void skullwizard_init(void)
 		precache_sound("skullwiz/push.wav");
 		precache_sound("skullwiz/firemisl.wav");
 
-//precache_sound("spider/scuttle.wav");
-//precache_sound("spider/bite.wav");
-//precache_sound("spider/pain.wav");
-//precache_sound("spider/death.wav");
-
 		precache_spider ();
 
 	}
@@ -1139,7 +1126,7 @@ void skullwizard_init(void)
 	self.flags(+)FL_MONSTER;
 	self.yaw_speed = 10;
 	
-	self.counter = time;	//counter for when to teleport
+	self.counter = 0;	//counter for when to teleport
 }
 
 /*QUAKED monster_skull_wizard (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
@@ -1192,4 +1179,3 @@ void monster_skull_wizard_lord (void)
 
 	ApplyMonsterBuff(self, TRUE);
 }
-
