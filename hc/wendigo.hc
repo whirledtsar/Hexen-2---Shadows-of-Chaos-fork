@@ -245,10 +245,10 @@ void() fire_icespike =
 	do_shard('14 8 0'*self.scale,360 + random()*150, '0 0 0');
 }*/
 
-void()	wendigo_atk1	=[	35,		wendigo_atk2	] {};
-void()	wendigo_atk2	=[	36,		wendigo_atk3	] {};
-void()	wendigo_atk3	=[	37,		wendigo_atk4	] {};
-void()	wendigo_atk4	=[	38,		wendigo_atk5	] {sound(self,CHAN_WEAPON,"wendigo/attack.wav",0.7,ATTN_NORM);};
+void()	wendigo_atk1	=[	35,		wendigo_atk2	] {ai_face();};
+void()	wendigo_atk2	=[	36,		wendigo_atk3	] {ai_face();};
+void()	wendigo_atk3	=[	37,		wendigo_atk4	] {ai_face();};
+void()	wendigo_atk4	=[	38,		wendigo_atk5	] {ai_face(); sound(self,CHAN_WEAPON,"wendigo/attack.wav",0.7,ATTN_NORM);};
 void()	wendigo_atk5	=[	39,		wendigo_atk6	] {ai_charge(3);};
 void()	wendigo_atk6	=[	40,		wendigo_atk7	] {ai_charge(5); ai_melee();};
 void()	wendigo_atk7	=[	41,		wendigo_atk8	] {ai_charge(5); ai_melee();};

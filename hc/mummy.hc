@@ -504,7 +504,7 @@ void lordmummymissile (void)
 			sound (self, CHAN_WEAPON, "mummy/tap.wav", 1, ATTN_NORM);
 
 		if (self.frame == $mstafA17)
-			launch_mumshot();
+			launch_mumshot(2.5);
 
 		if (result == AF_END)
 			mummyrun();
@@ -515,7 +515,7 @@ void lordmummymissile (void)
 	{
 		result=AdvanceFrame($mwalkB1,$mwalkB16);  // Because there is no one 
 		if (self.frame == $mwalkB16)
-			launch_mumshot();
+			launch_mumshot(2.5);
 
 		if (result == AF_END)
 			mummyrun();

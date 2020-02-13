@@ -455,7 +455,7 @@ void () trap_lightning_track =
 				
 	do_lightning (self,1,0,4, p1, p2, self.dmg);
 
-	fx_flash (p2);		// Flash of light
+	fx_light (p2, EF_BRIGHTLIGHT);		// Flash of light
 
 	self.think = trap_lightning_track;
 	
@@ -505,7 +505,7 @@ void () trap_lightning_use =
 
 	LightningDamage (p1, p2, self, self.dmg,"lightning");
 
-	fx_flash (p2);		// Flash of light
+	fx_light (p2, EF_BRIGHTLIGHT);		// Flash of light
 };
 
 /*QUAKED trap_lightning (0 1 1) (-8 -8 -8) (8 8 8) TRACK ONCE

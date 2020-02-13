@@ -36,49 +36,6 @@ void(float damage,entity victim) spawn_touchpuff =
 	SpawnPuff (self.origin + vel*0.01, vel, damage,victim);
 };
 
-void BecomeExplosion (float explodetype)
-{
-	if (explodetype)
-	{
-		if(explodetype==CE_FLOOR_EXPLOSION)
-			starteffect(CE_FLOOR_EXPLOSION , self.origin+'0 0 64');
-		else
-			starteffect(explodetype , self.origin);
-		if(explodetype==CE_FLOOR_EXPLOSION || explodetype==CE_FLOOR_EXPLOSION2)
-			fx_light(self.origin, EF_BRIGHTLIGHT);
-		else if (explodetype==CE_LG_EXPLOSION)	//exploding barrels
-			fx_light(self.origin, EF_LIGHT);
-		else	//CE_NEW_EXPLOSION || CE_SM_EXPLOSION
-			fx_light(self.origin, EF_DIMLIGHT);
-	}
-	else
-	{
-		if (self.flags2&FL_SMALL) {
-			starteffect(CE_SM_EXPLOSION , self.origin);
-			fx_light(self.origin, EF_DIMLIGHT);
-		}
-		else if(self.flags&FL_ONGROUND) {
-			starteffect(CE_FLOOR_EXPLOSION , self.origin+'0 0 64');
-			fx_light(self.origin, EF_BRIGHTLIGHT);
-		}
-		else {
-			starteffect(CE_LG_EXPLOSION , self.origin);
-			fx_light(self.origin, EF_LIGHT);
-		}
-	}
-
-	if(self.classname=="multigrenade")
-	{//Let sounds play here
-		self.effects=EF_NODRAW;
-		self.velocity='0 0 0';
-		self.movetype=MOVETYPE_NONE;
-		self.think=SUB_Remove;
-		thinktime self : 3;
-	}
-	else
-		remove(self);
-}
-
 void() T_MissileTouch =
 {
 	float	damg;
@@ -462,7 +419,7 @@ float W_CheckNoAmmo (float check_weapon)
 		{
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
-				if(self.bluemana >= 30 && self.greenmana >= 30)
+				if(self.bluemana >= 20 && self.greenmana >= 20)
 					return TRUE;
 			}
 			else if(self.bluemana >= 1 && self.greenmana >= 1)
