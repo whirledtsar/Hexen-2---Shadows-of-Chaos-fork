@@ -311,33 +311,6 @@ void PlayerAdvanceLevel(float NewLevel)
 		}
 	}
 	
-		if (self.playerclass == CLASS_PALADIN)
-		{
-		   sprint(self,"Paladin gained a level\n");
-			if (self.level==3)
-				sprint(self,"You have learned a new use for the Vorpal Blade\n");
-		}
-		else if (self.playerclass == CLASS_CRUSADER)
-		{
-			sprint(self,"Crusader gained a level\n");
-				
-			if (self.level==3)
-				sprint(self,"You have learned a new use for the Warhammer\n");
-		}
-		else if (self.playerclass == CLASS_NECROMANCER)
-		{
-			sprint(self,"Necromancer gained a level\n");
-				
-			if (self.level==3)
-				sprint(self,"You have learned a new use for the Bone Shard\n");
-			/*if (self.level != 5 && self.level != 7 && self.level < 11)
-				sprint(self,"Your powers of resurrection have grown stronger\n");*/
-		}
-		else if (self.playerclass == CLASS_ASSASSIN)
-		{
-			sprint(self,"Assassin gained a level\n");
-		}
-		
 	if (self.bluemana + ManaInc > self.max_mana)
 		self.bluemana = self.max_mana;
 	else
@@ -355,6 +328,33 @@ void PlayerAdvanceLevel(float NewLevel)
 		else
 			self.health += HealthInc;
 	}
+	
+		if (self.playerclass == CLASS_PALADIN)
+		{
+		   sprint(self,"Paladin gained a level\n");
+			if (self.level==3)
+				sprint(self,"You have learned a new use for the Vorpal Blade\n");
+		}
+		else if (self.playerclass == CLASS_CRUSADER)
+		{
+			sprint(self,"Crusader gained a level\n");
+			if (self.level > 2) {
+				self.bluemana = self.greenmana = self.max_mana;
+			}
+			if (self.level==3)
+				sprint(self,"You have learned a new use for the Warhammer\n");
+		}
+		else if (self.playerclass == CLASS_NECROMANCER)
+		{
+			sprint(self,"Necromancer gained a level\n");
+				
+			if (self.level==3)
+				sprint(self,"You have learned a new use for the Bone Shard\n");
+		}
+		else if (self.playerclass == CLASS_ASSASSIN)
+		{
+			sprint(self,"Assassin gained a level\n");
+		}
 
 	if (self.level > 2)
 		self.flags(+)FL_SPECIAL_ABILITY1;
