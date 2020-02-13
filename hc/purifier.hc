@@ -46,7 +46,8 @@ $frame select11     select12
 
 //==================================================================
 
-float PFLAME_COST = 5;
+float PFLOORFLAME_COST = 5;
+float PFLAME_COST = 1;
 
 void purifier_ready (void);
 
@@ -115,7 +116,6 @@ void pflame_burn(void)
 		}
 	}
 }
-
 
 void SpawnPFlame(void)
 {
@@ -217,7 +217,6 @@ void launch_pflame ()
 	thinktime newmis : .04;
 
 	newmis.think = SpawnPFlame;
-
 }
 
 void pmissile_gone(void)
@@ -428,11 +427,11 @@ void purifier_flamefire (void)
 		launch_pflame();
 		self.attack_finished = time + 0.65;
 		
-		self.greenmana -= PFLAME_COST;
-		self.bluemana -= PFLAME_COST;
+		self.greenmana -= PFLOORFLAME_COST;
+		self.bluemana -= PFLOORFLAME_COST;
 	}
 	else if(self.wfs==WF_CYCLE_WRAPPED)
-			purifier_ready();
+		purifier_ready();
 }
 
 /*
@@ -451,7 +450,7 @@ void purifier_tomefire (void)
 		self.attack_finished = time + 0.5;
 	}
 	else if(self.wfs==WF_CYCLE_WRAPPED)
-			purifier_ready();
+		purifier_ready();
 }
 
 /*
@@ -492,7 +491,6 @@ void launch_pmissile1 (void)
 
 	if (self.cnt > 3)
 		self.cnt =0;
-
 
 	missile.drawflags=MLS_ABSLIGHT;
 	missile.abslight=1;
@@ -601,44 +599,42 @@ purifier_fire - shoot purifier.
 
 void pflame_run (void) [ ++ 0 .. 26]
 {
-//dvanceFrame(0,5);
+	self.height*=1.25;
+	self.velocity_z+=self.height;
 	if (self.lifetime < time)
 		pmissile_gone();
 }
 
-void flamestream_touch ()
+void pflame_touch ()
 {
 	if(other.classname=="fball")
 		return;
-	self.effects(+)EF_MUZZLEFLASH;
 	if(other.takedamage)
 		T_Damage(other,self,self.owner,self.dmg);
 	else
-		T_RadiusDamage(self,self.owner,self.dmg*2,self.owner);	
-	if(self.frame<24)
-		self.frame=24;
+		T_RadiusDamage(self,self.owner,self.dmg*2,self.owner);
+	if (other.health <= 0)
+		smolder(other.origin);
+	
+	makevectors(self.angles);
+	CreateGreySmoke(self.origin-v_forward*5,'0 0 5',HX_FRAME_TIME);
+	remove(self);
 }
 
-
-void launch_fball ()
+void launch_pflamestream ()
 {
-	entity missile;
-	//float sndcount = 3;
-
-	//sndcount = sndcount +1;
+entity missile;
 	
 	self.attack_finished = time + 0.1;
 
-	missile = spawn ();
-
-	CreateEntityNew(missile,ENT_AXE_BLADE,"models/eidoflam.spr",SUB_Null);
 	if(self.t_width<time)
-		{
-//			sound(self,CHAN_VOICE,"misc/fburn_bg.wav",1,ATTN_NONE);
-			sound(self,CHAN_VOICE,"eidolon/flambrth.wav",1,ATTN_NONE);
-			self.t_width=time+0.5;
-		}
+	{
+		sound(self,CHAN_WEAPON,"eidolon/flambrth.wav",0.5,ATTN_NORM);
+		self.t_width=time+1.5;
+	}
 	
+	missile = spawn ();
+	CreateEntityNew(missile,ENT_AXE_BLADE,"models/eidoflam.spr",SUB_Null);
 	missile.owner = self;
 	missile.classname = "fball";
 	missile.scale = 0.5;
@@ -646,63 +642,69 @@ void launch_fball ()
 	// set missile speed	
 	makevectors (self.v_angle);
 	missile.velocity = normalize(v_forward);
-	missile.velocity = missile.velocity * 400;
+	missile.velocity = missile.velocity * 500;
 	
-	missile.touch = flamestream_touch;
-	//missile.touch = pmissile2_puff;
+	missile.touch = pflame_touch;
 
 	// Point it in the proper direction
     missile.angles = vectoangles(missile.velocity);
-	//missile.angles += angle_mod;
 
-	// set missile duration
-	missile.counter = 4;  // Can hurt two things before disappearing
-	missile.cnt = 0;		// Counts number of times it has hit walls
-	missile.lifetime = time + .5;  // Or lives for 2 seconds and then dies when it hits anything
-	setorigin (missile, self.origin + self.proj_ofs  + v_forward*10 + v_right * 1);
-
-//sound (missile, CHAN_VOICE, "paladin/axblade.wav", 1, ATTN_NORM);
-
-	/*if (tome)
-	{
-		missile.frags=TRUE;
-		missile.classname = "powerupaxeblade";
-		missile.skin = 1;
-		missile.drawflags = (self.drawflags & MLS_MASKOUT)| MLS_POWERMODE;
-	}*/
-	//else
-		//missile.classname = "axeblade";
+	setorigin (missile, self.origin + self.proj_ofs + v_forward*15 + v_right*1);
 	
-	missile.dmg = 5;
-
-	missile.lifetime = time + .5;
+	missile.dmg = random(12,14);
+	missile.height = 3;		//initial z velocity
+	missile.lifetime = time + .75;
+	
 	thinktime missile : HX_FRAME_TIME;
-	//missile.think = pmissile2_puff;
 	missile.think = pflame_run;
 	
-	self.greenmana -= 1.5;
-	self.bluemana -= 1.5;
-	
-	
-	//missile.think = pmissile2_puff;
-
-	//launch_axtail(missile);
-
+	self.greenmana -= PFLAME_COST;
+	self.bluemana -= PFLAME_COST;
 }
 
 void purifier_tomeflamer()
 {
+	self.th_weapon=purifier_tomeflamer;
+	if (!self.altfiring)
+		self.wfs = advanceweaponframe($bigshot1,$bigshot9);
+	else
+		self.wfs = advanceweaponframe($bigshot3,$bigshot4);
+	
+	if(self.weaponframe==$bigshot4)
+	{
+		self.effects(+)EF_MUZZLEFLASH;
+		self.punchangle_x= -4;
+		launch_pflamestream();
+		self.attack_finished = time + 0.1;
+		if (self.button1)
+			self.altfiring = TRUE;
+	}
+	if(self.weaponframe>=$bigshot4 && (!self.button1 || !self.artifact_active&ART_TOMEOFPOWER || (self.greenmana<PFLAME_COST || self.bluemana<PFLAME_COST) ) )
+	{	//stop cycle if button released, tome done, or out of mana
+		self.altfiring = FALSE;
+		self.t_width = 0;	//sound timer
+		stopSound (self, CHAN_WEAPON);
+		sound(self,CHAN_WEAPON,"eidolon/flamend.wav",0.4,ATTN_NORM);
+		purifier_ready();
+	}
+}
+/*
+void purifier_tomeflamer()
+{
 	self.wfs = advanceweaponframe($bigshot1,$bigshot9);
-	//self.th_weapon=launch_fball;
+	self.th_weapon=purifier_tomeflamer;
+	if(self.weaponframe==$bigshot9)// && !self.button1)
+		sound(self,CHAN_WEAPON,"eidolon/flamend.wav",0.5,ATTN_NORM);
 	if(self.weaponframe==$bigshot1)
 	{
+		self.effects(+)EF_MUZZLEFLASH;
 		self.punchangle_x= -4;
-		launch_fball();
+		launch_pflamestream();
 		self.attack_finished = time + 0.1;
 	}
 	else if(self.wfs==WF_CYCLE_WRAPPED)
-			purifier_ready();
-}
+		purifier_ready();
+}*/
 
 void() pal_purifier_fire =
 {
@@ -711,7 +713,7 @@ void() pal_purifier_fire =
 	else if ((self.artifact_active & ART_TOMEOFPOWER) &&
 		(self.greenmana >= 8) && (self.bluemana >= 8))
 		purifier_tomefire();
-	else if (self.button1 && self.greenmana >= PFLAME_COST && self.bluemana >= PFLAME_COST)
+	else if (self.button1 && self.greenmana >= PFLOORFLAME_COST && self.bluemana >= PFLOORFLAME_COST)
 		purifier_flamefire();
 	else if ((self.greenmana >= 1) && (self.bluemana >= 1))
 		purifier_rapidfire();
