@@ -187,11 +187,6 @@ void(vector spot) CreateRedFlash =
 
 void() DeathBubblesSpawn;
 
-void () flash_remove =
-{
-	remove(self);
-};
-
 void GenerateTeleportSound (entity center)
 {
 string telesnd;
@@ -310,7 +305,7 @@ void (vector org, float effect) fx_light =
 	local entity newent;
 
 	newent = spawn();
-  	setmodel (newent, "models/s_bubble.spr");
+  	setmodel (newent, "models/null.spr");
 	setorigin (newent, org + '0 0 24');
 	newent.movetype = MOVETYPE_NOCLIP;
 	newent.solid = SOLID_NOT;
@@ -323,31 +318,6 @@ void (vector org, float effect) fx_light =
 	setsize (newent, '0 0 0', '0 0 0');
 };
 
-void (vector org) fx_flash =
-{
-	local entity newent;
-
-	newent = spawn();
-  	setmodel (newent, "models/s_bubble.spr");
-
-//	setmodel (newent, newent.model);
-//	newent.modelindex = 0;
-//	newent.model = "";        
-
-
-	setorigin (newent, org + '0 0 24');
-	newent.movetype = MOVETYPE_NOCLIP;
-	newent.solid = SOLID_NOT;
-	newent.velocity = '0 0 0';
-	newent.nextthink = time + 0.5;
-	newent.think = flash_remove;
-	newent.classname = "bubble";
-
-   newent.effects = EF_BRIGHTLIGHT;
-
-	setsize (newent, '-8 -8 -8', '8 8 8');
-
-};
 /*
 void () friction_change_touch =
 {
