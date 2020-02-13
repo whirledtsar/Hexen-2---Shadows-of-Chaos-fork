@@ -156,10 +156,8 @@ void ScorpionInit(float type)
 		return;
 	}
 
-	if not(self.flags2&FL_SUMMONED)
-	{
+	if (!self.flags2 & FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_scorpion();
-	}
 	setmodel(self, "models/scorpion.mdl");
 
 	self.solid = SOLID_SLIDEBOX;
