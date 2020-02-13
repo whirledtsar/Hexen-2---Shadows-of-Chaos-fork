@@ -9,8 +9,8 @@ Weapon modes
 	Gauntlets
 Normal: standard
 Altfire: Stronger but slower punch
-Tomed: Stronger, pushes enemies back
-Tomed altfire: Stronger altfire, pushes enemies even further
+Tomed: Stronger, pushes enemies back slightly
+Tomed altfire: Stronger altfire, pushes enemies far
 
 	Vorpal sword
 Main: standard
@@ -24,11 +24,11 @@ Altfire: Melee attack
 Tomed: standard
 Tomed altfire: Stronger altfire
 
-	Sunstaff
+	Purifier
 Main: standard
 Altfire: Fire trail (moves along the ground and burns enemies)
 Tomed: standard
-Tomed altfire: same as tomed
+Tomed altfire: Flamethrower
  
 		Crusader
 	War hammer
@@ -46,6 +46,12 @@ Tomed altfire: same as tomed
 	Meteor staff
 Main: standard
 Altfire: Meteor grenade
+Tomed: standard
+Tomed altfire: same as tomed
+
+	Sunstaff
+Main: standard
+Altfire: same as main
 Tomed: standard
 Tomed altfire: same as tomed
 
@@ -90,7 +96,7 @@ Changes
 -Glyph artifact has a small delay between firing (length depends on class)
 -All melee attacks knock enemies back
 -Most explosions have dynamic light effects
--Assassin's Set Staff doesn't drain mana continuously after charging
+-Assassin's Set Staff doesn't drain mana continuously after charging; tomed mode costs 20 mana instead of 30
 -Corpses fading out can be disabled by typing "impulse 46" in console (re-enter it to re-enable)
 -Monster respawning is disabled by default; to enable, use "impulse 45"
 -Random monster variations are also disabled; to enable, use "impulse 47"
@@ -111,8 +117,8 @@ Changes
 	New entities - see FGD for further documentation
 -monster_maulotaur: maulotaur from Heretic; model by Razumen, code by Whirledtsar
 -monster_maulotaur_lord: boss-strength maulotaur
--sound_ambient_custom: ambient sound maker that can use any sound file; code by Shanjaq
--sound_maker_custom: triggered sound maker that can use any sound file; code by Shanjaq
+-custom_sound_ambient: ambient sound maker that can use any sound file; code by Shanjaq
+-custom_sound_maker: triggered sound maker that can use any sound file; code by Shanjaq
 -trigger_reflect: brush entity that reflects missiles
 -trigger_kill: brush entity that forces its target to die when triggered or touched
 -light_newfire: large raging fire; use spawnflag 4 to scale size from bottom; ported from the Portals of Praevus expansion
