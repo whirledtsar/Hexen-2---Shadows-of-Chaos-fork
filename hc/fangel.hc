@@ -808,7 +808,7 @@ void() init_fangel =
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
-	if (!self.flags2&FL_SUMMONED)
+	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2 ("models/fangel.mdl");
 		precache_model2 ("models/faspell.mdl");
@@ -888,7 +888,7 @@ New item for QuakeEd
 */
 void() monster_fallen_angel =
 {
-	if (!self.flags2&FL_SUMMONED)
+	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_sound2("fangel/death.wav");
 		precache_sound2("fangel/pain.wav");
@@ -908,7 +908,7 @@ New item for QuakeEd
 */
 void() monster_fallen_angel_lord =
 {
-	if (!self.flags2&FL_SUMMONED)
+	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_sound2("fangel/death.wav");
 		precache_sound2("fangel/pain.wav");
