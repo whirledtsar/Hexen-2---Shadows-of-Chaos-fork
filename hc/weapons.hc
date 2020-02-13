@@ -462,7 +462,7 @@ float W_CheckNoAmmo (float check_weapon)
 		{
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
-				if(self.bluemana >= 30 && self.greenmana >= 30)
+				if(self.bluemana >= 20 && self.greenmana >= 20)
 					return TRUE;
 			}
 			else if(self.bluemana >= 1 && self.greenmana >= 1)
