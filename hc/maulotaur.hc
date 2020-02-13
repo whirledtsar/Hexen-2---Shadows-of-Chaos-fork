@@ -243,7 +243,7 @@ vector meat_spot;
 	
 	T_Damage (victim, self, self, damg+random(10));
 	meat_spot=victim.origin;
-	meat_spot_z=self.origin_z+self.proj_ofs;
+	meat_spot_z=self.origin_z+self.proj_ofs_z;
 	MeatChunks (meat_spot,v_right*gore_vel+'0 0 200',3,victim);
 	SpawnPuff (meat_spot, '0 0 0', 20, victim);
 	Knockback (victim, self, self, force, zmod);
