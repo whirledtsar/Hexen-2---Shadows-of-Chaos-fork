@@ -72,11 +72,6 @@ void sound_maker (void)
 		precache_sound ("misc/tomb.wav");
 		self.noise1 = ("misc/tomb.wav");
 	}
-							
-  
-										 
-										
-  
 	
 	if (self.delay) 
 		self.use = sound_maker_wait;
@@ -105,26 +100,13 @@ void sound_again(void)
 		else
 			sound (self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
 	}
-							   
-  
-					
-				   
-																						
-						
-																						
-	  
-																						
-  
 	else
 		sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 
 	self.think = sound_again;
 						 
   
-	thinktime self : random(self.flags,self.flags2);
-  
-	 
-									   
+	thinktime self : random(self.flags,self.flags2);							   
 }
 
 
@@ -152,12 +134,8 @@ Creates an ambient sound in the world.
 --------------------------------------------------------
 */
 
-
 void sound_ambient (void)
 {
-					 
-								
-
 	if (self.soundtype == 1)
 	{
 		precache_sound ("ambience/windmill.wav");
