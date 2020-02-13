@@ -719,7 +719,8 @@ void Precache_wav (void)
 	//Purifier
 	precache_sound ("paladin/purfire.wav");	
 	precache_sound ("paladin/purfireb.wav");
-	precache_sound ("eidolon/flambrth.wav");	//for purifier tome altfire
+	precache_sound ("mummy/mislfire.wav");		//SoC: altfire
+	precache_sound ("eidolon/flambrth.wav");	//SoC: tome altfire
 	precache_sound ("eidolon/flamend.wav");
 	//Glyph: delayed fireball
 	precache_sound ("weapons/fbfire.wav");		//Delayed fireball explosion sound	
