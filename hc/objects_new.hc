@@ -22,22 +22,6 @@ void()	fog_loop8	=[	3,	fog_loop9	] {};
 void()	fog_loop9	=[	4,	fog_loop10	] {};
 void()	fog_loop10	=[	4,	fog_loop1	] {};
 
-
-void()	fog_spawn1	=[	0,	fog_spawn2	] {};
-void()	fog_spawn2	=[	0,	fog_spawn3	] {};
-void()	fog_spawn3	=[	1,	fog_spawn4	] {};
-void()	fog_spawn4	=[	1,	fog_spawn5	] {};
-void()	fog_spawn5	=[	2,	fog_spawn6	] {};
-void()	fog_spawn6	=[	2,	fog_spawn7	] {ThrowGib ("models/fog.spr", self.health);};
-void()	fog_spawn7	=[	3,	fog_spawn8	] {};
-void()	fog_spawn8	=[	3,	fog_spawn9	] {};
-void()	fog_spawn9	=[	4,	fog_spawn10	] {};
-void()	fog_spawn10	=[	4,	fog_spawn11	] {};
-void()	fog_spawn11	=[	4,	fog_spawn12	] {};
-void()	fog_spawn12	=[	4,	fog_spawn13	] {};
-void()	fog_spawn13	=[	4,	fog_spawn14	] {};
-void()	fog_spawn14	=[	4,	fog_spawn1	] {};
-
 void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, "misc/fburn_sm.wav", 1, ATTN_NORM);};
 void()	fire_burn2	=[	1,	fire_burn3	] {};
 void()	fire_burn3	=[	2,	fire_burn4	] {};
@@ -253,8 +237,6 @@ void()	water_fall24	=[	65,	water_fall25	] {};
 void()	water_fall25	=[	66,	water_fall26	] {};
 void()	water_fall26	=[	67,	water_fall1	] {};
 
-
-
 void()	corpse_swing1	=[	0,	corpse_swing2	] {};
 void()	corpse_swing2	=[	1,	corpse_swing3	] {};
 void()	corpse_swing3	=[	2,	corpse_swing4	] {};
@@ -427,8 +409,6 @@ void() misc_waterfall =
 	self.flags (+) FL_MONSTER | FL_FLY;
 	//self.th_stand();
 	
-
-	
 	if (self.spawnflags & WATER_TRANS)
 		self.drawflags (+) DRF_TRANSLUCENT;
 	else if (self.spawnflags & WATER_FULLBR)
@@ -450,8 +430,44 @@ void() misc_waterfall =
 		//watcount = 0;
 		//self.use = water_start1;
 	//}
+}
 	
-};
+void fog_float ()
+{
+	self.frame=self.weaponframe_cnt;
+	if (self.lifetime<time || self.velocity=='0 0 0')
+		remove(self);
+	else
+		thinktime self : HX_FRAME_TIME;
+}
+
+void fog_spawn ()
+{
+entity new;
+vector org;
+	makevectors(self.angles);
+	org = (self.absmin+self.absmax)*0.5 + normalize(v_forward)*random(self.t_width) + normalize(v_right)*random(self.t_width);
+	new = spawn();
+	setorigin (new, org);
+	setmodel (new, "models/fog.spr");
+	setsize (new, '0 0 0', '0 0 0');
+	
+	new.movetype = MOVETYPE_FLY;
+	new.solid = SOLID_NOT;
+	new.drawflags(+)DRF_TRANSLUCENT;
+	new.scale=0.2;
+	new.weaponframe_cnt=rint(random(0,4));
+	new.lifetime = time+self.lifespan+random(self.lifespan);
+	new.think = fog_float;
+	thinktime new : 0;
+	
+	new.velocity_x = (random(-self.t_length,self.t_length));
+	new.velocity_y = (random(-self.t_length,self.t_length));
+	new.velocity_z = (random(-self.height,self.height));
+	
+	self.think = fog_spawn;
+	thinktime self : random(self.wait,self.wait*2);
+}
 
 void() misc_mist
 {
@@ -466,24 +482,28 @@ void() misc_mist
 	self.th_stand();
 	if (self.targetname)
 		self.use = SUB_Remove;
-	
-	
 };
 
 void() misc_mistgen
 {
 	precache_model ("models/fog.spr");
-	//setmodel (self, "models/fog.spr");
 	
-	self.drawflags (+) DRF_TRANSLUCENT;
-	
-	self.th_stand = fog_spawn1;
+	if (!self.t_length)		//speed
+		self.t_length=30;
+	if (!self.t_width)		//spawning area
+		self.t_width=30;
+	if (!self.height)		//z speed
+		self.height=6;
+	if (!self.lifespan)		//fog lifetime
+		self.lifespan=2;
+	if (!self.wait)
+		self.wait=0.5;		//min delay between fog spawns
+	self.th_stand = fog_spawn;
 	self.netname="fog generator";
-	self.flags (+) FL_FLY;
 	if (self.targetname)
 	{
 		if (self.spawnflags & 2)
-			self.use = fog_spawn1;
+			self.use = fog_spawn;
 		else
 		{
 			self.use = SUB_Remove;
@@ -492,8 +512,6 @@ void() misc_mistgen
 	}
 	else
 		self.th_stand();
-	
-	
 };
 
 void() obj_treecluster
