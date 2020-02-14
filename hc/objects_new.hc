@@ -22,7 +22,7 @@ void()	fog_loop8	=[	3,	fog_loop9	] {};
 void()	fog_loop9	=[	4,	fog_loop10	] {};
 void()	fog_loop10	=[	4,	fog_loop1	] {};
 
-void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, "misc/fburn_sm.wav", 1, ATTN_NORM);};
+void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, self.noise1, 0.75, ATTN_IDLE)};
 void()	fire_burn2	=[	1,	fire_burn3	] {};
 void()	fire_burn3	=[	2,	fire_burn4	] {};
 void()	fire_burn4	=[	3,	fire_burn5	] {};
@@ -538,6 +538,9 @@ void() light_fire_large
 	precache_model ("models/flammd.spr");
 	setmodel (self, "models/flammd.spr");
 	self.think = fire_burn1;
+	if (!self.noise1)
+		self.noise1 = "misc/fburn_bg.wav";
+	precache_sound(self.noise1);
 	if (self.targetname)
 		self.use = SUB_Remove;
 	self.think();
