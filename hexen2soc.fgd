@@ -2186,7 +2186,18 @@
 
 @PointClass base(Object) = misc_mist : "Low fog/mist sprite" []
 
-@PointClass base(Object) = misc_mistgen : "Rolling fog sprite/particle generator - requires at least 0.5 wateralpha" []
+@PointClass base(Object) = misc_mistgen : "Rolling fog sprite/particle generator - requires at least 0.5 wateralpha"
+[
+	spawnflags(Flags) =
+	[
+		2 : "Start off"
+	]
+	t_length(integer) : "Mist max offset" : 30
+	t_width(integer) : "Mist speed" : 30
+	height(integer) : "Mist speed (Z)" : 6
+	lifespan(integer) : "Mist lifetime" : 2
+	wait(integer) : "Delay between spawns" : 0.5
+]
 
 @PointClass base(light) model(":models/chan.mdl") size(-8 -8 -8, 8 8 8) = light_chan : "Chandelier (heretic 2)" []
 
