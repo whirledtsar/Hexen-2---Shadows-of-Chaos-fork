@@ -16,22 +16,39 @@ float AFRIT_COCOON = 2;
 float AFRIT_DODGESPEED = 6;
 
 void() AfritCheckDodge;
+void() afrit_wake1;
 
 void() AfritEffects
 {
+entity new;
+string model;
+
 	if (self.count == 0) {
-		ThrowGib("models/burn.spr",self.health);
-		++self.count;
+		model="models/burn.spr";
+		self.count=1;
 	}
 	else if (self.count == 1) {
-		ThrowGib("models/burn1.spr",self.health);
-		++self.count;
+		model="models/burn1.spr";
+		self.count=2;
 	}
-	else
-	{
-		ThrowGib("models/burn2.spr",self.health);
-		self.count = 0;
-	}			
+	else {
+		model="models/burn2.spr";
+		self.count=0;
+	}
+	
+	new = spawn_temp();
+	new.origin = (self.absmin+self.absmax)*0.5;
+	new.origin_z = new.origin_z + 6;
+	setmodel (new, model);
+	setsize (new, '0 0 0', '0 0 0');
+	new.drawflags(+)DRF_TRANSLUCENT;
+	new.movetype = MOVETYPE_FLY;
+	new.velocity_x = (random(-5,5));
+	new.velocity_y = (random(-5,5));
+	new.velocity_z = (random(10,27));
+	
+	new.think = SUB_Remove;
+	thinktime new : 0.09;
 }
 
 void() ABallTouch
