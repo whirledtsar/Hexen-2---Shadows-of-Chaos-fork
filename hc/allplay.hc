@@ -240,25 +240,15 @@ void PlayerDead ()
 void ThrowGib (string gibname, float dm)
 {
 entity new;
-
-	new = spawn_temp();
+	//ws: corpses fading can be toggled by console command (impulse 46)
+	if (corpsefading)
+		new = spawn_temp();
+	else
+		new = spawn();
 	new.origin = (self.absmin+self.absmax)*0.5;
 	setmodel (new, gibname);
 	setsize (new, '0 0 0', '0 0 0');
 	new.velocity = VelocityForDamage (dm);
-	if (new.model == "models/shardwend.mdl")
-	{	
-		new.gravity = 0.4;
-		if (random(100) < 70)
-			new.drawflags(+)DRF_TRANSLUCENT|MLS_FULLBRIGHT;
-		/*new.velocity_x = (random() * (50 - -50)) + -50;
-		new.velocity_y = (random() * (50 - -50)) + -50;
-		new.velocity_z = (random() * (280 - 100)) + 100;*/
-		new.velocity_x = (random(-50,50));
-		new.velocity_y = (random(-50,50));
-		new.velocity_z = (random(100,280));
-		new.origin_z = new.origin_z - 10;
-	}
 	
 	new.movetype = MOVETYPE_BOUNCE;
 	new.solid = SOLID_NOT;
@@ -266,48 +256,29 @@ entity new;
 	new.avelocity_y = random(600);
 	new.avelocity_z = random(600);
 	new.scale=random(.5,.9);
-	new.think = SUB_Remove;
+	if (corpsefading || coop || deathmatch) {
+		new.think = SUB_Remove;
+		thinktime new : random(20,10);
+	}
+	else {
+		new.think = makestatic;	//SUB_Null;
+		thinktime new : 0;
+	}
 	new.ltime = time;
-	thinktime new : random(20,10);
 	new.frame = 0;
 	new.flags = 0;
-	if (new.model == "models/fog.spr")
-	{
-		new.avelocity = 0;
-		new.drawflags(+)DRF_TRANSLUCENT;
-		new.velocity_x = (random(-30,30));
-		new.velocity_y = (random(-30,30));
-		new.velocity_z = (random(-7,10));
-		new.movetype = MOVETYPE_FLY;
-		//new.gravity = 0.01;
-		//AdvanceFrame(0,4);
-		new.scale = 0.2;
-		//new.avelocity_x = 20;
-		//new.avelocity_y = -70;
-		//new.avelocity_z = 10;
-		//new.avelocity_z = random(600);
-		//new.scale=.8;
+	
+	if (new.model == "models/shardwend.mdl")
+	{	
+		new.gravity = 0.4;
+		if (random(100) < 70)
+			new.drawflags(+)DRF_TRANSLUCENT|MLS_FULLBRIGHT;
+		new.velocity_x = (random(-50,50));
+		new.velocity_y = (random(-50,50));
+		new.velocity_z = (random(100,280));
+		new.origin_z = new.origin_z - 10;
 	}
-	if (new.model == "models/burn.spr" || new.model == "models/burn1.spr" || new.model == "models/burn2.spr" || new.model == "models/burn3.spr")
-	{
-		new.avelocity = 0;
-		new.drawflags(+)DRF_TRANSLUCENT;
-		new.velocity_x = (random(-5,5));
-		new.velocity_y = (random(-5,5));
-		new.velocity_z = (random(10,27));
-		new.movetype = MOVETYPE_FLY;
-		new.origin_z = new.origin_z + 6;
-		//new.origin = new.origin + v_forward*2 + v_right*random(0,1);
-		//new.gravity = 0.01;
-		thinktime new : 0.09;
-		new.scale = 0.2;
-		//new.avelocity_x = 20;
-		//new.avelocity_y = -70;
-		//new.avelocity_z = 10;
-		//new.avelocity_z = random(600);
-		//new.scale=.8;
-	}
-	if (new.model == "models/footsoldierhd.mdl" || new.model == "models/footsoldierhalf.mdl" || new.model == "models/footsoldieraxe.mdl")
+	else if (new.model == "models/footsoldierhd.mdl" || new.model == "models/footsoldierhalf.mdl" || new.model == "models/footsoldieraxe.mdl")
 	{
 		new.avelocity = 0;
 		new.avelocity_x = 20;
@@ -316,7 +287,7 @@ entity new;
 		//new.avelocity_z = random(600);
 		new.scale=.8;
 	}
-	if (new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/afritwing.mdl")
+	else if (new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/afritwing.mdl" || new.model == "models/h_imp.mdl")
 	{
 		new.avelocity = 0;
 		new.avelocity_x = 20;
@@ -327,7 +298,7 @@ entity new;
 		if (self.classname == "monster_archer_lord")
 			new.skin = 1;
 	}
-	if (new.model == "models/impwing.mdl" || new.model == "models/impwing_ice.mdl")
+	else if (new.model == "models/impwing.mdl" || new.model == "models/impwing_ice.mdl")
 	{
 		new.avelocity = 0;
 		new.avelocity_x = 20;
@@ -340,7 +311,7 @@ entity new;
 		else
 			new.skin = 0;
 	}
-	if (new.model == "models/archerleg.mdl" || new.model == "models/footsoldierleg.mdl" || new.model == "models/footsoldierarm.mdl")
+	else if (new.model == "models/archerleg.mdl" || new.model == "models/footsoldierleg.mdl" || new.model == "models/footsoldierarm.mdl")
 	{
 		new.avelocity = 0;
 		new.avelocity_x = 3;
@@ -349,21 +320,16 @@ entity new;
 		//new.avelocity_z = random(600);
 		new.scale=.9;
 	}
-	if (new.model == "models/blood.mdl")
+	else if (new.model == "models/blood.mdl")
 	{
 		new.avelocity = 0;
 		new.gravity = 1.3;
 		new.origin_z = new.origin_z - 5;
 		//new.avelocity_z = random(600);
-		//new.scale=1.1;
 		new.scale = random(.6, 1.2);
 		new.frame = 0;
-		//new.think = BloodStop;
-		//new.nextthink = time + 0.1;
-		//if(new.flags&FL_ONGROUND)
-			//new.frame = 1;
 	}
-	if (new.model == "models/bloodpool.mdl" || new.model == "models/bloodpool2.mdl" || new.model == "models/bloodpool3.mdl" || new.model == "models/bloodpool_ice.mdl")
+	else if (new.model == "models/bloodpool.mdl" || new.model == "models/bloodpool2.mdl" || new.model == "models/bloodpool3.mdl" || new.model == "models/bloodpool_ice.mdl")
 	{
 		new.avelocity = 0;
 		new.gravity = 17;
@@ -380,21 +346,13 @@ entity new;
 		}
 		if (self.netname == "yakman")
 			new.scale = 1.3;
-			
+		
 		setsize(new, '0 0 0' , '0 0 0');
-		//new.origin_z = new.origin_z - 20;
-
-		//new.avelocity_z = random(600);
-		//new.scale=1.1;
 	}
-	if (new.model == "models/h_imp.mdl")
-	{
-		new.avelocity = 0;
-		new.avelocity_x = 20;
-		new.avelocity_y = -70;
-		new.avelocity_z = 10;
-		//new.avelocity_z = random(600);
-		new.scale=1.1;
+	if (new.model == "models/blood.mdl" || new.model == "models/bloodpool_ice.mdl" || new.model == "models/shardwend.mdl")
+	{	//always fade these out regardless of corpse fading setting
+		new.think = ice_melt;	//altdeath.hc
+		thinktime new : random(20,10);
 	}
 }
 
@@ -451,7 +409,6 @@ vector org;
 	self.think=PlayerDead;
 	thinktime self : 1;
 }
-
 
 void PlayerUnCrouching ()
 {
