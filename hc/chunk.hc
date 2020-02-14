@@ -609,8 +609,10 @@ void chunk_death (void)
 		{
 			if(self.health<-50)
 				deathsound="player/megagib.wav";
-			else
+			else if(random()<0.5)
 				deathsound="player/gib1.wav";
+			else
+				deathsound="player/gib2.wav";
 		}
 		sound(self,CHAN_AUTO,deathsound,1,ATTN_NORM);
 		self.level=-666;
