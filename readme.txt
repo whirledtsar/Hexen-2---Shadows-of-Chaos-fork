@@ -93,16 +93,17 @@ Changes
 	Changes to the SoC mod
 -Various balance tweaks & bugfixes
 -All classes receive mana & health upon leveling up (only the amount added to their maximum pool)
+-Corpses fading out can be disabled by typing "impulse 46" in console (re-enter it to re-enable); gibs always fade out in coop
+-Monster respawning is disabled by default; to enable, use "impulse 45"
+-Random monster variations are also disabled; to enable, use "impulse 47"
 -Glyph artifact has a small delay between firing (length depends on class)
 -All melee attacks knock enemies back
 -Most explosions have dynamic light effects
 -Assassin's Set Staff doesn't drain mana continuously after charging; tomed mode costs 20 mana instead of 30
--Corpses fading out can be disabled by typing "impulse 46" in console (re-enter it to re-enable)
--Monster respawning is disabled by default; to enable, use "impulse 45"
--Random monster variations are also disabled; to enable, use "impulse 47"
 -Inventory maximum amounts reduced to encourage use over hoarding - you can only carry 5 Quartz Flasks, and 1 or 2 each of powerful artifacts such as the Mystic Urn
 -Disc of repulsion puts some monsters into jump state so they can't attack in the air
 -Afrits no longer phase through geometry
+-Skull wizards won't teleport immediately after teleporting in
 -Archer Lord health (and experience points given) approximately halved
 -Mummies make a sound and light up when firing arrows
 
