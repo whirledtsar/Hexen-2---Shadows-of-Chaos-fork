@@ -1170,7 +1170,7 @@ void monster_skull_wizard_lord (void)
 
 	skullwizard_init();
 
-	self.health = 650;
+	self.health = 600;
 	self.experience_value = 400;
 	self.monsterclass = CLASS_LEADER;
 	self.skin = 1;
