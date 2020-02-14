@@ -48,8 +48,8 @@ float VORP_BASE_DAMAGE			= 15;
 float VORP_ADD_DAMAGE			= 10;
 float VORP_PWR_BASE_DAMAGE		= 50;
 float VORP_PWR_ADD_DAMAGE		= 30;
-float VORP_RADIUS				= 150;
-float VORP_FORCE				= 8;
+float VORP_RADIUS			= 150;
+float VORP_FORCE			= 10;
 float VORP_THROW_COST = 4;
 float VORP_TOME_EXTRACOST = 2;
 
@@ -504,12 +504,12 @@ void vorpal_melee (float tome)
 		if ((self.bluemana >= 4) && (tome)) // Tome of power melee damage
 		{
 			damg = 80 + (random(strmod));
-			force *= 3.25;
+			force *= 3.5;
 		}
 		else if (self.bluemana >= 2)
 		{
 			damg = 40 + random(strmod*0.5);
-			force *= 2.25;
+			force *= 2.5;
 		}
 		else 
 		{
