@@ -59,66 +59,38 @@ void monster_fallen_angel (void);
 	self.origin = spot1;
  
 	if (self.classname == "monster_imp_ice")
-	{
 		self.think = monster_imp_ice;
-	}
 	else if (self.classname == "monster_imp_fire")
-	{
 		self.think = monster_imp_fire;
-	}
 	else if (self.classname == "monster_archer")
-	{
 		self.think = monster_archer;
-	}
 	else if (self.classname == "monster_archer_lord")
 	{
 		self.classname = "monster_archer_lord"; //self.classname = "monster_archer";
 		self.think = monster_archer;
 	}
 	else if (self.classname == "monster_skull_wizard")
-	{
 		self.think = monster_skull_wizard;
-	}
 	else if (self.classname == "monster_scorpion_black")
-	{
 		self.think = monster_scorpion_black;
-	}
 	else if (self.classname == "monster_scorpion_yellow")
-	{
 		self.think = monster_scorpion_yellow;
-	}
 	else if (self.classname == "monster_spider_yellow_large")
-	{
 		self.think = monster_spider_yellow_large;
-	}
 	else if (self.classname == "monster_spider_yellow_small")
-	{
 		self.think = monster_spider_yellow_small;
-	}
 	else if (self.classname == "monster_spider_red_large")
-	{
 		self.think = monster_spider_red_large;
-	}
 	else if (self.classname == "monster_spider_red_small")
-	{
 		self.think = monster_spider_red_small;
-	}
 	else if (self.classname == "monster_golem_stone")
-	{
 		self.think = monster_golem_stone;
-	}
 	else if (self.classname == "monster_golem_iron")
-	{
 		self.think = monster_golem_iron;
-	}
 	else if (self.classname == "monster_golem_bronze")
-	{
 		self.think = monster_golem_bronze;
-	}
 	else if (self.classname == "monster_mummy")
-	{
 		self.think = monster_mummy;
-	}
 	else if (self.classname == "monster_mummy_lord")
 	{
 		self.classname = "monster_mummy";
@@ -133,9 +105,7 @@ void monster_fallen_angel (void);
 		self.think = monster_mezzoman;
 	}
 	else if (self.classname == "monster_werepanther")
-	{
 		self.think = monster_werepanther;
-	}
 	else if (self.classname == "monster_medusa")
 	{
 		self.think = monster_medusa;
@@ -249,7 +219,7 @@ void () CorpseThink =
 
 	if (self.watertype==CONTENT_LAVA)	// Corpse fell in lava
 		T_Damage(self,self,self,self.health);
-	else if (!corpsefading && self.lifetime < time)			// Time is up, begone with you
+	else if (corpsefading && self.lifetime < time)			// Time is up, begone with you
 		init_corpseblink();
 };
 
