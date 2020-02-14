@@ -1021,12 +1021,12 @@ void skullwiz_run (void) [++ $skwalk1..$skwalk24]
 
 		if (self.classname == "monster_skull_wizard")
 		{
-			if (random() < .20)
+			if (random() < .20 && self.counter < time)
 				skullwiz_blink();
 		}
 		else	// Skull Wizard BLINKS more often
 		{
-			if (random() < .30||self.search_time<time + 1)
+			if ( (random() < .30 && self.counter < time) ||self.search_time<time + 1)
 				skullwiz_blink();
 		}
 	}
