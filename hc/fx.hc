@@ -311,7 +311,7 @@ void (vector org, float effect) fx_light =
 	newent.solid = SOLID_NOT;
 	newent.velocity = '0 0 0';
 	newent.nextthink = time + 0.5;
-	newent.think = flash_remove;
+	newent.think = SUB_Remove;
 
 	newent.effects = effect (+) EF_NODRAW;
 
