@@ -287,11 +287,10 @@ void bone_turret_fire ()
 	newmis.scale=0.75;
 	
 	newmis.speed=1000;
-	makevectors(self.angles);
 	newmis.velocity=v_forward*newmis.speed;
 	newmis.angles=vectoangles(newmis.velocity);
 	
-	newmis.dmg=random(8,16);
+	newmis.dmg=random(10,16);
 	newmis.touch=bone_shard_touch;
 	setmodel(newmis,"models/boneshot.mdl");
 	setsize(newmis,'0 0 0','0 0 0');
@@ -307,11 +306,11 @@ void bone_turret_think ()
 	else
 		self.scale-=0.005;
 	
-	self.angles_y+=(10*self.aflag);
+	if (self.height)
+		self.angles_x+=(10*self.lefty);
+	else
+		self.angles_y+=(10*self.lefty);
 	
-	particle4(self.origin,30,random(368,384),PARTICLETYPE_GRAV,1);
-	
-	//local float chance = 32 + self.owner.wisdom;	//45-50 on level 3
 	local float chance;
 	
 	chance = 35 + self.owner.wisdom;	//50-55 at level 3
@@ -319,27 +318,33 @@ void bone_turret_think ()
 		chance = 90;
 	
 	if (random(0,100) < chance)
-	{
-		//check if its aimed at a wall
+	{	//check if its aimed at a wall
 		makevectors(self.angles);
 		traceline(self.origin,self.origin+v_forward*2,TRUE,self);
-		if (trace_fraction != 1)
-		{
-			self.aflag *= (-1);		//reverse direction
-			self.angles_y+=(20*self.aflag);
+		if (trace_fraction != 1) {
+			self.lefty *= (-1);		//reverse direction
+			self.angles_y+=(20*self.lefty);
 		}
 		sound(self,CHAN_WEAPON,"necro/bonefnrm.wav",0.5,ATTN_NORM);
 		bone_turret_fire();
 	}
-	thinktime self : 0.1;
 	
-	if (self.scale < 0.5)
-	{
+	particle4(self.origin,30,random(368,384),PARTICLETYPE_GRAV,1);
+	if (self.attack_finished < time) {
+		CreateGreySmoke(self.origin+'0 0 8'*self.scale,'0 0 4', HX_FRAME_TIME*2);
+		self.attack_finished = time+random(0.75,1.25);
+	}
+	
+	if (self.scale < 0.4) {
 		sound(self,CHAN_BODY,"necro/bonethit.wav",1,0.5);
-		starteffect(CE_SLOW_WHITE_SMOKE, self.origin,'0 0 0', HX_FRAME_TIME);
+		vector randomvec,upordown;
+		randomvec=randomv('-10 -10 -10','10 10 10');
+		starteffect(CE_GHOST, self.origin-self.movedir*8+randomvec,'0 0 30'+randomvec, 0.1);
 		particle4(self.origin,50,random(368,384),PARTICLETYPE_GRAV,10);
 		remove(self);
 	}
+	
+	thinktime self : 0.1;
 }
 
 void bone_ball_touch ()
@@ -353,26 +358,28 @@ void bone_ball_touch ()
 	
 	if (self.scale > 1)	//begin turret sequence
 	{
-		/*makevectors(self.angles);
-		traceline(self.origin,self.origin+v_up*2,TRUE,self);
-		if (trace_fraction != 1)	//hit ceiling?
-			setorigin (self, self.origin + '0 0 -8');
-		else
-		{
-			traceline(self.origin,self.origin+v_up*(-2),TRUE,self);
-			if (trace_fraction != 1)	//hit floor?
-				setorigin (self, self.origin + '0 0 8');
-		}*/
-		
 		sound(self,CHAN_BODY,"necro/bonenwal.wav",1,ATTN_NORM);
 		self.solid = SOLID_PHASE;
 		self.angles = self.velocity = self.avelocity = '0 0 0';
 		self.drawflags(+)MLS_ABSLIGHT;
+		self.drawflags(+)SCALE_ORIGIN_CENTER;
 		self.abslight=0.5;
-		self.aflag = 1;		//used to reverse direction when aim is blocked by wall
+		self.lefty = 1;		//used to reverse direction when aim is blocked by wall
 		self.touch = SUB_Null;
 		self.think = bone_turret_think;
 		thinktime self : HX_FRAME_TIME;
+		
+		makevectors(self.angles);
+		vector org;
+		org = self.origin+v_forward*-1;
+		traceline(org,org+v_up*(-1),TRUE,self);		//hit floor?
+		if (trace_plane_normal == '0 0 0')
+			traceline(org,org+v_up*1,TRUE,self);	//hit ceil?
+		if (trace_plane_normal_z == 1)
+			setorigin (self, self.origin + '0 0 14');	//raise from floor
+		else if (trace_plane_normal_z == (-1)) {
+			setorigin (self, self.origin + '0 0 -14');	//lower from ceil
+		}
 	}
 	else	//explode & remove
 	{
