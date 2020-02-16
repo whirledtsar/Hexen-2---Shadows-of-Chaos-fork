@@ -245,8 +245,8 @@ float dist,damg;
 	{
 		sound (self, CHAN_BODY, "weapons/drain.wav", 1, ATTN_NORM);
 		self.health += damg;
-		if (self.health > self.height)
-			self.health = self.height;	//dont give more than spawn health
+		if (self.health > self.max_health)
+			self.health = self.max_health;	//dont give more than spawn health
 	}
 	sound(self,CHAN_WEAPON,"assassin/chntear.wav",1,ATTN_NORM);
 	SpawnPuff(trace_endpos,(v_right*100)*dir,10,trace_ent);
@@ -320,7 +320,7 @@ void reiv_melee ()
 {
 	ai_face();
 	
-	if (self.health < self.height*0.666 || random()<0.05)
+	if (self.health < self.max_health*0.666 || random()<0.05)
 		self.think = reiv_meleedrain;
 	
 	else if (self.lefty)
@@ -408,7 +408,7 @@ void reiv_mis ()
 	local float r = range(self.enemy);
 	if (r == RANGE_MELEE)
 		self.think = reiv_melee;
-	else if (r <= RANGE_NEAR && self.health < self.height*0.666) {
+	else if (r <= RANGE_NEAR && self.health < self.max_health*0.666) {
 		sound (self, CHAN_VOICE, "reiv/idle.wav", 1, ATTN_NORM);
 		self.counter = time+1.25;	//stop charging at this time
 		self.think = reiv_chargedrain;
@@ -531,8 +531,8 @@ void monster_reiver ()
 	self.flags (+) FL_FLY;
 	if (!self.health)
 		self.health = 120;
-	self.height = self.health;	//save spawn health for later checks
-	//self.mass = 6;
+	self.max_health = self.health;	//save spawn health for later checks
+	self.mass = 11;
 	self.monsterclass = CLASS_GRUNT;
 	self.movetype = MOVETYPE_STEP;
 	self.proj_ofs = '0 0 24';
