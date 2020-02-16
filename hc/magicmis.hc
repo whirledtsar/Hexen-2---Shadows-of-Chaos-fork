@@ -329,6 +329,7 @@ float FireShockingGrasp (float intmod, float damg)
 
 					//Damage target
 					T_Damage(found,self,self,damg);
+					SpawnPuff(targetOrg, '0 0 8', damg, found);
 				}	
 			}
 		}
