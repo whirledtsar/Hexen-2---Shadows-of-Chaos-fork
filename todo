@@ -1,13 +1,5 @@
-fix imps: imps using the spawn-in system get stuck in swoop animation for some reason.
-this doesnt affect any maps retroactively since its a new feature. just dont use spawnflag 128 with them for now
+altfires for demoness weapons
 
-certain monsters (death knight, undying) behave very oddly with disc of repulsion & weapon knockback effects.
-blast death knight, kill him, and then his corpse will be thrown. blast undying and they can be killed by walking into them. something to do with mass?
+figure out fl_fireheal / fl2_fireheal, fl_coldheal / fl2_coldheal confusion
 
-finish reiver monster
-
-make tomed altfire mode for meteor staff
-
-skull wizards start floating after teleporting back in; present in uhexen2 progs as well (and assumably vanilla)
-
-make bone ball turret aim at the floor if it hit the ceiling
+figure out GoT respawning vs skill 4 respawning systems
