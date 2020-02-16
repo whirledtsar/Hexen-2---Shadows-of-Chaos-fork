@@ -164,14 +164,20 @@ void ai_melee()
 {//Bad idea- doesn't care where around self player is!
 vector	org1,org2;
 float 	ldmg;
+float dist;
 
 	if (!self.enemy)
 		return;		// removed before stroke
 		
 	org1=self.origin+self.proj_ofs;
 	org2=self.enemy.origin;
+	
+	if (!self.t_length)	//default melee range
+		dist=60;
+	else				//ws: custom melee range
+		dist=self.t_length;
 
-	if(vlen(org2-org1)>60)
+	if(vlen(org2-org1)>dist)
 		return;
 
 	traceline(org1,org2,FALSE,self);
