@@ -27,6 +27,7 @@ void() W_Precache =
 	//ws: precache monsters used by sickle monster summoning function
 	precache_scorpion();
 	precache_spider();
+	precache_knight();
 };
 
 //
@@ -1415,4 +1416,6 @@ void precache_undying()
 	precache_sound ("undying/usight.wav");
 	precache_sound ("undying/udecap.wav");
 	precache_sound ("death_knight/kdeath2.wav");
+	precache_sound ("mummy/crawl.wav");
+	precache_sound ("undying/uhit.wav");	//taken from Strife (Rogue Software)
 }
