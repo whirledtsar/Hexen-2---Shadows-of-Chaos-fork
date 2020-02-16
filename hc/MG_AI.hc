@@ -52,7 +52,7 @@ float base, divider, attack_mod;
 		return;
 	}
 
-	if(targ.drawflags&DRF_TRANSLUCENT)
+	if(targ.drawflags&DRF_TRANSLUCENT&&targ.frozen<=0)
 	{
 		if(targ.model=="models/assassin.mdl")
 			divider=3+targ.dexterity / 6;//Bonus for hiding in shadows
@@ -62,7 +62,7 @@ float base, divider, attack_mod;
 	else
 		divider=1;
 
-	if(targ.drawflags&MLS_ABSLIGHT)
+	if(targ.drawflags&MLS_ABSLIGHT)//&&targ.frozen<=0)
 		base=targ.abslight/2.5;
 	else
 		base=targ.light_level/75;//75 is semi-fullbright
@@ -92,7 +92,18 @@ float visibility_good (entity targ,float chance_mod)
 {
 	if(!targ)
 		return FALSE;
+
+	if(targ.frozen>0)
+		return TRUE;
+
 	get_visibility(targ,TRUE);
+
+	if(self.classname=="monster_mezzoman")
+		if(targ.velocity=='0 0 0')
+			chance_mod/=2;//Night vision!
+		else
+			chance_mod/=5;//Night vision and cats are beter at seeing slight movement
+
 	if(random(chance_mod)<targ.visibility)
 		return TRUE;
 
@@ -113,30 +124,24 @@ FALSE if not.
 */
 float FindMonsterTarget ()
 {
-	entity found;
-	float okay;
-
-	sdprint ("Summoned monster started finding monster target", TRUE);
-    if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&self.controller.enemy.classname!="gargoyle"&&visible(self.controller.enemy))
+entity found;
+float okay;
+	if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
 	{
 		self.enemy=self.controller.enemy;
-		sdprint ("Summoned monster's controller has a target", TRUE);
 		return TRUE;
 	}
 
-	sdprint ("Summoned monster's controller has no target... searching", TRUE);
 	okay=FALSE;
 	found=findradius(self.origin,1000);
 	while(found!=world)
 	{
 		if(found!=self)
-			if(found.flags2&FL_ALIVE&&self.controller.enemy.classname!="gargoyle")	//check if enemy is a dormant gargoyle -ws
+			if(found.flags2&FL_ALIVE)
 				if(visible(found))
 					if(found!=self.controller)
 						if(found.controller!=self.controller)
 						{
-							sdprint ("Summoned monster found a target!", TRUE);
-
 							if(coop)
 							{
 								if(found.classname!="player")
@@ -152,13 +157,11 @@ float FindMonsterTarget ()
 							if(okay)
 							{
 								self.enemy=found;
-								sdprint ("Returning monster target", TRUE);
 								return TRUE;
 							}
 						}
 		found=found.chain;
 	}
-	
 	sdprint ("Summoned monster found no targets, seeking controller instead", TRUE);
 	if(self.playercontrolled) // if imp, or summoned by player
 		self.enemy=self.controller;
@@ -185,19 +188,32 @@ float jump_height, jumpup, ignore_height;
 	jumpdir_z=0;
 	jump_height=jumpdir*v_forward;
 	if(jump_height<0.3)
+	{
+//		dprint("jump direction more than 60 degrees off of forward\n");
 		return FALSE;
+	}
 
 	spot1=self.origin;
 	spot2=self.enemy.origin;
 
 	spot1_z=0;
 	spot2_z=0;
-	jump_height=16;
+	if(self.model=="models/yakman.mdl")
+	{
+		if(vlen(spot2-spot1)>384)//Yakman can't jump too far
+		{
+//			dprint("too far for yakman to jump\n");
+			return FALSE;
+		}
+		jump_height=12;
+	}
+	else
+		jump_height=16;
 
 	if(pointcontents(spot1+v_forward*24-'0 0 10')!=CONTENT_SOLID)
 		ignore_height=TRUE;
 
-	if(self.classname!="monster_mezzoman"&&!self.spiderType)
+	if(self.classname!="monster_mezzoman"&&!self.spiderType&&self.model!="models/yakman.mdl")
 		if(vlen(spot1-spot2)>256)
 			ignore_height=FALSE;
 
@@ -217,7 +233,7 @@ float jump_height, jumpup, ignore_height;
 //		dprint("can't see goalentity\n");
 		return FALSE;
 	}
-	if(!ignore_height&&self.goalentity.absmin_z+36>=self.absmin_z&&self.think!=SpiderJumpBegin&&self.classname!="monster_mezzoman")
+	if(!ignore_height&&self.goalentity.absmin_z+36>=self.absmin_z&&self.think!=SpiderJumpBegin&&self.classname!="monster_mezzoman"&&self.model!="models/yakman.mdl")
 	{
 //		dprint("not above goalentity, and not spider\n");
 		return FALSE;
@@ -250,7 +266,7 @@ float jump_height, jumpup, ignore_height;
 
 	if(self.think==SpiderJumpBegin)
 		jump_height=vlen((self.goalentity.absmax+self.goalentity.absmin)*0.5-self.origin)/13;
-	else if(self.classname=="monster_mezzoman")
+	else if(self.classname=="monster_mezzoman"||self.model=="models/yakman.mdl")
 		if(self.goalentity.absmin_z>=self.absmin_z+36)
 		{
 			jump_height=vlen((self.goalentity.absmax+self.goalentity.absmin)*0.5-self.origin)/13;
@@ -262,7 +278,7 @@ float jump_height, jumpup, ignore_height;
 				jump_height=vlen((self.goalentity.absmax+self.goalentity.absmin)*0.5-self.origin)/13;
 			else
 			{
-//				dprint("Mezzo: Goal not above and not below\n");
+//				dprint("Mez/Yak: Goal not above and not below\n");
 				return FALSE;
 			}
 		}
@@ -293,7 +309,8 @@ float jump_height, jumpup, ignore_height;
 			return FALSE;
 		}
 
-		traceline(spot1,spot1+jumpdir*64 - '0 0 500',FALSE,self);
+//		traceline(spot1,spot1+jumpdir*64 - '0 0 500',FALSE,self);
+		tracearea(spot1,spot1+jumpdir*64 - '0 0 500','-8 -8 0','8 8 4',FALSE,self);
 
 		if(pointcontents(trace_endpos)==CONTENT_WATER||pointcontents(trace_endpos)==CONTENT_SLIME||pointcontents(trace_endpos)==CONTENT_LAVA)
 		{
@@ -311,17 +328,24 @@ float jump_height, jumpup, ignore_height;
 		SightSound();
 		if(!jumpup)
 		{
-			self.velocity=jumpdir*jump_height*17*self.scale;
-			self.velocity_z = jump_height*12*self.scale;
+			self.velocity=jumpdir*jump_height*18*self.scale;//was 17
+			self.velocity_z = jump_height*14*self.scale;//was 12
 		}
 		else
 		{
-			self.velocity=jumpdir*jump_height*10*self.scale;
-			self.velocity_z = jump_height*14*self.scale;
+			self.velocity=jumpdir*jump_height*14*self.scale;//was 10
+			self.velocity_z = jump_height*17*self.scale;//was 14
 		}
-		self.flags(-)FL_ONGROUND;
+		if(self.model!="models/yakman.mdl")
+			self.flags(-)FL_ONGROUND;
+		else
+			self.level=TRUE;
+
 		if(self.th_jump)
-			self.th_jump();
+		{
+			self.think=self.th_jump;
+			thinktime self : 0;
+		}
 		else
 			thinktime self : 0.3;
 	}
@@ -364,18 +388,17 @@ void MonsterCheckContents ()
 			vector org;
 			org = self.origin + v_forward*15 + v_right*10;
 			CreateWaterSplash(org);
-			self.flags += FL_WATERJUMP;
+			self.flags (+) FL_WATERJUMP;
 		}
 	}
 	else if (pointcontents(self.origin)!=CONTENT_WATER && self.flags&FL_WATERJUMP && !self.flags&FL_SWIM)
-		self.flags -= FL_WATERJUMP;
-	
+		self.flags (-) FL_WATERJUMP;
 	if(random()>0.3)
 		return;
 
 	if(pointcontents(self.origin)==CONTENT_LAVA)
 	{
-		if(self.flags&FL_FIREHEAL)
+		if(self.flags2&FL2_FIREHEAL)
 		{
 			if(self.health<self.max_health)
 				self.health+=1;
@@ -389,7 +412,7 @@ void MonsterCheckContents ()
 			thinktime newmis : 0;
 		}
 	}
-	if(self.movetype==MOVETYPE_SWIM||self.model=="models/skullwiz.mdl"||self.netname=="golem")
+	if(self.movetype==MOVETYPE_SWIM||self.model=="models/skullwiz.mdl"||self.netname=="golem"||self.classname=="monster_pirhana")
 		return;
 	if(pointcontents(self.origin+self.view_ofs)==CONTENT_WATER)
 	{
@@ -409,7 +432,7 @@ void MonsterCheckContents ()
 
 /*
 ====================================================================
-void pitch_roll_for_slope (vector slope)
+void pitch_roll_for_slope (vector slope, entity forwhom)
 (My personal favorite!)
 MG
 This will adjust the pitch and roll of a monster to match
@@ -419,23 +442,27 @@ the monster.  If it doesn't find a surface, it does nothinh\g
 and returns.
 ====================================================================
 */
-void pitch_roll_for_slope (vector slope)
+void pitch_roll_for_slope (vector slope, entity forwhom)
 {
-vector new_angles,new_angles2,old_forward,old_right;
-float dot,mod;
-	makevectors(self.angles);
-	old_forward=v_forward;
-	old_right=v_right;
+//vector new_angles,new_angles2,old_forward,old_right;
+//float dot,mod;
 
 	if(slope=='0 0 0')
 	{
-		traceline(self.origin,self.origin-'0 0 300',TRUE,self);
-		if(trace_fraction>0.05&&self.movetype==MOVETYPE_STEP)
-			self.flags(-)FL_ONGROUND;
+		traceline(forwhom.origin,forwhom.origin-'0 0 300',TRUE,forwhom);
+		if(trace_fraction>0.05&&forwhom.movetype==MOVETYPE_STEP)
+			forwhom.flags(-)FL_ONGROUND;
 		if(trace_fraction==1)
 			return;
 		slope=trace_plane_normal;
 	}
+
+	matchAngleToSlope(slope, forwhom);//Done in C
+/*
+	makevectors(forwhom.angles);
+	old_forward=v_forward;
+	old_right=v_right;
+
 	new_angles=vectoangles(slope);
 	new_angles_x=(90-new_angles_x)*-1;//Gets actual slope
 	new_angles2='0 0 0';
@@ -450,8 +477,9 @@ float dot,mod;
 		mod=-1;
 
 	dot=v_forward*old_forward;
-	self.angles_x=dot*new_angles_x;
-	self.angles_z=(1-fabs(dot))*new_angles_x*mod;
+	forwhom.angles_x=dot*new_angles_x;
+	forwhom.angles_z=(1-fabs(dot))*new_angles_x*mod;
+*/
 }
 
 /*
@@ -547,7 +575,7 @@ entity oldtarget;
 
 /*
 ================================================================
-fov()
+float fov(entity targ,entity from,float scope)
 
 Field-Of-View
 
@@ -620,6 +648,9 @@ and "targ".  "whole_body" TRUE will check for a path.
 float clear_path (entity targ,float whole_body)
 {
 vector destiny,org;
+	if(targ==world)
+		return FALSE;
+
 	destiny=targ.origin+targ.proj_ofs;
 
 	if(self.attack_state!=AS_FERRY)
@@ -650,7 +681,10 @@ vector destiny,org;
 		return FALSE;
 	}
 
-    if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+	if(trace_ent.classname=="player"&&targ.classname=="player")
+		return TRUE;
+
+	if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
 	{//Don't have a clear shot, and don't want to shoot obstruction
 		self.attack_state = AS_SLIDING;
 		return FALSE;
@@ -793,9 +827,9 @@ float lineofsight(entity targ, entity from)
 vector org,dir;
 	if(from.classname=="player")
 		makevectors(from.v_angle);
-/*	else if(from.classname=="monster_medusa")
+	else if(from.classname=="monster_medusa")
 		makevectors(from.angles+from.angle_ofs);
-*/	else
+	else
 		makevectors(from.angles);
 
 	org=from.origin+from.view_ofs;
@@ -944,6 +978,7 @@ float dist, bestdist;
 		if (IsMissile(found))	//IsMissile is in ai.hc; covers more entities
 		{
 			if(visible(found))
+					
 			{
 				dist=vlen(found.origin-self.origin);
 				if(dist<bestdist)
@@ -1034,7 +1069,7 @@ float dot, rng, reverse;
 	if(object.classname=="player"&&!self.monster_awake)
 	{
 		self.monster_awake=TRUE;
-		sound(self,CHAN_VOICE,"mezzo/attack.wav",1,ATTN_NORM);
+		sound(self,CHAN_VOICE,self.noise,1,ATTN_NORM);
 		reverse=-1;
 	}
 	else

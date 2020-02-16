@@ -145,7 +145,7 @@ void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
 
 }
 
-void axe_melee (float damage_base,float damage_mod,float mode)	//using FireMelee didn't work because it checked whether to use mana after doing damage, so if its victim died it wouldnt recognize it as a valid target and use mana. also it was making the wrong hit sound.
+void axe_melee (float damage_base,float damage_mod,float mode)	//ws: using FireMelee didn't work because it checked whether to use mana after doing damage, so if its victim died it wouldnt recognize it as a valid target and use mana. also it was making the wrong hit sound.
 {
 	vector	source;
 	vector	org;

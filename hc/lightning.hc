@@ -6,9 +6,6 @@ MG
 Lightning and Sunbeam effects, and thunderstorm
 ===============================================================================
 */
-
-
-
 void smolder_think ()
 {
 vector ofs;
@@ -24,6 +21,8 @@ vector ofs;
 
 void smolder (vector org)
 {
+//	starteffect(CE_SMOLDER,org);
+//	return;//Magical Network-Friendly Code!
 	newmis=spawn();
 	setorigin(newmis,org);
 	newmis.effects=EF_NODRAW;
@@ -57,6 +56,7 @@ void spawnshockball (vector org)
 	thinktime newmis : 0;
 	newmis.scale=2.5;
 }
+
 /*
 =================
 LightningDamage
@@ -65,8 +65,8 @@ LightningDamage
 
 void (vector endpos) ThroughWaterZap =
 {
-entity waterloser, attacker;
-float damg;
+	entity waterloser, attacker;
+	float damg;
 	waterloser = spawn();
 	setorigin (waterloser, endpos);
 	if(self.classname=="mjolnir")
@@ -81,7 +81,7 @@ float damg;
 		else if(self.controller.classname=="player")
 			attacker=self.controller;
 	}
-	T_RadiusDamageWater (waterloser, self, damg,self);
+	T_RadiusDamageWater (waterloser, attacker, damg,self);
 	remove (waterloser);
 };
 
@@ -104,12 +104,16 @@ float mover;
 void do_lightning_dam (entity from, float damage, string type)
 {
 vector loser_org;
+	if((trace_ent.classname=="buddha_shield"||trace_ent.classname=="monster_buddha")&&from.classname=="monster_buddha"&&type=="lightning")
+		return;
+	
 	if((trace_ent.classname=="monster_eidolon"||trace_ent.classname=="obj_chaos_orb")&&type=="lightning")
 		return;
 
 	particle (trace_endpos, '0 0 100', 225, damage*4);
 	if(type=="lightning")
-		spawnshockball((trace_ent.absmax+trace_ent.absmin)*0.5);
+//		spawnshockball((trace_ent.absmax+trace_ent.absmin)*0.5);
+		starteffect(CE_LSHOCK,(trace_ent.absmax+trace_ent.absmin)*0.5);
 	loser_org=trace_ent.origin;
     T_Damage (trace_ent, from, from, damage);
 	if(trace_ent.health<=0)
@@ -137,9 +141,9 @@ float	inertia;//absorb;
 	traceline (p1, p2, FALSE, self);
 
         if(type=="lightning"&&(pointcontents(trace_endpos) == CONTENT_WATER || pointcontents(trace_endpos) == CONTENT_SLIME))
-                ThroughWaterZap(trace_endpos);
+			ThroughWaterZap(trace_endpos);
         else if(type=="lightning"&&(trace_ent.watertype == CONTENT_WATER || trace_ent.watertype == CONTENT_SLIME))
-                T_RadiusDamageWater (self, self, 666*2,self);
+			T_RadiusDamageWater (self, self, 666*2,self);
 		else if(self.classname=="mjolnir"&&trace_ent==self.controller)
 			bprint("");
         else if (trace_ent.takedamage)
@@ -173,11 +177,11 @@ float	inertia;//absorb;
 			do_lightning_dam(from,damage,type);
 };
 
-void do_lightning (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2, float ldamg)
+void do_lightning (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2, float ldamg,float te_type)
 {
 vector damage_dir;
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-	WriteByte (MSG_BROADCAST, TE_STREAM_LIGHTNING);
+	WriteByte (MSG_BROADCAST, te_type);
 	WriteEntity (MSG_BROADCAST, lowner);
 	WriteByte (MSG_BROADCAST, tag+lflags);
 	WriteByte (MSG_BROADCAST, duration);
@@ -232,7 +236,7 @@ float number_strikes;
 		traceline(org,dir,TRUE,self);
 		tospot=org;
 		org=trace_endpos;
-		do_lightning (self,number_strikes,0,4,org,tospot,damg);
+		do_lightning (self,number_strikes,0,4,org,tospot,damg,TE_STREAM_LIGHTNING);
 		number_strikes+=1;
 	}
 };
@@ -252,7 +256,7 @@ float sound_vol;
 		sound_vol=1;
 	else if(sound_vol<0)
 		sound_vol=0.1;
-	sound (self, CHAN_AUTO, "ambience/thunder1.wav", sound_vol, ATTN_NORM);
+	sound (self, CHAN_VOICE, "ambience/thunder1.wav", sound_vol, ATTN_NORM);
 	thinktime self : 5;
 	self.think=thunder_clear;
 }
@@ -266,8 +270,7 @@ void spawn_thunder ()
 	setorigin(newmis,self.origin+v_forward*self.lightvalue2*10);
 	newmis.owner=self;
 	newmis.lightvalue2=self.lightvalue2;
-	//newmis.think=thunder_sound;
-	newmis.think=thunder_clear;
+	newmis.think=thunder_sound;
 	thinktime newmis : 2.5 - self.lightvalue2/10;
 }
 
@@ -304,7 +307,7 @@ float dist, num_branches;
 			sound(newmis,CHAN_AUTO,"ambience/thunder2.wav",1,ATTN_NONE);
 		else
 			sound(newmis,CHAN_AUTO,"ambience/thunder3.wav",1,ATTN_NONE);
-	}		
+	}	
 	else
 		sound(newmis,CHAN_AUTO,"crusader/lghtn2.wav",1,ATTN_NORM);
 	newmis.think=SUB_Remove;
@@ -317,7 +320,10 @@ float dist, num_branches;
 		if(self.level>=8)
 			self.level=0;
 
-		do_lightning (self,self.level,STREAM_ATTACHED,4,org,tospot,10000);
+		if (self.lockentity.classname == "monster_buddha")
+			do_lightning (self.lockentity,self.level,STREAM_ATTACHED,4,org,tospot,50,TE_STREAM_LIGHTNING);
+		else
+			do_lightning (self,self.level,STREAM_ATTACHED,4,org,tospot,10000,TE_STREAM_LIGHTNING);
 
 		lightn_dir=normalize(tospot-org);
 		org=org + lightn_dir*random(num_branches+dist/10,num_branches+dist/5);//Include trace_fraction?
@@ -413,6 +419,7 @@ void light_thunderstorm()
 			remove(self);
 			return;
 		}
+		precache_sound3("ambience/thunder1.wav");
 		precache_sound3("ambience/thunder2.wav");
 		precache_sound3("ambience/thunder3.wav");
 		precache_sound ("crusader/lghtn1.wav");

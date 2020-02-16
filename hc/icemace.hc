@@ -196,7 +196,7 @@ void() FreezeTouch=
 				thinktime newmis : 0.1;
 			}
 		}
-		if(other.flags&FL_COLDHEAL)//Had to take out cold heal, so cold resist
+		if(other.flags2&FL2_COLDHEAL)//Had to take out cold heal, so cold resist
 	        T_Damage(other,self,self.owner, damg / 3);
 		else if ((other.health<=10||(other.classname=="player"&&other.frozen<=-5&&other.health<200))&&other.solid!=SOLID_BSP&&!other.artifact_active&ART_INVINCIBILITY&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
 			SnowJob(other,self.owner);
@@ -436,7 +436,7 @@ float beam_count;
 	while(loser)
 	{
 		if(loser.takedamage&&loser.health&&loser.frozen<=0&&loser!=self.owner&&loser.solid!=SOLID_BSP)
-			if(loser.flags&FL_COLDHEAL)
+			if(loser.flags2&FL2_COLDHEAL)
 				T_Damage(loser,self,self.owner,1);
 			else
 			{

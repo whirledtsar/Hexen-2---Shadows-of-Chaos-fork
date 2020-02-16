@@ -3,7 +3,7 @@
 //**
 //** golem.hc
 //**
-//** $Header: /cvsroot/uhexen2/gamecode/hc/h2/golem.hc,v 1.1.1.1 2004-11-29 11:38:30 sezero Exp $
+//** $Header: /cvsroot/uhexen2/gamecode/hc/portals/golem.hc,v 1.1.1.1 2004-11-29 11:32:18 sezero Exp $
 //**
 //**************************************************************************
 
@@ -117,7 +117,7 @@ float GolemICheckMissileAttack();
 // monster_golem_stone
 //
 //==========================================================================
-/*QUAKED monster_golem_stone (1 0.3 0) (-32 -32 0) (32 32 88) AMBUSH
+/*QUAKED monster_golem_stone (1 0.3 0) (-32 -32 0) (32 32 88) AMBUSH STATUE JUMP PLAY_DEAD
 Stone Golem.
 ------- key / value ----------------------------
 health = 200
@@ -134,9 +134,14 @@ void monster_golem_stone(void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.th_init)
 	{
-		precache_model3("models/golem_s.mdl");
+		self.th_init=monster_golem_stone;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model4("models/golem_s.mdl");//converted for MP
 		
 		precache_model3("models/goarm.mdl");
 		precache_model3("models/golegs.mdl");
@@ -146,7 +151,7 @@ void monster_golem_stone(void)
 		precache_sound3("golem/stnpain.wav");
 		precache_sound3("golem/slide.wav");
 		precache_sound3("imp/swoophit.wav");
-		precache_sound3("golem/dthgroan.wav");		
+		precache_sound3("golem/dthgroan.wav");
 	}
 
 	self.thingtype = THINGTYPE_GREYSTONE;
@@ -154,16 +159,18 @@ void monster_golem_stone(void)
 	setsize(self, '-24 -24 0', '24 24 80');
 	GolemInit();
 	self.hull = HULL_PLAYER;
-	self.health = 200;
-	self.experience_value = 125;
+	if(!self.health)
+		self.health = 200;
+	if(!self.max_health)
+		self.max_health=self.health;
+	if(!self.experience_value)
+		self.experience_value = 125;
 	self.mintel = 4;
 	self.th_melee = GolemSMeleeDecide;
 	self.th_pain = GolemSPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
-	
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, TRUE);
 }
 
 //==========================================================================
@@ -171,7 +178,7 @@ void monster_golem_stone(void)
 // monster_golem_iron
 //
 //==========================================================================
-/*QUAKED monster_golem_iron (1 0.3 0) (-55 -55 0) (55 55 120) AMBUSH
+/*QUAKED monster_golem_iron (1 0.3 0) (-55 -55 0) (55 55 120) AMBUSH STATUE
 Iron Golem.
 ------- key / value ----------------------------
 health = 400
@@ -188,9 +195,15 @@ void monster_golem_iron(void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.th_init)
 	{
-		precache_model2("models/golem_i.mdl");
+		self.th_init=monster_golem_iron;
+		self.init_org=self.origin;
+	}
+
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model4("models/golem_i.mdl");//converted for MP
 
 		precache_model2("models/goarm.mdl");
 		precache_model2("models/golegs.mdl");
@@ -202,31 +215,22 @@ void monster_golem_iron(void)
 		precache_sound2("golem/gbfire.wav");
 		precache_sound2("golem/dthgroan.wav");
 	}
-	
 	self.thingtype = THINGTYPE_METAL;
 	setmodel(self, "models/golem_i.mdl");
 	setsize(self, '-32 -32 0', '32 32 80');
 	GolemInit();
-	self.health = 400;
+	if(!self.health)
+		self.health = 450;
+	if(!self.max_health)
+		self.max_health=self.health;
 	self.mintel = 6;
-	self.experience_value = 200;
+	if(!self.experience_value)
+		self.experience_value = 200;
 	self.th_melee = GolemIMeleeDecide;
 	self.th_pain = GolemIPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, TRUE);
-}
-
-void() bgolem_create =
-{
-
-	setmodel (self, "models/golem_b.mdl");
-	setsize(self, '-60 -60 0', '60 60 120');
-	spawn_tfog(self.origin);
-	walkmonster_start ();
-	self.movetype = MOVETYPE_STEP;
-	
 }
 
 //==========================================================================
@@ -234,7 +238,7 @@ void() bgolem_create =
 // monster_golem_bronze
 //
 //==========================================================================
-/*QUAKED monster_golem_bronze (1 0.3 0) (-64 -64 0) (64 64 194) AMBUSH
+/*QUAKED monster_golem_bronze (1 0.3 0) (-64 -64 0) (64 64 194) AMBUSH STATUE
 Bronze Golem.
 ------- key / value ----------------------------
 health = 500
@@ -250,11 +254,15 @@ void monster_golem_bronze(void)
 		return;
 	}
 
-	self.cnt = 0;
-	
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.th_init)
 	{
-		precache_model2("models/golem_b.mdl");
+		self.th_init=monster_golem_bronze;
+		self.init_org=self.origin;
+	}
+	self.cnt = 0;
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model4("models/golem_b.mdl");//converted for MP
 
 		precache_model2("models/goarm.mdl");
 		precache_model2("models/golegs.mdl");
@@ -267,21 +275,23 @@ void monster_golem_bronze(void)
 		precache_sound2("golem/gbfire.wav");
 		precache_sound2("golem/dthgroan.wav");
 	}
-	
 	self.thingtype = THINGTYPE_METAL;
 	setmodel(self, "models/golem_b.mdl");
-	setsize(self, '-60 -60 0', '60 60 120');
+	setsize(self, '-60 -60 0', '60 60 190');
 	GolemInit();
-	self.health = 650;
+	if(!self.health)
+		self.health = 650;
+	if(!self.max_health)
+		self.max_health=self.health;
 	self.mintel = 8;
-	self.experience_value = 275;
+	if(!self.experience_value)
+		self.experience_value = 275;
 	self.th_melee = GolemBMeleeDecide;
 	self.th_pain = GolemBPain;
 	self.view_ofs = self.proj_ofs='0 0 115';
-	
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, TRUE);
+	ApplyMonsterBuff(self, TRUE);  
 }
 
 //==========================================================================
@@ -306,14 +316,10 @@ void monster_golem_crystal(void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
-	{
-		precache_model3("models/golem_s.mdl");
-		precache_sound3("golem/stnpain.wav");
-		precache_sound3("golem/slide.wav");
-		precache_sound3("golem/dthgroan.wav");
-	}
-	
+	precache_model3("models/golem_s.mdl");
+	precache_sound3("golem/stnpain.wav");
+	precache_sound3("golem/slide.wav");
+	precache_sound3("golem/dthgroan.wav");
 	self.thingtype = THINGTYPE_ICE;
 	setmodel(self, "models/golem_s.mdl");
 	setsize(self, '-24 -24 0', '24 24 80');
@@ -323,6 +329,8 @@ void monster_golem_crystal(void)
 	self.abslight = 1.4;
 	self.skin = GLOBAL_SKIN_ICE;
 	self.health = 400;
+	if(!self.max_health)
+		self.max_health=self.health;
 	self.experience_value = 650;
 	self.th_melee = GolemSMeleeDecide;
 	self.th_pain = GolemSPain;
@@ -330,6 +338,7 @@ void monster_golem_crystal(void)
 	
 	self.view_ofs = self.proj_ofs='0 0 64';
 	
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
 	
 	self.takedamage = DAMAGE_NO;
@@ -356,7 +365,7 @@ void GolemInit(void)
 	self.th_walk = GolemWalk;
 	self.th_run = GolemRun;
 	self.th_die = GolemDie;
-	if(!self.flags2&FL_SUMMONED)
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_sound3("golem/awaken.wav");
 		precache_sound3("golem/step.wav");
@@ -382,10 +391,33 @@ void GolemCUse(void)
 //
 //==========================================================================
 
+void golem_awaken ()
+{
+	sound(self,CHAN_AUTO,"golem/awaken.wav",1,ATTN_NORM);
+	self.takedamage=DAMAGE_YES;
+	if(activator.classname=="player")
+	{
+		self.enemy = activator;
+		thinktime self : 0;
+		self.think = FoundTarget;
+	}
+	else
+		self.think=self.th_stand;
+}
+
 void GolemStand(void) [++ $rest1..$rest22]
 {
-	ai_stand();
-	thinktime self : 0.2;
+	if(self.spawnflags&2)
+	{
+		self.takedamage=DAMAGE_NO;
+		self.use=self.think=golem_awaken;
+		self.nextthink=-1;
+	}
+	else
+	{
+		ai_stand();
+		thinktime self : 0.2;
+	}
 }
 
 //==========================================================================
@@ -508,7 +540,10 @@ float 	ldmg;
 	if (self.attack_finished < time) 
 	{
 		sound(self, CHAN_BODY, "imp/swoophit.wav", 1, ATTN_NORM);
-		self.attack_finished = time + 1;
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished = time + 1;
 	}
 	
 	if (self.enemy.health - ldmg <= 0 && critical&&self.enemy.flags2&FL_ALIVE)

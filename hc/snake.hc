@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/snake.hc,v 1.2 2007-02-07 16:57:10 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/snake.hc,v 1.2 2007-02-07 16:59:36 sezero Exp $
  */
 /*
 ==============================================================================
@@ -355,8 +355,6 @@ void snake_wake(void) [++ $wake1 .. $wake19]
 }
 
 
-float float_null;
-
 float snake_look(void)
 {
 	entity client;
@@ -380,7 +378,6 @@ float snake_look(void)
 		self.enemy = client;
 		return TRUE;
 	}
-	
 	return FALSE;
 }
 
@@ -438,7 +435,7 @@ void wake_effect (void)
 	setorigin(newent,self.origin);
 	sound (self, CHAN_BODY, "snake/life.wav", 1, ATTN_NORM);
 
-	if (self.colormap != float_null)
+	if (self.colormap != 0)
 	{
 		CreateGreySmoke(self.origin + '0 0 60','0 0 12',HX_FRAME_TIME * 20);
 		CreateGreySmoke(self.origin + '16 16 55','0 0 12',HX_FRAME_TIME * 20);
@@ -449,7 +446,7 @@ void wake_effect (void)
 		CreateGreySmoke(self.origin + '-64 -64 70','0 0 12',HX_FRAME_TIME * 20);
 
 		self.use = SUB_Null;
-		self.colormap = float_null;
+		self.colormap = 0;
 		self.takedamage = DAMAGE_YES;
 		self.drawflags (+) MLS_ABSLIGHT;
 		self.flags2 (+) FL_ALIVE;
@@ -507,5 +504,7 @@ void() monster_snake =
 	self.th_die = chunk_death;
 	self.thingtype = THINGTYPE_BROWNSTONE;
 	self.monsterclass = CLASS_BOSS;
+
+	self.counter = 0;
 };
 

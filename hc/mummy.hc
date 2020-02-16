@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/mummy.hc,v 1.2 2007-02-07 16:57:08 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/mummy.hc,v 1.2 2007-02-07 16:59:34 sezero Exp $
  */
 
 /*
@@ -295,7 +295,7 @@ void launch_mumshot (float life)
 
 	newmis.effects = EF_NODRAW;
 	sound (self, CHAN_WEAPON, "mummy/mislfire.wav", 1, ATTN_NORM);
-	
+
 	if (life <= 0)
 		life = 2.5;
 	newmis.lifetime = time + life;
@@ -308,6 +308,7 @@ void launch_mumshot (float life)
 
 }
 
+/*
 void launch_mumshot2 (void)
 {
 	local vector diff;
@@ -339,12 +340,13 @@ void launch_mumshot2 (void)
 
 	newmis.think = SUB_Remove;
 }
+*/
 
 void mummy_die()
 {
 	ThrowGib ("models/blood.mdl", self.health);
 	ThrowGib("models/blood.mdl", self.health);
-	//ThrowGib (self.headmodel, self.health);
+	
 	if (self.classname == "monster_mummy_lord")
 		sound (self, CHAN_VOICE, "mummy/die2.wav", 1, ATTN_NORM);
 	else
@@ -365,7 +367,7 @@ void mummy_throw_rightleg()
 	new = spawn();
 
 	CreateEntityNew(new,ENT_MUMMY_LEG,"models/leg.mdl",SUB_Null);
-	
+
 	makevectors(self.angles);
 	new.origin = self.origin + v_right * 10 + v_up * 60;
 	new.velocity = VelocityForDamage (40);
@@ -479,7 +481,7 @@ void mummy_pain(void)
 
 	if (hold_parts != self.parts_gone)
 		sound (self, CHAN_BODY, "mummy/limbloss.wav", 1, ATTN_NORM);
-		
+	
 	self.pain_finished = time+random(0.3,0.9);
 }
 
@@ -942,7 +944,12 @@ void monster_mummy (void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
+	if(!self.th_init)
+	{
+		self.th_init=monster_mummy;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_mummy();
 
 	CreateEntityNew(self,ENT_MUMMY,"models/mummy.mdl",mummy_die);
@@ -961,14 +968,14 @@ void monster_mummy (void)
 	self.flags (+) FL_MONSTER;
 	self.yaw_speed = 10;
 	self.health = 200;
+	self.max_health=self.health;
 	self.experience_value = 200;
-	
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	
 	ApplyMonsterBuff(self, TRUE);
 }
 
-/*QUAKED monster_mummy_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_mummy_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT
 He's big, he's bad, he's wrapped in moldy bandages - he's the mummy.
 -------------------------FIELDS-------------------------
 health : 500
@@ -983,7 +990,12 @@ void monster_mummy_lord (void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.th_init)
+	{
+		self.th_init=monster_mummy_lord;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/mummy.mdl");
 		precache_model2("models/larm.mdl");
@@ -1004,6 +1016,10 @@ void monster_mummy_lord (void)
 		precache_sound2 ("mummy/bite.wav");
 	}
 
+	if(!self.health)
+		self.health = 400;
+	if(!self.max_health)
+		self.max_health=self.health;
 	CreateEntityNew(self,ENT_MUMMY,"models/mummy.mdl",mummy_die);
 
 	self.mintel = 3;
@@ -1020,11 +1036,9 @@ void monster_mummy_lord (void)
 
 	self.flags (+) FL_MONSTER;
 	self.yaw_speed = 10;
-	self.health = 400;
 	self.experience_value = 300;
-	
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	
 	ApplyMonsterBuff(self, TRUE);
 }
 

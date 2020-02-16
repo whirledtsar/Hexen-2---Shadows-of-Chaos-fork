@@ -3,7 +3,7 @@
 //**
 //** global.hc
 //**
-//** $Header: /cvsroot/uhexen2/gamecode/hc/h2/global.hc,v 1.1.1.1 2004-11-29 11:38:23 sezero Exp $
+//** $Header: /cvsroot/uhexen2/gamecode/hc/portals/global.hc,v 1.1.1.1 2004-11-29 11:32:12 sezero Exp $
 //**
 //**************************************************************************
 
@@ -29,6 +29,7 @@ float deathmatch;
 float randomclass;
 float coop;
 float teamplay;
+float cl_playerclass;
 
 // Propagated from level to level, used to keep track of completed
 // episodes.
@@ -77,10 +78,12 @@ float cycle_wrapped;
 
 float crouch_cnt;
 
+/*
 float modelindex_assassin;
 float modelindex_crusader;
 float modelindex_paladin;
 float modelindex_necromancer;
+*/
 float modelindex_sheep;
 
 float num_players;
@@ -116,9 +119,6 @@ string string_null;
 
 // Function launch_spike() sets this after spawning it.
 entity newmis;
-
-//test blood
-entity bloodpool;
 
 // The entity that activated a trigger or brush.
 entity activator;

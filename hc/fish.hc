@@ -1,5 +1,5 @@
 /*
- * h2/fish.hc
+ * portals/fish.hc
  */
 
 /*

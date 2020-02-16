@@ -1,60 +1,78 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/cube.hc,v 1.2 2007-02-07 16:57:00 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/cube.hc,v 1.2 2007-02-07 16:59:31 sezero Exp $
  */
+
+
 float cube_distance = 500;
 
 void CubeDie(void)
 {
+	stopSound(self,0);
 	if (self.owner != world)
 		self.owner.artifact_flags(-)self.artifact_flags;
-	
 	remove(self);
 }
 
 float cube_find_target(void)
 {
 	entity item;
-	float targetGood;
+	float pass;
 
-	item = findradius(self.origin, cube_distance);
-
-	while (item)
-	{
-		targetGood = FALSE;
-		
-		if (deathmatch == 1 && item.classname == "player") //target other players in deathmatch
-			targetGood = TRUE;
-		if (self.owner.classname != "player" && item.classname == "player") //target players if owned by monster
-			targetGood = TRUE;
-		if (self.owner.classname == "player" && item.flags & FL_MONSTER) //target monsters if owned by player
-			targetGood = TRUE;
-		
-		if (item.health <= 0) //Don't shoot dead bodies
-			targetGood = FALSE;
-		if (item.controller.classname == self.controller.classname) //don't shoot our own summons or anything summoned by our friends
-			targetGood = FALSE;
-			
-		if (targetGood)
+	while(pass<2)
+	{//on pass 2, accept corpses
+		item = findradius(self.origin, cube_distance);
+		while (item)
 		{
-			tracearea (self.origin,item.origin,self.mins,self.maxs,FALSE,self);
-			if (trace_ent == item)
+			if (((item.flags & FL_MONSTER) || (item.classname == "player" && deathmatch == 1&&item!=self.controller)||(pass==1&&(item.classname=="player_sheep"||item.netname=="corpse"||item.netname=="head"))) &&	item.health > 0)
 			{
-				if (!item.effects & EF_NODRAW)
+				if(item.controller!=self.controller)
 				{
-					self.enemy = item;
-					return TRUE;
+					traceline (self.origin,(item.absmin+item.absmax)*0.5,TRUE,self);
+					if (trace_fraction==1.0)
+					{
+						if ((!item.effects & EF_NODRAW)||item.classname=="monster_pentacles")
+						{
+							sound(self, CHAN_ITEM, "misc/Beep1.wav", 1, ATTN_NORM);
+							self.attack_finished=time+random(0.5);
+							self.drawflags(+)MLS_POWERMODE;
+							self.last_attack=0;
+							self.enemy = item;
+							return TRUE;
+						}
+					}
 				}
 			}
+			item = item.chain;
 		}
-
-		item = item.chain;
+		pass+=1;
 	}
 
 	return FALSE;
 }
 
+void do_fireball(vector offset,float damg);
 
-void do_fireball(vector offset);
+void cube_dobeam(vector targ_org)
+{
+	float beam_color;
+				beam_color=rint(random(0,4));
+				WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+				WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
+				WriteEntity (MSG_BROADCAST, self);				//owner
+				WriteByte (MSG_BROADCAST, 0);					//tag + flags
+				WriteByte (MSG_BROADCAST, 1);					//time
+				WriteByte (MSG_BROADCAST, beam_color);			//color
+
+				WriteCoord (MSG_BROADCAST, self.origin_x);
+				WriteCoord (MSG_BROADCAST, self.origin_y);
+				WriteCoord (MSG_BROADCAST, self.origin_z);
+
+				WriteCoord (MSG_BROADCAST, targ_org_x);
+				WriteCoord (MSG_BROADCAST, targ_org_y);
+				WriteCoord (MSG_BROADCAST, targ_org_z);
+
+				LightningDamage (self.origin, targ_org, self, beam_color+1,"sunbeam");
+}
 
 vector CubeDirection[6] =
 {
@@ -69,14 +87,10 @@ vector CubeDirection[6] =
 void cube_fire(void)
 {
 //	float RanVal;
-	float Distance;
+	vector targ_org;
+//	vector targ_size_min,targ_size_max;
+	float Distance,beam_color;
 	entity temp;
-
-	if (self.owner.classname == "player" && (time > self.monster_duration || self.shot_cnt >= 10))
-	{
-		CubeDie();
-		return;
-	}
 	
 	if (self.owner.health <= 0)
 	{
@@ -84,14 +98,10 @@ void cube_fire(void)
 		return;		
 	}
 
-	if (!self.enemy)
+	if (self.owner.classname == "player" && time > self.monster_duration)
 	{
-		self.cnt += 1;
-		if (self.cnt > 5)
-		{
-			cube_find_target();
-			self.cnt = 0;
-		}
+		CubeDie();
+		return;
 	}
 
 	if (self.enemy)
@@ -99,44 +109,78 @@ void cube_fire(void)
 		if (self.enemy.health <= 0)
 		{
 			self.enemy = world;
-			//self.drawflags (+) DRF_TRANSLUCENT;
+			self.drawflags(-)MLS_POWERMODE;
 		}
 	}
 
+	if (!self.enemy)
+		cube_find_target();
+
 	if (self.enemy)
 	{
-		if (random() < .7)
+		Distance = vlen(self.origin - self.enemy.origin);
+		if (Distance > cube_distance*2)
 		{
-			Distance = vlen(self.origin - self.enemy.origin);
-			if (Distance > cube_distance*2)
+			self.enemy = world;
+			self.drawflags(-)MLS_POWERMODE;
+		}
+		else if (Distance < cube_distance)
+		{
+			// Got to do this otherwise tracearea sees right through you
+			temp = self.owner;
+			self.owner = self;
+
+			/*
+			targ_size_min = self.enemy.maxs - self.enemy.mins;
+			targ_size_max =targ_size_min;
+			targ_size_min *=-0.5;
+			targ_org = (self.enemy.absmin+self.enemy.absmax)*0.5 + randomv(targ_size_min,targ_size_max);
+			*/
+			if(self.enemy.proj_ofs!='0 0 0')
+				targ_org=self.enemy.origin+self.enemy.proj_ofs;
+			else
+				targ_org=(self.enemy.absmin+self.enemy.absmax)*0.5;
+			traceline (self.origin,targ_org,FALSE,self);
+			if(trace_ent!=self.enemy)
+			{//First try missed
+				targ_org=(self.enemy.absmin+self.enemy.absmax)*0.5;
+				traceline (self.origin,targ_org,FALSE,self);
+			}
+			if (trace_ent == self.enemy)
 			{
-				self.enemy = world;
-				//self.drawflags (+) DRF_TRANSLUCENT;
+				self.adjust_velocity = CubeDirection[random(0,5)];
+				self.effects(+)EF_MUZZLEFLASH;
+				if(self.last_attack+1.5<time)
+					sound(self, CHAN_WEAPON, "golem/gbfire.wav", 1, ATTN_NORM);
+				else
+					sound(self, CHAN_BODY, "crusader/sunhum.wav", 1, ATTN_NORM);
+				updateSoundPos(self,CHAN_BODY);
+				updateSoundPos(self,CHAN_WEAPON);
+				self.last_attack=time;
+				self.owner = temp;	//restore owner for check
+				if (self.owner.flags&FL_CLIENT) {
+					self.shot_cnt+=1;
+					cube_dobeam(targ_org); }
+				else {
+					self.shot_cnt=17;
+					do_fireball('0 0 0',random(9,18)); }
 			}
 			else
 			{
-				// Got to do this otherwise tracearea sees right through you
-				temp = self.owner;
-				self.owner = self;
-
-				tracearea (self.origin,self.enemy.origin,self.mins,self.maxs,FALSE,self);
-				if (trace_ent == self.enemy)
+				traceline (self.origin,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
+				if(trace_fraction!=1.0)
 				{
-					self.adjust_velocity = CubeDirection[random(0,5)];
-					self.abslight = 1;
-
-					self.shot_cnt += 1;
-
-					do_fireball('0 0 0');
+					self.cnt+=1;
+					if(self.cnt>=5)
+					{//can't see enemy for last 10 tries, find someone else
+						self.enemy=world;
+						self.cnt=0;
+						self.drawflags(-)MLS_POWERMODE;
+					}
 				}
-				else 
-				{
-					self.enemy = world;
-					//self.drawflags (+) DRF_TRANSLUCENT;
-				}
-
-				self.owner = temp;
 			}
+
+			self.owner = temp;
 		}
 	}
 }
@@ -160,15 +204,28 @@ void CubeThinkerB(void)
 	float Distance;
 	thinktime self : 0.05;
 
+	if(random()<0.1)
+		sound(self, CHAN_VOICE, "misc/cubehum.wav", 1, ATTN_NORM);
+	updateSoundPos(self,CHAN_VOICE);
 	if (!self.owner.flags2 & FL_ALIVE) 
 	{
 		CubeDie();
 		return;
 	}
 
+	if(self.attack_finished<time)
+	{
+		if(random()<0.5)
+			cube_fire();
+		if(self.shot_cnt>17)
+		{
+			self.shot_cnt=0;
+			self.attack_finished=time+random(0.5,2);
+		}
+	}
+
 	if (self.adjust_velocity == '0 0 0')
 	{
-		cube_fire();
 		if (self.adjust_velocity == '0 0 0')
 		{
 			if (random() < 0.02)
@@ -178,9 +235,6 @@ void CubeThinkerB(void)
 		}
 	}
 	cube_rotate();
-
-	if (self.abslight > .1) 
-		self.abslight -= 0.1;
 
 	self.angles = self.owner.angles + self.v_angle;
 	
@@ -194,7 +248,7 @@ void CubeThinkerB(void)
 	if (Distance > cube_distance)
 	{
 		self.enemy = world;
-		//self.drawflags (+) DRF_TRANSLUCENT;
+		self.drawflags(-)MLS_POWERMODE;
 	}
 
 	if (self.enemy != world)
@@ -251,7 +305,6 @@ void CubeThinkerB(void)
 void cube_of_force (entity spawner)
 {
 	entity cube;
-
 	cube = spawn();
 
 	cube.owner = spawner;
@@ -262,6 +315,7 @@ void cube_of_force (entity spawner)
 	setorigin (cube, cube.owner.origin);
 	setmodel (cube, "models/cube.mdl");
 	setsize (cube, '-5 -5 -5', '5 5 5');		
+
 
 	cube.classname = "cube_of_force";
 	cube.health = 10;
@@ -281,7 +335,9 @@ void cube_of_force (entity spawner)
 	cube.th_die = CubeDie;
 
 	thinktime cube : 0.01;
+					   
 	cube.monster_duration = time + 45;
+									
 	cube.shot_cnt = 0;
 
 	cube.movedir = '100 100 0';
@@ -305,4 +361,3 @@ void UseCubeOfForce(void)
 		
 	self.cnt_cubeofforce -= 1;
 }
-

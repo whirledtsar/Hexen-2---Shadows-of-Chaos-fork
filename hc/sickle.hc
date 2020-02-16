@@ -55,6 +55,7 @@ void monster_scorpion_yellow (void);
 void monster_scorpion_black (void);
 void monster_werejaguar (void);
 void monster_mummy(void);
+void monster_death_knight(void);
 void CorpseThink(void);
 void sickle_ready(void);
 void phase_init(void);

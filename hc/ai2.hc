@@ -1,7 +1,10 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/portals/ai.hc,v 1.4 2007-02-07 16:59:29 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/h2/ai2.hc,v 1.2 2007-02-07 16:56:55 sezero Exp $
  */
 void(entity etemp, entity stemp, entity stemp, float dmg) T_Damage;
+
+void sdprint (string dmess, float includeEnemy);
+
 /*
 
 .enemy
@@ -28,33 +31,10 @@ time > .pausetime.
 walkmove(angle, speed) primitive is all or nothing
 */
 
-void sdprint (string dmess, float includeEnemy)
-{
-	if(self.playercontrolled)
-	{		
-		dprint(dmess);
-		if (includeEnemy)
-		{
-			dprint(" enemy: ");
-			dprint(self.enemy.classname);
-		}
-		dprint("\n");
-	}
-}
-//float ArcherCheckAttack (void);
-float MedusaCheckAttack (void);
 void()SetNextWaypoint;
-void()SpiderMeleeBegin;
-void()spider_onwall_wait;
 float(entity targ , entity from)infront_of_ent;
-void(entity proj)mezzo_choose_roll;
-void()multiplayer_health;
-void()riderpath_init;
-void(float move_speed)riderpath_move;
-float(float move_speed)eidolon_riderpath_move;
-void() eidolon_guarding;
-void()hive_die;
 float()eidolon_check_attack;
+void()multiplayer_health;
 
 //void()check_climb;
 
@@ -69,6 +49,11 @@ float	current_yaw;
 // will wake up even if they wouldn't have noticed the player
 //
 float	sight_entity_time;
+void()riderpath_init;
+void(float move_speed)riderpath_move;
+float(float move_speed)eidolon_riderpath_move;
+void() eidolon_guarding;
+void()hive_die;
 float(float v) anglemod =
 {
 	while (v >= 360)
@@ -93,8 +78,8 @@ returns the range catagorization of an entity reletive to self
 */
 float(entity targ) range =
 {
-vector	spot1, spot2;
-float		r,melee;	
+	local vector	spot1, spot2;
+	local float		r,melee;	
 
 	if((self.solid==SOLID_BSP||self.solid==SOLID_TRIGGER)&&self.origin=='0 0 0')
 		spot1=(self.absmax+self.absmin)*0.5;
@@ -110,8 +95,6 @@ float		r,melee;
 
 	if (self.classname=="monster_mummy")
 		melee = 50;
-	else if (self.classname=="monster_yakman"||self.netname=="golem")//longer reach
-		melee = 150;
 	else
 		melee = 100;
 
@@ -131,26 +114,9 @@ visible2ent
 returns 1 if the entity is visible to self, even if not infront ()
 =============
 */
-void spawntestmarker(vector org, float life, float skincolor)
-{
-	newmis=spawn_temp();
-	newmis.drawflags=MLS_ABSLIGHT;
-	newmis.abslight=1;
-	newmis.frame=1;
-	newmis.skin=skincolor;
-	setmodel(newmis,"models/test.mdl");
-	setorigin(newmis,org);
-	newmis.think=SUB_Remove;
-	if(life==-1)
-		self.nextthink=-1;
-	else
-		thinktime newmis : life;
-}
-
 float visible2ent (entity targ, entity forent)
 {
 vector	spot1, spot2;
-entity oself;
 	if((forent.solid==SOLID_BSP||forent.solid==SOLID_TRIGGER)&&forent.origin=='0 0 0')
 		spot1=(forent.absmax+forent.absmin)*0.5;
 	else
@@ -163,60 +129,13 @@ entity oself;
 
     traceline (spot1, spot2, TRUE, forent);   // see through other monsters
 
-/*
-	if(forent.classname=="monster_skull_wizard"&&trace_fraction==1&&self.think==self.th_stand)
-	{
-		dprint("Skullwizard awakened by: ");
-		dprint(targ.classname);
-		dprint("\n");
-		forent.nextthink=-1;
-		forent.think=SUB_Null;
-		forent.th_run=self.th_stand;
-		forent.effects=EF_BRIGHTLIGHT;
-		if(targ.classname!="player")
-		{
-			targ.nextthink=-1;
-			targ.think=SUB_Null;
-			targ.th_run=targ.th_stand;
-			targ.effects=EF_BRIGHTLIGHT;
-		}
-	}
-*/
-
 	if(trace_ent.thingtype>=THINGTYPE_WEBS)
 		traceline (trace_endpos, spot2, TRUE, trace_ent);
-//	else if (trace_inopen && trace_inwater)//FIXME?  Translucent water?
-//		return FALSE;			// sight line crossed contents
-
-//	if (trace_allsolid)
-//		dprint("trace all solid\n");
-
-//	dprint(targ.classname);
+	else if (trace_inopen && trace_inwater)
+		return FALSE;			// sight line crossed contents
 
 	if (trace_fraction == 1)
-	{
-		if(forent.flags&FL_MONSTER)
-		{
-			oself=self;
-			self=forent;
-			if(visibility_good(targ,0.15 - skill/20))
-			{
-//				dprint("a monster, with good visible\n");
-				self=oself;
-				return TRUE;
-			}
-			self=oself;
-		}
-		else
-		{
-/*			spawntestmarker(spot1, -1, 0);
-			dprintv("spot1%s\n", spot1);
-			spawntestmarker(spot2, -1, 0);
-			dprintv("spot2%s\n", spot2);
-			dprint("not a monster, but visible\n");*/
-			return TRUE;
-		}
-	}
+		return TRUE;
 
 	return FALSE;
 }
@@ -235,9 +154,9 @@ float infront_of_ent (entity targ , entity from)
 
 	if(from.classname=="player")
 	    makevectors (from.v_angle);
-	else if(from.classname=="monster_medusa")
+/*	else if(from.classname=="monster_medusa")
 		makevectors (from.angles+from.angle_ofs);
-	else
+*/	else
 	    makevectors (from.angles);
 
 	if((from.solid==SOLID_BSP||from.solid==SOLID_TRIGGER)&&from.origin=='0 0 0')
@@ -343,8 +262,17 @@ float		ideal, move;
 
 void() HuntTarget =
 {
+	sdprint("Hunting target... ", TRUE);
+	
 	self.goalentity = self.enemy;
-	self.think = self.th_run;
+	if(self.spawnflags&PLAY_DEAD)
+	{
+//		dprint("getting up!!!\n");
+		self.think=self.th_possum_up;
+		self.spawnflags(-)PLAY_DEAD;
+	}
+	else
+		self.think = self.th_run;
 //	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
 	self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
 	thinktime self : 0.1;
@@ -361,12 +289,6 @@ void SightSound (void)
 		sound (self, CHAN_WEAPON, "mummy/sight.wav", 1, ATTN_NORM);
 	else if (self.classname == "monster_mummy_lord")
 		sound (self, CHAN_WEAPON, "mummy/sight2.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_death_knight")
-		sound (self, CHAN_WEAPON, "death_knight/ksight.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_disciple")
-		sound (self, CHAN_WEAPON, "disciple/sight.wav", 1, ATTN_NORM);
-	else if (self.sightsound)
-		sound (self, CHAN_VOICE, self.sightsound, 1, ATTN_NORM);
 
 }
 
@@ -383,7 +305,6 @@ void() FoundTarget =
 	SightSound ();
 
 	HuntTarget ();
-	SUB_UseWakeTargets ();	//ws: monsters use self.waketarget upon sighting player
 };
 
 /*
@@ -414,20 +335,10 @@ float		r;
 // spawnflags & 3 is a big hack, because zombie crucified used the first
 // spawn flag prior to the ambush flag, and I forgot about it, so the second
 // spawn flag works as well
-	sdprint("Summon monster finding any target", TRUE);
     if(!deathmatch&&(self.playercontrolled||self.classname=="cube_of_force"))
-	{
-		sdprint("Summon monster finding Monster target", TRUE);
-		if (FindMonsterTarget())
-		{
-			HuntTarget();
-			return TRUE;
-		}
-		return FALSE;
-	}
+		return FindMonsterTarget();
 
-	sdprint("Summon monster finding Player target", TRUE);
-	if (sight_entity_time >= time&&sight_entity!=world)
+	if (sight_entity_time >= time)
 	{
 		client = sight_entity;
 		if (client.enemy == self.enemy)
@@ -440,9 +351,6 @@ float		r;
 			return FALSE;	// current check entity isn't in PVS
 	}
 
-	if(self.classname=="monster_imp_lord"&&client==self.controller)
-		return FALSE;
-
 	if (client == self.enemy)
 		return FALSE;
 
@@ -453,25 +361,16 @@ float		r;
 	if (r == RANGE_FAR)
 		return FALSE;
 
-	if(!visibility_good(client,5))
+	if (r == RANGE_NEAR)
 	{
-//		dprint("Monster has low visibility on ");
-//		dprint(client.netname);
-//		dprintf("(%s)\n",client.visibility);
-		return FALSE;
+		if (client.show_hostile < time && !infront (client))
+			return FALSE;
 	}
-
-	if(self.think!=spider_onwall_wait)
-		if (r == RANGE_NEAR)
-		{
-			if (client.show_hostile < time && !infront (client))
-				return FALSE;
-		}
-		else if (r == RANGE_MID)
-		{
-			if (!infront (client))
-				return FALSE;
-		}
+	else if (r == RANGE_MID)
+	{
+		if (!infront (client))
+			return FALSE;
+	}
 	
 	if (!visible (client))
 		return FALSE;
@@ -482,32 +381,48 @@ float		r;
 	self.enemy = client;
 
 	if (self.enemy.classname != "player")
-	{//If this check fails, do not let this entity set self as
-	 //sight_ent- avoids daisy-chaining of enemy sight
+	{
 		self.enemy = self.enemy.enemy;
 		if (self.enemy.classname != "player")
 		{
 			self.enemy = world;
 			return FALSE;
 		}
-		SightSound ();
-		HuntTarget ();
-		return TRUE;
 	}
 
+/*	if(self.spawnflags&PLAY_DEAD)
+	{
+		if(r==RANGE_MELEE)
+		{
+			if(!dont_hunt)
+				FoundTarget ();
+			return TRUE;
+		}
+		else if(!infront_of_ent(self,self.enemy)&&random()<0.1&&random()<0.1)
+		{
+			if(!dont_hunt)
+				FoundTarget ();
+			return TRUE;
+		}
+		else
+		{
+			self.enemy=world;
+			return FALSE;
+		}
+	}
+*/
 	if(!dont_hunt)
 		FoundTarget ();
 	return TRUE;
 };
 
-void()SpiderJumpBegin;
 //=============================================================================
-/*
+
 void(float dist) ai_forward =
 {
 	walkmove (self.angles_y, dist, FALSE);
 };
-*/
+
 void(float dist) ai_back =
 {
 	walkmove ( (self.angles_y+180), dist, FALSE);
@@ -538,12 +453,10 @@ ai_painforward
 stagger back a bit
 =============
 */
-/*
 void(float dist) ai_painforward =
 {
 	walkmove (self.ideal_yaw, dist, FALSE);
 };
-*/
 
 /*
 =============
@@ -552,58 +465,31 @@ ai_walk
 The monster is walking it's beat
 =============
 */
-//THE PIT!
-
-float find_enemy_target ()
-{
-entity found;
-	if(self.target=="")
-		return FALSE;
-
-	found=find(world, targetname, self.target);
-	if(!found)
-	{
-		found=find(world, targetname, self.targetname);
-		if(found)
-			if(found.enemy.flags2&FL_ALIVE)
-				found=found.enemy;
-	}
-	if(found==world||!found.flags2&FL_ALIVE)
-	{
-		if(!found.targetname)
-			self.target="";
-		return FALSE;
-	}
-	self.goalentity = self.pathentity = found;
-	self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
-	self.enemy=self.goalentity;
-	self.th_run();
-	return TRUE;
-}
-
 void(float dist) ai_walk =
 {
+	
 	MonsterCheckContents();
 
 	movedist = dist;
-
+	
 	// check for noticing a player
-//THE PIT!
-	if(world.model=="maps/monsters.bsp")
-		if(find_enemy_target())
-			return;
-
 	if (FindTarget (FALSE))
 		return;
 
-	if(!movetogoal(dist))
+	if(self.classname=="monster_eidolon")
 	{
-		if(trace_ent.solid==SOLID_BSP&&trace_fraction<1)
+		if (!self.path_current)
+			riderpath_init();
+		if(!eidolon_riderpath_move(dist))
 		{
-			if(trace_plane_normal!='0 0 0')
-				self.walldir='0 0 0' - trace_plane_normal;
+			if(self.think==self.th_walk)
+				self.think=eidolon_guarding;
 		}
+		else if(self.think==eidolon_guarding)
+			self.think=self.th_walk;
 	}
+	else
+		movetogoal (dist);
 };
 
 
@@ -616,20 +502,20 @@ The monster is staying in one place for a while, with slight angle turns
 */
 void() ai_stand =
 {
-	sdprint("Summon monster standing", FALSE);
+	sdprint("AI2 - Summon monster standing", FALSE);
 	MonsterCheckContents();
 	
-//THE PIT!
-	if(world.model=="maps/monsters.bsp")
-		if(find_enemy_target())
-			return;
-
+	sdprint("AI2 - Summon monster contents are ok", FALSE);
 	if (FindTarget (FALSE))
 		return;
-	sdprint("Summon monster found target", TRUE);
+	
+	sdprint("AI2 - Summon monster found target", TRUE);
+	if(self.spawnflags&PLAY_DEAD)
+		return;
+
 	if (time > self.pausetime)
 	{
-		sdprint("Summon monster start walking", TRUE);
+		sdprint("AI2 - Summon monster start walking", TRUE);
 		self.th_walk ();
 		return;
 	}
@@ -644,7 +530,6 @@ ai_turn
 don't move, but turn towards ideal_yaw
 =============
 */
-/*
 void() ai_turn =
 {
 	if (FindTarget (FALSE))
@@ -652,7 +537,6 @@ void() ai_turn =
 	
 	ChangeYaw ();
 };
-*/
 
 //=============================================================================
 
@@ -661,7 +545,6 @@ void() ai_turn =
 ChooseTurn
 =============
 */
-/*
 void(vector dest3) ChooseTurn =
 {
 	local vector	dir, newdir;
@@ -686,7 +569,6 @@ void(vector dest3) ChooseTurn =
 	dir_z = 0;
 	self.ideal_yaw = vectoyaw(dir);	
 };
-*/
 
 /*
 ============
@@ -707,33 +589,7 @@ float() FacingIdeal =
 
 
 //=============================================================================
-void UseBlast (void);
-void LeaderRepulse (void)
-{
-	entity findmissile;
-	float useblast;
-	
-	useblast = FALSE;
-	
-	//find a player blast within a certain range
-	findmissile = findradius(self.origin, BLAST_RADIUS);
-	while(findmissile)
-	{
-		if (findmissile.movetype == MOVETYPE_FLYMISSILE && findmissile.owner.classname == "player")
-		{
-			useblast = TRUE;
-		}
-		
-		findmissile = findmissile.chain;
-	}
-	
-	if (useblast)
-	{
-		UseBlast();
-	}
-}
 
-float()pent_check_attack;
 float() CheckAnyAttack =
 {
 	if (!enemy_vis)
@@ -744,15 +600,6 @@ float() CheckAnyAttack =
 			return FALSE;
 		else
 			return eidolon_check_attack();
-
-	if(self.classname=="monster_pentacles")
-		return pent_check_attack();
-
-	if(self.classname=="monster_medusa")
-	{
-//		dprint("medusa checking\n");
-		return MedusaCheckAttack();
-	}
 
 	return CheckAttack ();
 };
@@ -814,9 +661,9 @@ ai_run
 The monster has an enemy it is trying to kill
 =============
 */
-
 void(float dist) ai_run =
 {
+	sdprint("AI2 - Doing AI run... ", FALSE);
 	
 	MonsterCheckContents();
 	
@@ -824,11 +671,8 @@ void(float dist) ai_run =
 // see if the enemy is dead
 	if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
 	{
-//THE PIT!
-	if(world.model=="maps/monsters.bsp")
-		if(find_enemy_target())
-			return;
-
+		sdprint("AI2 - summoned monster target dead ", TRUE);
+		
 		self.enemy = world;
 	// FIXME: look all around for other targets
 		if (self.oldenemy.health > 0)
@@ -863,17 +707,19 @@ void(float dist) ai_run =
 	enemy_vis = visible(self.enemy);
 	if (enemy_vis)
 	{
-		sdprint("Target alive and visible... ", TRUE);
+		sdprint("AI2 - Target alive and visible... ", TRUE);
+		
 		self.search_time = time + 5;
 		if(self.mintel)
 		{
-			sdprint("Summoned monster is smart enough to see it ", TRUE);
+			sdprint("AI2 - Summoned monster is smart enough to see it ", TRUE);
 			self.goalentity=self.enemy;
 		    self.wallspot=(self.enemy.absmin+self.enemy.absmax)*0.5;
 		}
 	}
 	else
 	{
+		sdprint("AI2 - Can't see target ", TRUE);
 		if(coop)
 		{
 			if(!FindTarget(TRUE))
@@ -886,7 +732,8 @@ void(float dist) ai_run =
 					SetNextWaypoint();
 		}
 		if(self.mintel)
-			sdprint("Smart enough to find target ", TRUE);
+		{
+			sdprint("AI2 - Smart enough to find target ", TRUE);
 			if(self.model=="models/spider.mdl")
 			{
 				if(random()<0.5)
@@ -894,6 +741,7 @@ void(float dist) ai_run =
 			}
 			else 
 				SetNextWaypoint();
+		}
 	}
 
 	if(random()<0.5&&(!self.flags&FL_SWIM)&&(!self.flags&FL_FLY)&&(self.spawnflags&JUMP))
@@ -918,10 +766,9 @@ void(float dist) ai_run =
 		return;
 	}
 
-	if (CheckAnyAttack ()) {
-		sdprint("Is allowed to attack ", TRUE);
+	if (CheckAnyAttack ())
 		return;					// beginning an attack
-	}
+		
 	if (self.attack_state == AS_SLIDING)
 	{
 		ai_run_slide ();
@@ -943,111 +790,17 @@ void(float dist) ai_run =
 		else if(self.think==eidolon_guarding)
 			self.th_run();
 	}
-	else if(!movetogoal(dist))
-	{
-		if(trace_ent.solid==SOLID_BSP&&trace_fraction<1)
-		{
-		vector movdir;
-/*			dprint("RUNNING\n");
-			dprintv("Pent hit wall - normal = %s\n",trace_plane_normal);
-			dprintv("Origin = %s\n",self.origin);
-			dprintv("End_pos = %s\n",trace_endpos);*/
-			movdir=normalize(trace_endpos - self.origin);
-//			dprintv("Move dir = %s\n",movdir);
-			if(trace_plane_normal=='0 0 0')
-			{
-				traceline(self.origin,self.origin+movdir*64,TRUE,self);
-//				dprintv("New normal = %s\n",trace_plane_normal);
-			}
-			if(trace_plane_normal!='0 0 0')
-			{
-				self.walldir='0 0 0' - trace_plane_normal;
-//				dprintv("New walldir = %s\n",self.walldir);
-			}
-/*			else
-			{
-				dprintf("Trace fraction	= %s\n", trace_fraction);
-				if(trace_startsolid)
-					dprint("Trace started in wall\n");
-				else if(trace_allsolid)
-					dprint("Trace completely in wall\n");
-				else if(trace_ent.solid==SOLID_BSP)
-					dprint("Wall in my way\n");
-				else
-				{
-					dprint(trace_ent.classname);
-					dprint(" in my way\n");
-				}
-			}
-*/		}
-	}
+	else
+		movetogoal (dist);		// done in C code...
 };
 
-float IsEnemyOwned (entity ent)
+//FAKE FUNCTIONS
+void SpiderJumpBegin()
 {
-	if (ent.owner==self.enemy || ent.controller==self.enemy || ent.owner.controller==self.enemy || ent.owner.owner==self.enemy || ent.controller.owner==self.enemy)
-		return TRUE;
-	
+}
+
+float mezzo_choose_roll (entity null)
+{
 	return FALSE;
 }
 
-float IsPlayerOwned (entity ent)
-{
-	if (ent.owner.flags&FL_CLIENT || ent.controller.flags&FL_CLIENT || ent.owner.controller.flags&FL_CLIENT || ent.owner.owner.flags&FL_CLIENT || ent.controller.controller.flags&FL_CLIENT || ent.controller.owner.flags&FL_CLIENT)
-		return TRUE;
-	
-	return FALSE;
-}
-
-float IsMissile (entity ent)
-{
-	if (ent.movetype==MOVETYPE_FLYMISSILE || ent.movetype == MOVETYPE_BOUNCE || ent.movetype==MOVETYPE_BOUNCEMISSILE)
-		return TRUE;
-	
-	if (IsPlayerOwned(ent) || ent.owner.flags&FL_MONSTER || ent.controller.flags&FL_MONSTER)
-	{
-		if (ent.movetype==MOVETYPE_FLY && !ent.flags&FL_MONSTER && !ent.flags2&FL_SUMMONED)
-			return TRUE;
-	}
-	
-	return FALSE;
-}
-//ws: copy of ChangeYaw adapted for pitch. useful for flying & swimming enemies. uses entity's turn_time in place of yaw_speed.
-void ChangePitch (void)
-{
-	float		ideal, move, current_pitch;
-	
-	vector vec = vectoangles( (self.enemy.absmin + self.enemy.absmax) * 0.5 - self.origin );
-	self.idealpitch = vec_x;
-	current_pitch = anglemod( self.angles_x );
-	ideal = self.idealpitch;
-	
-	if (current_pitch == ideal)
-		return;
-	
-	move = ideal - current_pitch;
-	if (ideal > current_pitch)
-	{
-		if (move > 180)
-			move = move - 360;
-	}
-	else
-	{
-		if (move < -180)
-			move = move + 360;
-	}
-	
-	if (move > 0)
-	{
-		if (move > self.turn_time)
-			move = self.turn_time;
-	}
-	else
-	{
-		if (move < 0-self.turn_time )
-			move = 0-self.turn_time;
-	}
-	
-	current_pitch = anglemod (current_pitch + move);
-	self.angles_x = current_pitch;
-}

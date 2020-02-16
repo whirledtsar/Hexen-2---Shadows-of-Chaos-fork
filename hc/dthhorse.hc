@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/dthhorse.hc,v 1.2 2007-02-07 16:57:01 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/dthhorse.hc,v 1.2 2007-02-07 16:59:31 sezero Exp $
  */
 
 /*
@@ -165,11 +165,15 @@ void fire_circ_hit ()
 
 	self.dmg=0;
 	self.think=circle_of_fire;
+	if(self.owner.classname=="player")
+		self.effects(+)EF_BRIGHTLIGHT;
+
 	thinktime self : 0;
 }
 
 void firecirc_fall_think()
 {
+    if(self.enemy)
 	if (self.lifetime < time || vlen(self.enemy.origin - self.origin) < 40)
 	{
 		other=self.enemy;
@@ -695,7 +699,7 @@ void ghost_think ()
 
 void spawn_ghost (entity attacker)
 {
-	float r;
+float r;
 	newmis=spawn();
 	newmis.movetype=MOVETYPE_NOCLIP;
 	newmis.solid=SOLID_TRIGGER;
@@ -948,8 +952,8 @@ void rider_death(void)
 	self.monsterclass = CLASS_BOSS;
 
 	setsize (self, '-55 -55 -24', '55 55 100');
-	self.health = 3500;
-	self.experience_value = 2000;
+	self.health = self.max_health = 3500;
+	self.experience_value = self.init_exp_val = 1000;
 
 	self.dflags = 0;
 	self.rider_gallop_mode = 0;

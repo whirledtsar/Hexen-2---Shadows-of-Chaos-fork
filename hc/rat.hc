@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/rat.hc,v 1.2 2007-02-07 16:57:09 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/rat.hc,v 1.2 2007-02-07 16:59:35 sezero Exp $
  */
 
 // Scuttle
@@ -244,6 +244,7 @@ void monster_rat (void)
 	self.classname="monster_rat";
 
 	setsize(self, '-3 -3 0', '3 3 7');
+	self.hull = HULL_POINT;
 	self.health = 3;
 
 	self.thingtype=THINGTYPE_FLESH;

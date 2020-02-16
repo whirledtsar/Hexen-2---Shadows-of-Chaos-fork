@@ -32,6 +32,7 @@ void ThrowSolidHead (float dm)
 	self.headmodel="";
     self.frame = 0;
 
+	self.netname="head";
 	self.movetype = MOVETYPE_STEP;
 	self.takedamage = DAMAGE_YES;
 	self.solid = SOLID_PHASE;

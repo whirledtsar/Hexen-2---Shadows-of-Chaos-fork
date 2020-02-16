@@ -1,7 +1,6 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/corpse.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/corpse.hc,v 1.2 2007-02-07 16:59:30 sezero Exp $
  */
- 
 void monster_imp_ice (void);
 void monster_imp_fire (void);
 void monster_archer (void);
@@ -59,38 +58,66 @@ void monster_fallen_angel (void);
 	self.origin = spot1;
  
 	if (self.classname == "monster_imp_ice")
+	{
 		self.think = monster_imp_ice;
+	}
 	else if (self.classname == "monster_imp_fire")
+	{
 		self.think = monster_imp_fire;
+	}
 	else if (self.classname == "monster_archer")
+	{
 		self.think = monster_archer;
+	}
 	else if (self.classname == "monster_archer_lord")
 	{
 		self.classname = "monster_archer_lord"; //self.classname = "monster_archer";
 		self.think = monster_archer;
 	}
 	else if (self.classname == "monster_skull_wizard")
+	{
 		self.think = monster_skull_wizard;
+	}
 	else if (self.classname == "monster_scorpion_black")
+	{
 		self.think = monster_scorpion_black;
+	}
 	else if (self.classname == "monster_scorpion_yellow")
+	{
 		self.think = monster_scorpion_yellow;
+	}
 	else if (self.classname == "monster_spider_yellow_large")
+	{
 		self.think = monster_spider_yellow_large;
+	}
 	else if (self.classname == "monster_spider_yellow_small")
+	{
 		self.think = monster_spider_yellow_small;
+	}
 	else if (self.classname == "monster_spider_red_large")
+	{
 		self.think = monster_spider_red_large;
+	}
 	else if (self.classname == "monster_spider_red_small")
+	{
 		self.think = monster_spider_red_small;
+	}
 	else if (self.classname == "monster_golem_stone")
+	{
 		self.think = monster_golem_stone;
+	}
 	else if (self.classname == "monster_golem_iron")
+	{
 		self.think = monster_golem_iron;
+	}
 	else if (self.classname == "monster_golem_bronze")
+	{
 		self.think = monster_golem_bronze;
+	}
 	else if (self.classname == "monster_mummy")
+	{
 		self.think = monster_mummy;
+	}
 	else if (self.classname == "monster_mummy_lord")
 	{
 		self.classname = "monster_mummy";
@@ -105,7 +132,9 @@ void monster_fallen_angel (void);
 		self.think = monster_mezzoman;
 	}
 	else if (self.classname == "monster_werepanther")
+	{
 		self.think = monster_werepanther;
+	}
 	else if (self.classname == "monster_medusa")
 	{
 		self.think = monster_medusa;
@@ -177,13 +206,9 @@ void corpseblink (void)
 	self.scale -= 0.10;
 
 	if (self.scale < 0.10)
-	{
 		MarkForRespawn();
-	}
 	else
-	{
 		remove(self);
-	}
 }
 
 void init_corpseblink (void)
@@ -234,8 +259,7 @@ vector newmaxs;
 
 //Won't be necc to pass headmdl once everything has it's .headmodel
 //value set in spawn
-
-	self.target = self.targetname;	//fix by Shanjaq
+	self.netname="corpse";
     self.th_die = chunk_death;
 	//self.touch = obj_push; //Pushable corpses has the side effect of getting the player stuck when ironically it was meant to prevent that
     self.health = random(10,25);
@@ -243,7 +267,7 @@ vector newmaxs;
 		self.health += (self.mass*0.75);	//ws: increase health for big corpses
 	self.takedamage = DAMAGE_YES;
 	self.solid = SOLID_PHASE;
-	self.experience_value = 0;
+	self.experience_value = self.init_exp_val = 0;
 	self.movetype = MOVETYPE_NONE;
 	if(self.classname!="monster_hydra")
 		self.movetype = MOVETYPE_STEP;//Don't get in the way	
@@ -264,9 +288,8 @@ vector newmaxs;
     self.flags(-)FL_MONSTER;
 	if (!self.preventrespawn)
 		self.controller = self;
-	self.onfire = FALSE;
 
-	pitch_roll_for_slope('0 0 0');
+	pitch_roll_for_slope('0 0 0',self);
 
     if ((self.decap)  && (self.classname == "player"))
     {	
@@ -281,10 +304,9 @@ vector newmaxs;
     }
     else 
 	{
-		self.lifetime = time + random(60,70); // disappear after 70 seconds - CORPSE TIMER
+		self.lifetime = time + random(10,20); // disappear after 20 seconds
 		self.think=CorpseThink;
 		thinktime self : 0;
-		//return;
 	}
 };
 

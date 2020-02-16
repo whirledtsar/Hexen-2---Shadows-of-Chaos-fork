@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/path.hc,v 1.2 2007-02-07 16:57:08 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/path.hc,v 1.2 2007-02-07 16:59:35 sezero Exp $
  */
 
 /*
@@ -12,7 +12,7 @@ change to the next target and continue.
 */
 void() pathcorner_touch =
 {
-local entity	temp;
+entity	temp;
 
 	if (other.pathentity != self)	// This corner was not targeted by this monster
 		return;

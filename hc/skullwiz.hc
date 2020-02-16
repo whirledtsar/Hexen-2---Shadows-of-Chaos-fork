@@ -1,5 +1,5 @@
 /*
- * h2/skullwiz.hc
+ *  portals/skullwiz.hc
  */
 
 //
@@ -148,7 +148,6 @@ float dot;
 
 	if(self.enemy.last_attack<time - 0.5)
 		return FALSE;
-	
 	if (self.counter > time)	//dont teleport immediately after teleporting in
 		return FALSE;
 
@@ -326,8 +325,8 @@ void skullwiz_summon(void)
 	self.lifetime = time + 30;
 
 	self.skin = 1;
-	self.health = 5;
-	self.experience_value = SpiderExp[1];
+	self.health = self.max_health = 5;
+	self.init_exp_val = self.experience_value = SpiderExp[1];
 
 	self.drawflags = SCALE_ORIGIN_BOTTOM;
 	self.spawnflags (+) JUMP;
@@ -346,8 +345,6 @@ void skullwiz_summon(void)
 	self.th_melee = SpiderMeleeBegin;
 	self.th_missile = SpiderJumpBegin;
 	self.th_pain = SpiderPain;
-	/*self.th_possum = spider_playdead;
-	self.th_possum_up = spider_possum_up;*/
 	self.classname = "monster_spider_yellow_small";
 
 	self.flags (+) FL_MONSTER;
@@ -421,7 +418,7 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 	{
 		spider_spawn(0);
 
-		if (random() < 0.15 || self.bufftype & BUFFTYPE_LEADER)   // 15% chance he'll do another
+		if (random() < 0.15 || coop || self.bufftype & BUFFTYPE_LEADER)   // 15% chance he'll do another
 		{
 			spider_spawn(1);
 		}
@@ -437,7 +434,10 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 void skullwiz_transition (void) [++ $sktran1.. $sktran7]
 {
 	if (self.frame == $sktran1)
-		self.attack_finished = time + random(0.5,3.5);
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished = time + random(0.5,3.5);
 
 	if (cycle_wrapped)
 		skullwiz_run();
@@ -511,7 +511,7 @@ void SkullMissileTouch (void)
 void SkullMissile_Twist2(void)
 {
 	vector holdangle;
-	
+
 	self.think = SkullMissile_Twist2;
 	thinktime self : .2;
 
@@ -539,7 +539,7 @@ void SkullMissile_Twist2(void)
 	{
 		sound (self, CHAN_BODY, "skullwiz/scream2.wav", 1, ATTN_NORM);
 		self.scream_time = time + random(.50,1);
-	}
+	}	
 	
 	if (self.owner.bufftype & BUFFTYPE_LEADER)
 		HomeThink();
@@ -557,12 +557,9 @@ void SkullMissile_Twist(void)
 	{
 		sound (self, CHAN_BODY, "skullwiz/scream.wav", 1, ATTN_NORM);
 		self.scream_time = time + random(.50,1);
-	}
-	
+	}	
 	if (self.owner.bufftype & BUFFTYPE_LEADER)
-	{
 		HomeThink();
-	}
 }
 
 /*-----------------------------------------
@@ -703,7 +700,6 @@ void skullwiz_blinkin(void)
 		max_scale = 1;
 	else
 		max_scale = 1.20;
-	
 	if (self.bufftype & BUFFTYPE_LARGE)
 		max_scale = self.tempscale;
 
@@ -712,7 +708,6 @@ void skullwiz_blinkin(void)
 		self.scale=max_scale;
 		self.th_pain=skullwiz_pain;
 		self.takedamage = DAMAGE_YES;
-		
 		//reset scale type to normal
 		self.drawflags (-) SCALE_TYPE_MASKOUT;
 		self.drawflags (-) SCALE_TYPE_XYONLY;
@@ -842,6 +837,7 @@ float loop_cnt,forward,dot;
 	self.nextthink = time;	
 	sound (self, CHAN_VOICE, "skullwiz/blinkin.wav", 1, ATTN_NORM);
 	CreateRedFlash(self.origin + '0 0 40');
+	
 }
 
 /*-----------------------------------------
@@ -894,13 +890,12 @@ void skullwiz_blink(void) [++ $sktele2..$sktele30]
 		self.aflag=FALSE;
 		self.takedamage = DAMAGE_NO;  // So t_damage won't force him into another state 
 		self.scale = 1;
-		
 		if (self.bufftype & BUFFTYPE_LARGE)
 			self.scale = self.tempscale;
 		
 		//temporarily remove monster effects
 		// Must happen before teleport in order to not break the SCALE_TYPE_MASKOUT effect
-		RemoveMonsterBuffEffect(self);
+		//RemoveMonsterBuffEffect(self);
 
 		//self.drawflags = (self.drawflags & SCALE_TYPE_MASKOUT) | SCALE_TYPE_XYONLY;
 		//replacing explicite flags with adding/removing Teleport related flags
@@ -1014,7 +1009,10 @@ void skullwiz_run (void) [++ $skwalk1..$skwalk24]
 
 	delta = self.enemy.origin - self.origin;
 	if (vlen(delta) < 80)		// Too close so don't ignore enemy
-		self.attack_finished = time - 1; 
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			self.attack_finished = time - 1; 
 
 	if (self.frame == $skwalk1)  // Decide if he should BLINK away
 	{
@@ -1067,13 +1065,12 @@ void skullwiz_stand (void) [++ $skwait1..$skwait26]
 
 void skullwizard_init(void)
 {
-	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
-		precache_model("models/skullwiz.mdl");
+		precache_model4("models/skullwiz.mdl");//converted for MP
 		precache_model("models/skulbook.mdl");
 		precache_model("models/skulhead.mdl");
 		precache_model("models/skulshot.mdl");
-		precache_model("models/spider.mdl");
 
 		if (self.classname == "monster_skull_wizard")
 		{
@@ -1082,7 +1079,6 @@ void skullwizard_init(void)
 			precache_sound("skullwiz/growl.wav");
 			precache_sound("skullwiz/scream.wav");
 			precache_sound("skullwiz/pain.wav");
-//	precache_sound("spider/death.wav");
 		}	
 		else
 		{
@@ -1100,8 +1096,7 @@ void skullwizard_init(void)
 		precache_sound("skullwiz/push.wav");
 		precache_sound("skullwiz/firemisl.wav");
 
-		precache_spider ();
-
+		precache_spider();
 	}
 
 	setmodel(self, "models/skullwiz.mdl");
@@ -1125,9 +1120,9 @@ void skullwizard_init(void)
 
 	self.flags(+)FL_MONSTER;
 	self.yaw_speed = 10;
-	
-	self.counter = 0;	//counter for when to teleport
+
 }
+
 
 /*QUAKED monster_skull_wizard (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
 A skull wizard
@@ -1143,15 +1138,23 @@ void monster_skull_wizard (void)
 		return;
 	}
 
+	if(!self.th_init)
+	{
+		self.th_init=monster_skull_wizard;
+		self.init_org=self.origin;
+	}
 	skullwizard_init();
 
-	self.health = 150;
-	self.experience_value = 100;
+	if(!self.health)
+		self.health = 150;
+	if(!self.max_health)
+		self.max_health=self.health;
+	self.experience_value = 90;
 	self.monsterclass = CLASS_GRUNT;
-	
+	self.init_exp_val = self.experience_value;
+
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, TRUE);
+	//ApplyMonsterBuff(self, TRUE);
 }
 
 /*QUAKED monster_skull_wizard_lord (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
@@ -1168,14 +1171,23 @@ void monster_skull_wizard_lord (void)
 		return;
 	}
 
+	if(!self.th_init)
+	{
+		self.th_init=monster_skull_wizard_lord;
+		self.init_org=self.origin;
+	}
 	skullwizard_init();
 
-	self.health = 600;
-	self.experience_value = 400;
+	if(!self.health)
+		self.health = 600;
+	if(!self.max_health)
+		self.max_health=self.health;
+	self.experience_value = 325;
 	self.monsterclass = CLASS_LEADER;
 	self.skin = 1;
 	self.scale = 1.20;
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-
-	ApplyMonsterBuff(self, TRUE);
+	//ApplyMonsterBuff(self, TRUE);
 }
+

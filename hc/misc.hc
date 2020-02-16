@@ -1,20 +1,42 @@
-/*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/misc.hc,v 1.3 2007-02-07 16:57:07 sezero Exp $
- */
 
-/*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
+/*
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/misc.hc,v 1.3 2007-02-07 16:59:34 sezero Exp $
+ */
+float DONT_REMOVE = 1;
+/*QUAKED miscellaneous_info (0 0 0) ?
+NOT AN ENTITY- just miscellaneous
+info that doesn't belong in any
+one entity's comments.
+
+Use these fields to make something
+spit out an item or artifact when
+it dies...
+cnt_torch;
+cnt_h_boost;
+
+cnt_sh_boost
+cnt_mana_boost
+cnt_teleport
+cnt_tome
+cnt_summon
+cnt_invisibility
+cnt_glyph
+cnt_haste
+cnt_blast
+cnt_polymorph
+cnt_flight
+cnt_cubeofforce
+cnt_invincibility
+
+
+*/
+/*QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4) DONT_REMOVE
 Used as a positional target for spotlights, etc.
 */
 void info_null()
 {
-	remove(self);
-}
-
-/*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
-Restored from quake for map hacks, you sneaky breekis
-*/
-void() info_notnull =
-{
+	if(!self.spawnflags&DONT_REMOVE)
+		remove(self);
 }
 
 float ROTATE_BREAK = 16;
@@ -120,47 +142,28 @@ void fire_touch();
 void misc_fireball()
 {
 	precache_model ("models/lavaball.mdl");
-	precache_sound ("fx/burn.wav");
-	precache_sound ("fx/lava2.wav");
 	self.classname = "fireball";
 	thinktime self : random(5);
-	if (self.targetname)
-	{
-		self.think = SUB_Null;
-		self.use = fire_fly;
-	}
-	else
-		self.think = fire_fly;
+	self.think = fire_fly;
 	if (!self.speed)
-		self.speed = 400;
+		self.speed = 1000;
 }
 
 void fire_fly()
 {
 local entity	fireball;
-local vector firemove;
-	firemove = '0 0 0';
-	firemove_x = random(-80, 80);
-	firemove_y = random(-80, 80);
-	firemove_z = random(25, 40);
+
 	fireball = spawn();
-	//sound(self,CHAN_AUTO,"fx/lava2.wav",1,ATTN_NONE);
-	fireball.gravity = 0.4;
 	fireball.solid = SOLID_TRIGGER;
 	fireball.movetype = MOVETYPE_TOSS;
-	fireball.velocity = firemove;
-	fireball.velocity=RandomVector('10 10 0');
-	fireball.velocity_z = self.speed + random(20);
-	fireball.drawflags(+)MLS_FULLBRIGHT|MLS_CRYSTALGOLEM;
-	//fireball.drawflags(+)MLS_FIREFLICKER | MLS_ABSLIGHT;
+	fireball.velocity = '0 0 1000';
+	fireball.velocity=RandomVector('50 50 0');
+	fireball.velocity_z = self.speed + random(200);
 	fireball.classname = "fireball";
 	setmodel (fireball, "models/lavaball.mdl");
-	fireball.avelocity = '400 80 0';
 	setsize (fireball, '0 0 0', '0 0 0');
 	setorigin (fireball, self.origin);
-	fireball.scale = 0.9;
-	//fireball.abslight = 1.0;
-	thinktime fireball : 6;
+	thinktime fireball : 5;
 	fireball.think = SUB_Remove;
 	fireball.touch = fire_touch;
 	
@@ -171,7 +174,6 @@ local vector firemove;
 void fire_touch()
 {
 	T_Damage (other, self, self, 20);
-	sound(self,CHAN_AUTO,"fx/burn.wav",1,ATTN_NORM);
 	remove(self);
 }
 
@@ -453,7 +455,7 @@ void () trap_lightning_track =
 		return;
 	}
 				
-	do_lightning (self,1,0,4, p1, p2, self.dmg);
+	do_lightning (self,1,0,4, p1, p2, self.dmg,TE_STREAM_LIGHTNING);
 
 	fx_light (p2, EF_BRIGHTLIGHT);		// Flash of light
 
@@ -565,27 +567,9 @@ void () trap_lightning =
 void bubble_remove();
 void bubble_bob();
 
-/*QUAK-ED air_bubbles (0 .5 .8) (-8 -8 -8) (8 8 8)
-
-testing air bubbles
-*/
-/*
-void air_bubbles()
-{
-	if (deathmatch)
-	{
-		remove (self);
-		return;
-	}
-	precache_model ("models/s_bubble.spr");
-	thinktime self : 1;
-	self.think = make_bubbles;
-}
-
-
 void make_bubbles()
 {
-local entity	bubble;
+entity	bubble;
 
 	bubble = spawn_temp();
 	setmodel (bubble, "models/s_bubble.spr");
@@ -600,13 +584,44 @@ local entity	bubble;
 	bubble.frame = 0;
 	bubble.cnt = 0;
 	setsize (bubble, '-8 -8 -8', '8 8 8');
-	thinktime self : random(0.5,1.5);
+	self.cnt-=1;
 	self.think = make_bubbles;
+	if(self.cnt)
+		thinktime self : random(0.05,.15);
+	else if(self.wait == -2)
+		remove(self);
+	else if(self.wait == -1)
+		self.nextthink=-1;
+	else
+		thinktime self : self.wait + ((random()*self.level) - self.level/2)/100;
 }
+
+/*QUAKED air_bubbles (0 .5 .8) (-8 -8 -8) (8 8 8)
+'cnt' - How many bubbles
+'wait' How long to wait between spurts (-1 will never spurt again, unless triggered again, -2 will make it remove after one spurt)
+'level' - random factor (0 - 100) more or less bubbles, longer or shorter wait
+
+Target this guy and it will wait to spew bubbles when triggered.
 */
+
+void air_bubbles()
+{
+	precache_model ("models/s_bubble.spr");
+	self.cnt+=((random()*self.level) - self.level/2)/10;
+	if(self.cnt<1)
+		self.cnt=1;
+	if(self.targetname)
+		self.use=make_bubbles;
+	else
+	{
+		self.think = make_bubbles;
+		thinktime self : self.wait;
+	}
+}
+
 void() bubble_split =
 {
-local entity	bubble;
+entity	bubble;
 	bubble = spawn_temp();
 	setmodel (bubble, "models/s_bubble.spr");
 	setorigin (bubble, self.origin);
@@ -629,19 +644,15 @@ local entity	bubble;
 void() bubble_remove =
 {
 	if (other.classname == self.classname)
-	{
-//		dprint ("bump");
 		return;
-	}
 	remove(self);
 };
 
 
 void() bubble_bob =
 {
-local float		rnd1, rnd2, rnd3;
-
-local float waterornot;
+float		rnd1, rnd2, rnd3;
+float waterornot;
 	waterornot=pointcontents(self.origin);
 	if (waterornot!=CONTENT_WATER&&waterornot!=CONTENT_SLIME)
 		remove(self);
@@ -709,19 +720,17 @@ void() func_wall_use =
 	self.frame = 1 - self.frame;
 };
 
-/*QUAKED func_wall (0 .5 .8) ? TRANSLUCENT
+/*QUAKED func_wall (0 .5 .8) ? TRANSLUCENT INVISIBLE
 This is just a solid wall if not inhibitted
 TRANSLUCENT - makes it see-through
+Invisible - makes it invisible
 abslight = how bright to make it
 */
 void func_wall()
 {
 	self.angles = '0 0 0';
 	self.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
-	if (self.spawnflags & 8)
-		self.solid = SOLID_NOT;
-	else
-		self.solid = SOLID_BSP;
+	self.solid = SOLID_BSP;
 	self.classname="solid wall";
 	self.use = func_wall_use;
 	setmodel (self, self.model);
@@ -729,6 +738,8 @@ void func_wall()
 		self.drawflags=DRF_TRANSLUCENT;
 	if(self.abslight)
 		self.drawflags(+)MLS_ABSLIGHT;
+	if(self.spawnflags&2)
+		self.effects(+)EF_NODRAW;
 }
 
 
@@ -751,7 +762,14 @@ void func_illusionary()
 	self.movetype = MOVETYPE_NONE;
 	self.solid = SOLID_NOT;
 	setmodel (self, self.model);
-	makestatic (self);
+	if(deathmatch||teamplay)
+		makestatic (self);
+	else
+	{
+		self.solid=SOLID_NOT;
+		self.movetype=MOVETYPE_NONE;
+	}
+
 }
 
 //============================================================================
@@ -1107,7 +1125,7 @@ entity found;
 	else
 		self.owner=found;
 }
-/*
+
 void trigger_fan_blow_touch (void)
 {
 vector blowdir, org;
@@ -1188,7 +1206,7 @@ void trigger_fan_blow (void)
 	self.think=trigger_find_owner;
 	thinktime self : 0.1;
 }
-*/
+
 
 void() angletrigger_done =
 {
@@ -1298,3 +1316,39 @@ void() func_angletrigger =
 
 	self.inactive = FALSE;	
 };
+
+void velocity_damage ()
+{
+float impact;
+	if(!other.takedamage)
+		return;
+	if(other.last_onground+0.25>time)
+		return;
+
+	impact=vlen(other.velocity)*other.mass/10;
+	impact*=self.dmg;
+	T_Damage(other,self,self,impact);
+}
+
+/*QUAKED func_obstacle (0 .5 .8) ? 
+Does damage on impact based on the speed of the impactee
+"dmg" - multiplier on damage (damage is based on speed of impact and mass of impactee)
+"level" - velocity threshold to not do damage under (400 is running speed)
+*/
+void func_obstacle ()
+{
+	self.angles = '0 0 0';
+	self.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
+	self.solid = SOLID_BSP;
+	self.classname="solid wall";
+//	self.use = func_wall_use;
+	setmodel (self, self.model);
+	if(self.spawnflags&1)
+		self.drawflags=DRF_TRANSLUCENT;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+	if(!self.dmg)
+		self.dmg=1;
+	self.touch=velocity_damage;
+}
+

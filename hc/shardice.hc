@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/shardice.hc,v 1.2 2007-02-07 16:57:09 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/shardice.hc,v 1.2 2007-02-07 16:59:36 sezero Exp $
  */
 /*
 ==============================================================================
@@ -77,15 +77,14 @@ vector vec;
 	missile.movetype = MOVETYPE_FLYMISSILE;
 	missile.solid = SOLID_BBOX;
 	missile.health = 10;
-	setmodel (missile, "models/shardice.mdl");
-	
+
 	if(self.classname=="monster_imp_lord")
 	{
 		set_speed*=2;
 		missile.scale=2;
 	}
 
-	
+	setmodel (missile, "models/shardice.mdl");
 	setsize (missile, '0 0 0', '0 0 0');		
 
 // set missile speed	

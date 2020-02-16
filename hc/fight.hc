@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/fight.hc,v 1.2 2007-02-07 16:57:03 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/fight.hc,v 1.2 2007-02-07 16:59:32 sezero Exp $
  */
 
 
@@ -11,25 +11,18 @@
 
 
 float anglemod(float v);
-void  ChooseTurn(vector dest);
+//void  ChooseTurn(vector dest);
 void  ai_face();
 float CheckMonsterAttack(float AttackType, float ChanceModifier);
 
-
 float enemy_vis, enemy_infront, enemy_range;
 float enemy_yaw;
-
-
 
 float MAX_MELEE			= 1;
 float MAX_MISSILE		= 2;
 float MAX_BOTH			= 3;
 float MAX_FAR_MELEE		= 4;
 float MAX_SHORT_MISSILE = 8;
-
-
-
-
 
 /*
  * CheckAttack() -- The player is in view, so decide to move or launch an
@@ -38,9 +31,9 @@ float MAX_SHORT_MISSILE = 8;
 
 float CheckAttack()
 {
-	local vector	spot1, spot2;	
-	local entity	targ;
-	local float		chance;
+vector	spot1, spot2;	
+entity	targ;
+float		chance;
 
 	targ = self.enemy;
 	
@@ -54,7 +47,7 @@ float CheckAttack()
 		traceline (trace_endpos, spot2, FALSE, trace_ent);
 
 	if (trace_ent != targ)
-        if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
+		if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
 			return FALSE;//Don't have a clear shot, and don't want to shoot obstruction
 			
 //FIXME: check for translucent water?
@@ -69,6 +62,7 @@ float CheckAttack()
 			return TRUE;
 		}
 	}
+
 //FIXME: check for darkness, maybe won't fire, maybe aim will be off
 	
 // missile attack
@@ -106,7 +100,10 @@ float CheckAttack()
 	if (random () < chance)
 	{
 		self.th_missile ();
-		SUB_AttackFinished (random(0,2));
+		if(skill>=4)
+			self.attack_finished=0;
+		else
+			SUB_AttackFinished (random(0,2));
 		return TRUE;
 	}
 
@@ -159,7 +156,6 @@ void ai_charge_side()
 	walkmove(heading, 20, FALSE);
 }
 
-
 /*
  * ai_melee()
  */
@@ -200,7 +196,7 @@ float 	ldmg;
 /*
  * ai_melee_side()
  */
-
+/*
 void ai_melee_side()
 {
 	local vector	delta;
@@ -220,4 +216,5 @@ void ai_melee_side()
 	ldmg = random(9);
 	T_Damage (self.enemy, self, self, ldmg);
 }
+*/
 

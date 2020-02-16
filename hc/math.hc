@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/math.hc,v 1.2 2007-02-07 16:57:07 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/math.hc,v 1.2 2007-02-07 16:59:34 sezero Exp $
  */
 
 
@@ -13,6 +13,7 @@ float crandom()
 	return random(-1,1);
 }
 
+/*
 float fexp(float base,float exponent)
 {//MG
 float exp_count;
@@ -37,6 +38,7 @@ float exp_count;
 	}
 	return base;
 }
+*/
 
 float byte_me(float mult)
 {//MG

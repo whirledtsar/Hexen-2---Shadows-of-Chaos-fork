@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/items.hc,v 1.2 2007-02-07 16:57:07 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/items.hc,v 1.2 2007-02-07 16:59:34 sezero Exp $
  */
 void() W_SetCurrentAmmo;
 void() W_SetCurrentWeapon;
@@ -18,7 +18,7 @@ void() SUB_regen =
 	setorigin (self, self.origin);
 };
 
-
+/*
 void ItemHitFloorWait ()
 {
 //	dprint("Waiting to hit\n");
@@ -44,6 +44,8 @@ void ItemHitFloorWait ()
 	else
 		thinktime self : 0.05;
 }
+*/
+
 /*
 ============
 PlaceItem
@@ -81,8 +83,16 @@ void() PlaceItem =
 		self.hull=oldHull;
 		if(self.touch==puzzle_touch)
 		{
-			setorigin(self,self.origin+'0 0 28');
-			setsize (self, '-8 -8 -28', '8 8 8');
+			if(self.puzzle_id=="scept"&&mapname=="egypt5")
+			{
+				setorigin(self,self.origin+'0 0 28');
+				setsize (self, '-1 -1 -28', '1 1 0');
+			}
+			else
+			{
+				setorigin(self,self.origin+'0 0 28');
+				setsize (self, '-8 -8 -28', '8 8 8');
+			}
 		}
 		else
 		{
@@ -265,44 +275,46 @@ WEAPONS
 ===============================================================================
 */
 
+float MAX_INV = 15;		//ws: changed from 25 because most items actually have a cap of 15 in artifacts.hc
+
 void max_ammo2 (entity AddTo, entity AddFrom)
 {
 	// FIXME: I assume the max will be different between classes and levels
-	//ws: see constant.hc
+
 	if (AddTo.cnt_torch + AddFrom.cnt_torch > MAX_INV)
 		AddFrom.cnt_torch = MAX_INV - AddTo.cnt_torch;
-	/*if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_h_boost + AddFrom.cnt_h_boost > 30)
+	if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_h_boost + AddFrom.cnt_h_boost > 30)
 		AddFrom.cnt_h_boost = 30 - AddTo.cnt_h_boost;
-	else */if (AddTo.cnt_h_boost + AddFrom.cnt_h_boost > MAX_FLASK)
-		AddFrom.cnt_h_boost = MAX_FLASK - AddTo.cnt_h_boost;
-	if (AddTo.cnt_sh_boost + AddFrom.cnt_sh_boost > MAX_URN)
-		AddFrom.cnt_sh_boost = MAX_URN - AddTo.cnt_sh_boost;
-	if (AddTo.cnt_mana_boost + AddFrom.cnt_mana_boost > MAX_KRATER)
-		AddFrom.cnt_mana_boost = MAX_KRATER - AddTo.cnt_mana_boost;
+	else if (AddTo.cnt_h_boost + AddFrom.cnt_h_boost > MAX_INV)
+		AddFrom.cnt_h_boost = MAX_INV - AddTo.cnt_h_boost;
+	if (AddTo.cnt_sh_boost + AddFrom.cnt_sh_boost > 5)
+		AddFrom.cnt_sh_boost = 5 - AddTo.cnt_sh_boost;
+	if (AddTo.cnt_mana_boost + AddFrom.cnt_mana_boost > MAX_INV)
+		AddFrom.cnt_mana_boost = MAX_INV - AddTo.cnt_mana_boost;
 	if (AddTo.cnt_teleport + AddFrom.cnt_teleport > MAX_INV)
 		AddFrom.cnt_teleport = MAX_INV - AddTo.cnt_teleport;
-	if (AddTo.cnt_tome + AddFrom.cnt_tome > MAX_TOME)
-		AddFrom.cnt_tome = MAX_TOME - AddTo.cnt_tome;
-	if (AddTo.cnt_summon + AddFrom.cnt_summon > MAX_SUMMON)
-		AddFrom.cnt_summon = MAX_SUMMON - AddTo.cnt_summon;
-	if (AddTo.cnt_invisibility + AddFrom.cnt_invisibility > MAX_GHOST)
-		AddFrom.cnt_invisibility = MAX_GHOST - AddTo.cnt_invisibility;
-	if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_glyph + AddFrom.cnt_glyph > 30)
-		AddFrom.cnt_glyph = 30 - AddTo.cnt_glyph;
+	if (AddTo.cnt_tome + AddFrom.cnt_tome > MAX_INV)
+		AddFrom.cnt_tome = MAX_INV - AddTo.cnt_tome;
+	if (AddTo.cnt_summon + AddFrom.cnt_summon > MAX_INV)
+		AddFrom.cnt_summon = MAX_INV - AddTo.cnt_summon;
+	if (AddTo.cnt_invisibility + AddFrom.cnt_invisibility > MAX_INV)
+		AddFrom.cnt_invisibility = MAX_INV - AddTo.cnt_invisibility;
+	if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_glyph + AddFrom.cnt_glyph > 50)
+		AddFrom.cnt_glyph = 50 - AddTo.cnt_glyph;
 	else if (AddTo.cnt_glyph + AddFrom.cnt_glyph > MAX_INV)
 		AddFrom.cnt_glyph = MAX_INV - AddTo.cnt_glyph;
 	if (AddTo.cnt_haste + AddFrom.cnt_haste > MAX_INV)
 		AddFrom.cnt_haste = MAX_INV - AddTo.cnt_haste;
 	if (AddTo.cnt_blast + AddFrom.cnt_blast > MAX_INV)
 		AddFrom.cnt_blast = MAX_INV - AddTo.cnt_blast;
-	if (AddTo.cnt_polymorph + AddFrom.cnt_polymorph > MAX_POLY)
-		AddFrom.cnt_polymorph = MAX_POLY - AddTo.cnt_polymorph;
+	if (AddTo.cnt_polymorph + AddFrom.cnt_polymorph > MAX_INV)
+		AddFrom.cnt_polymorph = MAX_INV - AddTo.cnt_polymorph;
 	if (AddTo.cnt_flight + AddFrom.cnt_flight > MAX_INV)
 		AddFrom.cnt_flight = MAX_INV - AddTo.cnt_flight;
-	if (AddTo.cnt_cubeofforce + AddFrom.cnt_cubeofforce > MAX_CUBE)
-		AddFrom.cnt_cubeofforce = MAX_CUBE - AddTo.cnt_cubeofforce;
-	if (AddTo.cnt_invincibility + AddFrom.cnt_invincibility > MAX_ICON)
-		AddFrom.cnt_invincibility = MAX_ICON - AddTo.cnt_invincibility;
+	if (AddTo.cnt_cubeofforce + AddFrom.cnt_cubeofforce > MAX_INV)
+		AddFrom.cnt_cubeofforce = MAX_INV - AddTo.cnt_cubeofforce;
+	if (AddTo.cnt_invincibility + AddFrom.cnt_invincibility > MAX_INV)
+		AddFrom.cnt_invincibility = MAX_INV - AddTo.cnt_invincibility;
 
 	if (AddTo.bluemana + AddFrom.bluemana > AddTo.max_mana)
 		AddFrom.bluemana = AddTo.max_mana - AddTo.bluemana;
@@ -382,50 +394,74 @@ void weapon_touch (void)
 	else
 		leave = 0;
 
-// this was causing weapon switching to get stuck if several weapons were
-// picked up too fast:
-// http://sourceforge.net/projects/uhexen2/forums/forum/425206/topic/5635367
-//	other.oldweapon = other.weapon;
-
 	new = self.items;
 	// Give player weapon and mana
 	if (self.classname=="wp_weapon2")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_VORPAL;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_ICESTAFF;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_MAGICMISSILE;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_ACIDORB;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_CROSSBOW;
+			break;
+		}
 
 		other.bluemana += 25;		
 	}
 	else if (self.classname=="wp_weapon3")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_AXE;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_METEORSTAFF;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_BONESHARD;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_FLAMEORB;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_GRENADES;
-
+			break;
+		}
 		other.greenmana += 25;		
 
 	}
 	else if (self.classname=="wp_weapon4_head")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_PURIFIER1;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_SUN1;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_RAVENSTAFF1;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_LIGHTNING1;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_SET1;
+			break;
+		}
 
 		other.bluemana += 25;		
 		other.greenmana += 25;	
@@ -436,14 +472,24 @@ void weapon_touch (void)
 	}
 	else if (self.classname=="wp_weapon4_staff")
 	{
-		if (other.playerclass == CLASS_PALADIN)
+		switch(other.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.netname = STR_PURIFIER2;
-		else if (other.playerclass == CLASS_CRUSADER)
+			break;
+		case CLASS_CRUSADER:
 			self.netname = 	STR_SUN2;
-		else if (other.playerclass == CLASS_NECROMANCER)
+			break;
+		case CLASS_NECROMANCER:
 			self.netname = 	STR_RAVENSTAFF2;
-		else if (other.playerclass == CLASS_ASSASSIN)
+			break;
+		case CLASS_SUCCUBUS:
+			self.netname = 	STR_LIGHTNING2;
+			break;
+		default:	//CLASS_ASSASSIN
 			self.netname = 	STR_SET2;
+			break;
+		}
 
 		other.bluemana += 25;		
 		other.greenmana += 25;	
@@ -478,6 +524,7 @@ void weapon_touch (void)
 
 	if(self.attack_finished<time)
 	{//So you don't interrupt another selection or firing frame
+		self.oldweapon = self.weapon;
 		if(!deathmatch||!hadweap)	//In DM, don't switch to new weapon if already had it
 			NewBestWeapon (old, new);
 
@@ -587,6 +634,11 @@ void ihealth_touch(void)
 		activator = other;
 		SUB_UseTargets();				// fire all targets / killtargets
 	}
+	if(other.flags2&FL2_POISONED)
+	{
+		other.flags2(-)FL2_POISONED;
+		centerprint(other,"The poison has been cleansed from your blood...\n");
+	}
 }
 
 
@@ -652,12 +704,14 @@ void mana_touch(void)
 
 	self.model = string_null;
 	self.solid = SOLID_NOT;
-	if (deathmatch == 1)
-		self.nextthink = time + RESPAWN_TIME;
 	self.think = SUB_regen;
 
 	activator = other;
 	SUB_UseTargets();				// fire all targets / killtargets
+	if (!self.owner && deathmatch == 1||world.target=="sheep")
+		self.nextthink = time + RESPAWN_TIME;
+	else
+		remove(self);	//test this!
 }
 
 void spawn_item_mana_green(float amount)
@@ -901,7 +955,7 @@ PLAYER BACKPACKS
 ===============================================================================
 */
 
-void GetPuzzle2(entity item, entity person, string which);
+//void GetPuzzle2(entity item, entity person, string which);
 
 void BackpackTouch(void)
 {
@@ -1254,21 +1308,25 @@ void BackpackTouch(void)
 
 void MonsterDropStuff(void)
 {
-	float chance;
 
 	if(!self.flags&FL_MONSTER)
-		return;
-	
-	if (self.preventrespawn)
 		return;
 
 	if (self.monsterclass < CLASS_GRUNT)
 		return;
 
+	DropBackpack();
+}
+
+float RandomMonsterGoodies ()
+{
+float chance;
+float it_total;	
+
 	// Grunts drop only instant items
 	if (self.monsterclass == CLASS_GRUNT)
 	{
-		if (random() < .33) // %33 chance he'll drop something	
+		if (random() < .15) // %15 chance he'll drop something	
 		{
 			chance = random();
 			if (chance < .25)
@@ -1284,68 +1342,63 @@ void MonsterDropStuff(void)
 			{
 				self.spawn_health = 1;
 			}
+			it_total+=1;
 		}
 	}
 
 	// Henchmen drop instant items or lesser artifacts
 	else if (self.monsterclass == CLASS_HENCHMAN)
 	{
-		if (random() < .33) // %33 chance he'll drop something	
+		if (random() < .15) // %15 chance he'll drop something	
 		{
 			chance = random();
 
-			if (chance < .06)
+			if (chance < .08)
 				self.greenmana = 10;
-			else if (chance < .12)
+			else if (chance < .16)
 				self.bluemana = 10;
 			else if (chance < .24)
 			{
 				self.greenmana = 10;
 				self.bluemana = 10;
 			}
-			else if (chance < .40)
+			else if (chance < .32)
 			{
 				self.spawn_health = 1;
 			}
-			else if (chance < .50)
-				self.cnt_h_boost = 1;
-			else if (chance < .55)
+			else if (chance < .40)
 				self.cnt_torch = 1;
-			else if (chance < .65)
+			else if (chance < .48)
+				self.cnt_h_boost = 1;
+			else if (chance < .56)
 				self.cnt_mana_boost = 1;
-			else if (chance < .60)
+			else if (chance < .64)
 				self.cnt_teleport = 1;
-			else if (chance < .65)
+			else if (chance < .72)
 				self.cnt_tome = 1;
-			else if (chance < .70)
-				self.cnt_haste = 1;
-			else if (chance < .75)
-				self.cnt_blast = 1;
 			else if (chance < .80)
-				self.armor_amulet = 20;
-			else if (chance < .95)
-				self.armor_bracer = 20;
-			else
-				self.armor_helmet = 20;
-
+				self.cnt_haste = 1;
+			else if (chance < .90)
+				self.cnt_blast = 1;
+			it_total+=1;
 		}		
 	}
 	// Leaders drop armor or artifacts
 	else if (self.monsterclass == CLASS_LEADER)
 	{		
-		if (random() < .5) // %50 chance he'll drop something	
+		if (random() < .15) // %15 chance he'll drop something	
 		{
 			chance = random();
 		
-			/*if (chance < .05)		//ws: no useless shit from high-tier monsters
+			 if (chance < .05)
 				self.cnt_torch = 1;
-			else */if (chance < .10)
+			else if (chance < .10)
 				self.cnt_h_boost = 1;
 			else if (chance < .15)
 				self.cnt_sh_boost = 1;
 			else if (chance < .20)
 				self.cnt_mana_boost = 1;
-			else if (chance < .25)
+			else if (chance < .25&&!(world.spawnflags&MISSIONPACK))
 				self.cnt_teleport = 1;
 			else if (chance < .30)
 				self.cnt_tome = 1;
@@ -1373,10 +1426,10 @@ void MonsterDropStuff(void)
 				self.armor_breastplate = 20;
 			else
 				self.armor_helmet = 20;
+			it_total+=1;
 		}
 	}
-
-	DropBackpack();
+	return it_total;
 }
 
 /*
@@ -1386,12 +1439,12 @@ DropBackpack
 */
 void DropBackpack(void)
 {
-	entity item,old_self;
-	float total;
+entity item,old_self;
+float total;
 
 	item = spawn();
 
-	if(self.playerclass==CLASS_NECROMANCER)
+	if(self.playerclass==CLASS_CRUSADER)
 		self.cnt_glyph=rint(self.cnt_glyph/5);
 	total = 0;
 
@@ -1495,55 +1548,15 @@ void DropBackpack(void)
 		item.armor_helmet = self.armor_helmet;
 	}
 
-/*	if (self.puzzle_inv1)
-	{
-		item.puzzle_inv1 = self.puzzle_inv1;
-		total = 999;
-	}
-	if (self.puzzle_inv2)
-	{
-		item.puzzle_inv2 = self.puzzle_inv2;
-		total = 999;
-	}
-	if (self.puzzle_inv3)
-	{
-		item.puzzle_inv3 = self.puzzle_inv3;
-		total = 999;
-	}
-	if (self.puzzle_inv4)
-	{
-		item.puzzle_inv4 = self.puzzle_inv4;
-		total = 999;
-	}
-	if (self.puzzle_inv5)
-	{
-		item.puzzle_inv5 = self.puzzle_inv5;
-		total = 999;
-	}
-	if (self.puzzle_inv6)
-	{
-		item.puzzle_inv6 = self.puzzle_inv6;
-		total = 999;
-	}
-	if (self.puzzle_inv7)
-	{
-		item.puzzle_inv7 = self.puzzle_inv7;
-		total = 999;
-	}
-	if (self.puzzle_inv8)
-	{
-		item.puzzle_inv8 = self.puzzle_inv8;
-		total = 999;
-	}
-*/
-
 	// Any mana or instant health 	
 	item.bluemana = self.bluemana;
 	item.greenmana = self.greenmana;
 	item.spawn_health = self.spawn_health;
 
-//	total = 1;
-//	item.cnt_tome = 1;
+
+	if (!total && !item.bluemana && !item.greenmana && !item.spawn_health) 
+		if(self.classname!="player")
+			total=RandomMonsterGoodies();
 
 	if (!total && !item.bluemana && !item.greenmana && !item.spawn_health) 
 	{	// Nothing to put in the backpack
@@ -1632,10 +1645,13 @@ void DropBackpack(void)
 		{
 			spawn_artifact (ARTIFACT_INVINCIBILITY,NO_RESPAWN);
 		}
-		else if ((item.bluemana) && (item.greenmana))
+		//this could never happen
+		/*else if ((item.bluemana) && (item.greenmana))
 		{
 			spawn_item_mana_both(self.bluemana);
 		}
+		*/
+		//these items could respawn in dmatch!
 		else if (item.bluemana)
 		{
 			spawn_item_mana_blue(self.bluemana);
@@ -1671,7 +1687,6 @@ void DropBackpack(void)
 			self = old_self;
 			return;
 		}
-
 		self = old_self;
 	}
 	else

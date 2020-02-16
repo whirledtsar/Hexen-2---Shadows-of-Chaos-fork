@@ -627,8 +627,7 @@ entity missile;
 	
 	self.attack_finished = time + 0.1;
 
-	if(self.t_width<time)
-	{
+	if(self.t_width<time) {
 		sound(self,CHAN_WEAPON,"eidolon/flambrth.wav",0.5,ATTN_NORM);
 		self.t_width=time+1.5;
 	}

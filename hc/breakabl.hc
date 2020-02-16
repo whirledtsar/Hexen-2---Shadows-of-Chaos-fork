@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/breakabl.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/breakabl.hc,v 1.2 2007-02-07 16:59:30 sezero Exp $
  */
 
 /*
@@ -21,7 +21,7 @@ float BREAK_INVISIBLE  = 128;
 
 float (entity e1, entity e2) EntitiesTouching;
 
-float breakhealth[21] = 
+float breakhealth[25] = 
 {
 	0,
 	75,		// THINGTYPE_GREYSTONE
@@ -43,7 +43,11 @@ float breakhealth[21] =
 	10,		// THINGTYPE_GLASS
 	50,		// THINGTYPE_ICE
 	10,		// THINGTYPE_CLEARCLASS
-	10		// THINGTYPE_CLEARCLASS
+	10,		// THINGTYPE_REDGLASS
+	10,		// THINGTYPE_ACID
+	10,		// THINGTYPE_METEOR
+	30,		// THINGTYPE_GREENFLESH
+	40		// THINGTYPE_BONE
 };
 
 //============================================================================
@@ -186,31 +190,15 @@ void brush_use()
 	}
 }
 
+/*
 void brush_no_link_use (void)
 {
 //entity found, starte;
 
 	SUB_UseTargets();
-/*	if(self.target)
-	{
-		found=find(found,targetname,self.target);
-		if(found!=world)
-		{
-			starte=found;
-			found.think=found.use;
-			thinktime found : 0;
-			found=find(found,targetname,self.target);
-			while(found!=starte&&found!=world)
-			{
-				found.think=found.use;
-				thinktime found : 0;
-				found=find(found,targetname,self.target);
-			}
-		}
-	}
-*/
 	self.th_die();
 }
+*/
 
 /*QUAKED breakable_brush (0 0 1) ? KILLALL HIERARCH NOLINK CHECKNAME ORDERED TRANSLUCENT INVINCIBLE INVISIBLE
 Breakable window or wall
@@ -254,8 +242,14 @@ thingtype - type of chunks and sprites it will generate
    14 - metal stone
    15 - metal cloth
    16 - spider web
+   17 - stained glass
+   18 - ice
    19 - clear glass
    20 - red glass
+   21 - acid
+   22 - meteor
+   23 - green flesh
+   24 - bone
 
 health - amount of damage item can take.  Default is based on thingtype
    glass       -  25

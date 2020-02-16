@@ -1,18 +1,17 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/plats.hc,v 1.3 2007-02-07 16:57:08 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/plats.hc,v 1.3 2007-02-07 16:59:35 sezero Exp $
  */
 
 void() newplat_center_touch;
 void() newplat_go_up;
 void() newplat_go_down;
 void() plat_center_touch;
-void() plat_outside_touch;
+//void() plat_outside_touch;
 void() plat_trigger_use;
 void() plat_go_up;
 void() plat_go_down;
 void() plat_crush;
 float PLAT_LOW_TRIGGER = 1;
-float PLAT_NOCRUSH = 128;
 
 void() crusher_hit_bottom;
 void() crusher_hit_top;
@@ -32,11 +31,14 @@ void() train_wait;
 float TRAIN_GLOW = 1;
 float TRAIN_WAITTRIG = 2;
 float TRAIN_RETURN = 4;
+float ANGLEMATCH	= 32;
+float USE_ORIGIN	= 64;
+float ANGLE_WAIT	= 128;
 
 void() plat_spawn_inside_trigger =
 {
-	local entity	trigger;
-	local vector	tmin, tmax;
+entity	trigger;
+vector	tmin, tmax;
 
    //middle trigger
 
@@ -114,6 +116,7 @@ void() plat_center_touch =
 		self.nextthink = self.ltime + 1;	// delay going down
 };
 
+/*
 void() plat_outside_touch =
 {
 	if (other.classname != "player"&&other.movetype!=MOVETYPE_PUSHPULL)
@@ -121,12 +124,11 @@ void() plat_outside_touch =
 
 	if (other.health <= 0)
 		return;
-		
-//dprint ("plat_outside_touch\n");
 	self = self.enemy;
 	if (self.state == STATE_TOP)
 		plat_go_down ();
 };
+*/
 
 void() plat_trigger_use =
 {
@@ -137,25 +139,15 @@ void() plat_trigger_use =
 
 void() plat_crush =
 {
+
 	T_Damage (other, self, self, 1);
+	
 	if (self.state == STATE_UP)
 		plat_go_down ();
 	else if (self.state == STATE_DOWN)
 		plat_go_up ();
 	else
 		objerror ("plat_crush: bad self.state\n");
-};
-
-void() plat_dmg_return =
-{
-	T_Damage (other, self, self, 1);
-	if (self.velocity_z < 0)
-		newplat_go_up();
-	else if (self.velocity_z > 0)
-		newplat_go_down();
-	else
-		objerror ("newplat_dmg_return: bad self.state\n");
-	
 };
 
 void() plat_use =
@@ -192,7 +184,7 @@ void() func_plat =
 		self.soundtype = 2;
 // FIX THIS TO LOAD A GENERIC PLAT SOUND
 
-	else if (self.soundtype == 1)
+	if (self.soundtype == 1)
 	{
 		precache_sound ("plats/pulyplt1.wav");
 		precache_sound ("plats/pulyplt2.wav");
@@ -200,21 +192,14 @@ void() func_plat =
 		self.noise1 = "plats/pulyplt2.wav";
 	}
 
-	else if (self.soundtype == 2)
+	if (self.soundtype == 2)
 	{
 		precache_sound ("plats/chainplt1.wav");
 		precache_sound ("plats/chainplt2.wav");
 		self.noise = "plats/chainplt1.wav";
 		self.noise1 = "plats/chainplt2.wav";
 	}
-	
-	else if (self.soundtype == 3)
-	{
-		precache_sound ("plats/platslid.wav");
-		precache_sound ("plats/platstp.wav");
-		self.noise = "plats/platslid.wav";
-		self.noise1 = "plats/platstp.wav";
-	}
+
 
 	self.mangle = self.angles;
 	self.angles = '0 0 0';
@@ -225,10 +210,8 @@ void() func_plat =
 	setorigin (self, self.origin);	
 	setmodel (self, self.model);
 	setsize (self, self.mins , self.maxs);
-	if (!self.spawnflags & PLAT_NOCRUSH)
-		self.blocked = plat_crush;
-	else
-		self.blocked = plat_dmg_return;
+
+	self.blocked = plat_crush;
 	if (!self.speed)
 		self.speed = 150;
 
@@ -428,6 +411,8 @@ void() func_train_find =
 };
 
 /*QUAKED func_train (0 .5 .8) ? GLOW TOGGLE RETURN TRANSLUCENT
+Hexen 2 Release V1.11 version Trains
+
 Trains are moving platforms that players can ride.
 The targets origin specifies the min point of the train at each corner.
 The train spawns at the first target it is pointing at.
@@ -473,9 +458,15 @@ As usual, any rotating brush needs an origin brush.
 
 if TRAIN_GLOW is checked, changes to a light globe sprite and lights up an area
 */
+void func_train_mp();
 void() func_train =
-{	
-	local entity targ;
+{
+entity targ;
+	if(world.spawnflags&MISSIONPACK)
+	{
+		func_train_mp();
+		return;
+	}
 
 	self.decap = 0;
 
@@ -507,7 +498,7 @@ void() func_train =
 	else
 	{
 		self.noise = self.noise1 = "misc/null.wav";
-		precache_sound ("misc/null.wav");
+//		precache_sound ("misc/null.wav");
 	}
 
 	if(self.wait==-2)
@@ -661,17 +652,6 @@ void() newplat_crush =
 		objerror ("newplat_crush: bad self.state\n");
 };
 
-void() newplat_dmg_return =
-{
-	T_Damage (other, self, self, 1);
-	if (self.velocity_z < 0)
-		newplat_calc_up();
-	else if (self.velocity_z > 0)
-		newplat_calc_down();
-	else
-		objerror ("newplat_crush: bad self.state\n");
-};
-
 void() newplat_center_touch =
 {
 
@@ -730,12 +710,13 @@ wait - amount of time plat waits before moving (default 3)
 */
 void() func_newplat =
 {
+
 	if (!self.t_length)
 		self.t_length = 80;
 	if (!self.t_width)
 		self.t_width = 10;
 
-	if (self.soundtype < 1 || self.soundtype > 3)
+	if (self.soundtype == 0)
 		self.soundtype = 2;
 
 	if (self.soundtype == 1)
@@ -753,14 +734,8 @@ void() func_newplat =
 		self.noise = "plats/chainplt1.wav";
 		self.noise1 = "plats/chainplt2.wav";
 	}
-	if (self.soundtype == 3)		// Big Stone Door, sliding
-	{
-		precache_sound ("doors/doorstop.wav");
-		precache_sound ("doors/stonslid.wav");
 
-		self.noise1 = "doors/doorstop.wav";
-		self.noise = "doors/stonslid.wav";
-	}
+
 
 	self.mangle = self.angles;
 	self.angles = '0 0 0';
@@ -799,10 +774,7 @@ void() func_newplat =
 	}
 
 	self.use = newplat_trigger_use;
-	if (!self.spawnflags & PLAT_NOCRUSH)
-		self.blocked = newplat_crush;
-	else
-		self.blocked = newplat_dmg_return;
+	self.blocked = newplat_crush;
 
 	newplat_spawn_inside_trigger ();	//set the "start moving" trigger	
 

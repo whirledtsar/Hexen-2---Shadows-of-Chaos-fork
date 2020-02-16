@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/raven.hc,v 1.1.1.1 2004-11-29 11:40:10 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/raven.hc,v 1.1.1.1 2004-11-29 11:35:11 sezero Exp $
  */
 
 /*
@@ -155,11 +155,13 @@ void raven_flap_fast (void) [++ $fastfly1 .. $fastfly5]
 	}
 }
 
+/*
 void raven_flap_slow (void) [++ $slowfly1 .. $slowfly9]
 {
 //used every now and then when gliding
 	ai_walk(self.speed+self.frame-$slowfly1);
 }
+*/
 
 void raven_glide_think ()
 {
@@ -422,6 +424,7 @@ void raven_die (void)
 LOOKING
 ---------------
 */
+/*
 void raven_look_left_low (void)
 {
 	self.frame=$lowlft1;
@@ -451,7 +454,7 @@ void raven_look_down (void)
 	self.frame=$down1;
 	self.th_stand();
 }
-
+*/
 
 /*
 ---------------
@@ -584,7 +587,7 @@ void() monster_raven =
 {
 	if (!self.flags2&FL_SUMMONED)
 	{
-		precache_model2 ("models/raven.mdl");
+		precache_model4 ("models/raven.mdl");//converted for MP
 		precache_model2 ("models/fether.mdl");
 		precache_sound2 ("raven/squawk.wav");
 //		precache_sound2 ("raven/nevermor.wav");

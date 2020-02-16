@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/sheep.hc,v 1.1.1.1 2004-11-29 11:40:29 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/sheep.hc,v 1.2 2007-02-07 16:24:59 sezero Exp $
  */
 
 /*
@@ -92,7 +92,8 @@ $frame wait11       wait12       wait13       wait14       wait15
 $frame wait16       
 
 float stationary = 1;
-/*QUAKED player_sheep (0.3 0.1 0.6) (-8 -8 -0) (8 8 32) stationary STUCK JUMP PLAY_DEAD DORMANT NODROP
+
+/*QUAKED player_sheep (0.3 0.1 0.6) (-8 -8 -0) (8 8 32) stationary STUCK JUMP x DORMANT NODROP start_frozen respawn
 A sheep player model
 -------------------------FIELDS-------------------------
 stationary- sheep will not wander around or change angles
@@ -112,16 +113,18 @@ void()sheep_lookdown;
 void()sheep_look;
 void()sheep_lookup;
 
+/*
 void restore_monster ()
 {
 //SOUND and MODEL
 	newmis=spawn();
 	thinktime newmis : 0;
-	newmis.think=self.th_spawn;
+	newmis.think=self.th_init;
 	newmis.skin=self.skin;
 	newmis.health=self.max_health;
 	remove(self);
 }
+*/
 
 void sheep_sound (float vol)
 {
@@ -179,8 +182,8 @@ void()sheep_tranA = [++ $tranA1 .. $tranA10]
 {
 float r;
 	if(self.target)
-		sheep_move(3);
-	else if(!walkmove(self.angles_y,3,FALSE))
+		sheep_move(self.speed);
+	else if(!walkmove(self.angles_y,self.speed,FALSE))
 		sheep_turn();
 
 	sheep_think();
@@ -199,8 +202,8 @@ float r;
 void()sheep_tranB = [++ $tranB1 .. $tranB12]
 {
 	if(self.target)
-		sheep_move(3);
-	else if(!walkmove(self.angles_y,3,FALSE))
+		sheep_move(self.speed);
+	else if(!walkmove(self.angles_y,self.speed,FALSE))
 		sheep_turn();
 
 	sheep_think();
@@ -229,8 +232,8 @@ void () sheep_gstep_a = [++ $gstepA10 .. $gstepA30]
 float r;
 	sheep_think();
 	if(self.target)
-		sheep_move(0.3);
-	else if(!walkmove(self.angles_y,0.3,FALSE))
+		sheep_move(self.speed/10);
+	else if(!walkmove(self.angles_y,self.speed/10,FALSE))
 		sheep_turn();
 
 	if(cycle_wrapped)
@@ -251,8 +254,8 @@ void () sheep_gstep_b = [++ $gstepB10 .. $gstepB30]
 float r;
 	sheep_think();
 	if(self.target)
-		sheep_move(0.3);
-	else if(!walkmove(self.angles_y,0.3,FALSE))
+		sheep_move(self.speed/10);
+	else if(!walkmove(self.angles_y,self.speed/10,FALSE))
 		sheep_turn();
 
 	if(cycle_wrapped)
@@ -271,8 +274,8 @@ float r;
 void()sheep_trot = [++ $trot1 .. $trot10]
 {
 	if(self.target)
-		sheep_move(3);
-	else if(!walkmove(self.angles_y,3,FALSE))
+		sheep_move(self.speed);
+	else if(!walkmove(self.angles_y,self.speed,FALSE))
 		sheep_turn();
 
 	sheep_think();
@@ -391,12 +394,20 @@ void monster_sheep_run () [++ $trot1 .. $trot10]
 	}
 }
 
+void sheep_run_use()
+{
+	if(random()<0.8||self.speed==6)
+		return;
+	self.yaw_speed=4;
+	self.speed=6;
+}
+
 void player_sheep (void)
 {
 float r;
 
-	if(self.th_spawn==SUB_Null)
-		self.th_spawn=player_sheep;
+	if(self.th_init==SUB_Null)
+		self.th_init=player_sheep;
 	else
 	{
 		self.health=self.max_health;
@@ -406,11 +417,30 @@ float r;
 
 	CreateEntityNew(self,ENT_SHEEP,"models/sheep.mdl",chunk_death);
 
+	if(world.target=="sheep")
+	{
+		self.use=sheep_run_use;
+		self.scale=random(0.05,2.55);
+		self.experience_value=rint(3.5*self.scale);
+		self.init_org=self.origin;
+		self.th_init=player_sheep;
+		self.health+=10*self.scale;
+		self.mins=self.mins*self.scale;
+		self.maxs=self.maxs*self.scale;
+		setsize(self,self.mins,self.maxs);
+	}
 	self.th_pain = sheep_pain;
 	self.touch	= obj_push;
 	self.flags(+)FL_PUSH;	
 	self.flags2(+)FL_ALIVE;
 	self.yaw_speed=2;
+	self.speed=3;
+	self.th_run=sheep_wait;
+	
+	if(self.scale)
+		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+//	if(self.spawnflags&SHEEP_RESPAWN)
+//		self.wallspot=self.origin;
 
 //FIXME: Don't allow trans, trot, etc, if stationary flag on
 	r=rint(random(1,3));
@@ -422,7 +452,7 @@ float r;
 		self.noise="misc/sheep3.wav";
 
 	if(self.enemy)
-		self.think=monster_sheep_run;
+		self.think=self.th_run=monster_sheep_run;
 	else
 	{
 		r=rint(random(1,11));
@@ -454,9 +484,30 @@ float r;
 		self.think=sheep_wait;
 
 	self.th_walk=self.th_stand=self.think;
+//These next few are super-paranoid, but the fucking sheep just
+	//keep fucking crashing!!!!
+	if(!self.th_walk)
+		self.th_walk=sheep_wait;
+	if(!self.th_stand)
+		self.th_stand=sheep_wait;
+	if(self.th_walk==SUB_Null)
+		self.th_walk=sheep_wait;
+	if(self.th_stand==SUB_Null)
+		self.th_stand=sheep_wait;
+
 	walkmonster_start();
 }
-
+/*
+void spawn_sheep (vector org)
+{
+entity newsheep;
+	newsheep=spawn();
+	newsheep.classname="player_sheep";
+	newsheep.spawnflags=self.spawnflags;
+	newsheep.think=player_sheep;
+	thinktime newsheep : 0.5;
+}
+*/
 /*
 ============================
 PLAYER SHEEP
@@ -546,7 +597,6 @@ void player_sheep_baa ()
 
 void()	player_sheep_pain=[++$pain1..$pain8]
 {
-	ThrowGib ("models/blood.mdl", self.health);
 	if(self.pain_finished<time)
 		if(random()<0.5)
 			self.th_weapon=player_sheep_snout_pain1;
@@ -630,14 +680,15 @@ void Polymorph (entity loser)
 	else
 	{
 //Stop all auto-looping sounds on removed monster
-		sound(loser,CHAN_BODY,"misc/null.wav",1,ATTN_NONE);
+		stopSound(loser,0);
+		/*sound(loser,CHAN_BODY,"misc/null.wav",1,ATTN_NONE);
 		sound(loser,CHAN_WEAPON,"misc/null.wav",1,ATTN_NONE);
-		sound(loser,CHAN_ITEM,"misc/null.wav",1,ATTN_NONE);
+		sound(loser,CHAN_ITEM,"misc/null.wav",1,ATTN_NONE);*/
 		newmis=spawn();
 		setorigin(newmis,loser.origin);
 
 //For restoring monster:
-		newmis.th_spawn=loser.th_spawn;
+		newmis.th_init=loser.th_init;
 		newmis.skin=0;
 		newmis.oldskin=loser.skin;
 		newmis.max_health=loser.health;
@@ -659,12 +710,22 @@ void Polymorph (entity loser)
 
 void poly_touch ()
 {
-	if(other.monsterclass >= CLASS_BOSS&&other!=self.owner)
+	if(teamplay&&other.team==self.owner.team)
+	{
+		self.touch=SUB_Null;
+		particleexplosion(self.origin,random(144,159),self.absmax_z-self.absmin_z,10);
+		remove(self);
+	}
+	else if(other.monsterclass >= CLASS_BOSS&&other!=self.owner)
 	{
 		self.velocity=normalize((self.owner.absmin+self.owner.absmax)*0.5-self.origin)*700;
 		self.owner=other;
 	}
-	else if(other.flags2&FL_ALIVE&&other.model!="models/sheep.mdl"&&other.classname!="monster_golem_crystal")
+	else if(other.flags2&FL_ALIVE&&
+			other.model!="models/sheep.mdl"&&
+			other.classname!="monster_golem_crystal"&&
+			other.takedamage&&
+			other.classname!="monster_pentacles")
 	{
 		self.touch=SUB_Null;
 		Polymorph(other);
@@ -703,30 +764,6 @@ void FirePoly (float ofs)
 	setorigin(newmis,self.origin+self.proj_ofs+v_forward*10);
 }
 
-void polyshooter_use()
-{
-	self.enemy = other.enemy;
-
-	sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
-	FirePoly (0);
-}
-
-void polyshooter_think()
-{
-	polyshooter_use ();
-	thinktime self : self.wait;
-}
-
-void trap_polyshooter ()
-{
-	precache_sound ("weapons/spike2.wav");
-	precache_model("models/polymrph.spr");
-	SetMovedir ();
-	if (self.wait == 0)
-		self.wait = 1;
-	self.use = polyshooter_use;
-}
-
 void Use_Polymorph ()
 {
 	FirePoly(-150);
@@ -736,3 +773,26 @@ void Use_Polymorph ()
 	FirePoly(150);
 	self.cnt_polymorph -= 1;
 }
+
+void unsheep(entity thingy)
+{
+entity oself;
+oself=self;
+self=thingy;
+
+	self.oldweapon = FALSE;
+	self.weapon = IT_WEAPON1;
+	restore_weapon();
+	SetModelAndThinks();
+	self.attack_finished=self.sheep_time=0;
+
+	setsize (self, '-16 -16 0', '16 16 28');	
+	self.hull=HULL_CROUCH;
+	PlayerSpeed_Calc();
+
+	self.think=player_frames;
+	thinktime self : 0;
+
+self=oself;
+}
+

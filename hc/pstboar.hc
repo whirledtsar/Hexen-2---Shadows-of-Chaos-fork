@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/pstboar.hc,v 1.2 2007-02-07 16:57:09 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/pstboar.hc,v 1.2 2007-02-07 16:59:35 sezero Exp $
  */
 
 /*
@@ -147,7 +147,6 @@ float PB_STAGE_BACKUP		= 7;
 
 void rider_death();
 
-void()multiplayer_health;
 
 void hive_trail ()
 {
@@ -196,27 +195,6 @@ void throw_hive (void)
 	thinktime newmis : 0;
 }
 
-void poison_think ()
-{
-	self.enemy.deathtype="poison";
-	T_Damage (self.enemy, self, self.owner, 1 );
-	if(self.enemy.flags&FL_CLIENT)
-		stuffcmd(self.enemy,"bf\n");
-	if(self.lifetime<time||self.enemy.health<=0)
-		self.think=SUB_Remove;
-	thinktime self : 1;
-}
-
-void spawn_poison ()
-{
-	newmis=spawn();
-	newmis.think=poison_think;
-	newmis.enemy=self.enemy;
-	newmis.owner=self.owner;
-
-	thinktime newmis : 0.05;
-	newmis.lifetime=time+random(5,10);
-}
 
 void pestilence_missile_touch(void)
 {
@@ -237,7 +215,7 @@ void pestilence_missile_touch(void)
 		if(other.flags&FL_CLIENT)
 			stuffcmd(other,"bf\n");
 		if(other.classname!="rider_pestilence")
-			spawn_poison();
+			spawn_poison(self.enemy,self.owner,random(5,10));
 		other.deathtype="poison";
 		T_Damage (other, self, self.owner, damg );
 		sound (self, CHAN_WEAPON, "pest/xbowhit.wav", 1, ATTN_NORM);
@@ -845,7 +823,8 @@ void rider_pestilence(void)
 
 	setsize (self, '-84 -84 0', '84 84 100');
 	self.health = self.max_health = 4400;
-	self.experience_value = 2000;
+	self.experience_value = 1500;
+	self.init_exp_val = self.experience_value;
 	self.th_pain = pest_hurt;
 	self.rider_gallop_mode = self.monster_stage = PB_STAGE_NORMAL;
 	self.speed = pst_speed[self.rider_gallop_mode];

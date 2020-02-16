@@ -1,11 +1,11 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/client.hc,v 1.6 2007-02-07 16:56:59 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/client.hc,v 1.6 2007-02-07 16:59:30 sezero Exp $
  */
 
 // prototypes
 void () W_WeaponFrame;
 void() W_SetCurrentAmmo;
-void() player_pain;
+void(entity attacker,float total_damage) player_pain;
 void (vector org, entity death_owner) spawn_tdeath;
 void() DecrementSuperHealth;
 void CheckRings (void);
@@ -287,6 +287,38 @@ void FindDMLevel(void)
 			nextmap = "ravdm5";
 		else if (mapname == "ravdm5")
 			nextmap = "ravdm1";
+
+		else if (mapname == "keep1")
+			nextmap = "keep2";
+		else if (mapname == "keep2")
+			nextmap = "keep3";
+		else if (mapname == "keep3")
+			nextmap = "keep4";
+		else if (mapname == "keep4")
+			nextmap = "keep5";
+		else if (mapname == "keep5")
+			nextmap = "keep1";
+
+		else if (mapname == "tibet1")
+			nextmap = "tibet2";
+		else if (mapname == "tibet2")
+			nextmap = "tibet3";
+		else if (mapname == "tibet3")
+			nextmap = "tibet4";
+		else if (mapname == "tibet4")
+			nextmap = "tibet5";
+		else if (mapname == "tibet5")
+			nextmap = "tibet6";
+		else if (mapname == "tibet6")
+			nextmap = "tibet7";
+		else if (mapname == "tibet7")
+			nextmap = "tibet8";
+		else if (mapname == "tibet8")
+			nextmap = "tibet9";
+		else if (mapname == "tibet9")
+			nextmap = "tibet10";
+		else if (mapname == "tibet10")
+			nextmap = "tibet1";
 	}
 	else
 	{
@@ -306,6 +338,7 @@ void FindDMLevel(void)
 
 void() changelevel_touch =
 {
+entity found;
 	if (other.classname != "player")//||(!infront_of_ent(self,other)))
 		return;
 
@@ -323,6 +356,21 @@ void() changelevel_touch =
 			return;		// not facing the right way
 	}
 
+	found = find(world,classname,"cube_of_force");
+	while(found)
+	{
+		stopSound(found,0);
+		remove(found);
+		found = find(found,classname,"cube_of_force");
+	}
+
+	found = find (world, classname, "player");
+	while (found != world)
+	{
+		if(found.model=="models/sheep.mdl")
+			unsheep(found);
+		found = find (found, classname, "player");
+	}
 	//FIXME: temp server flags fix
 //	other.sv_flags=serverflags;
 	if (coop || deathmatch)
@@ -396,6 +444,7 @@ void() changelevel_use =
 
 /*QUAKED trigger_changelevel (0.5 0.5 0.5) ? x END_OF_UNIT END_OF_EPISODE
 When the player touches this, he gets sent to the map listed in the "map" variable.  Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
+Those spawnflags are from Quake- do nothing.	
 */
 void() trigger_changelevel =
 {
@@ -457,6 +506,7 @@ Player entered the suicide command
 */
 void() ClientKill =
 {
+entity lastleader,newking;
 	bprint (self.netname);
 	bprint (" suicides\n");
 	self.model=self.init_model;
@@ -465,6 +515,17 @@ void() ClientKill =
 		self.frags -= 2;	// extra penalty - REMOVED for coop, otherwise falling deaths reduces player level
 	//if (coop)
 	//drop_level(self,2);
+	lastleader=FindExpLeader();
+	drop_level(self,2);
+	newking=FindExpLeader();
+	if(newking!=lastleader)
+	{//Tell everyone if the king of the hill has changed
+		sound (world, CHAN_BODY, "misc/comm.wav", 1, ATTN_NONE);
+		bprint(newking.netname);
+		bprint(" is the NEW King of the Hill!\n");
+		WriteByte(MSG_ALL, SVC_UPDATE_KINGOFHILL);
+		WriteEntity (MSG_ALL, newking);
+	}
 	respawn ();
 };
 
@@ -488,14 +549,15 @@ entity() SelectSpawnPoint =
 	float  pcount;
 	float ok;
 
-// testinfo_player_start is only found in regioned levels
-	spot = find (world, classname, "testplayerstart");
-	if (spot)
-		return spot;
+														 
+												   
+		  
+			  
 
 // choose a info_player_deathmatch point
 	if(self.newclass)
 	{
+		dprint("newclass start\n");
 		spot = find(world, classname, "classchangespot");
 		if(spot)
 		{
@@ -507,15 +569,28 @@ entity() SelectSpawnPoint =
 
 	if (coop)
 	{
+		dprint("Coop start\n");
 		spot = lastspawn;
 		pcount = 1;
-		while (pcount > 0 && pcount < 3)
+		while (pcount < 3)
 		{
 			spot = find(spot, classname, "info_player_coop");
-			if (spot != world && 
-			    (spot.targetname == startspot) ||
-				(startspot == string_null && spot.spawnflags & 1))
+
+		/*	if(spot.playerclass)
+				dprintf("Spot has a playerclass %s\n",spot.playerclass);
+			if(spot.playerclass>0&&spot.playerclass!=self.playerclass)
+				dprint("Skipping spawn spot\n");
+			else */
+			if (spot != world && ((spot.targetname == startspot) ||
+										
+				(startspot == string_null && spot.spawnflags & 1)))
 			{
+			/*	self.scale=1.5;
+				self.proj_ofs_z*=1.5;
+				self.drawflags(+)SCALE_ORIGIN_BOTTOM;*/
+			//	dprint(spot.targetname);
+			//	dprint(" checking Spot at");
+			//	dprintv("%s\n",spot.origin);
 				thing = findradius(spot.origin, 64);
 				ok = TRUE;
 				while (thing)
@@ -530,6 +605,8 @@ entity() SelectSpawnPoint =
 				}
 				if (ok)
 				{
+			//		dprint("found spot at");
+			//		dprintv("%s\n",spot.origin);
 					lastspawn = spot;
 					return lastspawn;
 				}
@@ -537,17 +614,18 @@ entity() SelectSpawnPoint =
 			if (spot == world)
 				pcount += 1;
 		}
-//		dprint("Resorting to info_player_start\n");
+/*		dprint("Resorting to info_player_start\n");
 		lastspawn = find (lastspawn, classname, "info_player_start");
 		if (lastspawn != world)
-			return lastspawn;
+			return lastspawn;*/
 	}
 	else if (deathmatch)
 	{
+		dprint("dmatch start\n");
 		spot = lastspawn;
 		loop /*while (1)*/ {
 			spot = find(spot, classname, "info_player_deathmatch");
-			if (spot != world)
+			if (spot != world&&random()<0.5)//add some randomness
 			{
 				if (spot == lastspawn)
 					return lastspawn;
@@ -570,6 +648,7 @@ entity() SelectSpawnPoint =
 
 	if (startspot)
 	{
+		dprint("Searching for info_player_start with targetname\n");
 		spot = world;
 		pcount = 1;
 		while(pcount)
@@ -584,6 +663,7 @@ entity() SelectSpawnPoint =
 
 	if (!spot)
 	{
+		dprint("Resorting to info_player_start\n");
 		spot = find (world, classname, "info_player_start");
 		if (!spot)
 			error ("PutClientInServer: no info_player_start on level");
@@ -601,9 +681,19 @@ called each time a player is spawned
 */
 void() PlayerDie;
 
+/*
+===========
+PutClientInServer
+
+called each time a player is spawned
+============
+*/
+void() PlayerDie;
+
 void() PutClientInServer =
 {
 entity spot;
+float pclass;
 
 	spot = SelectSpawnPoint ();
 
@@ -623,9 +713,11 @@ entity spot;
 	self.deathtype="";
 	self.viewentity=self;
 	self.wallspot='0 0 0';
+//	self.scale=1.5;
 	self.scale=1;
 	self.skin=0;
-	self.drawflags=self.abslight=self.effects=0;
+//	self.drawflags=self.abslight=self.effects=0;
+	self.abslight=self.effects=0;
 	self.flags(+)FL_CLIENT;
 	self.flags2(+)FL_ALIVE;
 	self.air_finished = time + 12;
@@ -633,6 +725,7 @@ entity spot;
 	self.thingtype=THINGTYPE_FLESH;
 	self.adjust_velocity = '-999 -999 -999';
 //Reset all time-based fields
+	self.dflags=
 	self.act_state =
 	self.show_hostile =
 	self.onfire=
@@ -671,44 +764,87 @@ entity spot;
 	self.decap=
 	self.frozen=
 	self.plaqueflg = 0;
+	self.raven_cnt = 0;
+	self.friction=self.gravity=self.standard_grav = 1;
 	self.artifact_active(-)ARTFLAG_FROZEN|ARTFLAG_STONED;
 
 	self.whiptime = 0;
 	self.glyph_finished = 0;
 	
-	if(self.newclass)
+	/*	if(spot.playerclass)  
 	{
-		bprint(self.netname);
-		bprint(" becomes a ");
-		if(self.newclass==CLASS_PALADIN)
-			bprint("Paladin!\n");
-		else if(self.newclass==CLASS_CRUSADER)
-			bprint("Crusader!\n");
-		else if(self.newclass==CLASS_NECROMANCER)
-			bprint("Necromancer!\n");
-		else
-			bprint("Assassin!\n");
-		self.playerclass=self.newclass;
+		self.playerclass=spot.playerclass;
 		setclass(self,self.playerclass);
 		stats_NewClass(self);
 		self.newclass=FALSE;
 	}
-
-	if(deathmatch&&randomclass)
-		self.playerclass=CLASS_NONE;
-
-	if (self.playerclass == CLASS_NONE)
-	{ // Default it to the paladin if not selected
-		if (cvar("registered") != 0 || cvar("oem") != 0)
-			setclass(self,rint(random(1,4)));
-		else
+	else
+	{*/
+		if(self.newclass)
 		{
-			if (random() < 0.5)
-				setclass(self,CLASS_PALADIN);
-			else
-				setclass(self,CLASS_ASSASSIN);
+			bprint(self.netname);
+			bprint(" becomes a ");
+			switch(self.newclass)
+			{
+			case CLASS_PALADIN:
+				bprint("Paladin!\n");
+				break;
+			case CLASS_CRUSADER:
+				bprint("Crusader!\n");
+				break;
+			case CLASS_NECROMANCER:
+				bprint("Necromancer!\n");
+				break;
+			case CLASS_SUCCUBUS:
+				bprint("Demoness!\n");
+				break;
+			default:
+				bprint("Assassin!\n");
+				break;
+			}
+			self.playerclass=self.newclass;
+			setclass(self,self.playerclass);
+			stats_NewClass(self);
+			self.newclass=FALSE;
 		}
-	}
+
+		if(deathmatch&&randomclass)
+			self.playerclass=CLASS_NONE;
+
+		if (self.playerclass == CLASS_NONE)
+		{ // Default it to the paladin if not selected
+			if (cvar("registered") != 0 || cvar("oem") != 0)
+			{//not sure what rint was doing to the results, threw
+				//in this bad temp hack for now
+				pclass=random(0,5);
+				switch(pclass)
+				{
+					case 0..1:
+						setclass(self,1);
+						break;
+					case 1..2:
+						setclass(self,2);
+						break;
+					case 2..3:
+						setclass(self,3);
+						break;
+					case 3..4:
+						setclass(self,4);
+						break;
+					default:
+						setclass(self,5);
+						break;
+				}
+			}
+			else
+			{
+				if (random() < 0.5)
+					setclass(self,CLASS_PALADIN);
+				else
+					setclass(self,CLASS_ASSASSIN);
+			}
+		}
+//	}
 
 	if(self.max_health<=0)
 		stats_NewPlayer(self);
@@ -764,14 +900,27 @@ entity spot;
 		self.invincible_time = time + 3;
 		self.artifact_low(+)ART_INVINCIBILITY;
 
-		if(self.playerclass==CLASS_CRUSADER)
-			self.skin = GLOBAL_SKIN_STONE;
-		else if(self.playerclass==CLASS_PALADIN)
+		switch(self.playerclass)
+		{
+		case CLASS_PALADIN:
 			self.effects(+)EF_BRIGHTLIGHT; 
-		else if(self.playerclass==CLASS_ASSASSIN)
-			self.colormap=140;
-		else if(self.playerclass==CLASS_NECROMANCER)
+			break;
+		case CLASS_CRUSADER:
+			self.skin = GLOBAL_SKIN_STONE;
+			break;
+		case CLASS_NECROMANCER:
 			self.effects(+)EF_DARKLIGHT;
+			break;
+		case CLASS_SUCCUBUS:
+   
+			self.drawflags(+)MLS_ABSLIGHT|DRF_TRANSLUCENT;
+			self.effects(+)EF_BRIGHTFIELD;
+			self.abslight=1;
+			break;
+		default:	//assassin
+			self.colormap=140;
+			break;
+		}
 	}
 	self.ring_regen_time = 0;
 	self.ring_flight_time=0;
@@ -805,6 +954,18 @@ entity spot;
 	}
 
 	spawn_tdeath (self.origin, self);
+	if (self.artifact_flags & AFL_CUBE_LEFT)
+	{
+		self.cnt_cubeofforce+=1;
+		self.artifact_flags(-)AFL_CUBE_LEFT;
+		UseCubeOfForce();
+	}
+	if (self.artifact_flags & AFL_CUBE_RIGHT)
+	{
+		self.cnt_cubeofforce+=1;
+		self.artifact_flags(-)AFL_CUBE_RIGHT;
+		UseCubeOfForce();
+	}
 };
 
 
@@ -851,6 +1012,8 @@ entity spot;
 	self.decap=
 	self.frozen=
 	self.plaqueflg = 0;
+	self.raven_cnt = 0;
+	self.friction=self.gravity=self.standard_grav = 1;
 	self.artifact_active(-)ARTFLAG_FROZEN|ARTFLAG_STONED;
 
 	self.ring_flight_time = 0;
@@ -858,11 +1021,13 @@ entity spot;
 	self.rings (-) RING_FLIGHT;
 	self.rings_active (-) RING_FLIGHT;
 
-	self.air_finished = time + 12;
+	self.air_finished   = time + 6;//+= TimeDiff;
+	self.pain_finished  = time + 6;//+= TimeDiff;
 
 	self.ring_regen_time += TimeDiff;
 	self.ring_water_time += TimeDiff;
 	self.ring_turning_time += TimeDiff;
+	self.dflags+=TimeDiff;
 
 	self.super_damage_time += TimeDiff;
 	self.haste_time  += TimeDiff;
@@ -926,6 +1091,18 @@ entity spot;
 
 	self.think=player_frames;
 	thinktime self : 0;
+	if (self.artifact_flags & AFL_CUBE_LEFT)
+	{
+		self.cnt_cubeofforce+=1;
+		self.artifact_flags(-)AFL_CUBE_LEFT;
+		UseCubeOfForce();
+	}
+	if (self.artifact_flags & AFL_CUBE_RIGHT)
+	{
+		self.cnt_cubeofforce+=1;
+		self.artifact_flags(-)AFL_CUBE_RIGHT;
+		UseCubeOfForce();
+	}
 }
 
 /*
@@ -981,7 +1158,12 @@ void() info_player_deathmatch =
 /*QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 24) DEFAULT
 potential spawning position for coop games
 -----------------------FIELDS-------------------------
-
+'playerclass'
+1-Paladin
+2-Crusader
+3-Necromancer
+4-Assassin
+5-Succubus
 --------------------------------------------------------
 */
 void() info_player_coop =
@@ -1139,6 +1321,7 @@ vector start, end;
 void()catapult_fire;
 void() PlayerJump =
 {
+float wall_jump;
 	if(self.flags&FL_ONGROUND)
 	{
 		traceline(self.origin,self.origin-'0 0 3',FALSE,self);
@@ -1179,7 +1362,14 @@ void() PlayerJump =
 
 	if (!(self.flags & FL_ONGROUND))
 	{
-		return;
+		if(cvar("sv_gravity")>400)//On low-grav levels, allow players to push off walls
+			return;
+		makevectors(self.v_angle);
+		traceline(self.origin+self.proj_ofs,self.origin+self.proj_ofs+v_forward*64,FALSE,self);
+		if(trace_fraction<1&&trace_ent==world&&trace_plane_normal!='0 0 0')
+			wall_jump=TRUE;
+		else
+			return;
 	}
 
 	if ( !(self.flags & FL_JUMPRELEASED) )
@@ -1196,7 +1386,7 @@ void() PlayerJump =
 // player jumping sound
 	if(self.model=="models/sheep.mdl")//self.modelindex==modelindex_sheep)
 		sheep_sound(1);
-	else if(self.playerclass==CLASS_ASSASSIN)
+	else if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 		sound (self, CHAN_BODY,"player/assjmp.wav", 1, ATTN_NORM);
 	else
 		sound (self, CHAN_BODY,"player/paljmp.wav", 1, ATTN_NORM);
@@ -1209,8 +1399,10 @@ void() PlayerJump =
 //		sound (self, CHAN_BODY, "player/necjmp.wav", 1, ATTN_NORM);
 //	else if (self.playerclass == CLASS_ASSASSIN)
 //		sound (self, CHAN_BODY, "player/assjmp.wav", 1, ATTN_NORM);
-
-	self.velocity_z = self.velocity_z + 270*self.scale;
+	if(wall_jump)
+		self.velocity = v_forward*-270*self.scale;
+	else
+		self.velocity_z = self.velocity_z + 270*self.scale;
 };
 
 
@@ -1236,10 +1428,14 @@ void() WaterMove =
 		GAUNT_TEXMOD = "models/gauntlet.mdl";
 		AXE_TEXMOD = "models/axe.mdl";
 	}
-	if ((self.flags & FL_INWATER) && (self.watertype == CONTENT_WATER) && (self.waterlevel == 3) && (!self.lefty))
-	{
-		DeathBubbles(10);
-		self.lefty = 1;
+	if ((self.flags & FL_INWATER) &&
+		(self.watertype == CONTENT_WATER) &&
+		(self.waterlevel == 3) &&
+		(self.air_finished>=time+11.5))//&&!self.lefty
+	{//OOPS- no free edicts crash?
+//		DeathBubbles(10);//was using self.lefty
+		DeathBubbles(1);
+//		self.lefty = 1;
 	}
 
 /*	if ((self.flags & FL_INWATER) && (self.splash_time < time))
@@ -1266,16 +1462,16 @@ void() WaterMove =
 		{
 			if (self.model=="models/sheep.mdl")
 				sheep_sound(1);
-			else if(self.playerclass==CLASS_ASSASSIN)
+			else if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 				sound (self, CHAN_VOICE, "player/assgasp1.wav", 1, ATTN_NORM);
 			else
 				sound (self, CHAN_VOICE, "player/palgasp1.wav", 1, ATTN_NORM);
 		}
-		else if (self.air_finished < time + 9)
+		else if (self.air_finished < time + 7)
 		{
 			if (self.model=="models/sheep.mdl")
 				sheep_sound(1);
-			else if(self.playerclass==CLASS_ASSASSIN)
+			else if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 				sound (self, CHAN_VOICE, "player/assgasp2.wav", 1, ATTN_NORM);
 			else
 				sound (self, CHAN_VOICE, "player/palgasp2.wav", 1, ATTN_NORM);
@@ -1318,9 +1514,9 @@ void() WaterMove =
 		{
 			self.dmgtime = time + 0.5;
 
-			if(other.flags&FL_FIREHEAL)
+			if(other.flags2&FL2_FIREHEAL)
 				other.health=other.health+5*self.waterlevel;
-			else if(!other.flags&FL_FIRERESIST)
+			else if(!other.flags2&FL2_FIRERESIST)
 				T_Damage (self, world, world, 5*self.waterlevel);
 		}
 	}
@@ -1353,6 +1549,7 @@ void() WaterMove =
 			sound (self, CHAN_BODY, "player/MUCK5.wav", 1, ATTN_NORM);
 		//else if (self.watertype == CONTENT_SLIME)
 			//sound (self, CHAN_BODY, "player/slimbrn1.wav", 1, ATTN_NORM);
+			
 
 		self.flags(+)FL_INWATER;
 		self.dmgtime = 0;
@@ -1429,6 +1626,7 @@ vector dir;
 				self.drawflags(-)DRF_TRANSLUCENT|MLS_ABSLIGHT;
 				self.frozen=FALSE;
 				self.artifact_active(-)ARTFLAG_FROZEN;
+				self.touch=PlayerTouch;
 			}
 		}
 		else
@@ -1494,11 +1692,20 @@ void() PlayerPreThink =
 {
 	vector	spot1, spot2;
 
+	self.friction = 1;
+
+	if ((self.health<=0) && (self.movetype!=MOVETYPE_NOCLIP))
+	{
+		if(pointcontents(self.origin)==CONTENT_SOLID&&self.origin!='0 0 0')
+		{
+			self.velocity='0 0 0';
+			self.solid=SOLID_NOT;
+			self.movetype=MOVETYPE_NOCLIP;
+			setorigin(self,self.oldorigin);
+		}
+	}
 	if (!self.flags & FL_INWATER)
 		self.aflag = 0;
-
-//	dprint(teststr[1]);
-//	dprint("\n");
 
 	if (intermission_running)
 	{
@@ -1540,10 +1747,6 @@ void() PlayerPreThink =
 			self.weaponmodel="";
 	}
 
-	makevectors (self.v_angle);		// is this still used
-
-	self.friction=0;   // If in entity FRICTION_TOUCH will reset this
-
 	CheckRules ();
 	CheckRings ();
 	CheckAbilities ();
@@ -1559,6 +1762,7 @@ void() PlayerPreThink =
 		PlayerDeathThink ();
 		return;
 	}
+	CheckCrouch ();//don't try to uncrouch when dead
 	// Turn off plaque if it is on
 	if (self.plaqueflg)
 	{	// Is moving or looking around so kill plaque
@@ -1672,7 +1876,7 @@ void() PlayerPreThink =
 	// Change weapon
 	if (time > self.attack_finished && self.weapon != IT_WEAPON1)
 	{
-		if (((self.weapon == IT_WEAPON3) && (self.greenmana<1) && !(self.playerclass==CLASS_PALADIN)) ||
+		if (((self.weapon == IT_WEAPON3) && (self.greenmana<1) && (self.playerclass!=CLASS_PALADIN)) ||
 			((self.weapon == IT_WEAPON4) && (self.bluemana<1) && (self.greenmana<1)))
 		{
 			W_BestWeapon ();
@@ -1776,8 +1980,12 @@ void CheckRings (void)
 		victim = findradius( self.origin, 100);
 		while(victim)
 		{
-			if ((victim.movetype == MOVETYPE_FLYMISSILE) && (victim.owner != self))
+			if ((victim.movetype == MOVETYPE_FLYMISSILE||
+				victim.movetype == MOVETYPE_BOUNCEMISSILE||
+				victim.movetype == MOVETYPE_BOUNCE)&&
+				(victim.owner != self))
 			{
+				victim.frags=2;//For client death messages
 				victim.owner = self;
 				chance = random();
 				dir = victim.origin + (v_forward * -1);
@@ -1791,6 +1999,10 @@ void CheckRings (void)
 				}
 				else  // reflect missile
 					victim.velocity = '0 0 0' - victim.velocity;
+				if(victim.movedir!='0 0 0')
+					victim.movedir=normalize(victim.velocity);
+				if(victim.classname=="pincer")
+					victim.enemy=victim.owner;
 			}
 			victim = victim.chain;
 		}
@@ -1824,14 +2036,27 @@ void remove_invincibility(entity loser)
 	loser.artifact_active (-) ART_INVINCIBILITY;
 	loser.invincible_time = 0;
 	loser.air_finished = time + 12;
-	if(loser.playerclass==CLASS_CRUSADER)
-		loser.skin = 0;
-	else if(loser.playerclass==CLASS_PALADIN)
+	switch(loser.playerclass)
+	{
+	case CLASS_PALADIN:
 		loser.effects(-)EF_BRIGHTLIGHT;
-	else if(loser.playerclass==CLASS_ASSASSIN)
-		loser.colormap=0;
-	else if(loser.playerclass==CLASS_NECROMANCER)
+		break;
+	case CLASS_CRUSADER:
+		loser.skin = 0;
+		break;
+	case CLASS_NECROMANCER:
 		loser.effects(-)EF_DARKLIGHT;
+		break;
+	case CLASS_SUCCUBUS:
+		loser.abslight=0;
+		loser.drawflags(-)DRF_TRANSLUCENT|MLS_ABSLIGHT;
+		loser.effects(-)EF_BRIGHTFIELD;
+		loser.flags2(-)FL2_FADE_UP;
+		break;
+	default:	//assassin
+		loser.colormap=0;
+		break;
+	}
 }
 
 /*
@@ -1885,6 +2110,45 @@ void() CheckPowerups =
 			remove_invincibility(self);
 		else if ((self.invincible_time - 10) < time)
 			self.artifact_low (+) ART_INVINCIBILITY;
+		if(self.playerclass==CLASS_SUCCUBUS)
+		{
+			vector vect, v1, v2;
+		
+			vect='0 0 0';
+			vect_y=(self.invincible_time - time)*480;
+			makevectors(vect);
+			vect = self.origin + self.proj_ofs + v_forward*32;
+			if (random() < 0.5)
+			v1 = randomv('-10 -10 25', '10 10 45');
+			v2 = randomv('-10 -10 25', '10 10 45');
+			particle2(vect, v1, v2, 416,PARTICLETYPE_FIREBALL,7);
+			vect = self.origin + self.proj_ofs - v_forward*32;
+			v1_z=v2_z=0;
+			particle2(vect,v1, v2, 135,PARTICLETYPE_REDFIRE,3);
+
+			/*float add_dir;
+			
+			if(self.dflags<=time)
+			{
+				self.effects(+)EF_BRIGHTFIELD;
+				self.dflags=time+1;
+			}
+			if(self.flags2&FL2_FADE_UP)
+				add_dir=0.01;
+			else
+				add_dir=-0.01;
+			self.abslight+=add_dir;
+			if(self.abslight<=0.01)
+			{//FIXME- stay invis for a short bit
+				self.flags2(+)FL2_FADE_UP;
+				self.abslight=0.01;
+			}
+			else if(self.abslight>=1)
+			{
+				self.flags2(-)FL2_FADE_UP;
+				self.abslight=1;
+			}*/
+		}
 	}
 
 //	if (self.artifact_active & ART_TOMEOFPOWER)
@@ -1943,8 +2207,8 @@ void() CheckPowerups =
 //			self.view_ofs = '0 0 50';
 //			self.proj_ofs='0 0 44';
 
-			self.oldweapon = FALSE;
-			self.weapon = IT_WEAPON1;
+			self.oldweapon = self.weapon = IT_WEAPON1;
+			self.attack_finished=self.sheep_time=0;
 			restore_weapon();
 			SetModelAndThinks();
 
@@ -1960,6 +2224,18 @@ void() CheckPowerups =
 	}
 
 	if(self.cameramode != world)
+	{
+		if(self.cameramode.classname=="player")
+		{
+			msg_entity = self;
+			CameraViewPort(self,self.cameramode);
+			WriteByte (MSG_ONE, 10);				// 10 = SVC_SETVIEWANGLES
+			WriteAngle (MSG_ONE,self.cameramode.v_angle_x);		// pitch
+			WriteAngle (MSG_ONE,self.cameramode.v_angle_y);		// yaw
+			WriteAngle (MSG_ONE,self.cameramode.v_angle_z);		// roll
+			self.weaponmodel=self.cameramode.weaponmodel;
+			self.weaponframe=self.cameramode.weaponframe;
+		}
 		if(deathmatch)
 		{
 			if(self.velocity!='0 0 0'||self.pain_finished>time||self.button0||self.button2)
@@ -1967,6 +2243,7 @@ void() CheckPowerups =
 		}
 		else if (self.camera_time < time)
 			CameraReturn ();
+	}
 };
 
 /*
@@ -1994,6 +2271,28 @@ void PlayerTouch (void)
 
 	if(other==world)
 		return;
+
+	if(coop||deathmatch)
+		if(random()<0.5)
+			if(other.classname=="player")
+				if(self.velocity!='0 0 0')//push other players
+					if(normalize(self.velocity)*normalize(other.origin-self.origin)>0.2)
+						if(fabs(other.origin_z-self.origin_z)<48)
+						{
+						float push_mod;
+							if(self.flags&FL_ONGROUND)
+								push_mod=0.33;
+							else
+								push_mod=0.77;
+							if(other.flags&FL_ONGROUND&&self.velocity_z<0)
+							{
+								other.velocity_x=(other.velocity_x/push_mod+self.velocity_x*push_mod)*push_mod;
+								other.velocity_y=(other.velocity_y/push_mod+self.velocity_y*push_mod)*push_mod;
+								other.flags(-)FL_ONGROUND;
+							}
+							else
+								other.velocity=(other.velocity*(1/push_mod)+self.velocity*push_mod)*push_mod;
+						}
 
 	if(self.flags&FL_ONGROUND)
 		return;
@@ -2033,7 +2332,7 @@ void() PlayerPostThink =
 		else if (self.jump_flag*(self.mass/10) < -500)//was -650
 		{
 //			T_Damage (self, world, world, 5); 
-			if(self.playerclass==CLASS_ASSASSIN)
+			if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 				sound (self, CHAN_VOICE, "player/asslnd.wav", 1, ATTN_NORM);
 			else
 				sound (self, CHAN_VOICE, "player/pallnd.wav", 1, ATTN_NORM);
@@ -2047,7 +2346,20 @@ void() PlayerPostThink =
 	}
 
 	if (!(self.flags & FL_ONGROUND))
+	{
+		if(self.playerclass==CLASS_SUCCUBUS)
+			if(self.flags&FL_SPECIAL_ABILITY1)
+				if(self.button2&&self.velocity_z<=0&&!self.waterlevel)
+				{
+					if(self.gravity==self.standard_grav&&self.standard_grav>0.2)
+						sound (self, CHAN_BODY, "succubus/fwoomp.wav", 1, ATTN_NORM);
+					self.gravity=0.2;
+					self.flags(-)FL_JUMPRELEASED;
+				}
+				else
+					self.gravity=self.standard_grav;
 		self.jump_flag = self.velocity_z;
+	}
 	else
 		self.last_onground=time;
 
@@ -2058,6 +2370,12 @@ void() PlayerPostThink =
 
 	if ((self.artifact_flags & AFL_SUPERHEALTH) && (self.healthtime < time))
 		DecrementSuperHealth ();
+	if(self.movechain!=world)
+		if(self.movechain.origin!=self.origin)
+			setorigin(self.movechain,self.origin);
+
+//	if(self.friction!=1)
+//		self.friction=1;
 };
 
 
@@ -2088,6 +2406,7 @@ called when a player disconnects from a server
 */
 void() ClientDisconnect =
 {
+entity lastleader,newking;
 	if (gameover)
 		return;
 	// if the level end trigger has been activated, just return
@@ -2099,6 +2418,21 @@ void() ClientDisconnect =
 	bprint (ftos(self.frags));
 	bprint (STR_FRAGS);
 	sound (self, CHAN_BODY, "player/leave.wav", 1, ATTN_NONE);
+	if(FindExpLeader()==self)
+	{
+		lastleader=self;
+		drop_level(self,self.level);
+		self.experience=0;
+		newking=FindExpLeader();
+		if(newking!=lastleader)
+		{//Tell everyone if the king of the hill has changed
+			sound (world, CHAN_BODY, "misc/comm.wav", 1, ATTN_NONE);
+			bprint(newking.netname);
+			bprint(" is the NEW King of the Hill!\n");
+			WriteByte(MSG_ALL, SVC_UPDATE_KINGOFHILL);
+			WriteEntity (MSG_ALL, newking);
+		}
+	}
 	GibPlayer();
 	set_suicide_frame ();
 };
@@ -2129,10 +2463,15 @@ string deathstring, deathstring2,iclass;
 	{
 		bprint (targ.netname);
 		bprint (STR_WASTELEFRAGGEDBY);
-		bprint (attacker.netname);
+		if(attacker.flags&FL_CLIENT)
+		{
+			bprint (attacker.netname);
+			attacker.frags += 1;
+		}
+		else
+			bprint (attacker.classname);
 		bprint ("\n");
 
-		attacker.frags += 1;
 		return;
 	}
 
@@ -2188,7 +2527,7 @@ string deathstring, deathstring2,iclass;
 			if (rnum < 0.25)
 				deathstring = " mows down a teammate\n";
 			else if (rnum < 0.50)
-				deathstring = " checks his glasses\n";
+				deathstring = " checks their glasses\n";
 			else if (rnum < 0.75)
 				deathstring = " gets a frag for the other team\n";
 			else
@@ -2210,7 +2549,7 @@ string deathstring, deathstring2,iclass;
 			}
 			else if(targ.decap==1)
 			{
-				if(tclass==CLASS_ASSASSIN)
+				if(tclass==CLASS_ASSASSIN||tclass==CLASS_SUCCUBUS)
 					deathstring = " lost her head over ";
 				else
 					deathstring = " lost his head over ";
@@ -2218,7 +2557,7 @@ string deathstring, deathstring2,iclass;
 			}
 			else if (targ.decap==2)
 			{
-				if (tclass==CLASS_ASSASSIN)
+				if (tclass==CLASS_ASSASSIN||tclass==CLASS_SUCCUBUS)
 					deathstring = " got her head blown clean off by ";
 				else
 					deathstring = " got his head blown clean off by ";
@@ -2249,10 +2588,10 @@ string deathstring, deathstring2,iclass;
 				deathstring = " was in the wrong place at the wrong time thanks to ";
 				deathstring2 = "'s timebomb glyph!\n";
 			}
-			else if (iclass=="icewall")
+			else if(iclass=="poison grenade")
 			{
-				deathstring = " was pricked by ";
-				deathstring2 = "'s ice wall glyph!\n";
+				deathstring = " choked on ";
+				deathstring2 = "'s gas!\n";
 			}
 			else if(iclass=="tornato")
 			{
@@ -2274,24 +2613,27 @@ string deathstring, deathstring2,iclass;
 				deathstring =" was jacked up by ";
 				deathstring2 ="'s Summoned Imp Lord!\n";
 			}
-			else if(inflictor.frags==2 || iclass == "blast")
+			else if(inflictor.frags==2&&iclass!="player")
 			{
-				deathstring = " was destroyed by the power of ";
-				deathstring2 = "'s Disc of Repulsion!\n";
+				deathstring = " was destroyed by  ";
+				deathstring2 = "'s deflected shot!\n";
 			}
-			else if (rnum == IT_WEAPON1)
+			else 
+			switch (rnum)
 			{
+			case IT_WEAPON1:
 				if(attacker.artifact_active&ART_TOMEOFPOWER)
 					exp_mult=1.5;
 				else
 					exp_mult=2;
-				if(aclass==CLASS_ASSASSIN)
+
+				switch (aclass)
 				{
+				case CLASS_ASSASSIN:
 					deathstring = " got penetrated by ";
 					deathstring2 = "'s Katar\n";
-				}
-				else if(aclass==CLASS_CRUSADER)
-				{
+					break;
+				case CLASS_CRUSADER:
 					if(exp_mult==1.5)
 					{
 						deathstring = " was fried by the holy lightning of ";
@@ -2302,26 +2644,31 @@ string deathstring, deathstring2,iclass;
 						deathstring = " was whalloped by ";
 						deathstring2 = "'s hammer!\n";
 					}
-				}
-				else if(aclass==CLASS_PALADIN)
-				{
+					break;
+				case CLASS_PALADIN:
 					deathstring = " got KO'd by ";
 					deathstring2 = "'s fists of fury!\n";
-				}
-				else
-				{
+					break;
+				case CLASS_SUCCUBUS:
+					deathstring = " got burned by ";
+					deathstring2 = "'s BloodFire\n";
+					break;
+				default:
 					deathstring = " was sliced and diced by ";
 					deathstring2 = "'s sickle!\n";
+					break;
 				}
-			}
-			else if (rnum == IT_WEAPON2)
-			{
+				break;
+
+			case IT_WEAPON2:
 				if(powered_up)
 					exp_mult=1;
 				else
 					exp_mult=1.2;
-				if(aclass==CLASS_ASSASSIN)
+
+				switch (aclass)
 				{
+				case CLASS_ASSASSIN:
 					if(powered_up)
 					{
 						deathstring = " was stuck like a pig by ";
@@ -2332,9 +2679,8 @@ string deathstring, deathstring2,iclass;
 						deathstring = " took one of ";
 						deathstring2 = "'s arrows to the heart!\n";
 					}
-				}
-				else if(aclass==CLASS_CRUSADER)
-				{
+					break;
+				case CLASS_CRUSADER:
 					if(powered_up)
 					{
 						deathstring = " befell the subzero temperatures of ";
@@ -2345,9 +2691,8 @@ string deathstring, deathstring2,iclass;
 						deathstring = " gets the cold shoulder from ";
 						deathstring2 = "!\n";
 					}
-				}
-				else if(aclass==CLASS_PALADIN)
-				{
+					break;
+				case CLASS_PALADIN:
 					if(powered_up)
 					{
 						deathstring = " took a shock to the system from ";
@@ -2358,29 +2703,40 @@ string deathstring, deathstring2,iclass;
 						deathstring = " was cut to pieces by ";
 						deathstring2 = "'s vorpal sword!\n";
 					}
-				}
-				else
-				{
+					break;
+				case CLASS_SUCCUBUS:
+					if(powered_up)
+					{
+						deathstring = " was reduced to a pile of bubbling flesh by ";
+						deathstring2 = "'s Acid Cloud!\n";
+					}
+					else
+					{
+						deathstring = " was vaporized by ";
+						deathstring2 = "'s Acid Rune!\n";
+					}
+					break;
+				default:
 					if(powered_up)
 					{
 						deathstring = " was tracked down by ";
-						deathstring2 = "'s Magic Missiles!\n";
 					}
 					else
 					{
 						deathstring = " was mowed down by ";
-						deathstring2 = "'s Magic Missiles!\n";
 					}
+					deathstring2 = "'s Magic Missiles!\n";
+					break;
 				}
-			}
-			else if (rnum == IT_WEAPON3)
-			{
+			break;
+			case IT_WEAPON3:
 				if(powered_up)
 					exp_mult=0.8;
 				else
 					exp_mult=1;
-				if(aclass==CLASS_ASSASSIN)
+				switch (aclass)
 				{
+				case CLASS_ASSASSIN:
 					if(powered_up)
 					{
 						reversed=TRUE;
@@ -2392,9 +2748,8 @@ string deathstring, deathstring2,iclass;
 						deathstring = " sucked down ";
 						deathstring2 = "'s grenade!\n";
 					}
-				}
-				else if(aclass==CLASS_CRUSADER)
-				{
+					break;
+				case CLASS_CRUSADER:
 					if(powered_up)
 					{
 						deathstring = " was whisked away by ";
@@ -2405,9 +2760,8 @@ string deathstring, deathstring2,iclass;
 						deathstring = " took a nice hot meteor shower courtesy of ";
 						deathstring2 = "!\n";
 					}
-				}
-				else if(aclass==CLASS_PALADIN)
-				{
+					break;
+				case CLASS_PALADIN:
 					if(powered_up)
 					{
 						deathstring = " was cut down by ";
@@ -2418,9 +2772,21 @@ string deathstring, deathstring2,iclass;
 						deathstring = " got a nasty papercut from ";
 						deathstring2 = "'s axeblade!\n";
 					}
-				}
-				else
-				{
+					break;
+				case CLASS_SUCCUBUS:
+					if(powered_up)
+					{
+						deathstring = " was incinerated by ";
+						deathstring2 = "'s FireStorm!\n";
+					}
+					else
+					{
+						reversed=TRUE;
+						deathstring = " made ";
+						deathstring2 = " burst into flames!\n";
+					}
+					break;
+				default:
 					if(powered_up)
 					{
 						deathstring = " was fragged by ";
@@ -2432,16 +2798,17 @@ string deathstring, deathstring2,iclass;
 						deathstring = " broke  ";
 						deathstring2 = "'s bones with the bone shard spell!\n";
 					}
+					break;
 				}
-			}
-			else if (rnum == IT_WEAPON4)
-			{
+			break;
+			case IT_WEAPON4:
 				if(powered_up)
 					exp_mult=0.5;
 				else
 					exp_mult=0.8;
-				if(aclass==CLASS_ASSASSIN)
+				switch (aclass)
 				{
+				case CLASS_ASSASSIN:
 					if(powered_up)
 					{
 						deathstring = " got into a little S&M with ";
@@ -2452,9 +2819,8 @@ string deathstring, deathstring2,iclass;
 						deathstring = " got cored by ";
 						deathstring2 = "'s Scarab Staff!\n";
 					}
-				}
-				else if(aclass==CLASS_CRUSADER)
-				{
+					break;
+				case CLASS_CRUSADER:
 					if(attacker.artifact_active&ART_TOMEOFPOWER)
 					{
 						exp_mult=0.5;
@@ -2466,9 +2832,8 @@ string deathstring, deathstring2,iclass;
 						deathstring = " smells like fried chicken thanks to ";
 						deathstring2 = "'s Sunstaff!\n";
 					}
-				}
-				else if(aclass==CLASS_PALADIN)
-				{
+					break;
+				case CLASS_PALADIN:
 					if(powered_up)
 					{
 						deathstring = " was blown into next week by ";
@@ -2479,9 +2844,21 @@ string deathstring, deathstring2,iclass;
 						deathstring = "'s evil ways were purified by ";
 						deathstring2 = "!\n";
 					}
-				}
-				else
-				{
+					break;
+				case CLASS_SUCCUBUS:
+					if(powered_up)
+					{
+						reversed = TRUE;
+						deathstring = " lit up ";
+						deathstring2 = "'s life!\n";
+					}
+					else
+					{
+						deathstring = " got a charge out of ";
+						deathstring2 = "'s balls... of lightning!\n";
+					}
+					break;
+				default:
 					if(powered_up)
 					{
 						deathstring = " succumbed to the black death of ";
@@ -2492,8 +2869,11 @@ string deathstring, deathstring2,iclass;
 						deathstring = " befell the black magic of ";
 						deathstring2 = "'s Ravenstaff!\n";
 					}
+					break;
 				}
+			break;
 			}
+
 			if(reversed)
 			{
 				bprint (attacker.netname);
@@ -2615,7 +2995,11 @@ string deathstring, deathstring2,iclass;
 			}
 			if (attacker.classname == "monster_mezzoman")
 			{
-				if (attacker.skin==1)
+				if (attacker.strength>=3)
+					bprint (" was squished like a bug by Siberian WereTiger!\n");
+				else if (attacker.strength==2)
+					bprint (" was cut down to size by the Snow WereLeopard!\n");
+				else if (attacker.strength==1)
 					bprint (" is not yet worthy of facing the WerePanther!\n");
 				else
 					bprint (" is no match for the WereJaguar!\n");
@@ -2650,6 +3034,19 @@ string deathstring, deathstring2,iclass;
 					bprint (" was taken down by the Yakman!\n");
 				else
 					bprint (" got gored by the Yakman!\n");
+			}
+			if (attacker.classname == "monster_pentacles")
+				bprint (" was humbled by the pentacles!\n");
+			if (attacker.classname == "monster_buddha")
+			{
+				if (inflictor==attacker)
+					bprint (" was not mighty enough to defeat Praevus!\n");
+				else if (inflictor.classname=="buddha_firewalker")
+					bprint (" was incinerated by Praevus' wall of fire!\n");
+				else if (inflictor.classname=="buddha_firepillar")
+					bprint (" couldn't take the heat of Praevus' pillars of fire!\n");
+				else if (inflictor.classname=="buddha_missile")
+					bprint (" was tracked down by Praevus' spinning stars of death!\n");
 			}
 			if (attacker.classname == "rider_famine")
 				bprint(" was drained of life-force by Famine!\n");
@@ -2690,7 +3087,7 @@ string deathstring, deathstring2,iclass;
 		// tricks and traps
 		if(targ.decap==1)
 		{
-			if(targ.playerclass==CLASS_ASSASSIN)
+			if(targ.playerclass==CLASS_ASSASSIN||targ.playerclass==CLASS_SUCCUBUS)
 				bprint(" should have quit while she was a head... oh, she IS a head!\n");
 			else
 				bprint(" should have quit while he was a head... oh, he IS a head!\n");
@@ -2698,7 +3095,7 @@ string deathstring, deathstring2,iclass;
 		}
 		if(targ.decap==2)
 		{
-			if(targ.playerclass==CLASS_ASSASSIN)
+			if(targ.playerclass==CLASS_ASSASSIN||targ.playerclass==CLASS_SUCCUBUS)
 				bprint(" got her head blown off!\n");
 			else
 				bprint(" got his head blown off!\n");

@@ -3,11 +3,11 @@
 //**
 //** builtin.hc
 //**
-//** $Header: /cvsroot/uhexen2/gamecode/hc/h2/builtin.hc,v 1.1.1.1 2004-11-29 11:37:19 sezero Exp $
+//** $Header: /cvsroot/uhexen2/gamecode/hc/portals/builtin.hc,v 1.1.1.1 2004-11-29 11:30:57 sezero Exp $
 //**
 //**************************************************************************
 
-// Sets v_forward, etc.
+// Sets v_forward, v_up, and v_right based on ang.
 void makevectors(vector ang) : 1;
 
 void setorigin(entity e, vector o) : 2;
@@ -138,7 +138,7 @@ float RewindFrame(float start, float end) : 65;
 
 void setclass(entity e, float value) : 66;
 
-void movetogoal(float step) : 67;
+float movetogoal(float step) : 67;
 
 // For files in demo and retail version.
 string precache_file(string s) : 68;
@@ -205,9 +205,24 @@ vector v_factor(vector factor) : 94;
 	// returns (v_right * factor_x) + (v_forward * factor_y) + (v_up * factor_z)
 vector v_factorrange(vector start, vector end) : 95;
 
+//for oem version
 string precache_sound3(string s) : 96;
 string precache_model3(string s) : 97;
 string precache_file3(string s) : 98;
+
+void matchAngleToSlope(vector slope, entity who) : 99;
+
+void updateInfoPlaque(float text_id, float mode) : 100;
+
+//for mission pack only
+string precache_sound4(string s) : 101;
+string precache_model4(string s) : 102;
+string precache_file4(string s) : 103;
+
+void doWhiteFlash(void) : 104;
+
+void updateSoundPos(entity e, float chan) : 105;
+void stopSound(entity e, float chan) : 106;
 
 float DotProduct (vector v1, vector v2)
 {
@@ -247,9 +262,3 @@ float AngleBetween(vector v1, vector v2)
 	//return in degrees
 	return RadToDegrees(angleRad);
 }
-
-//for mission pack only EXPANSION
-string precache_sound4(string s) : 101;
-string precache_model4(string s) : 102;
-string precache_file4(string s) : 103;
-void stopSound(entity e, float chan) : 106;

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/invntory.hc,v 1.2 2007-02-07 16:57:06 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/invntory.hc,v 1.3 2007-02-07 16:59:33 sezero Exp $
  */
 
 entity SelectSpawnPoint(void);
@@ -38,7 +38,7 @@ float move_cnt;
 	self.solid=SOLID_NOT;
 	setorigin(self,self.origin+'0 0 42');
 	setsize(self,'-40 -40 -42','40 40 42');
-	self.hull=HULL_HYDRA;
+	self.hull=HULL_SCORPION;//HYDRA;
 	newmis=spawn();
 	setorigin(newmis,self.origin);
 	tracearea(self.origin,self.origin+'0 0 1',self.mins,self.maxs,FALSE,newmis);
@@ -55,8 +55,6 @@ float move_cnt;
 		newmis.flags2(+)FL_SUMMONED;
 		newmis.controller=self.owner;
 		newmis.team=self.owner.team;
-		newmis.preventrespawn = TRUE;// mark so summoned monster cannot respawn
-		newmis.playercontrolled = TRUE;
 		newmis.classname="monster_imp_lord";
 		newmis.lifetime=time+30;
 		if(self.owner.enemy!=world&&self.owner.enemy.flags2&FL_ALIVE&&visible2ent(self.owner.enemy,self))
@@ -71,6 +69,7 @@ float move_cnt;
 		}
 		self.owner.imp_count+=1;
 		newmis.imp_count=self.owner.imp_count;
+		newmis.team=self.owner.team;
 		newmis.think=monster_imp_lord;
 		thinktime newmis : 0;
 
@@ -143,9 +142,9 @@ entity teleport_ent;
 	self.flags2(+)FL_TORNATO_SAFE;
 	teleport_ent = spawn();
 
-	teleport_ent.goalentity = SelectSpawnPoint ();
+//	teleport_ent.goalentity = SelectSpawnPoint ();
 
-	teleport_ent.classname = "teleportcoin";
+	teleport_ent.classname = teleport_ent.netname = "teleportcoin";
 	teleport_ent.inactive = FALSE;
 	teleport_ent.think = teleport_coin_run;
 	teleport_ent.nextthink = time + .01;
@@ -297,7 +296,7 @@ void Use_Proximity_Mine ()
 	self.glyph_finished=time+0.5;
 	newmis=spawn();
 	newmis.owner=self;
-	sound (self,CHAN_VOICE,"fx/glyphuse1.wav",1,ATTN_NORM);
+	sound (self,CHAN_ITEM,"fx/glyphuse1.wav",1,ATTN_NORM);	
 	newmis.classname="proximity";
 	newmis.movetype=MOVETYPE_FLYMISSILE;
 	newmis.solid=SOLID_BBOX;
@@ -325,7 +324,6 @@ void Use_Proximity_Mine ()
 UseTimebomb
 ============
 */
-
 void TimeBombBoom()
 {
 	sound(self,CHAN_AUTO,"misc/warning.wav",1,ATTN_NORM);
@@ -344,17 +342,16 @@ void TimeBombTouch()
 void Use_TimeBomb()
 {
 	self.glyph_finished = time+0.1;
+	sound (self,CHAN_ITEM,"fx/glyphuse1.wav",1,ATTN_NORM);
+	
 	newmis=spawn();
 	newmis.owner=self;
-	newmis.enemy=world;
 	newmis.classname="timebomb";
-	sound (self,CHAN_VOICE,"fx/glyphuse1.wav",1,ATTN_NORM);
 	newmis.solid=SOLID_BBOX;
 	/*if(deathmatch&&!coop)
 		newmis.dmg=100;
 	else
-		newmis.dmg=75;
-	newmis.dmg=60;*/
+		newmis.dmg=75;*/
 	newmis.dmg=100;
 	newmis.touch=TimeBombTouch;
 	newmis.angles_x=90;
@@ -381,10 +378,8 @@ void UseBlast (void)
 	float v_length,push,percent,points,inertia;
 	
 	push=0;	//ws: initialize push for later check, just in case
-	
 	victim = findradius( self.origin, BLAST_RADIUS*2);
 	self.safe_time=time+7;
-	
 	entity blaster;		//ws: disc creates temp fake entity to pass as inflictor to t_damage & clientobituary so they can track direct disc damage, not just reflected projectiles
 	blaster = spawn();
 	blaster.classname = "blast";
@@ -394,20 +389,49 @@ void UseBlast (void)
 
 	while(victim)
 	{
-		if (victim.classname!="hook"&&victim.owner.classname != "circfire" && victim.classname != "cube_of_force"&&victim.monsterclass<CLASS_BOSS)
+		if(victim.classname=="cube_of_force"&&victim.controller!=self&&random()<0.2)
+		{
+			if(victim.artifact_flags&AFL_CUBE_RIGHT)
+				victim.controller.artifact_flags(-)AFL_CUBE_RIGHT;
+			if(victim.artifact_flags&AFL_CUBE_LEFT)
+				victim.controller.artifact_flags(-)AFL_CUBE_LEFT;
+			victim.frags=2;
+			victim.movetype=MOVETYPE_BOUNCE;
+			stopSound(victim,0);
+			victim.owner = victim.controller = self;
+			victim.velocity = normalize(victim.origin - (self.absmin+self.absmax)*0.5)*600;
+			victim.avelocity=randomv('-300 -300 -300','300 300 300');
+			if(victim.movedir!='0 0 0')
+				victim.movedir=normalize(victim.velocity);
+			victim.dmg=75;
+			victim.touch = GrenadeTouch2;
+			victim.think = MultiExplode;
+			thinktime victim : 3;
+
+			holdpos = victim.origin;
+			holdpos_z += (victim.maxs_z - victim.mins_z)/2;
+			traceline(self.origin,holdpos,FALSE,self);
+			CreateBlueFlash(trace_endpos);
+		}
+		else if (victim.classname!="hook"&&victim.owner.classname != "circfire" &&victim.classname!="cube_of_force"&&victim.monsterclass<CLASS_BOSS)
 		{
 //			dprint(victim.classname);
 //			dprint(" blasted\n");
 			if (((victim.health) && (victim!=self) ) ||
-				(victim.movetype == MOVETYPE_FLYMISSILE) || (victim.movetype == MOVETYPE_BOUNCEMISSILE) && (victim.owner != self))
+				(victim.movetype == MOVETYPE_FLYMISSILE) ||
+				(victim.movetype == MOVETYPE_BOUNCEMISSILE)||
+				(victim.movetype == MOVETYPE_BOUNCE))// && (victim.owner != self))
 			{
 				traceline(self.origin,victim.origin,TRUE,self);
 
 				if (trace_fraction == 1)  // No walls in the way
 				{
 					sound (self, CHAN_WEAPON, "raven/blast.wav", 1, ATTN_NORM);
-					
-					if (((victim.movetype != MOVETYPE_FLYMISSILE) && (victim.movetype != MOVETYPE_BOUNCEMISSILE)) || (victim.classname =="chain_head" ))
+
+					if (((victim.movetype != MOVETYPE_FLYMISSILE)
+						&& (victim.movetype != MOVETYPE_BOUNCEMISSILE)
+						&& (victim.movetype != MOVETYPE_BOUNCE))
+						|| (victim.classname =="chain_head" )|| (victim.classname =="player" ))
 					{	
 						dir =  victim.origin - self.origin;
 						v_length = vlen (dir);
@@ -434,16 +458,15 @@ void UseBlast (void)
 							victim.velocity_z = push;
 						}
 					}
-					else
+					else if (victim.classname!="funnal")
 					{
 						victim.frags=2;
 						victim.enemy=victim.owner;
 						victim.owner = self;
-						if (victim.classname!="tornato")
-						{
-							victim.velocity = victim.velocity * -1;
-							victim.angles = vectoangles(victim.velocity);
-						}
+						victim.velocity = victim.velocity * -1;
+						victim.angles = vectoangles(victim.velocity);
+						if(victim.movedir!='0 0 0')
+							victim.movedir=normalize(victim.velocity);
 					}
 
 					holdpos = victim.origin;
@@ -454,14 +477,19 @@ void UseBlast (void)
 					points = percent * BLASTDAMAGE;  // Minimum blast damage
 					if (points > 10)
 						points = 10;
+					else if (points < 1)
+						points = 1;
+
 
 					T_Damage (victim, self, blaster, points);
 				}
 			}
 		}
 
-		if (victim.classname=="tornato" && victim.enemy.flags2&FL_ALIVE)
-			victim.enemy.flags2(+)FL_TORNATO_SAFE;
+//		if (victim.classname=="tornato" && victim.enemy.flags2&FL_ALIVE)
+//			victim.enemy.flags2(+)FL_TORNATO_SAFE;
+		if (victim.owner.classname=="tornato")
+			victim.owner.lifetime=0;
 
 		if(victim.classname=="swarm")
 		{
@@ -474,6 +502,9 @@ void UseBlast (void)
 			victim.think=victim.th_jump;
 			thinktime victim : 0;
 		}
+
+		if(victim.classname=="pincer")
+			victim.enemy=victim.owner;
 
 		victim = victim.chain;
 	}
@@ -497,6 +528,12 @@ void UseInvincibility (void)
 		self.effects(+)EF_BRIGHTLIGHT; 
 	else if(self.playerclass==CLASS_ASSASSIN)
 		self.colormap=140;
+	else if(self.playerclass==CLASS_SUCCUBUS)
+	{
+		self.drawflags(+)MLS_ABSLIGHT|DRF_TRANSLUCENT;
+		self.effects(+)EF_BRIGHTFIELD;
+		self.abslight=1;
+	}
 	else if(self.playerclass==CLASS_NECROMANCER)
 		self.effects(+)EF_DARKLIGHT;
 
@@ -520,6 +557,95 @@ void UseInvisibility (void)
 void()Use_Polymorph;
 void()Use_Tripwire;
 void()Use_Fireball;
+
+void poisong_die()
+{
+	stopSound(self,0);
+	SmallExplosion();
+}
+
+void SpewPoison ()
+{
+vector updir;
+	if(self.solid!=SOLID_PHASE)				
+	{
+		setsize(self,'-3 -3 -3','3 3 3');
+		self.solid=SOLID_PHASE;
+	}
+	if(self.owner.tripwire_cnt>self.tripwire_cnt+4)
+		self.lifetime=0;
+
+	if(self.lifetime==-1)
+		self.lifetime=time + 30;
+	else if(self.lifetime<time)
+	{
+		sound(self,CHAN_BODY,"succubus/endhisss.wav",1,ATTN_NORM);
+		self.owner.tripwire_cnt-=1;
+		remove(self);
+		return;
+	}
+	if(!self.aflag)
+	{
+		self.aflag=TRUE;
+		starteffect(CE_ACID_EXPL,self.origin+'0 0 8','0 0 .2',HX_FRAME_TIME*2);
+		sound(self,CHAN_BODY,"succubus/gasss.wav",1,ATTN_NORM);
+		self.t_width=time+2;
+	}
+	else if((self.velocity=='0 0 0'||self.flags&FL_ONGROUND)&&self.t_width<time&&self.aflag==1)
+	{
+		self.aflag=2;
+		sound(self,CHAN_BODY,"succubus/hisss.wav",1,ATTN_NORM);
+	}
+	updir=randomv('-10 -10 10','10 10 30');
+//Hissing sound
+	CreateGreenSmoke(self.origin,updir,HX_FRAME_TIME*3);
+//Set up a trigger instead of T_Dam.  Might be faster.
+	T_RadiusDamage(self,self.owner,1,self.owner);
+	thinktime self : 0.1;
+}
+
+void Use_PoisonGas() 
+{
+	self.glyph_finished = time+0.25;
+        makevectors(self.v_angle);
+		sound(self,CHAN_WEAPON,"misc/whoosh.wav",1,ATTN_NORM);
+entity missile;
+        missile=spawn();
+        missile.owner=self;
+        missile.classname="poison grenade";
+        missile.movetype=MOVETYPE_BOUNCE;
+		missile.takedamage=TRUE;
+		missile.health=10;
+		missile.th_die=poisong_die;
+        missile.solid=SOLID_BBOX;
+        missile.touch=GrenadeTouch2;
+		missile.lifetime=-1;		
+
+		self.tripwire_cnt+=1;
+		missile.tripwire_cnt=self.tripwire_cnt;
+
+		missile.o_angle = self.origin+self.proj_ofs+v_forward*8;
+
+		missile.speed=500;
+
+		if(self.v_angle_x)
+			missile.velocity = v_forward*missile.speed + v_up * 200 + crandom()*v_right*10 + crandom()*v_up*10;
+		else
+		{
+			missile.velocity = aim(self, missile.o_angle,1000);
+	        missile.velocity = missile.velocity * missile.speed;
+            missile.velocity_z = 200;
+		}
+
+		missile.angles = vectoangles(missile.velocity);
+		missile.avelocity=randomv('-300 -300 -300','300 300 300');
+
+        setmodel(missile,"models/glyphwir.mdl");
+        setsize(missile,'0 0 0','0 0 0');
+        setorigin(missile,missile.o_angle);
+		missile.think=SpewPoison;
+		thinktime missile : 0.5;
+}
 
 void BreakChains()
 {
@@ -569,11 +695,13 @@ void UseInventoryItem (void)
 		UseManaBoost ();
 		self.flags (+) FL_ARTIFACTUSED;
 	}
-	else if ((self.inventory == INV_GLYPH) && (self.cnt_glyph) && (time>self.glyph_finished))
+	else if ((self.inventory == INV_GLYPH) && (self.cnt_glyph)  && (time>self.glyph_finished))
 	{
 		self.cnt_glyph-=1;
 		if(self.playerclass==CLASS_ASSASSIN)
 			Use_Tripwire();
+		else if(self.playerclass==CLASS_SUCCUBUS)
+			Use_PoisonGas();
 		else if(self.playerclass==CLASS_CRUSADER)
 			Use_TimeBomb ();
 		else if(self.playerclass==CLASS_PALADIN)
@@ -699,10 +827,11 @@ void PanicButton ()
 	}
 	if (self.cnt_glyph)
 	{
-		
 		self.cnt_glyph=self.cnt_glyph - 1;
 		if(self.playerclass==CLASS_ASSASSIN)
 			Use_Tripwire();
+		else if(self.playerclass==CLASS_SUCCUBUS)
+			Use_PoisonGas();
 		else if(self.playerclass==CLASS_CRUSADER)
 			Use_TimeBomb ();
 		else if(self.playerclass==CLASS_PALADIN)
@@ -778,7 +907,7 @@ void PanicButton ()
 void  DropInventoryItem (void)
 {
 	entity item,holdent;
-	float throwflag;
+	float throwflag,torch_thrown;
 
 	makevectors(self.v_angle);
 	traceline(self.origin + self.proj_ofs,self.origin + self.proj_ofs + v_forward * 60,FALSE,self);
@@ -809,6 +938,8 @@ void  DropInventoryItem (void)
 	// Is it in the inventory
 	if ((holdent.inventory == INV_TORCH) && (holdent.cnt_torch))
 	{
+		if(holdent.artifact_flags&AFL_TORCH)
+			torch_thrown=TRUE;
 		spawn_artifact(ARTIFACT_TORCH,NO_RESPAWN);
 		holdent.cnt_torch -=1;
 		throwflag = 1;
@@ -915,6 +1046,8 @@ void  DropInventoryItem (void)
 		setorigin(item,self.origin + self.proj_ofs + v_up * 10 + v_forward * 40 + v_right * 8);
 		
 		sound(self,CHAN_BODY,"misc/whoosh.wav",1,ATTN_NORM);
+		if(torch_thrown)
+			throw_torch(item);
 	}
 	else
 		remove(item);

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/chunk.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/chunk.hc,v 1.2 2007-02-07 16:59:30 sezero Exp $
  */
 void ThrowSolidHead (float dm);
 void MarkForRespawn (void);
@@ -60,7 +60,7 @@ void ChunkRemove (void)
 
 vector ChunkVelocity (void)
 {
-	local vector v;
+	vector v;
 
 	v_x = 300 * crandom();
 	v_y = 300 * crandom();
@@ -105,16 +105,33 @@ void ThrowSingleChunk (string chunkname,vector location,float life_time,float sk
 
 void MeatChunks (vector org,vector dir,float chunk_count,entity loser)
 {
-float final;
+float final,t_type;
 entity chunk;
 
-	while(chunk_count)
+	if(deathmatch||coop)
+	{
+		if(dir=='0 0 0')
+		{
+			dir = ChunkVelocity();
+			dir=loser.velocity+dir;
+		}
+		if(loser.frozen>0)
+			t_type=THINGTYPE_ICE;
+		else if(loser.model=="models/spider.mdl")
+			t_type=THINGTYPE_GREENFLESH;
+		else
+			t_type=loser.thingtype;
+		starteffect(CE_CHUNK, org, t_type, dir, chunk_count);
+	}
+	else while(chunk_count)
 	{
 		chunk=spawn_temp();
 		chunk_count-=1;
 		final = random();
 
-		if(loser.model=="models/spider.mdl")
+		if(loser.frozen>0)
+			setmodel (chunk, "models/shardice.mdl");
+		else if(loser.model=="models/spider.mdl")
 		{
 			if (final < 0.33)
 				setmodel (chunk, "models/sflesh1.mdl");
@@ -154,18 +171,81 @@ entity chunk;
 
 void ThrowGib (string gibname, float dm);
 
-void CreateModelChunks (vector space,float scalemod)
+void chunk_hurt ()
+{
+float damage;
+	if(!other.takedamage)
+		return;
+
+	if(self.attack_finished>time)
+		return;
+	
+	if(self.velocity=='0 0 0')
+		return;
+
+	//SOUND
+	self.attack_finished = time + 0.5;
+	damage = self.scale * vlen(self.velocity)/100 * self.dmg;
+	T_Damage(other,self,self.owner,damage);
+}
+
+void CreateModelChunks (vector space,float scalemod, float numChunks)
 {
 	entity chunk;
-	float final;
+	float final, tried,t_type;
+	vector chunk_vel,org;
+	//return;//Magical Network-Friendly Code!
+
+	chunk_vel = ChunkVelocity();
+	if(!self.flags&FL_ONGROUND&&self.movetype!=MOVETYPE_NONE)
+		chunk_vel=self.velocity+chunk_vel;
+
+	if(deathmatch||coop)
+	{
+		if(self.origin=='0 0 0'&&self.solid==SOLID_BSP)
+			org=(self.absmin+self.absmax)*0.5;
+		else
+			org=self.origin;
+		if(self.frozen>0)
+			t_type=THINGTYPE_ICE;
+		else if(self.model=="models/spider.mdl")
+			t_type=THINGTYPE_GREENFLESH;
+		else
+			t_type=self.thingtype;
+		starteffect(CE_CHUNK, org, t_type, chunk_vel, numChunks);
+		return;
+	}
 
 	chunk = spawn_temp();
 
 	space_x = space_x * random();
 	space_y = space_y * random();
-	space_z = space_z * random();
+							  
 
-	setorigin (chunk, self.absmin + space);
+	if(self.solid==SOLID_TRIGGER&&self.thingtype!=THINGTYPE_WEBS)//Trigger event
+	{
+		traceline(self.absmin + space, self.absmin + space + '0 0 1' * self.maxs_z,TRUE,self);
+		tried = 0;
+		while((trace_startsolid||pointcontents(trace_endpos)!=CONTENT_EMPTY) && tried < 20)
+		{
+			space_x = space_x * random();
+			space_y = space_y * random();
+			traceline(self.absmin + space, self.absmin + space + '0 0 1' * self.maxs_z,TRUE,self);
+			tried+=1;
+		}
+		if(tried == 20)
+			return;
+		space_z = trace_endpos_z;
+		setorigin (chunk, trace_endpos);
+		chunk.solid = SOLID_BBOX;
+		chunk.touch = chunk_hurt;
+	}
+	else
+	{
+		space_z = space_z * random();
+		setorigin (chunk, self.absmin + space);
+		chunk.solid = SOLID_NOT;
+	}
 
 	final = random();
 	if ((self.thingtype==THINGTYPE_GLASS) || (self.thingtype==THINGTYPE_REDGLASS) || 
@@ -192,7 +272,14 @@ void CreateModelChunks (vector space,float scalemod)
 		else if (self.thingtype==THINGTYPE_WEBS)
 		{
 			chunk.skin=3;
-//			chunk.drawflags (+) DRF_TRANSLUCENT;
+			chunk.drawflags (+) DRF_TRANSLUCENT;
+			if(self.drawflags&MLS_ABSLIGHT)
+			{
+				chunk.drawflags(+)MLS_ABSLIGHT;
+				chunk.abslight=self.abslight;
+			}
+			chunk_vel*=.1;
+			chunk.gravity=random(0.3,0.8);
 		}
 	}
 	else if (self.thingtype==THINGTYPE_WOOD)
@@ -249,19 +336,8 @@ void CreateModelChunks (vector space,float scalemod)
 			setmodel (chunk, "models/schunk4.mdl");
 		chunk.skin = 1;
 	}
-	else if (self.thingtype==THINGTYPE_BONE)
-	{
-		if (final < 0.25)
-			setmodel (chunk, "models/schunk1.mdl");
-		else if (final < 0.50)
-			setmodel (chunk, "models/schunk2.mdl");
-		else if (final < 0.75)
-			setmodel (chunk, "models/schunk3.mdl");
-		else 
-			setmodel (chunk, "models/schunk4.mdl");
-		chunk.skin = 1;
-	}
-	else if (self.thingtype==THINGTYPE_CLAY)
+  
+	else if ((self.thingtype==THINGTYPE_CLAY) || (self.thingtype==THINGTYPE_BONE))
 	{
 		if (final < 0.25)
 			setmodel (chunk, "models/clshard1.mdl");
@@ -271,6 +347,10 @@ void CreateModelChunks (vector space,float scalemod)
 			setmodel (chunk, "models/clshard3.mdl");
 		else 
 			setmodel (chunk, "models/clshard4.mdl");
+		if (self.thingtype==THINGTYPE_BONE)
+		{
+			chunk.skin = 1;
+		}
 	}
 	else if (self.thingtype==THINGTYPE_LEAVES)
 	{
@@ -393,13 +473,13 @@ void CreateModelChunks (vector space,float scalemod)
 	else if (self.thingtype==THINGTYPE_ICE)
 	{
 		setmodel(chunk,"models/shard.mdl");
-		//setmodel(chunk,"models/shardwend.mdl");
+										   
 		chunk.skin=0;
-		chunk.gravity = 0.7;
+					  
 		chunk.frame=random(2);
 		chunk.drawflags(+)DRF_TRANSLUCENT|MLS_ABSLIGHT;
 		chunk.abslight=0.5;
-		
+  
 	}
 	else// if (self.thingtype==THINGTYPE_GREYSTONE)
 	{
@@ -414,12 +494,24 @@ void CreateModelChunks (vector space,float scalemod)
 		chunk.skin = 0;
 	}
 
-	setsize (chunk, '0 0 0', '0 0 0');
+	if(self.solid==SOLID_TRIGGER)//Trigger event
+	{
+		setsize(chunk,'-1 -1 -1', '1 1 1');
+		chunk.hull = HULL_POINT;
+		thinktime chunk :  random(2)+2;
+		chunk.dmg = self.dmg;
+	}
+	else
+	{
+		setsize (chunk, '0 0 0', '0 0 0');
+		thinktime chunk :  random(2);
+	}
+
 	chunk.movetype = MOVETYPE_BOUNCE;
-	chunk.solid = SOLID_NOT;
-	chunk.velocity = ChunkVelocity();
+						 
+								  
 	chunk.think = ChunkRemove;
-	
+	chunk.velocity=chunk_vel;
 	chunk.avelocity_x = random(1200);
 	chunk.avelocity_y = random(1200);
 	chunk.avelocity_z = random(1200);
@@ -430,7 +522,6 @@ void CreateModelChunks (vector space,float scalemod)
 		chunk.scale = random(scalemod,scalemod + .1);
 
 	chunk.ltime = time;
-	thinktime chunk :  random(2);
 }
 
 void DropBackpack(void);  // in items.hc
@@ -574,7 +665,7 @@ void chunk_death (void)
 	{
 		if ((random(100) < 40) && (self.netname != "spider"))
 			BloodSplat();
-		if (random(100) > 50)
+		if (random(100) < 50)
 			ThrowGib("models/bloodpool2.mdl", self.health);
 		else
 			ThrowGib("models/bloodpool.mdl", self.health);
@@ -658,15 +749,24 @@ void chunk_death (void)
 	if(model_cnt>CHUNK_MAX)
 		model_cnt=CHUNK_MAX;
 
-	while (model_cnt>0)
+	if(deathmatch||coop)
+	{	// this function handles deathmatch specially...
+		CreateModelChunks(space,scalemod, model_cnt);
+	}
+	else
 	{
-		if (chunk_cnt < CHUNK_MAX*2)
+		while (model_cnt>0)
 		{
-			CreateModelChunks(space,scalemod);
-			chunk_cnt+=1;
+			if (chunk_cnt < CHUNK_MAX*2)
+			{
+				CreateModelChunks(space,scalemod, 1);
+				chunk_cnt+=1;
+			}
+
+			model_cnt-=1;
 		}
 
-		model_cnt-=1;
+			   
 	}
 	
 	make_chunk_reset();
@@ -675,7 +775,7 @@ void chunk_death (void)
 		return;
 
 	SUB_UseTargets();
-	self.target = self.targetname;
+	self.target = self.targetname;	//fix by Shanjaq
 
 	if (self.thingtype==THINGTYPE_FLESH || //most monsters are flesh
 	   ((self.thingtype==THINGTYPE_GREYSTONE || self.thingtype==THINGTYPE_METAL) && self.flags&FL_MONSTER))//golems
@@ -684,13 +784,15 @@ void chunk_death (void)
 		self.think = MarkForRespawn;
 		self.nextthink = time + 0.01;
 	}
-	else if(self.headmodel!=""&&self.classname!="head")
+	if(self.headmodel!=""&&self.classname!="head")
 	{
 		ThrowSolidHead (50);
 	}
 	else
 	{
-		remove(self);		
+		if(self.movechain)
+			remove(self.movechain);
+		remove(self);
 	}
 }
 

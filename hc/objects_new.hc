@@ -22,7 +22,7 @@ void()	fog_loop8	=[	3,	fog_loop9	] {};
 void()	fog_loop9	=[	4,	fog_loop10	] {};
 void()	fog_loop10	=[	4,	fog_loop1	] {};
 
-void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, self.noise1, 0.75, ATTN_IDLE)};
+void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, self.noise1, 0.75, ATTN_IDLE);};
 void()	fire_burn2	=[	1,	fire_burn3	] {};
 void()	fire_burn3	=[	2,	fire_burn4	] {};
 void()	fire_burn4	=[	3,	fire_burn5	] {};
@@ -36,7 +36,6 @@ void()	fire_burn11	=[	10,	fire_burn12	] {};
 void()	fire_burn12	=[	11,	fire_burn13	] {};
 void()	fire_burn13	=[	12,	fire_burn14	] {};
 void()	fire_burn14	=[	13,	fire_burn1	] {CreateWhiteSmoke(self.origin + '0 0 56','0 0 8',HX_FRAME_TIME * 2);};
-
 
 void()	star_sparkle1	=[	0,	star_sparkle2	] {};
 void()	star_sparkle2	=[	1,	star_sparkle3	] {};
@@ -538,11 +537,11 @@ void() light_fire_large
 	precache_model ("models/flammd.spr");
 	setmodel (self, "models/flammd.spr");
 	self.think = fire_burn1;
+	if (self.targetname)
+		self.use = SUB_Remove;
 	if (!self.noise1)
 		self.noise1 = "misc/fburn_bg.wav";
 	precache_sound(self.noise1);
-	if (self.targetname)
-		self.use = SUB_Remove;
 	self.think();
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/fireball.hc,v 1.2 2007-02-07 16:57:04 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/fireball.hc,v 1.2 2007-02-07 16:59:32 sezero Exp $
  */
 /*
 ==============================================================================
@@ -33,7 +33,6 @@ void FireFizzle (void)
 void() fireballTouch =
 {
 	local float	damg;
-	float wismod;
 
 	if (other == self.owner)
 		return;		// don't explode on owner
@@ -44,16 +43,7 @@ void() fireballTouch =
 		return;
 	}
 
-	if (self.dmg == -1)
-	{
-		damg = random(9,18);		
-		if (self.owner.classname == "cube_of_force" && self.owner.owner.classname == "player")
-		{
-			wismod = self.owner.owner.wisdom;
-			damg = random(wismod / 2, wismod);
-		}
-	}
-	else if (self.dmg)
+	if (self.dmg)
 		damg = self.dmg;
 	else
 		damg = random(12,22);
@@ -83,12 +73,7 @@ void() fireballTouch =
 //	BecomeExplosion ();
 };
 
-
-
-
-
 //============================================================================
-
 
 void fireball_1(void)
 {
@@ -108,7 +93,7 @@ void fireball_1(void)
 //============================================================================
 
 
-void(vector offset) do_fireball =
+void(vector offset, float damg) do_fireball =
 {
 entity missile;
 vector vec;
@@ -123,7 +108,7 @@ vector vec;
 		missile.scale=2;
 	}
 	else
-		missile.dmg = self.dmg;
+		missile.dmg = damg;
 
 	missile.movetype = MOVETYPE_FLYMISSILE;
 	missile.solid = SOLID_BBOX;

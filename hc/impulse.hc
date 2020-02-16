@@ -1,59 +1,135 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/impulse.hc,v 1.4 2007-02-07 16:57:06 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/impulse.hc,v 1.4 2007-02-07 16:59:33 sezero Exp $
  */
 
 void PlayerAdvanceLevel(float NewLevel);
 void player_level_cheat(void);
 void player_experience_cheat(void);
 void Polymorph (entity loser);
+void()sheep_look;
 //void create_swarm (void);
+
+void wake_sheep ()
+{
+entity found;
+float r;
+	if(self.attack_finished>time)
+		return;
+
+	if(self.sheep_call>time)
+		return;
+
+	self.sheep_call=time+2;
+
+	sheep_sound(1);
+	found=find(world,classname,"player_sheep");
+	while(found)
+	{
+		if(infront(found))
+			r=random();
+		else
+			r=random(5);
+		if(r<0.5)
+		{
+			found.think=sheep_look;
+			thinktime found : 0;
+		}
+		found=find(found,classname,"player_sheep");
+	}
+}
 
 void restore_weapon ()
 {//FIXME: use idle, not select
 	self.weaponframe = 0;
 	if (self.playerclass==CLASS_PALADIN)
 	{
-		if (self.weapon == IT_WEAPON1)
+		switch (self.weapon)
+		{
+		case  IT_WEAPON1:
 			self.weaponmodel = "models/gauntlet.mdl";
-		else if (self.weapon == IT_WEAPON2)
+		break;
+		case IT_WEAPON2:
 			self.weaponmodel = "models/vorpal.mdl";
-		else if (self.weapon == IT_WEAPON3)
+		break;
+		case IT_WEAPON3:
 			self.weaponmodel = "models/axe.mdl";
-		else if (self.weapon == IT_WEAPON4)
+		break;
+		case IT_WEAPON4:
 			self.weaponmodel = "models/purifier.mdl";
+		break;
+		}
 	}
 	else if (self.playerclass==CLASS_CRUSADER)
 	{
-		if (self.weapon == IT_WEAPON1)
+		switch (self.weapon)
+		{
+		case IT_WEAPON1:
 			self.weaponmodel = "models/warhamer.mdl";
-		else if (self.weapon == IT_WEAPON2)
+		break;
+		case IT_WEAPON2:
 			self.weaponmodel = "models/icestaff.mdl";
-		else if (self.weapon == IT_WEAPON3)
+		break;
+		case IT_WEAPON3:
 			self.weaponmodel = "models/meteor.mdl";
-		else if (self.weapon == IT_WEAPON4)
+		break;
+		case IT_WEAPON4:
 			self.weaponmodel = "models/sunstaff.mdl";
+		break;
+		}
 	}
 	else if (self.playerclass==CLASS_NECROMANCER)
 	{
-		if (self.weapon == IT_WEAPON1)
+		switch (self.weapon)
+		{
+		case IT_WEAPON1:
 			self.weaponmodel = "models/sickle.mdl";
-		else if (self.weapon == IT_WEAPON2)
-			self.weaponmodel = "models/sickle.mdl";  // FIXME: still need these models
-		else if (self.weapon == IT_WEAPON3)
-			self.weaponmodel = "models/sickle.mdl";
-		else if (self.weapon == IT_WEAPON4)
+		break;
+		case IT_WEAPON2:
+			self.weaponmodel = "models/spllbook.mdl";  // FIXME: still need these models
+		break;
+		case IT_WEAPON3:
+			self.weaponmodel = "models/spllbook.mdl";
+		break;
+		case IT_WEAPON4:
 			self.weaponmodel = "models/ravenstf.mdl";
+		break;
+		}
 	}
 	else if (self.playerclass==CLASS_ASSASSIN)
 	{
-		if (self.weapon == IT_WEAPON1)
+		switch (self.weapon)
+		{
+		case IT_WEAPON1:
 			self.weaponmodel = "models/punchdgr.mdl";
-		else if (self.weapon == IT_WEAPON2)
+		break;
+		case IT_WEAPON2:
 			self.weaponmodel = "models/crossbow.mdl";
-		else if (self.weapon == IT_WEAPON3)
+		break;
+		case IT_WEAPON3:
 			self.weaponmodel = "models/v_assgr.mdl";
-		else if (self.weapon == IT_WEAPON4)
+		break;
+		case IT_WEAPON4:
 			self.weaponmodel = "models/scarabst.mdl";
+		break;
+		}
+	}
+	else if (self.playerclass==CLASS_SUCCUBUS)
+	{
+		switch (self.weapon)
+		{
+		case IT_WEAPON1:
+			self.weaponmodel = "models/sucwp1.mdl";
+		break;
+		case IT_WEAPON2:
+			self.weaponmodel = "models/sucwp2.mdl";
+		break;
+		case IT_WEAPON3:
+			self.weaponmodel = "models/sucwp3.mdl";
+		break;
+		case IT_WEAPON4:
+			self.weaponmodel = "models/sucwp4.mdl";
+		break;
+		}
 	}
 }
 
@@ -61,20 +137,27 @@ void see_coop_view ()
 {
 entity startent,found;
 float gotone;
+	if(self.viewentity!=self)
+		centerprint(self,"Ally vision not available in chase camera mode\n");
+
 	if(!coop&&!teamplay)
 	{
 		centerprint(self,"Ally vision not available\n");
 		return;
 	}
 
-	startent=self.viewentity;
+	if(self.cameramode==world)
+		startent=self;
+	else
+		startent=self.cameramode;
 	found=startent;
 	while(!gotone)
 	{
 		found=find(found,classname,"player");
-		if(found.flags2&FL_ALIVE)
-			if((deathmatch&&found.team==self.team)||coop)
-				gotone=TRUE;
+		if(found.flags&FL_CLIENT)
+			if((deathmatch&&teamplay&&found.team==self.team)||coop)
+				if(found.cameramode==world||found==self)
+					gotone=TRUE;
 		if(found==startent)
 		{
 			centerprint(self,"No allies available\n");
@@ -82,26 +165,21 @@ float gotone;
 		}
 	}
 
-	sprint(self,found.netname);
-	sprint(self," found!\n");
-	self.viewentity=found;
-	CameraViewPort(self,found);
-	CameraViewAngles(self,found);
-	if(self.viewentity==self)
+	if(found==self)
 	{
-		self.oldweapon=self.weapon;//for deselection animation
-		restore_weapon();
+		CameraReturn();
+		return;
 	}
-	else
-	{
-		self.weaponmodel=self.viewentity.weaponmodel;
-		self.weaponframe=self.viewentity.weaponframe;
-	}
+	centerprint(self,found.netname);
+	AllyVision(self,found);
+	self.weaponmodel=self.cameramode.weaponmodel;
+	self.weaponframe=self.cameramode.weaponframe;
 }
 
 void player_everything_cheat(void)
 {
-	if(deathmatch||coop)
+//RESET!
+	if(deathmatch||coop||skill>2)
 		return;
 
 	CheatCommand();		// Give them weapons and mana	
@@ -124,14 +202,24 @@ entity lastent;
 			bprint(lastent.netname);
 			bprint(" (L-");
 			bprint(ftos(lastent.level));
-			if(lastent.playerclass==CLASS_ASSASSIN)
+			switch (lastent.playerclass)
+			{
+			case CLASS_ASSASSIN:
 				bprint(" Assassin) ");
-			else if(lastent.playerclass==CLASS_PALADIN)
+			break;
+			case CLASS_SUCCUBUS:
+				bprint(" Demoness) ");
+			break;
+			case CLASS_PALADIN:
 				bprint(" Paladin) ");
-			else if(lastent.playerclass==CLASS_CRUSADER)
+			break;
+			case CLASS_CRUSADER:
 				bprint(" Crusader) ");
-			else
+			break;
+			default:
 				bprint(" Necromancer) ");
+			break;
+			}
 			bprint(" FRAGS: ");
 			bprint(ftos(lastent.frags));
 			bprint(" (LF: ");
@@ -201,7 +289,7 @@ float inertia, lift;
 
 		trace_ent.flags(-)FL_ONGROUND;
 
-		if(self.playerclass==CLASS_ASSASSIN)
+		if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 			sound (self, CHAN_BODY,"player/assjmp.wav", 1, ATTN_NORM);
 		else
 			sound (self, CHAN_BODY,"player/paljmp.wav", 1, ATTN_NORM);
@@ -209,6 +297,7 @@ float inertia, lift;
 	}
 }
 
+/*
 void AddServerFlag(float addflag)
 {
 	addflag=byte_me(addflag+8);
@@ -216,6 +305,18 @@ void AddServerFlag(float addflag)
 	dprintf("Added flag %s\n",addflag);
 	serverflags(+)addflag;
 	dprintf("Serverflags are now: %s\n",serverflags);
+}
+*/
+
+void makeplayer ()
+{
+	newmis=spawn();
+	setmodel(newmis,self.model);
+	setorigin(newmis,self.origin);
+	newmis.frame = self.frame;
+	newmis.angles=self.angles;
+	newmis.think=SUB_Remove;
+	thinktime newmis : 10;
 }
 
 /*
@@ -228,11 +329,11 @@ void() ImpulseCommands =
 {
 	entity search;
 	float total;
-//	string s2;
+	string printnum;
 
 	if(self.flags2&FL_CHAINED&&self.impulse!=23)
 		return;
-
+	
 	if (self.impulse == 144)
 	{
 		if (self.button1 == 0)
@@ -243,26 +344,50 @@ void() ImpulseCommands =
 		if (self.button1 == 1)
 			self.button1 = 0;
 	}
-	else if (self.impulse == 9&&skill<3)
+
+	if (self.impulse == 9&&skill<3)
 		CheatCommand ();
-	else if (self.impulse == 14)
-		Polymorph(self);
+	else if(self.impulse==177)//Make BBOX model
+		if(self.movechain.model=="models/playrbox.mdl")
+		{
+			remove(self.movechain);
+			self.movechain=world;
+		}
+		else
+		{
+			self.movechain=spawn();
+			setorigin(self.movechain,self.origin);
+			setmodel(self.movechain,"models/playrbox.mdl");
+			setsize(self.movechain,'-16 -16 0','16 16 56');
+			self.movechain.hull=HULL_PLAYER;
+			self.movechain.abslight=0.5;
+			self.movechain.drawflags(+)MLS_ABSLIGHT;
+			self.movechain.solid=SOLID_NOT;
+			self.movechain.movetype=MOVETYPE_NOCLIP;
+			self.movechain.angles='0 0 0';
+		}
+	else if(self.impulse==178)//test trace
+		if(self.flags2&FL2_TEST_TRACE)
+			self.flags2(-)FL2_TEST_TRACE;
+		else
+			self.flags2(+)FL2_TEST_TRACE;
 	else if (self.impulse == 99)
 		ClientKill();
-	else if (self.impulse ==149)
-		dprintf("Serverflags are now: %s\n",serverflags);
-//	else if (self.impulse >149 && self.impulse <157)
-//		AddServerFlag(self.impulse - 149);
-//	else if (self.impulse == 21 )  // To activate torch
-//		UseTorch ();
 	else if (self.impulse == 23 )  // To use inventory item
 		UseInventoryItem ();
 	else if(self.impulse==33)
-		see_coop_view();
+	{
+		if(coop||teamplay)
+			see_coop_view();
+		else
+			centerprint(self,"Ally Vision Not Available\n");
+	}
 	else if(self.impulse==32)
 		PanicButton();
-/*	else if (self.impulse == 27)//Uncomment this for a good time!
-		MakeCamera();*/
+	else if (self.impulse == 27)//Uncomment this for a good time!
+		ToggleChaseCam(self);
+	else if (self.impulse == 28&&(!coop)&&(!deathmatch))
+		makeplayer();
 	else if (self.impulse == 34)
 	{	// S.A listing puzzle inventory is a good idea
 		sprint(self,"Puzzle Inventory: ");
@@ -391,8 +516,9 @@ void() ImpulseCommands =
 		sprint(self,s2);
 		sprint(self,"\n");
 	}*/
-	else if(self.impulse==25)
+	else if(self.impulse==25&&skill<3)
 	{
+//reset!
 		if(deathmatch||coop)
 		{
 			self.impulse=0;
@@ -421,8 +547,8 @@ void() ImpulseCommands =
 	}
 	else if(self.impulse==40&&skill<3)
 	{
-		//if(deathmatch||coop)  - network saving no longer works so you should use the level cheat to "load"
-		if(deathmatch)
+//reset!
+		if(deathmatch||coop)
 		{
 			self.impulse=0;
 			return;
@@ -442,11 +568,17 @@ void() ImpulseCommands =
 	}
 	else if (self.impulse == 42)
 	{
-		dprintv("Coordinates: %s\n", self.origin);
-		dprintv("Angles: %s\n",self.angles);
-		dprint("Map is ");
-		dprint(mapname);
-		dprint("\n");
+		sprint(self,"Coordinates: ");
+		printnum=vtos(self.origin);
+		sprint(self,printnum);
+		sprint(self,"\n");
+		sprint(self,"Angles: ");
+		printnum=vtos(self.angles);
+		sprint(self,printnum);
+		sprint(self,"\n");
+		sprint(self,"Map is ");
+		sprint(self,mapname);
+		sprint(self,"\n");
 	}
 	else if(self.impulse==43&&skill<3)
 		player_everything_cheat();
@@ -522,11 +654,26 @@ void() ImpulseCommands =
 	}
 	else if (self.impulse == 255)
 		PrintFrags();
-	else if (self.impulse>170&&self.impulse<175&&cvar("registered"))
+//On the fly class changing only works in network because of selective precaching
+	else if (self.impulse>170&&self.impulse<176&&cvar("registered"))
 	{
+		if(!coop&&!deathmatch)
+		{
+			centerprint(self,"Cannot switch classes on the fly in single player...\n");
+			self.impulse=0;
+			return;
+		}
+
+		if(randomclass)
+		{
+			centerprint(self,"Cannot switch classes with randomclass active...\n");
+			self.impulse=0;
+			return;
+		}
+
 		if(self.level<3)
 		{
-			sprint(self,"You must have achieved level 3 or higher to change class!\n");
+			centerprint(self,"You must have achieved level 3 or higher to change class!\n");
 			self.impulse=0;
 			return;
 		}
@@ -563,7 +710,16 @@ void() ImpulseCommands =
 			}
 			else
 				self.newclass=CLASS_ASSASSIN;
+		else if(self.impulse==175)
+			if(self.playerclass==CLASS_SUCCUBUS)
+			{
+				self.impulse=0;
+				return;
+			}
+			else
+				self.newclass=CLASS_SUCCUBUS;
 		self.effects=self.drawflags=FALSE;
+		remove_invincibility(self);
 		self.playerclass=self.newclass;//So it drops exp the right amount
 		drop_level(self,2);
 
@@ -571,10 +727,10 @@ void() ImpulseCommands =
 		newmis.classname="classchangespot";
 		newmis.angles=self.angles;
 		setorigin(newmis,self.origin);
-
-		if(!deathmatch&&!coop)
-			parm7=self.newclass;//Just to tell respawn() not to use restart
-		else
+//what's this  - it's code for single play which we don't need anymore
+//		if(!deathmatch&&!coop)
+//			parm7=self.newclass;//Just to tell respawn() not to use restart
+//		else
 		{
 			self.model=self.init_model;
 			GibPlayer();
@@ -588,23 +744,40 @@ void() ImpulseCommands =
 		self.impulse=0;
 		return;
 	}
-	else if (self.impulse >= 1 && self.impulse <= 4)
-		W_ChangeWeapon ();
-	else if ((self.impulse == 10) && (wp_deselect == 0))
-		CycleWeaponCommand ();
-//	else if (self.impulse == 11)
-//		ServerflagsCommand ();
-	else if (self.impulse == 12)
-		CycleWeaponReverseCommand ();
-	else if(self.impulse == 13)
-		HeaveHo();
-	else if (self.impulse == 22 &&!self.flags2 & FL2_CROUCHED)  // To crouch
+	
+	switch (self.impulse)
 	{
-		if(self.flags2 & FL2_CROUCH_TOGGLE)
-			self.flags2(-)FL2_CROUCH_TOGGLE;
-		else
-			self.flags2(+)FL2_CROUCH_TOGGLE;
-//		PlayerCrouch();
+	case 1..4:
+		W_ChangeWeapon();
+	break;
+	case 10:
+		if (wp_deselect == 0)
+			CycleWeaponCommand ();
+	break;
+//	case 11:
+//		ServerflagsCommand ();
+//	break;
+	case 12:
+		CycleWeaponReverseCommand ();
+	break;
+	case 13:
+		HeaveHo();
+	break;
+	case 14:
+		if(world.target=="sheep")
+			wake_sheep();
+		else if(skill<3)
+			Polymorph(self);
+		break;
+	case 22:
+		if (!self.flags2 & FL2_CROUCHED)
+		{
+			if(self.flags2 & FL2_CROUCH_TOGGLE)
+				self.flags2(-)FL2_CROUCH_TOGGLE;
+			else
+				self.flags2(+)FL2_CROUCH_TOGGLE;
+		}
+	break;
 	}
 	self.impulse = 0;
 };

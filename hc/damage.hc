@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/damage.hc,v 1.3 2007-02-07 16:57:00 sezero Exp $
+ * $Id: damage.hc 5225 2013-07-28 18:28:09Z sezero $
  */
 
 void() T_MissileTouch;
@@ -7,8 +7,8 @@ void() info_player_start;
 void necromancer_sphere(entity ent);
 void crusader_sphere(entity ent);
 
-void() monster_death_use;
-void()player_pain;
+void(float force_respawn) monster_death_use;
+void(entity attacker,float total_damage)player_pain;
 void()PlayerDie;
 void MonsterDropStuff(void);
 void Use_TeleportCoin(void);
@@ -16,8 +16,278 @@ void UseInvincibility(void);
 void Use_TomeofPower(void);
 void use_super_healthboost();
 
+entity FindExpLeader()
+{
+entity lastent, leader;
+float top_exp;
+	lastent=nextent(world);
+	num_players=0;
+	while(lastent)
+	{
+		if(lastent.classname=="player")
+		{
+			num_players+=1;
+			if(lastent.experience>top_exp)
+			{
+				leader=lastent;
+				top_exp=leader.experience;
+			}
+		}
+		lastent=find(lastent,classname,"player");
+	}
+	return leader;
+}
 
-float ClassArmorProtection[16] =
+float CheckExpAward (entity attacker,entity targ,float fatality,float damage)
+{
+float exp_bonus,health_mod,exp_base;
+entity lastleader,newking;
+	if(!attacker.flags&FL_CLIENT)
+	{
+//		dprint("Attacker not a player!\n");
+		return FALSE;
+	}
+
+	if(attacker.deadflag>=DEAD_DYING)
+	{
+//		dprint("Attacker dead!\n");
+		return FALSE;
+	}
+
+	if(world.target=="sheep")
+	{
+		if(fatality&&targ.classname=="player_sheep")
+		{
+			if(attacker.flags&FL_CLIENT)
+			{
+			string sheep_pointer;
+				sound (attacker, CHAN_BODY, "misc/comm.wav", 1, ATTN_NORM);
+				exp_base=random();
+				if(!targ.scale)
+					targ.scale=1;
+				sprint(attacker,"Got me a ");
+				sheep_pointer=ftos(targ.experience_value);
+				sprint(attacker,sheep_pointer);
+				sprint(attacker,"-pointer!\n");
+				if(targ.scale<0.5)
+				{
+					sprint(attacker,"Slippery sucker! ");
+					exp_bonus=rint((0.6-targ.scale)*10);
+					sheep_pointer=ftos(exp_bonus);
+					sprint(attacker,sheep_pointer);
+					sprint(attacker,"-point bonus!\n");
+					attacker.experience+=exp_bonus;
+				}
+/*				if(fatality==2)
+				{
+					sprint(attacker,"Non-scope bonus point!");
+					attacker.experience+=1;
+				}*/
+
+				if(exp_base<0.2)
+					centerprint(attacker,"Bullseye!\n");
+				else if(exp_base<0.4)
+					centerprint(attacker,"Got one!\n");
+				else if(exp_base<0.6)
+					centerprint(attacker,"Right in the kill zone!\n");
+				else if(exp_base<0.8)
+					centerprint(attacker,"Boo-yah!\n");
+				else
+					centerprint(attacker,"Nee-hahhh!\n");
+			}
+			attacker.experience+=targ.experience_value;
+		}
+		return FALSE;
+	}
+	//NOTE: exp_mult is for DM only
+	health_mod=1;
+	if(deathmatch)
+	{
+		if(attacker.artifact_active&ART_INVINCIBILITY)
+			health_mod=0.2;//CHEAP!!!
+		else if(attacker.health>attacker.max_health)
+		{
+			health_mod=attacker.max_health/attacker.health;
+			if(health_mod<0.5)
+				health_mod=0.5;
+		}
+		else if(attacker.health<attacker.max_health*0.5)
+		{
+			health_mod=((attacker.max_health*0.5)/attacker.health)*0.1;
+			if(health_mod>3.3)
+				health_mod=3.3;
+		}
+	}
+	exp_mult*=health_mod;
+
+	if(targ.classname=="player")
+	{
+		if(fatality)
+			if(damage>targ.max_health)
+				damage=targ.max_health;
+		targ.experience_value=(targ.level*800 - 500)*exp_mult;
+		if(fatality)
+			targ.experience_value*=(damage/targ.max_health);//remainder of health
+		else
+			targ.experience_value*=(damage/targ.max_health*0.5);
+		exp_base=targ.experience_value;
+	}
+	else
+	{
+		if(fatality)
+			exp_base=targ.experience_value;//remainder of health
+		else
+			exp_base=targ.init_exp_val*(damage/targ.max_health*0.5);//give appropriate exp for % of damage to max_health, divided by 2
+	}
+
+	if(exp_base<=0)
+	{
+//		dprint("target has no exp_val\n");
+		return FALSE;
+	}
+
+	if(attacker.model=="models/sheep.mdl")
+	{//3000 exp bonus for killing as sheep.
+		if(fatality)
+		{
+			sound (attacker, CHAN_BODY, "misc/comm.wav", 1, ATTN_NORM);
+			centerprint(attacker,"Sheep kill BONUS!!!\n");
+			exp_bonus=3000;
+		}
+	}
+
+	if(deathmatch)
+	{
+		lastleader=FindExpLeader();//Find King of the Hill
+		if(targ.classname=="player")//Exp gained is (level*800 - 500) * exp_mult
+		{
+			if(!fatality)
+			{
+				if((targ.classname=="player"&&teamplay&&attacker.team==self.team)||attacker==targ)//hit your own guy
+				{//this is checked above to, but what the hay
+//					dprint("Attacker hit own teammate in DM!\n");
+					return FALSE;
+				}
+				else
+				{
+//					dprint("Attacker valid player in DM!\n");
+					return exp_base;//exp_bonus only for fatalities
+				}
+			}
+			else
+			{
+				attacker.level_frags+=targ.level;//Level frags
+				if(lastleader==targ&&attacker!=targ)//Killed King		
+				{
+					sound (attacker, CHAN_ITEM, "misc/comm.wav", 1, ATTN_STATIC);
+					centerprint(attacker,"You took out the King of the Hill!\n");
+					if(num_players>2)//Only give bonus if more than 2 players
+						exp_bonus+=500*(num_players - 2);	//Give an extra 500* num players,you beat others to the kill
+				}
+			}
+		}
+		
+		if((targ.classname=="player"&&teamplay&&attacker.team==targ.team)||attacker==targ)
+		{
+			if(!fatality)
+			{//this is checked above to, but what the hay
+//				dprint("Attacker hit own teammate in DM!\n");
+				return FALSE;
+			}
+			else if(attacker==targ)
+				return FALSE;
+			else
+				drop_level(attacker,1);//Killed someone on your team, or killed self, lose a level, get no exp
+		}
+		else
+		{
+			if(targ.classname=="player"&&attacker.level+2<targ.level)
+			{
+				if(fatality)
+					drop_level(targ,1); //If player killed by a lower level player, lose 1 level (diff in levels must be 3 or more)
+			}
+
+			if(attacker!=targ.controller)//No credit for killing your imp!
+			{
+				if(!fatality)
+				{
+//					dprint("Attacker hit valid player in DM!\n");
+					return exp_base;//exp_bonus is only for fatalities
+				}
+				else
+					AwardExperience(attacker,targ,exp_base+exp_bonus);
+			}
+			else if(!fatality)
+			{
+//				dprint("Attacker hit own ent in DM!\n");
+				return FALSE;
+			}
+		}
+
+		if(deathmatch)
+		{
+			newking=FindExpLeader();
+			if(newking!=lastleader)
+			{//Tell everyone if the king of the hill has changed
+				sound (world, CHAN_BODY, "misc/comm.wav", 1, ATTN_NONE);
+				bprint(newking.netname);
+				bprint(" is the NEW King of the Hill!\n");
+				WriteByte(MSG_ALL, SVC_UPDATE_KINGOFHILL);
+				WriteEntity (MSG_ALL, newking);
+			}
+		}
+	}
+	else if(targ.classname=="player"&&coop&&teamplay&&attacker.team==targ.team)
+	{
+		if(!fatality)
+		{
+//			dprint("Attacker hit own teammate in coop\n");
+			return FALSE;
+		}
+		else
+			drop_level(attacker,1);	//Killed friend in coop, lose a level
+	}
+	else if(attacker!=targ.controller&&(targ.monsterclass<CLASS_BOSS||targ.classname=="obj_chaos_orb"))//Bosses award Exp themselves, to all players in coop
+	{
+		if(!fatality)
+		{
+//			dprint("Attacker hit valid exp targ\n");
+			return exp_base;//exp_bonus only for fatalities
+		}
+		else
+			AwardExperience(attacker,targ,exp_base+exp_bonus);
+	}
+	return TRUE;
+}
+
+void poison_think ()
+{
+	self.enemy.deathtype="poison";
+	T_Damage (self.enemy, self, self.owner, 1 );
+	if(self.enemy.flags&FL_CLIENT)
+		stuffcmd(self.enemy,"bf\n");
+	if(self.lifetime<time||self.enemy.health<=0||(!self.enemy.flags2&FL2_POISONED))
+	{
+		self.enemy.flags2(-)FL2_POISONED;
+		self.think=SUB_Remove;
+	}
+	thinktime self : 1;
+}
+
+void spawn_poison(entity loser,entity killer,float poison_length)
+{
+entity poison_ent;
+	loser.flags2(+)FL2_POISONED;
+	poison_ent=spawn();
+	poison_ent.think=poison_think;
+	poison_ent.enemy=loser;
+	poison_ent.owner=killer;
+
+	thinktime poison_ent : 0.05;
+	poison_ent.lifetime=time+poison_length;
+}
+
+float ClassArmorProtection[20] =
 {
 	// Paladin Armor Protection
 	.05,	// AMULET
@@ -38,6 +308,12 @@ float ClassArmorProtection[16] =
 	.10,	// HELMET
 
 	// Assassin Armor Protection
+	.10,	// AMULET
+	.15,	// BRACER
+	.25,	// BREASTPLATE
+	.05,	// HELMET
+
+	// Succubus Armor Protection
 	.10,	// AMULET
 	.15,	// BRACER
 	.25,	// BREASTPLATE
@@ -107,27 +383,6 @@ float targ_rad,loop_cnt;
 	return FALSE;
 };
 
-entity FindExpLeader()
-{
-entity lastent, leader;
-float top_exp;
-	lastent=nextent(world);
-	num_players=0;
-	while(lastent)
-	{
-		if(lastent.classname=="player")
-		{
-			num_players+=1;
-			if(lastent.experience>top_exp)
-			{
-				leader=lastent;
-				top_exp=leader.experience;
-			}
-		}
-		lastent=find(lastent,classname,"player");
-	}
-	return leader;
-}
 
 float Pal_DivineIntervention(void)
 {
@@ -167,10 +422,9 @@ float Pal_DivineIntervention(void)
 Killed
 ============
 */
-void(entity targ, entity attacker, entity inflictor) Killed =
+void(entity targ, entity attacker, entity inflictor,float damage) Killed =
 {
-	entity oself;
-	float exp_bonus;
+entity oself;
 	oself = self;
 	self = targ;
 
@@ -201,7 +455,6 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 			if ((targ.flags & FL_MONSTER) || (targ.flags & FL_CLIENT))
 				crusader_sphere (attacker);
 		}
-		
 		self.killerlevel = attacker.level;
 	}
 
@@ -238,8 +491,6 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 		self.attack_finished=time;
 		self.pausetime=time;
 		self.teleport_time=time;
-		//if(self.frozen>0)
-			//self.deathtype="ice shatter";
 		if(self.frozen>0)
 			self.deathtype="ice shatter";
 		else if(self.skin==GLOBAL_SKIN_STONE)
@@ -249,6 +500,16 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 	if (self.classname == "player")
 		ClientObituary(self, attacker, inflictor);
 
+	if(world.target=="sheep")
+	{
+		if(inflictor.scoped)
+			CheckExpAward(attacker,self,TRUE,damage);
+		else
+			CheckExpAward(attacker,self,2,damage);
+	}
+	else
+		CheckExpAward(attacker,self,TRUE,damage);
+/*
 	if(attacker.deadflag<DEAD_DYING)
 	{
 		if(attacker.model=="models/sheep.mdl"&&attacker.flags&FL_CLIENT)
@@ -295,34 +556,46 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 				}
 			}
 		}
-		//else if(self.classname=="player"&&attacker.classname=="player"&&(coop||teamplay&&attacker.team==self.team))
-			//drop_level(attacker,1);	//Killed friend in coop, lose a level
-
+		else if(self.classname=="player"&&attacker.classname=="player"&&(coop||teamplay&&attacker.team==self.team))
+			drop_level(attacker,1);	//Killed friend in coop, lose a level
+		
 		else if(attacker.flags&FL_CLIENT&&attacker!=self.controller&&(self.monsterclass<CLASS_BOSS||self.classname=="obj_chaos_orb"))//Bosses award Exp themselves, to all players in coop
 			AwardExperience(attacker,self,self.experience_value+exp_bonus);
 	}
-
+*/
 	self.enemy = attacker;
 
 // bump the monster counter
+	if(self.model=="models/sheep.mdl"&&world.target=="sheep")
+		monster_death_use(TRUE);
+
 	if (self.flags & FL_MONSTER)
 	{
-		MonsterDropStuff();
+		self.experience_value= self.init_exp_val = 0;
+		if(world.model=="maps/monsters.bsp")
+			self.targetname="";//THE PIT!
+		if(self.puzzle_id=="")
+			MonsterDropStuff();
 		killed_monsters = killed_monsters + 1;
 		WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
-		monster_death_use();
-		pitch_roll_for_slope('0 0 0');
+		if(self.classname!="monster_imp_lord"&&self.classname!="monster_fish")
+			monster_death_use(FALSE);
+		pitch_roll_for_slope('0 0 0',self);
 	}
-	else if(self.target)
-		SUB_UseTargets();
+	else if(self.th_die==SUB_Null)
+		if(self.target)
+			SUB_UseTargets();
 
 	self.th_stand=self.th_walk=self.th_run=self.th_pain=self.oldthink=self.think=self.th_melee=self.th_missile=SUB_Null;
 	
 	if(pointcontents(self.origin+self.view_ofs)==CONTENT_WATER)
 		DeathBubbles(20);
 
+
 	if(attacker.classname=="rider_death")
 		spawn_ghost(attacker);
+	if(self.puzzle_id!="")
+		DropPuzzlePiece();
 
 	if(oself!=targ)
 	{
@@ -359,19 +632,7 @@ entity found;
 			if(found.team==self.controller.team)
 				return;
 	}
-	
-	//if monster is already aware of the player, check if it's near them; if so, ignore the new attacker
-	/*if (self.enemy.classname == "player")
-	{
-		string distance;
-		distance = ftos(vlen(self.enemy.origin-self.origin));
-		dprint (distance);
-		if (vlen(self.enemy.origin-self.origin)<128)
-			return;
-		else
-			self.enemy = attacker;
-	}
-	else*/
+
 	if (self.enemy.classname == "player")
 		self.oldenemy = self.enemy;
 	self.enemy = attacker;
@@ -437,6 +698,7 @@ float GetNaturalArmorClass(entity targ)
 	return acvalue;
 }
 
+
 void ApplyNaturalArmor(entity targ)
 {
 	float natac;
@@ -474,14 +736,13 @@ float armor_calc(entity targ,float damage)
 		total_armor_protection += ClassArmorProtection[targ.playerclass - 1 + 3];
 
 	total_armor_protection += targ.level * .001;
-	
 
 	armor_cnt = armor_inv(targ);
-	
+
 	if (armor_cnt) // There is armor
 	{
 		armor_damage = total_armor_protection * damage;
-		
+
 		// Damage is greater than all the armor
 		if (armor_damage > (targ.armor_amulet + targ.armor_bracer + 
 				targ.armor_breastplate + targ.armor_helmet))
@@ -494,72 +755,76 @@ float armor_calc(entity targ,float damage)
 		else			// Damage the armor
 		{
 			curr_damage = armor_damage;
-			armor_cnt = armor_inv(targ);
+			// FIXME: Commented out the loop for E3 because of a runaway loop message
+		//	while (curr_damage>0)
+		//	{
+				armor_cnt = armor_inv(targ);
 
-			perpiece = curr_damage / armor_cnt;
+				perpiece = curr_damage / armor_cnt;
 
-			if ((targ.armor_amulet) && (curr_damage))
-			{
-				targ.armor_amulet -= perpiece;	
-				curr_damage -= perpiece;
-				if (targ.armor_amulet < 0)
+				if ((targ.armor_amulet) && (curr_damage))
 				{
-					curr_damage -= targ.armor_amulet;
-					targ.armor_amulet = 0;
+					targ.armor_amulet -= perpiece;	
+					curr_damage -= perpiece;
+					if (targ.armor_amulet < 0)
+					{
+						curr_damage -= targ.armor_amulet;
+						targ.armor_amulet = 0;
+					}	
+
+					if (targ.armor_amulet < 1)
+						targ.armor_amulet = 0;
+				}				
+
+				if ((targ.armor_bracer) && (curr_damage))
+				{
+					targ.armor_bracer -= perpiece;	
+					curr_damage -= perpiece;
+					if (targ.armor_bracer < 0)
+					{
+						curr_damage -= targ.armor_bracer;
+						targ.armor_bracer = 0;
+					}	
+					
+					if (targ.armor_bracer < 1)
+						targ.armor_bracer = 0;
+				}				
+
+				if ((targ.armor_breastplate) && (curr_damage))
+				{
+					targ.armor_breastplate -= perpiece;	
+					curr_damage -= perpiece;
+					if (targ.armor_breastplate < 0)
+					{
+						curr_damage -= targ.armor_breastplate;
+						targ.armor_breastplate = 0;
+					}	
+					
+					if (targ.armor_breastplate < 1)
+						targ.armor_breastplate = 0;
+				}				
+
+				if ((targ.armor_helmet) && (curr_damage))
+				{
+					targ.armor_helmet -= perpiece;	
+					curr_damage -= perpiece;
+					if (targ.armor_helmet < 0)
+					{
+						curr_damage -= targ.armor_helmet;
+						targ.armor_helmet = 0;
+					}	
+
+					if (targ.armor_helmet < 1)
+						targ.armor_helmet = 0;
 				}	
 
-				if (targ.armor_amulet < 1)
-					targ.armor_amulet = 0;
-			}				
-
-			if ((targ.armor_bracer) && (curr_damage))
-			{
-				targ.armor_bracer -= perpiece;	
-				curr_damage -= perpiece;
-				if (targ.armor_bracer < 0)
-				{
-					curr_damage -= targ.armor_bracer;
-					targ.armor_bracer = 0;
-				}	
-				
-				if (targ.armor_bracer < 1)
-					targ.armor_bracer = 0;
-			}				
-
-			if ((targ.armor_breastplate) && (curr_damage))
-			{
-				targ.armor_breastplate -= perpiece;	
-				curr_damage -= perpiece;
-				if (targ.armor_breastplate < 0)
-				{
-					curr_damage -= targ.armor_breastplate;
-					targ.armor_breastplate = 0;
-				}	
-				
-				if (targ.armor_breastplate < 1)
-					targ.armor_breastplate = 0;
-			}				
-
-			if ((targ.armor_helmet) && (curr_damage))
-			{
-				targ.armor_helmet -= perpiece;	
-				curr_damage -= perpiece;
-				if (targ.armor_helmet < 0)
-				{
-					curr_damage -= targ.armor_helmet;
-					targ.armor_helmet = 0;
-				}	
-
-				if (targ.armor_helmet < 1)
-					targ.armor_helmet = 0;
-			}
+		//	}
 		}
 	}
 	else
 		armor_damage =0;
 
 	ApplyNaturalArmor(targ);
-
 	return(armor_damage);
 }
 
@@ -577,11 +842,23 @@ vector	dir;
 entity	oldself;
 float	save;
 float	total_damage;
-//float	do_mod;
 float armor_damage;
-entity holdent;
+float hurt_exp_award;
+entity holdent,lastleader,newking;
 
 	if (!targ.takedamage)
+		return;
+
+	// make sure target is a player: spider.spiderActiveCount and
+	// player.camera_time overlap in entity union and can make
+	// spiders invincible, otherwise.
+	if (targ.flags&FL_CLIENT&&targ.camera_time>=time&&!deathmatch)
+		return;
+
+	if (targ.classname=="monster_yakman"&&targ.pain_finished>time)
+		return;
+
+	if(targ.thingtype==THINGTYPE_ACID&&inflictor.thingtype==THINGTYPE_ACID)
 		return;
 
 	if(targ.invincible_time>time)
@@ -589,6 +866,9 @@ entity holdent;
 		sound(targ,CHAN_ITEM,"misc/pulse.wav",1,ATTN_NORM);
 		return;
 	}
+
+	if(inflictor.classname=="cube_of_force")
+		attacker=inflictor.controller;
 
 	if(targ!=attacker)
 		if (targ.deathtype != "teledeath"&&targ.deathtype != "teledeath2"&&targ.deathtype != "teledeath3"&&targ.deathtype != "teledeath4")
@@ -604,15 +884,10 @@ entity holdent;
 
 	if (targ.flags & FL_GODMODE)
 		return;
-	
 	if (attacker.bufftype & BUFFTYPE_SPECTRE)
-	{
 		damage *= 1.5;
-	}
 	else if (attacker.bufftype & BUFFTYPE_LEADER)
-	{
 		damage *= 1.25;
-	}
 
 	if(targ.classname=="monster_mezzoman")
 	{
@@ -648,8 +923,25 @@ entity holdent;
 		return;
 	}
 
+	if(deathmatch)
+		if(targ.flags&FL_CLIENT)
+			if(targ.viewentity!=targ&&targ.viewentity!=world)
+			{
+				oldself=self;
+				self=targ;
+				CameraReturn();
+				self=oldself;
+			}
 //Damage modifiers
 // used by buttons and triggers to set activator for target firing
+
+	//NOTE: EXPERIMENTAL, FIXME?
+	if(skill>=4)
+	{//NOTE: respawn monster when it dies after 10 seconds?
+		if(targ.flags&FL_CLIENT)
+			damage*=2;
+	}
+
 	damage_attacker = attacker;
 
 	//old damage modifier code for strength
@@ -679,9 +971,10 @@ entity holdent;
 	if(targ.flags&FL_MONSTER&&inflictor.flags2&FL2_ADJUST_MON_DAM)
 		damage*=2;//Special- more damage against monsters
 
-	//No longer apply super damage to all attacks (only to melee)
-	//if (attacker.super_damage)
-		//damage += attacker.super_damage * damage;
+	// check for attacker being a player here is necessary
+	// see the "Trigger field" dest2 bug in the union in entity.hc
+	if (attacker.flags&FL_CLIENT && attacker.super_damage)
+		damage += attacker.super_damage * damage;
 
 	// Calculating Damage to a player
 	if (targ.classname == "player")
@@ -758,7 +1051,7 @@ entity holdent;
 			attacker=attacker.controller;
 		}
 		targ.th_pain=SUB_Null;	//Should prevents interruption of death sequence
-		Killed (targ, attacker,inflictor);
+		Killed (targ, attacker,inflictor,total_damage);
 		return;
 	}
 
@@ -766,22 +1059,58 @@ entity holdent;
 	oldself = self;
 	self = targ;
 
+/*	if(self.experience_value)
+	{
+		if(!self.max_health)
+			dprint("WARNING!  EXPERIENCE AWARDER WITHOUT MAX_HEALTH!!!\n");
+
+		if(self.max_health<self.health)
+		{
+			dprint(self.classname);
+			dprint(" - WARNING!  MAX_HEALTH<HEALTH!!!\n");
+		}
+
+		if(self.init_exp_val<self.experience_value)
+			dprint("WARNING!  EXPERIENCE > INIT_EXP!!!\n");
+	}
+*/
+	lastleader=FindExpLeader();
+	hurt_exp_award=CheckExpAward(attacker,self,FALSE,total_damage);
+	if(hurt_exp_award>0)
+	{
+		AwardExperience(attacker,self,hurt_exp_award);
+		if(deathmatch)
+		{
+			newking=FindExpLeader();
+			if(newking!=lastleader)
+			{//Tell everyone if the king of the hill has changed
+				sound (world, CHAN_BODY, "misc/comm.wav", 1, ATTN_NONE);
+				bprint(newking.netname);
+				bprint(" is the NEW King of the Hill!\n");
+				WriteByte(MSG_ALL, SVC_UPDATE_KINGOFHILL);
+				WriteEntity (MSG_ALL, newking);
+			}
+		}
+		if(self.classname!="player")
+			self.experience_value-=hurt_exp_award;
+	}
+
 // barrels need sliding information
 	if (self.classname == "barrel")
 	{
 		self.enemy = inflictor;
-		self.count = damage;
+		self.count = total_damage;
 	}
 	else if (self.classname == "catapult")
 		self.enemy = inflictor;
 	else if(self.classname=="player")
 		self.enemy = attacker;
 
-	if ( (self.flags & FL_MONSTER) && attacker != world && !(attacker.flags & FL_NOTARGET) && attacker!=self.controller && (attacker.controller!=self.controller||attacker.controller==world) )
+	if ( (self.flags & FL_MONSTER) && attacker != world && !(attacker.flags & FL_NOTARGET)&&attacker!=self.controller&&(attacker.controller!=self.controller||attacker.controller==world))
 	{	// Monster's shouldn't attack each other (kin don't shoot kin)
-		if (self != attacker && attacker != self.enemy &&(self.enemy.classname!="player"||attacker.classname=="player"||attacker.controller.classname=="player"))
+		if (self != attacker && attacker != self.enemy&&(self.enemy.classname!="player"||attacker.classname=="player"||(attacker.controller.classname=="player"&&attacker.flags2&FL_ALIVE)))// && attacker.flags & FL_CLIENT)
 		{
-			if (self.classname != attacker.classname||random(100)==1) //5% chance they'll turn on selves
+			if (self.classname != attacker.classname||random(100)<=5) //5% chance they'll turn on selves
 			{
 				if((self.model=="models/spider.mdl"||self.model=="models/scorpion.mdl")&&attacker.model==self.model)
 				{
@@ -795,15 +1124,16 @@ entity holdent;
 	}
 
 	if (self.th_pain)
-	{
-		if(self.classname=="player"&&self.model!="models/sheep.mdl")
-			player_pain();
-		else 
-			self.th_pain (attacker, total_damage);
-	// nightmare mode monsters don't go into pain frames often
-		if (skill == 3)
-			self.pain_finished = time + 5;		
-	}
+		if(self.th_pain!=SUB_Null)
+		{
+			if(self.classname=="player"&&self.model!="models/sheep.mdl")
+				player_pain(attacker, total_damage);
+			else if(self.frozen<=0)
+				self.th_pain (attacker, total_damage);
+		// nightmare mode monsters don't go into pain frames often
+			if (skill >= 3)
+				self.pain_finished = time + 5;		
+		}
 
 	self = oldself;
 };
@@ -827,6 +1157,8 @@ vector	inflictor_org, org;
 	inflictor_org = (inflictor.absmin+inflictor.absmax)*0.5;
 	if(inflictor.classname=="circfire")
 		radius=150;
+	else if(inflictor.classname=="poison grenade")
+		radius=200;//FIXME- greater distance above...
 	else
 		radius=damage+40;
 	head = findradius(inflictor_org, radius);
@@ -841,7 +1173,15 @@ vector	inflictor_org, org;
 			if (head.takedamage)
 			{
 				org = (head.absmax + head.absmin)*0.5;
-				points = 0.5*vlen (inflictor_org - org);
+				if(inflictor.classname=="poison grenade")
+				{
+					if(head.flags2&FL_ALIVE&&head.thingtype==THINGTYPE_FLESH)
+						points=0;
+					else
+						points=damage;
+				}
+				else
+					points = 0.5*vlen (inflictor_org - org);
 				if (points < 0)
 					points = 0;
 				points = damage - points;
@@ -856,19 +1196,13 @@ vector	inflictor_org, org;
 		//following stops multiple grenades from blowing each other up
 				if(head.owner==inflictor.owner&&
 					head.classname==inflictor.classname&&
-					(head.classname=="stickmine"||head.classname=="tripwire"))
+					(head.classname=="stickmine"||head.classname=="tripwire"||head.classname=="proximity"))
 					points=0;
 				if((inflictor.classname=="snowball"||inflictor.classname=="blizzard")&&head.frozen>0)
 					points=0;
-				/*ielse f (inflictor.classname=="icewall")	//ws: abandoned crusader glyph
-				{
-					if (head.classname=="icewall" || head.thingtype!=THINGTYPE_FLESH)
-						points=0;
-				}*/
-				
 				if (points > 0)
 				{
-					if (CanDamage (head, inflictor))
+					if (CanDamage (head, inflictor)||inflictor.classname=="fireballblast")
 					{
 						if(other.movetype!=MOVETYPE_PUSH)
 						{
@@ -881,24 +1215,40 @@ vector	inflictor_org, org;
 		                    head.velocity=head.velocity+normalize(org-inflictor_org)*(points*10/inertia);
 			                head.flags(-)FL_ONGROUND;
 						}
+
+						if(inflictor.classname=="poison grenade")
+						{
+							if(!head.flags2&FL2_POISONED)
+							{//Poison them
+								if(head.flags&FL_CLIENT&&(coop||teamplay==1))
+								{
+									if(head.team!=attacker.team&&!coop)
+									{
+										centerprint(head,"You have been poisoned!\n");
+										spawn_poison(head,attacker,random(10,20));
+									}
+								}
+								else
+									spawn_poison(head,attacker,random(10,20));
+							}
+						}
+
+
 						if(inflictor.classname=="fireballblast")
 						{
 							if(points>10||points<5)
 								points=random(5,10);
 
-							if(head.flags&FL_FIREHEAL)
+							if(head.flags2&FL2_FIREHEAL)
 							{
 								if(head.health+points<=head.max_health)
 									head.health=head.health+points;
 								else
 									head.health=head.max_health;
 							}
-							else if(!head.flags&FL_FIRERESIST)
-							{
-								if(head.health<=points)
-									points=1000;
-								T_Damage (head, inflictor, attacker, points);
-							}
+							if(head.health<=points)
+								points=1000;
+							T_Damage (head, inflictor, attacker, points);
 						}
 						else
 							T_Damage (head, inflictor, attacker, points);
@@ -918,13 +1268,13 @@ T_RadiusDamageWater
 
 void(entity inflictor, entity attacker, float dam, entity ignore) T_RadiusDamageWater =
 {
-        local   float   points;
-        local   entity  head;
-	local	vector	org;
+float   points;
+entity  head;
+vector	org;
 
     head = findradius(inflictor.origin, dam);
 	
-	while (head)
+	while (head!=world)
 	{
         if (head != ignore)
 		{
@@ -939,12 +1289,13 @@ void(entity inflictor, entity attacker, float dam, entity ignore) T_RadiusDamage
 					if (points <= 64)
 						points = 1;
 					points = dam/points;
-					if (points < 1||(self.classname=="mjolnir"&&head==self.controller)||head.classname=="monster_hydra")
+					if (points < 1||(self.classname=="mjolnir"&&head==self.controller)||head.classname=="monster_hydra"||(head.classname=="player"&&head==attacker))
 						points = 0;
 					if (points > 0)
 					{
 						head.deathtype="zap";
-						spawnshockball((head.absmax+head.absmin)*0.5);
+//						spawnshockball((head.absmax+head.absmin)*0.5);
+						starteffect(CE_LSHOCK,(head.absmax+head.absmin)*0.5);
 						T_Damage (head, inflictor, attacker, points);
 //Bubbles if dead?
                     }

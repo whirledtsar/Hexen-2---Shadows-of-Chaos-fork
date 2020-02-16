@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/artifact.hc,v 1.2 2007-02-07 16:56:55 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/artifact.hc,v 1.2 2007-02-07 16:59:29 sezero Exp $
  */
 
 
@@ -12,7 +12,6 @@
 void() SUB_regen;
 void() StartItem;
 void ring_touch(void);
-
 
 void artifact_touch()
 {
@@ -95,20 +94,20 @@ void artifact_touch()
 	}
 	else if(self.netname == STR_GLYPH)
 	{
-		/*if(other.playerclass==CLASS_CRUSADER)
+		if(other.playerclass==CLASS_CRUSADER)
 		{
-			if ((other.cnt_glyph + 5) > 30)
+			if ((other.cnt_glyph + 5) > MAX_INV*2)
 				return;	
 			else	
 				other.cnt_glyph += 5;
 		}
 		else
-		{*/
+		{
 			if ((other.cnt_glyph + 1) > MAX_INV)
 				return;	
 			else	
 				other.cnt_glyph += 1;
-		//}		crusader has spiky ice glyphs instead of timebombs now
+		}
 	}
 	else if(self.netname == STR_HASTE)
 	{
@@ -152,14 +151,13 @@ void artifact_touch()
 		else
 			other.cnt_invincibility += 1;
 	}
-	/*
-	else if(self.classname == "art_sword_and_crown")
+	else if(self.classname == "art_sword_and_crown"&&other.team==2)
 	{
+		sound(self,CHAN_AUTO,"crusader/lghtn2.wav",1,ATTN_NONE);
 		centerprint(other,"You are victorious!\n");
 		bprint(other.netname);
 		bprint(" has captured the Crown!\n");
 	}
-	*/
 
 	amount = random();
 	if (amount < 0.5)
@@ -229,7 +227,13 @@ void Artifact_Cheat(void)
 void GenerateArtifactModel(string modelname,string art_name,float respawnflag) 
 {
 	if (respawnflag)	// Should this thing respawn
+	{
 		self.artifact_respawn = deathmatch;
+		if((art_name==STR_TOME||art_name==STR_MANABOOST)&&mapname=="tibet10")
+			self.artifact_respawn = TRUE;
+		else if((art_name==STR_HEALTHBOOST||art_name==STR_MANABOOST)&&skill>3)
+			self.artifact_respawn = TRUE;	//jfm: this should help out a bit...
+	}
 	setmodel(self, modelname);
 	self.netname = art_name;
 
@@ -238,7 +242,7 @@ void GenerateArtifactModel(string modelname,string art_name,float respawnflag)
 		self.netname = "Ring of Flight";
 		self.touch	 = ring_touch;
 	}
-	else if (modelname != "models/a_xray.mdl")
+	else //if (modelname != "models/a_xray.mdl")
 		self.touch	 = artifact_touch;
 	setsize (self, '0 0 0', '0 0 0');
 
@@ -346,6 +350,12 @@ void use_super_healthboost()
 
 	self.cnt_sh_boost -= 1;
 	self.artifact_flags(+)AFL_SUPERHEALTH;   // Show the health is in use
+
+	if(self.flags2&FL2_POISONED)
+	{
+		self.flags2(-)FL2_POISONED;
+		centerprint(self,"The poison has been cleansed from your blood...\n");
+	}
 }
 
 
@@ -383,6 +393,11 @@ void use_healthboost()
   	if(self.health > self.max_health)
 	{
   		self.health = self.max_health;
+	}
+	if(self.flags2&FL2_POISONED)
+	{
+		self.flags2(-)FL2_POISONED;
+		centerprint(self,"The poison has been cleansed from your blood...\n");
 	}
 }
 
@@ -426,15 +441,20 @@ void KillTorch()
 	if(!self.artifact_active&ART_INVISIBILITY)
 		self.effects(-)EF_DIMLIGHT;   // Turn off lights
 	self.artifact_flags(-)AFL_TORCH;  // Turn off torch flag
+	if(self.netname==STR_TORCH)
+		remove(self);
+	else
+		self.cnt_torch	-= 1;
 }
 
+/*
 void DouseTorch()//Never called?!
-{
+{//water?
 	sound (self, CHAN_BODY, "raven/douse.wav", 1, ATTN_IDLE);
 	self.torchtime = 0;
 	KillTorch();
 }
-
+*/
 void DimTorch()
 {
 	sound (self, CHAN_BODY, "raven/kiltorch.wav", 1, ATTN_IDLE);
@@ -453,6 +473,34 @@ void FullTorch()
 	self.torchthink = DimTorch;
 }
 
+void thrown_torch_think ()
+{//FIXME: If you pick it back up, it should still be lit and timing out
+	if (self.torchtime < time)
+		self.torchthink ();
+	self.think=thrown_torch_think;
+	thinktime self : 0.5;
+}
+
+void throw_torch (entity throwtorch)
+{
+	makevectors(self.v_angle);
+	throwtorch.netname=STR_TORCH;
+	throwtorch.torchtime = self.torchtime;
+	if(self.effects&EF_DIMLIGHT)
+		throwtorch.effects(+)EF_DIMLIGHT;
+	if(self.effects&EF_TORCHLIGHT)
+		throwtorch.effects(+)EF_TORCHLIGHT;
+	throwtorch.torchthink=self.torchthink;
+
+	throwtorch.think=thrown_torch_think;
+	thinktime throwtorch : 0;
+
+	if(!self.artifact_active&ART_INVISIBILITY)
+		self.effects(-)EF_DIMLIGHT;   // Turn off lights
+	self.artifact_flags(-)AFL_TORCH;  // Turn off torch flag
+	self.effects(-)EF_TORCHLIGHT;
+	self.torchtime = 0;
+}
 
 /*
 ============
@@ -470,7 +518,6 @@ void UseTorch()
 		self.torchtime		= time + 1;
 		self.torchthink		= FullTorch;
 		self.artifact_flags (+) AFL_TORCH;   // Show the torch is in use
-		self.cnt_torch		-= 1;
 	}
 }
 
@@ -613,9 +660,9 @@ void art_invisibility()
 	spawn_artifact(ARTIFACT_INVISIBILITY,RESPAWN);
 }
 
-/*
 void spawn_art_sword_and_crown(void)
 {
+	self.effects=EF_BRIGHTLIGHT;
 	setmodel(self, "models/xcalibur.mdl");
 	self.netname = "Sword";
 	self.touch	 = artifact_touch;
@@ -623,20 +670,20 @@ void spawn_art_sword_and_crown(void)
 
 	StartItem();
 }
-*/
-/*QUAK-ED art_sword_and_crown (.0 .0 .5) (-8 -8 -44) (8 8 20) FLOATING
+
+/*QUAKED art_sword_and_crown (.0 .0 .5) (-8 -8 -44) (8 8 20) FLOATING
 Artifact for Sword and Crown
 -------------------------FIELDS-------------------------
 None
 --------------------------------------------------------
 */
-/*void art_sword_and_crown()
+void art_sword_and_crown()
 {
 	precache_model2("models/xcalibur.mdl");
 	self.artifact_respawn = deathmatch;
 	spawn_art_sword_and_crown();
 }
-*/
+
 
 void item_spawner_use(void)
 {

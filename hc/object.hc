@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/object.hc,v 1.3 2007-02-07 16:57:08 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/object.hc,v 1.3 2007-02-07 16:59:34 sezero Exp $
  */
 
 
@@ -13,6 +13,12 @@ void(float vol) sheep_sound;
 void() obj_barrel_roll;
 void()float;
 void()sheep_trot;
+
+void fix_vel ()
+{
+	self.enemy.velocity=self.mangle;
+	remove(self);
+}
 
 void obj_fly_hurt (entity loser)
 {//MG
@@ -100,10 +106,19 @@ dprint("\n");
 				dprint(ftos(force));
 				dprint("\n");
 */				T_Damage (loser, self, self, force);  
+				if(loser.health<=0)
+				{//Keep 75% of vel if broke loser apart
+	//				dprint("Broke through\n");
+					newmis=spawn();
+					newmis.mangle=self.velocity*0.75;
+					newmis.think=fix_vel;
+					newmis.enemy=self;
+					thinktime newmis : HX_FRAME_TIME;
+				}
 			}
 		}
 
-		if(self.classname!="monster_mezzoman"&&self.netname!="spider")//Cats always land on their feet
+		if(self.classname!="monster_mezzoman"&&self.netname!="spider"&&loser.thingtype!=THINGTYPE_WEBS)//Cats always land on their feet, webs don't hurt
 			if((magnitude>=100+self.health&&self.classname!="player")||magnitude>=700)//health here is used to simulate structural integrity
 			{
 				if(self.classname=="player"&&self.flags&FL_ONGROUND&&magnitude<1000)
@@ -126,12 +141,10 @@ dprint("\n");
 */
 					if(self.classname=="player_sheep"&&self.flags&FL_ONGROUND&&self.velocity_z>-50)
 						return;
-					
-					//apply falling damage/high velocity damage
-					if (self.classname != "player" || self.playerclass != CLASS_ASSASSIN)//assassins don't take fall damage
-						T_Damage(self,world,world,magnitude);
+					T_Damage(self,world,world,magnitude);
 				}
 			}
+
 
 	self.last_impact=time;
 	if(self.flags&FL_ONGROUND)
@@ -365,8 +378,6 @@ float ontop,pushed,inertia,force,walkforce;
 	}
 }
 
-//EXPANSION BACKPORT CODE
-
 void impact_touch_hurt_no_push ()
 {
 
@@ -394,9 +405,6 @@ void impact_touch_hurt_no_push ()
 		}
 	}
 }
-
-
-
 
 
 /*QUAKED obj_chair (0.3 0.1 0.6) (-10 -10 -5) (10 10 40)
@@ -465,6 +473,9 @@ void obj_tree2()
 	precache_model("models/tree2.mdl");
 	CreateEntityNew(self,ENT_TREE,"models/tree2.mdl",tree2_death);
 
+	if(world.target=="sheep")
+		setsize(self,'-12  -12  -16','12  12 210');
+
 	top = spawn();
 	top.scale = self.scale;
 
@@ -510,7 +521,7 @@ void obj_cart()
 {
 	precache_model("models/cart.mdl");
 	CreateEntityNew(self,ENT_CART,"models/cart.mdl",chunk_death);
-	self.hull=HULL_SCORPION;
+	self.hull=HULL_SCORPION;//HYDRA;
 
 	self.touch	= obj_push;
 	self.flags	(+) FL_PUSH;
@@ -868,7 +879,7 @@ void obj_ballista (void)
 		self.mass=1000;
 
 	CreateEntityNew(self,ENT_BALLISTA,"models/ballista.mdl",chunk_death);
-	self.hull=HULL_SCORPION;
+	self.hull=HULL_SCORPION;//HYDRA;
 
 	if (!self.cnt) 
 	  self.cnt = 30;
@@ -1022,7 +1033,7 @@ void brush_pushable()
 	setmodel (self, self.model); 
 	self.classname="pushable brush";
 	self.touch	= obj_push;
-    self.hull = HULL_BIG;
+    self.hull = HULL_SCORPION;//HULL_BIG;
 	setsize(self,self.mins,self.maxs);
 	if(!self.mass)
 		self.mass = 5;
@@ -1098,6 +1109,7 @@ void() obj_statue_mummy =
 	head.drawflags += SCALE_ORIGIN_BOTTOM;
 
 };
+
 
 
 /*QUAKED obj_pot1 (0.3 0.1 0.6) (-24 -24 0) (24 24 50)
@@ -1439,6 +1451,9 @@ FEILDS:
 -----------------------------
 abslight = Spiderwebs may need to be brighter or darker than their surroundings to look best.
 health = default is 0, which means it won't take damage, otherwise, you can shoot it away or, if it has low health, you can break it by landing very hard on it
+
+Note: 'WEAK' and 'TOUCHMOVE' and 'health' conflict...
+
 skin = default is 0 
 	0 = many little spider webs
 	1 = corner web, will appear in right side of the front of the box.
@@ -1511,9 +1526,8 @@ void obj_webs (void)
 	}
 
 	if(!self.spawnflags&32)
-		self.drawflags=DRF_TRANSLUCENT;
+		self.drawflags(+)DRF_TRANSLUCENT;
 
-//	self.use=chunk_death;
 	setorigin(self,self.origin);
 
 	if(self.spawnflags&2)
@@ -1631,11 +1645,11 @@ abslight = default is 0.5
 */
 void ice_touch (void)
 {
-	if(other.flags&FL_ONGROUND)
-		if(random()>self.friction)
-			other.flags-=FL_ONGROUND;
+	if(random()>self.friction)
+		other.flags(-)FL_ONGROUND;
 }
 
+/*
 void ice_slab_melt (void)
 {
 	if(self.scale>0.05)
@@ -1647,11 +1661,12 @@ void ice_slab_melt (void)
 	else
 		remove(self);
 }
+*/
 
 void obj_ice (void)
 {
 //thingtype_ice, need ice chunks
-	if(self.flags2&FL_SUMMONED)
+/*	if(self.flags2&FL_SUMMONED)
 	{
 //Make pushable, floating?!
 		self.solid = SOLID_BBOX;
@@ -1662,7 +1677,7 @@ void obj_ice (void)
 		thinktime self : 10;
 	}
 	else
-	{
+*/	{
 		self.solid = SOLID_BSP;
 		self.movetype = MOVETYPE_PUSH;
 	}
@@ -1736,6 +1751,35 @@ void obj_statue_lion(void)
 
 }
 
+
+void draglion_use () [++ 0 .. 34]
+{//FIXME: sound?
+	if(cycle_wrapped)
+		chunk_death();
+	else if(self.frame==1)
+		sound(self,CHAN_VOICE,"fx/draglion.wav",1,ATTN_NORM);
+}
+
+/*QUAKED obj_statue_dragon_lion (0.3 0.1 0.6) (-25 -25 0) (25 25 62)
+Statue of a dragon lion?
+Animates a bit before it dies
+
+  Needs a sound?
+-------------------------FIELDS-------------------------
+health = 200
+--------------------------------------------------------
+
+*/
+void obj_statue_dragon_lion(void)
+{
+	precache_model4("models/draglion.mdl");
+	precache_sound4("fx/draglion.wav");
+	CreateEntityNew(self,ENT_DRAGLION,"models/draglion.mdl",draglion_use);
+
+	self.drawflags += SCALE_ORIGIN_BOTTOM;
+	self.use=draglion_use;
+}
+
 /*QUAKED obj_statue_athena(0.3 0.1 0.6) (-30 -30 0) (30 30 90)
 Statue of a Athena
 -------------------------FIELDS-------------------------
@@ -1783,8 +1827,6 @@ void obj_bonepile (void)
 	self.use = chunk_death;
 
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-	
-	self.thingtype = THINGTYPE_BONE;
 }
 
 /*QUAKED obj_statue_caesar(0.3 0.1 0.6) (-24 -24 0) (24 24 90)
@@ -1828,8 +1870,6 @@ void obj_skull (void)
 {
 	precache_model("models/skull.mdl");
 	CreateEntityNew(self,ENT_SKULL,"models/skull.mdl",chunk_death);
-	
-	self.thingtype = THINGTYPE_BONE;
 }
 
 /*QUAKED obj_pew (0.3 0.1 0.6) (-16 -40 0) (16 40 50)
@@ -1969,5 +2009,393 @@ void obj_plant_rome (void)
 {
 	precache_model2("models/plantrom.mdl");
 	CreateEntityNew(self,ENT_PLANT_ROME,"models/plantrom.mdl",chunk_death);
+}
+
+
+/*QUAKED obj_skeleton (0.3 0.1 0.6) (-37 -12 0) (37 12 11)
+A skeleton laying face up, arms crossed
+-------------------------FIELDS-------------------------
+health = 20
+mass = 200;
+--------------------------------------------------------
+*/
+void obj_skeleton (void)
+{
+	precache_model4("models/skeleton.mdl");
+	CreateEntityNew(self,ENT_SKELETON,"models/skeleton.mdl",chunk_death);
+	self.use = chunk_death;
+}
+
+/*QUAKED obj_stalagmite1 (0.3 0.1 0.6) (-10 -10 -17) (10 10 17)
+A tall, thin stalagmite or stalactite
+can be abslighted and scaled
+Use translucency and scaling to make an icicle
+-------------------------FIELDS-------------------------
+health = 20
+angles = x y z (pitch yaw roll)
+--------------------------------------------------------
+*/
+void obj_stalagmite1 (void)
+{
+	precache_model4("models/stlgmt1.mdl");
+	CreateEntityNew(self,ENT_STALAG1,"models/stlgmt1.mdl",chunk_death);
+
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+
+	if(self.spawnflags&1)
+		self.drawflags(+)DRF_TRANSLUCENT;
+}
+
+/*QUAKED obj_stalagmite2 (0.3 0.1 0.6) (-24 -24 -21) (24 24 21)
+A thicker stalagmite or stalactite
+can be abslighted and scaled
+Use translucency and scaling to make an icicle
+-------------------------FIELDS-------------------------
+health = 40
+angles = x y z (pitch yaw roll)
+--------------------------------------------------------
+*/
+void obj_stalagmite2 (void)
+{
+	precache_model4("models/stlgmt2.mdl");
+	CreateEntityNew(self,ENT_STALAG2,"models/stlgmt2.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+
+	if(self.spawnflags&1)
+		self.drawflags(+)DRF_TRANSLUCENT;
+}
+
+/*QUAKED obj_snow_corner (0.3 0.1 0.6) (-41 -55 0) (41 55 65)
+A corner pile of snow, faces south-east if using an angle of 0
+can be abslighted and scaled
+*/
+void obj_snow_corner (void)
+{
+	precache_model4("models/snowcrnr.mdl");
+	CreateEntityNew(self,ENT_SNOW_CORNER,"models/snowcrnr.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+	makestatic(self);
+}
+
+/*QUAKED obj_snow_pile (0.3 0.1 0.6) (-52 -52 0) (52 52 16)
+pile of snow
+can be abslighted and scaled
+*/
+void obj_snow_pile (void)
+{
+	precache_model4("models/snowpile.mdl");
+	CreateEntityNew(self,ENT_SNOW_PILE,"models/snowpile.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+	makestatic(self);
+}
+
+/*QUAKED obj_snow_wall (0.3 0.1 0.6) (-83 -83 0) (83 83 45)
+A wide wall of now of snow, faces east if using an angle of 0
+can be abslighted and scaled
+*/
+void obj_snow_wall (void)
+{
+	precache_model4("models/snowwall.mdl");
+	CreateEntityNew(self,ENT_SNOW_WALL,"models/snowwall.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+	makestatic(self);
+}
+
+/*QUAKED obj_chinese_kite_lamp (0.3 0.1 0.6) (-22 -22 -120) (22 22 0)
+Hnaging chinese kite lamp or something
+*/
+void obj_chinese_kite_lamp (void)
+{
+	precache_model4("models/ch-kite.mdl");
+	CreateEntityNew(self,ENT_CH_KITE,"models/ch-kite.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_TOP;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+}
+
+/*QUAKED obj_chinese_sign (0.3 0.1 0.6) (-48 -48 -66) (48 48 0)
+Hanging chinese sign or something
+*/
+void obj_chinese_sign (void)
+{
+	precache_model4("models/ch-hang.mdl");
+	CreateEntityNew(self,ENT_CH_HANG,"models/ch-hang.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_TOP;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+}
+
+/*QUAKED obj_demon_statue (0.3 0.1 0.6) (-16 -16 0) (16 16 44)
+demoness statue?
+*/
+void obj_demon_statue (void)
+{
+	precache_model4("models/demstat.mdl");
+	CreateEntityNew(self,ENT_DEMSTAT,"models/demstat.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+}
+
+/*QUAKED obj_samurai (0.3 0.1 0.6) (-32 -32 0) (32 32 72)
+sam the statue
+
+frame - '0' is pose 1
+		'1' is pose 2
+*/
+void obj_samurai (void)
+{
+	precache_model4("models/samurai.mdl");
+	CreateEntityNew(self,ENT_SAMURAI,"models/samurai.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+}
+
+void shiva_dance () [++ 1 .. 30]
+{
+	thinktime self : 0.1;
+	if(cycle_wrapped)
+		if(!self.aflag)
+			self.aflag=TRUE;
+		else
+		{
+			self.frame=0;
+			self.aflag=FALSE;
+			self.nextthink=-1;
+		}
+	else if(self.frame==1)
+		sound(self,CHAN_VOICE,"fx/shiva.wav",1,ATTN_NORM);
+}
+
+/*QUAKED obj_shiva (0.3 0.1 0.6) (-32 -32 0) (32 32 72)
+4 armed lady with hip action
+*/
+void obj_shiva (void)
+{
+	precache_model4("models/4arm.mdl");
+	precache_sound4("fx/shiva.wav");
+	CreateEntityNew(self,ENT_SHIVA,"models/4arm.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+	self.use=shiva_dance;
+}
+
+/*QUAKED obj_book_o_the_dead (0.3 0.1 0.6) (-10 -10 0) (10 10 4)
+Book O' The Dead
+*/
+void obj_book_o_the_dead (void)
+{
+	precache_model4("models/openbook.mdl");
+	CreateEntityNew(self,ENT_BOTD,"models/openbook.mdl",chunk_death);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+		self.drawflags(+)MLS_ABSLIGHT;
+}
+
+float td_spr_max = 5;
+
+void talking_door_die(void)[-- 5 .. 0]
+{
+	if (self.frame == 1)
+	{
+		self.drawflags (+) DRF_TRANSLUCENT;
+	}
+
+	if (self.frame == 0)
+	{
+		self.think = SUB_Remove;
+		self.nextthink = time + 0.05;
+	}
+}
+
+void talking_door_talk2(void)
+{
+	sound(self,CHAN_VOICE,self.noise,1,ATTN_NONE);			
+	
+	self.think = talking_door_die;
+	thinktime self : 2;
+}
+
+void talking_door_talk(void)
+{
+	sound(self,CHAN_VOICE,self.noise,1,ATTN_NONE);			
+
+	self.noise = self.noise1;
+
+	self.think = SUB_Null;
+	self.nextthink = 0;
+}
+
+void talking_door_animate (void)[++ 0 .. 5]
+{
+	if (self.frame == 5)
+	{
+		self.use = talking_door_talk2;
+		self.think = talking_door_talk;
+		self.nextthink = 1;
+		return;
+	}
+
+	thinktime self : 0.1;
+}
+
+void talking_door_use (void)
+{
+	setmodel (self, "models/face.spr");
+	setsize (self, '0 0 0','0 0 0');//-32 -32 -16','32 32 16');
+
+//	self.solid = SOLID_BBOX;
+	self.movetype = MOVETYPE_NONE;
+	self.use = talking_door_die;
+
+	self.think = talking_door_animate;
+	thinktime self : 0.1;
+}
+	
+/*QUAKED obj_talking_door (0.3 0.1 0.6) (-16 -16 -10) (16 16 10)
+Talking door animation
+-------------------------FIELDS-------------------------
+netname: name of target to movechain to
+--------------------------------------------------------
+*/
+/*void obj_talking_door(void)
+{
+	precache_model4("models/face.spr");
+
+	setmodel (self, "models/null.spr");
+	self.solid = SOLID_NOT;
+	
+	self.noise  = "doorhead/notyet.wav";
+	self.noise1 = "doorhead/donewell.wav";
+	
+	precache_sound4("doorhead/notyet.wav");
+	precache_sound4("doorhead/donewell.wav");
+
+	self.th_die = SUB_Null;
+	self.use= talking_door_use;
+
+	self.angles += '0 180 0';
+
+	setsize (self, '0 0 0','0 0 0');//-32 -32 -16','32 32 16');
+}
+*/
+/*QUAKED obj_skeleton_throne (0.3 0.1 0.6) (-33 -33 -0) (33 33 115)
+Frickin' kick-ass Skeletal King on his Throne O' Bones!
+
+Tell me Hexen 2 isn't the best looking game in the world!
+*/
+void skeleton_throne_use ()
+{
+	self.movechain.frame=1;
+}
+
+void obj_skeleton_throne (void)
+{
+entity sk_king,box2,box3;
+	precache_model4("models/throne.mdl");
+	precache_model4("models/sk-throne.mdl");
+	CreateEntityNew(self,ENT_SKELTHRN,"models/throne.mdl",SUB_Null);
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	self.use=skeleton_throne_use;
+	
+	sk_king=spawn();
+	self.movechain=sk_king;
+	setmodel(sk_king,"models/sk-throne.mdl");
+	setsize(sk_king,'0 0 0','0 0 0');
+	setorigin(sk_king,self.origin);
+	sk_king.angles=self.angles;
+	sk_king.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if(self.abslight)
+	{
+		self.drawflags(+)MLS_ABSLIGHT;
+		sk_king.abslight=self.abslight;
+		sk_king.drawflags(+)MLS_ABSLIGHT;
+	}
+
+	makevectors(self.angles);
+	box2=spawn();
+	box2.solid=SOLID_BBOX;
+	setsize(box2,'-26 -26 0','26 26 36');
+	setorigin(box2,self.origin-v_forward*7);
+	box3=spawn();
+	box3.solid=SOLID_BBOX;
+	if(self.angles_y==0||self.angles_y==180)
+		setsize(box3,'-4 -30 0','4 30 115');
+	else
+		setsize(box3,'-30 -4 0','30 4 115');
+	setorigin(box3,self.origin-v_forward*29);
+}
+
+void nate_touch(void)
+{
+}
+
+void nate_think(void)
+{
+	local float damage;
+
+	if (self.attack_finished < time && !self.count)
+	{	
+		self.count = 1;
+		damage = 100000 - self.health;
+		dprintf("Totaled %s points of damage... hit me again!\n", damage);
+		self.health = 100000;
+	}
+
+	self.think = nate_think;
+	thinktime self : 0.1;
+}
+
+void nate_pain(entity attacker, float total_damage)
+{
+	self.attack_finished = time + 3;
+	self.count = 0;
+	dprintf("Ouch! I took %s points of damage!\n", total_damage);
+
+	
+}
+
+/*QUAKED NATE_9000 (0.3 0.1 0.6) (-33 -33 -0) (33 33 115)
+Nefariously
+Anal
+Test
+Entity
+*/
+void NATE_9000 (void)
+{
+
+	self.classname = "NATE 9000";
+
+	precache_model("models/sheep.mdl");
+
+	setmodel(self, "models/sheep.mdl");
+	setsize(self, '-30 -30 -30', '30 30 30');
+	self.movetype = MOVETYPE_NONE;
+	self.solid = SOLID_SLIDEBOX;
+	
+	self.takedamage = DAMAGE_YES;
+	self.health = 100000;
+	
+	self.colormap = 199;
+	self.scale = 0.5;
+	self.drawflags (+) MLS_POWERMODE;
+	self.effects = EF_DIMLIGHT;
+	self.touch = nate_touch;
+	self.th_pain = nate_pain;
+	self.think = nate_think;
+	self.flags (+) FL_ALIVE | FL_MONSTER;
+	thinktime self : 0.1;
 }
 

@@ -1,4 +1,5 @@
-/*QUAKED obj_catapult2 (0 .5 .8) (-150 -150 0) (150 150 28) ?
+/*QUAKED obj_catapult2 (0 .5 .8) (-150 -150 0) (150 150 28) not_usable
+not_usable - can't be used, stuck in the up position
 
 "speed"		Throw speed (300 default)
 "wait"		wait before resetting (3 default)
@@ -259,26 +260,20 @@ void obj_catapult2 (void)
 
 	self.solid = SOLID_BBOX;
 	self.movetype = MOVETYPE_PUSHPULL;
-	self.touch=catapult2_touch;
 //	setmodel (self, "models/catapult.mdl");
 	setmodel (self, "models/cattest.mdl");
 	setsize(self,'-145 -145 0','145 145 26');
-	self.hull=HULL_SCORPION;
+	self.hull=HULL_SCORPION;//HYDRA;
 	setorigin (self, self.origin);	
 	self.classname="catapult";
 	self.level=30;
 	self.frame=20;
 	
-	self.th_pain=catapult_pain;
-	self.th_weapon=catapult_fire;
 
 //	if (!self.speed)
 		self.speed = 300;//Too strong?
 	if (self.wait==0)
 		self.wait = 3;
-	self.th_die = chunk_death;
-	self.takedamage = DAMAGE_YES;
-	self.use=catapult_fire;
 
 	if(!self.thingtype)
 		self.thingtype = THINGTYPE_WOOD;
@@ -290,7 +285,25 @@ void obj_catapult2 (void)
 		self.health=1000;
 	self.max_health = self.health;
 
-	self.think=catapult_ready;
-	thinktime self : 0;
+	if(!self.spawnflags&1)
+	{
+		self.touch=catapult2_touch;
+		self.th_die = chunk_death;
+		self.takedamage = DAMAGE_YES;
+		self.use=catapult_fire;
+		self.th_pain=catapult_pain;
+		self.th_weapon=catapult_fire;
+		self.think=catapult_ready;
+		thinktime self : 0;
+	}
+	else
+	{
+	entity solidbox;
+		self.frame=22;
+		solidbox=spawn();
+		setorigin(solidbox,self.origin+'0 0 24');
+		solidbox.solid=SOLID_BBOX;
+		setsize(solidbox,'-24 -24 0','24 24 100');
+	}
 }
 

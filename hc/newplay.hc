@@ -394,6 +394,107 @@ $frame stdxbw6      stdxbw7      stdxbw8      stdxbw9      stdxbw10
 $frame stdxbw11     stdxbw12     stdxbw13     
 
 
+//=================================================================
+$framevalue 0
+
+//SUCCUBUS
+//
+//
+$frame runwpa1      runwpa2      runwpa3      runwpa4      runwpa5      
+$frame runwpa6      runwpa7      runwpa8      runwpa9      runwpa10     
+$frame runwpa11     runwpa12     
+
+//
+$frame runwpbc1      runwpbc2      runwpbc3      runwpbc4      runwpbc5      
+$frame runwpbc6      runwpbc7      runwpbc8      runwpbc9      runwpbc10     
+$frame runwpbc11     runwpbc12     
+
+//
+$frame runwpd1      runwpd2     runwpd3     runwpd4     runwpd5      
+$frame runwpd6      runwpd7     runwpd8     runwpd9     runwpd10     
+$frame runwpd11     runwpd12     
+
+//
+$frame wtwpa1      wtwpa2      wtwpa3      wtwpa4      wtwpa5      
+$frame wtwpa6      wtwpa7      wtwpa8      wtwpa9      wtwpa10     
+$frame wtwpa11     wtwpa12     wtwpa13     
+
+//
+$frame wtwpbc1      wtwpbc2      wtwpbc3      wtwpbc4      wtwpbc5      
+$frame wtwpbc6      wtwpbc7      wtwpbc8      wtwpbc9      wtwpbc10     
+$frame wtwpbc11     wtwpbc12     wtwpbc13     
+
+//
+$frame wtwpd1      wtwpd2      wtwpd3      wtwpd4      wtwpd5      
+$frame wtwpd6      wtwpd7      wtwpd8      wtwpd9      wtwpd10     
+$frame wtwpd11     wtwpd12     wtwpd13     
+
+//
+$frame atwpa1      atwpa2      atwpa3      atwpa4      atwpa5      
+$frame atwpa6      atwpa7      atwpa8      
+
+//
+$frame atwpbc1      atwpbc2      atwpbc3      atwpbc4      
+$frame atwpbc5      atwpbc6      atwpbc7      atwpbc8      
+
+//
+$frame	atwpd1     atwpd2     atwpd3     atwpd4
+$frame	atwpd5     atwpd6     atwpd7     atwpd8
+
+//
+$frame pnwpa1     pnwpa2     pnwpa3     pnwpa4     pnwpa5     
+$frame pnwpa6     pnwpa7     
+
+//
+$frame pnwpbc1     pnwpbc2     pnwpbc3     pnwpbc4     pnwpbc5     
+$frame pnwpbc6     pnwpbc7     
+
+//
+$frame pnwpd1     pnwpd2     pnwpd3     pnwpd4     pnwpd5     
+$frame pnwpd6     pnwpd7     
+
+//
+$frame swmwpa1      swmwpa2      swmwpa3      swmwpa4      swmwpa5      
+$frame swmwpa6      swmwpa7      swmwpa8      swmwpa9      swmwpa10     
+$frame swmwpa11     swmwpa12     swmwpa13     swmwpa14     swmwpa15     
+
+//
+$frame swmwpbc1      swmwpbc2      swmwpbc3      swmwpbc4      swmwpbc5      
+$frame swmwpbc6      swmwpbc7      swmwpbc8      swmwpbc9      swmwpbc10     
+$frame swmwpbc11     swmwpbc12     swmwpbc13     swmwpbc14     swmwpbc15     
+
+//
+$frame swmwpd1      swmwpd2      swmwpd3      swmwpd4      swmwpd5      
+$frame swmwpd6      swmwpd7      swmwpd8      swmwpd9      swmwpd10     
+$frame swmwpd11     swmwpd12     swmwpd13     swmwpd14     swmwpd15     
+
+//
+$frame djump1        djump2        djump3        djump4        djump5        
+$frame djump6        djump7        djump8        djump9        djump10       
+$frame djump11       djump12       djump13       djump14       djump15       
+
+//
+$frame dcrouch1      dcrouch2      dcrouch3      dcrouch4      dcrouch5      
+$frame dcrouch6      dcrouch7      dcrouch8      dcrouch9      dcrouch10     
+$frame dcrouch11     dcrouch12     dcrouch13     dcrouch14     dcrouch15     
+$frame dcrouch16     dcrouch17     dcrouch18     dcrouch19     dcrouch20     
+
+//
+$frame ddeath1       ddeath2       ddeath3       ddeath4       ddeath5       
+$frame ddeath6       ddeath7       ddeath8       ddeath9       ddeath10      
+$frame ddeath11      ddeath12      ddeath13      ddeath14      ddeath15      
+$frame ddeath16      ddeath17      ddeath18      ddeath19      ddeath20      
+
+//
+$frame ddecap1       ddecap2       ddecap3       ddecap4       ddecap5       
+$frame ddecap6       ddecap7       ddecap8       ddecap9       ddecap10      
+$frame ddecap11      ddecap12      ddecap13      ddecap14      ddecap15      
+$frame ddecap16      ddecap17      ddecap18      ddecap19      ddecap20      
+$frame ddecap21      ddecap22      ddecap23      ddecap24      ddecap25      
+$frame ddecap26      ddecap27      ddecap28      
+
+
+
 /*
 ==============================
 CONSTANTS: (in constants.hc)
@@ -459,117 +560,152 @@ void Ass_Change_Weapon (void)
 		self.th_missile=Ass_Pdgr_Fire;
 }
 
-float player_start_frames[160] =
+void Suc_Change_Weapon (void)
+{
+	if(self.weapon==IT_WEAPON4)
+		self.th_missile=Suc_Blrn_Fire;
+	else if(self.weapon==IT_WEAPON2)
+		self.th_missile=Suc_Aorb_Fire;
+	else if(self.weapon==IT_WEAPON3)
+		self.th_missile=Suc_Forb_Fire;
+	else
+		self.th_missile=Suc_Litn_Fire;
+}
+
+float player_start_frames[200] =
 {
 //Stand
 	$stdgnt1 ,$stdswd1 ,$stdswd1 ,$pstdstf1 ,	//Paladin
 	$stdham1 ,$stdice1 ,$cstdstf1 ,$cstdstf1 ,	//Crusader
 	$stdsic1 ,$stdhan1 ,$stdhan1 ,$nstdstf1 ,	//Necromancer
 	$stddag1 ,$stdxbw1 ,$stddag1 ,$astdstf1 ,	//Assassin
+	$wtwpa1 ,$wtwpbc1 ,$wtwpbc1 ,$wtwpd1 ,		//Succubus
 //Run
 	$rungnt1,$runswd1,$runswd1,$prunstf1,	//Paladin
 	$runham1,$runice1,$crunstf1,$crunstf1,	//Crusader
 	$runsic1,$runhan1,$runhan1,$nrunstf1,	//Necromancer
 	$rundag1,$runxbw1,$rundag1,$arunstf1,	//Assassin
+	$runwpa1,$runwpbc1,$runwpbc1,$runwpd1,	//Succubus
 //Swim/fly
 	$flygnt1,$flyswd1,$flyswd1,$pflystf1,	//Paladin
 	$flyham1,$flyice1,$cflystf1,$cflystf1,	//Crusader
 	$flysic1,$flyhan1,$flyhan1,$nflystf1,	//Necromancer
 	$flydag1,$flyxbw1,$flydag1,$aflystf1,	//Assassin
+	$swmwpa1,$swmwpbc1,$swmwpbc1,$swmwpd1,	//Succubus
 //Attack
 	$attgnt1,$attswd1,$attswd1,$pattstf1,	//Paladin
 	$attham1,$attice1,$cattstf1,$cattstf1,	//Crusader
 	$attsic1,$atthan1,$atthan1,$nattstf1,	//Necromancer
 	$attdag1,$attxbw1,$attdag1,$aattstf1,	//Assassin
+	$atwpa1,$atwpbc1,$atwpbc1,$atwpd1,		//Succubus
 //pain
 	$paingnt1,$painswd1,$painswd1,$ppainstf1,	//Paladin
 	$painham1,$painice1,$cpainstf1,$cpainstf1,	//Crusader
 	$painsic1,$painhan1,$painhan1,$npainstf1,	//Necromancer
 	$paindag1,$painxbw1,$paindag1,$apainstf1,	//Assassin
+	$pnwpa1,$pnwpbc1,$pnwpbc1,$pnwpd1,			//Succubus
 //Jump
 	$pjump1,0,0,0,	//Paladin
 	$cjump1,0,0,0,	//Crusader
 	$runsic1,$runhan1,$runhan1,$nrunstf1,	//Necromancer
 	$ajump1,0,0,0,	//Assassin
+	$djump1,0,0,0,	//Succubus
 //Crouch_stand
 	$pcrouch1,0,0,0,	//Paladin
 	$ccrouch1,0,0,0,	//Crusader
 	$ncrouch1,0,0,0,	//Necromancer
 	$acrouch1,0,0,0,    //Assassin
+	$dcrouch1,0,0,0,    //Succubus
 //Crouch_move
 	$pcrouch1,0,0,0,					//Paladin
 	$ccrouch1,0,0,0,							//Crusader
 	$ncrouch1,0,0,0,							//Necromancer
 	$acrouch1,0,0,0,							//Assassin
+	$dcrouch1,0,0,0,							//Succubus
 //dead
 	$pdeath1,0,0,0,							//Paladin
 	$cdeath1,0,0,0,							//Crusader
 	$ndeath1,0,0,0,							//Necromancer
 	$adeath1,0,0,0,							//Assassin
+	$ddeath1,0,0,0,							//Succubus
 //decap
 	$pdecap1,0,0,0,							//Paladin
 	$cdecap1,0,0,0,							//Crusader
 	$ndecap1,0,0,0,							//Necromancer
-	$adecap1,0,0,0							//Assassin
+	$adecap1,0,0,0,							//Assassin
+	$ddecap1,0,0,0							//Succubus
 };
 
-float player_end_frames[160] =
+float player_end_frames[200] =
 {
 //Stand
 	$stdgnt13,$stdswd13,$stdswd13,$pstdstf13,	//Paladin
 	$stdham13,$stdice13,$cstdstf13,$cstdstf13,	//Crusader
 	$stdsic12,$stdhan12,$stdhan12,$nstdstf12,	//Necromancer
-	$stddag13,$stdxbw13,$stddag13,$astdstf13,		//Assassin
+	$stddag13,$stdxbw13,$stddag13,$astdstf13,	//Assassin
+	$wtwpa13,$wtwpbc13,$wtwpbc13,$wtwpd13,		//Succubus
 //Run
 	$rungnt12,$runswd12,$runswd12,$prunstf12,	//Paladin
 	$runham12,$runice12,$crunstf12,$crunstf12,	//Crusader
 	$runsic12,$runhan12,$runhan12,$nrunstf12,	//Necromancer
-	$rundag12,$runxbw12,$rundag12,$arunstf12,		//Assassin
+	$rundag12,$runxbw12,$rundag12,$arunstf12,	//Assassin
+	$runwpa12,$runwpbc12,$runwpbc12,$runwpd12,	//Succubus
 //Swim/fly
 	$flygnt15,$flyswd15,$flyswd15,$pflystf15,	//Paladin
 	$flyham15,$flyice15,$cflystf14,$cflystf14,	//Crusader
 	$flysic14,$flyhan14,$flyhan14,$nflystf14,	//Necromancer
 	$flydag15,$flyxbw15,$flydag15,$aflystf15,	//Assassin
+	$swmwpa15,$swmwpbc15,$swmwpbc15,$swmwpd15,	//Succubus
 //Attack
 	$attgnt11,$attswd12,$attswd12,$pattstf4,	//Paladin
-	$attham10,$attice4,$cattstf5,$cattstf5,	//Crusader
+	$attham10,$attice4,$cattstf5,$cattstf5,		//Crusader
 	$attsic12,$atthan8,$atthan8,$nattstf8,		//Necromancer
 	$attdag11,$attxbw4,$attdag11,$aattstf4,		//Assassin
+	$atwpa8,$atwpbc8,$atwpbc8,$atwpd8,			//Succubus
 //pain
 	$paingnt7,$painswd7,$painswd7,$ppainstf7,	//Paladin
 	$painham8,$painice8,$cpainstf8,$cpainstf8,	//Crusader
 	$painsic8,$painhan8,$painhan8,$npainstf8,	//Necromancer
 	$paindag7,$painxbw7,$paindag7,$apainstf7,	//Assassin
+	$pnwpa7,$pnwpbc7,$pnwpbc7,$pnwpd7,			//Succubus
 //Jump
 	$pjump12,0,0,0,								//Paladin
 	$cjump13,0,0,0,								//Crusader
 	$runsic12,$runhan12,$runhan12,$nrunstf12,	//Necromancer
 	$ajump12,0,0,0,								//Assassin
+	$djump15,0,0,0,								//Succubus
 //Crouch_stand
 	$pcrouch20,0,0,0,							//Paladin
 	$ccrouch20,0,0,0,							//Crusader
 	$ncrouch20,0,0,0,							//Necromancer
 	$acrouch20,0,0,0,							//Assassin
+	$dcrouch20,0,0,0,							//Succubus
 //Crouch_move
 	$pcrouch20,0,0,0,							//Paladin
 	$ccrouch20,0,0,0,							//Crusader
 	$ncrouch20,0,0,0,							//Necromancer
 	$acrouch20,0,0,0,							//Assassin
+	$dcrouch20,0,0,0,							//Succubus
 //dead
 	$pdeath20,0,0,0,							//Paladin
 	$cdeath20,0,0,0,							//Crusader
 	$ndeath20,0,0,0,							//Necromancer
 	$adeath20,0,0,0,							//Assassin
+	$ddeath20,0,0,0,							//Succubus
 //decap
 	$pdecap28,0,0,0,							//Paladin
 	$cdecap28,0,0,0,							//Crusader
 	$ndecap20,0,0,0,							//Necromancer
-	$adecap28,0,0,0							//Assassin
+	$adecap28,0,0,0,							//Assassin
+	$ddecap28,0,0,0								//Succubus
 };
 
 void player_frames ()
 {
 float weapmod, startframe,endframe,framestate;
+//	if(self.playerclass==CLASS_SUCCUBUS)
+//		dprintf("Succubus act state: %s\n",self.act_state);
+
 	if(self.deadflag)
 		self.act_state=ACT_DEAD;
 
@@ -587,20 +723,28 @@ float weapmod, startframe,endframe,framestate;
 	else
 		weapmod=0;
 
-	startframe = player_start_frames	[(self.playerclass - 1) * 4 + self.act_state*16 + weapmod];
+	startframe = player_start_frames	[(self.playerclass - 1) * 4 + self.act_state*20 + weapmod];
+	
 	if(self.waterlevel<3&&self.movetype==MOVETYPE_FLY)
+	{
+		if(self.playerclass==CLASS_SUCCUBUS)
+			startframe+=10;
 		endframe=startframe;
+	}
 	else
-		endframe = player_end_frames	[(self.playerclass - 1) * 4 + self.act_state*16 + weapmod];
+		endframe = player_end_frames	[(self.playerclass - 1) * 4 + self.act_state*20 + weapmod];
 
 	if(self.act_state!=ACT_CROUCH_STAND)
 		framestate=AdvanceFrame(startframe,endframe);
 
 	self.think=player_frames;
-	thinktime self : HX_FRAME_TIME;
+//	if(self.playerclass==CLASS_SUCCUBUS)
+//		thinktime self : 0.075;
+//	else
+		thinktime self : HX_FRAME_TIME;
 
 	if(self.act_state!=ACT_DEAD)
-		if(self.viewentity==self||self.viewentity.classname=="chasecam")
+		if((self.viewentity==self||self.viewentity.classname=="chasecam")&&self.camera_time<time)
 			self.th_weapon();
 
 	if(self.act_state==ACT_SWIM_FLY)
@@ -645,6 +789,13 @@ float weapmod, startframe,endframe,framestate;
 	{
 //		if(self.act_state==ACT_PAIN&&self.frame==startframe)
 //			PainSound();
+		if(self.playerclass==CLASS_SUCCUBUS)
+			if (!(self.flags & FL_ONGROUND))
+				if(self.button2)
+					if(self.gravity==0.2)
+						if(self.frame>$djump9)
+							self.frame=$djump9;
+
 		if(framestate==AF_END&&!self.button0)
 		{
 			if(!self.velocity_x && !self.velocity_y)
@@ -674,11 +825,11 @@ float weapmod, startframe,endframe,framestate;
 		self.act_state=ACT_SWIM_FLY;
 }
 
-void()	player_frames_behead =
+void player_frames_behead ()
 {//Note: give playerclass!
-	self.level=player_start_frames[ACT_DECAP * 16 + (self.playerclass - 1) * 4];
-	self.dmg=player_end_frames[ACT_DECAP * 16 + (self.playerclass - 1) * 4];
+	self.level=player_start_frames[ACT_DECAP * 20 + (self.playerclass - 1) * 4];
+	self.dmg=player_end_frames[ACT_DECAP * 20 + (self.playerclass - 1) * 4];
 	self.cnt=0;
 	player_behead();
-};
+}
 

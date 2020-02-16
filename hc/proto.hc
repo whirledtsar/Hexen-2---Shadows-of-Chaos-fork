@@ -3,14 +3,13 @@
 //**
 //** proto.hc
 //**
-//** $Header: /cvsroot/uhexen2/gamecode/hc/h2/proto.hc,v 1.2 2007-02-07 16:24:55 sezero Exp $
+//** $Header: /cvsroot/uhexen2/gamecode/hc/portals/proto.hc,v 1.1.1.1 2004-11-29 11:35:01 sezero Exp $
 //**
 //**************************************************************************
 
 // combat.hc
 
 void T_Damage(entity targ, entity inflictor, entity attacker, float damage);
-//float T_Heal(entity e, float healamount, float ignore);
 float CanDamage(entity targ, entity inflictor);
 
 // subs.hc
@@ -28,22 +27,10 @@ void AwardExperience(entity ToEnt, entity FromEnt, float Amount);
 void() SetModelAndThinks;
 void stats_NewPlayer(entity e);
 
-void()shock_think;
-void(vector org)spawnshockball;
+//void()shock_think;
+//void(vector org)spawnshockball;
 void(entity light_targ)lightstyle_change;
-void(entity targ, entity attacker,entity inflictor) Killed;
-
-//void()player_paladin_gauntlet_attack;
-//void()player_paladin_swaxe_attack;
-//void()player_paladin_staff_attack;
-//void()player_paladin_crouch_move;
-
-//void()player_assassin_hands_attack;
-//void()player_assassin_xbow_attack;
-//void()player_assassin_staff_attack;
-//void()player_assassin_crouch_move;
-
-// quake.hc
+void(entity targ, entity attacker,entity inflictor,float damage) Killed;
 
 void(float richter) MonsterQuake;
 void() MultiExplode;
@@ -55,7 +42,6 @@ float()FindMonsterTarget;
 void()MonsterCheckContents;
 float visibility_good (entity targ,float chance_mod);
 float()CheckJump;
-//float CheckJump (float print_err);
 void()W_SetCurrentWeapon;
 void(float explodetype)BecomeExplosion; 
 void()player_frames;
@@ -70,4 +56,23 @@ vector aim_adjust (entity targ);
 void()respawn;
 void()GibPlayer;
 void stats_NewClass(entity e);
+void()GrenadeTouch2;
+void(vector org)smolder;
+void(float damage,entity victim) spawn_touchpuff;
+//void()talkhead_idle;
+void DropPuzzlePiece(void);
+void MonsterPrecachePuzzlePiece ();
+//void spawn_sheep (vector org);
+void obj_push();
+void spawn_poison(entity loser,entity killer,float poison_length);
+void remove_invincibility(entity loser);
+void W_SetCurrentAmmo (void);
+void ToggleChaseCam(entity voyeur);//take them out of chase cam
+void Ring_Init(string modelname,string name);
+void rider_die(void);
+void(vector p1, vector p2, entity from, float damage,string type) LightningDamage;
+void(entity thingy)unsheep;
+void()PlayerTouch;
+void SmallExplosion (void);
+
 

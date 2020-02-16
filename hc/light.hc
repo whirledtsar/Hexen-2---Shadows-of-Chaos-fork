@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/light.hc,v 1.2 2007-02-07 16:57:07 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/light.hc,v 1.2 2007-02-07 16:59:34 sezero Exp $
  */
 /*
 ==========================================================
@@ -11,6 +11,49 @@ Lights can be toggled/faded, shot out, etc.
 */
 
 float START_LOW		= 1;
+
+void fire_hurt_field_touch ()
+{
+	if(self.attack_finished>time)
+		return;
+	if(self.inactive)
+		return;
+	if(other.health<=0)
+		return;
+
+	self.attack_finished=time+HX_FRAME_TIME;
+	T_Damage(other,self,self,self.dmg);
+	if(self.t_width<time)
+	{
+		self.t_width=time+0.6;
+		sound(self,CHAN_WEAPON,"crusader/sunhit.wav",1,ATTN_NORM);
+	}
+}
+
+void init_fire_hurt_field ()
+{
+	InitTrigger();
+	self.touch=fire_hurt_field_touch;
+}
+
+void spawn_burnfield (vector org)
+{//Make a trigger_flame_hurt around flame
+entity fhf;
+	fhf=spawn();
+	fhf.model=self.model;
+	fhf.effects=EF_NODRAW;
+	self.trigger_field=fhf;
+	//	setsize(fhf,'-3 -3 0','3 3 9');
+	setorigin(fhf,org);
+	if(self.dmg)
+		fhf.dmg=self.dmg;
+	else
+		fhf.dmg=self.dmg=.2;
+
+	fhf.classname="fire hurt field";
+	fhf.think=init_fire_hurt_field;
+	fhf.nextthink=time;
+}
 
 void initialize_lightstyle (void)
 {
@@ -116,6 +159,8 @@ void lightstyle_change (entity light_targ)
 void torch_death ()
 {
 	lightstylestatic(self.style,0);
+	stopSound(self,CHAN_BODY);
+	//sound(self,CHAN_BODY, "misc/null.wav", 0.5, ATTN_STATIC);
 	chunk_death();
 }
 
@@ -123,17 +168,21 @@ void torch_think (void)
 {
 float lightstate;
 	lightstate=lightstylevalue(self.style);
-	if(!lightstate)			//Use "off" frames
+	if(lightstate<1)			//Use "off" frames
 	{
 		if(self.mdl)
 			setmodel(self,self.mdl);
 		self.drawflags(-)MLS_ABSLIGHT;
+		if(self.dmg)
+			self.trigger_field.inactive=TRUE;
 	}
 	else
 	{
 		if(self.weaponmodel)
 			setmodel(self,self.weaponmodel);
 		self.drawflags(+)MLS_ABSLIGHT;
+		if(self.dmg)
+			self.trigger_field.inactive=FALSE;
 	}
 	if(time>self.fadespeed)
 		self.nextthink=-1;
@@ -154,10 +203,10 @@ Default light value is 300
 Default style is 0
 ----------------------------------
 If triggered, will toggle between lightvalue1 and lightvalue2
-.lightvalue1 (default 0) 
-.lightvalue2 (default 11, equivalent to 300 brightness)
+"lightvalue1" (default 0) 
+"lightvalue2" (default 11, equivalent to 300 brightness)
 Two values the light will fade-toggle between, 0 is black, 25 is brightest, 11 is equivalent to a value of 300.
-.fadespeed (default 1) = How many seconds it will take to complete the desired lighting change
+"fadespeed" (default 1) = How many seconds it will take to complete the desired lighting change
 The light will start on at a default of the higher light value unless you turn on the startlow flag.
 START_LOW = will make the light start at the lower of the lightvalues you specify (default uses brighter)
 
@@ -216,7 +265,13 @@ void() light_globe =
 	else
 	{
 		setmodel(self,self.weaponmodel);
-		makestatic (self);
+		if(deathmatch||teamplay)
+			makestatic (self);
+		else
+		{
+			self.solid=SOLID_NOT;
+			self.movetype=MOVETYPE_NONE;
+		}
 	}
 };
 */
@@ -247,7 +302,7 @@ void() FireAmbient =
 	}
 };
 
-/*QUAK-ED light_torch_small_walltorch (0 .5 0) (-10 -10 -20) (10 10 20) START_LOW
+/*QUAK-ED light_torch_small_walltorch (0 .5 0) (-10 -10 -20) (10 10 20) START_LOW HURT
 Short wall torch
 Default light value is 200
 Default style is 0
@@ -259,12 +314,19 @@ Two values the light will fade-toggle between, 0 is black, 25 is brightest, 11 i
 .fadespeed (default 1) = How many seconds it will take to complete the desired lighting change
 The light will start on at a default of the higher light value unless you turn on the startlow flag.
 START_LOW = will make the light start at the lower of the lightvalues you specify (default uses brighter)
+HURT = Will hurt things that touch it.
+.dmg = how much to hurt people who touch fire - damage/20th of a second.  Default = .2;
 
 NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS NEED THIS INFO
 */
 void() light_torch_small_walltorch =
 {
 	precache_model ("models/flame.mdl");
+	if(self.spawnflags&2)
+		spawn_burnfield(self.origin);
+	else
+		self.dmg=0;
+
 	FireAmbient ();
 	if(self.targetname)
 		self.use=torch_use;
@@ -287,11 +349,17 @@ void() light_torch_small_walltorch =
 	{
 		self.drawflags(+)MLS_ABSLIGHT;
 		setmodel(self,self.weaponmodel);
-		makestatic (self);
+		if(deathmatch||teamplay)
+			makestatic (self);
+		else
+		{
+			self.solid=SOLID_NOT;
+			self.movetype=MOVETYPE_NONE;
+		}
 	}
 };
 
-/*QUAKED light_flame_large_yellow (0 1 0) (-10 -10 -12) (12 12 18) START_LOW
+/*QUAKED light_flame_large_yellow (0 1 0) (-10 -10 -13) (10 10 41) START_LOW HURT
 Large yellow flame
 ----------------------------------
 If triggered, will toggle between lightvalue1 and lightvalue2
@@ -301,12 +369,19 @@ Two values the light will fade-toggle between, 0 is black, 25 is brightest, 11 i
 .fadespeed (default 1) = How many seconds it will take to complete the desired lighting change
 The light will start on at a default of the higher light value unless you turn on the startlow flag.
 START_LOW = will make the light start at the lower of the lightvalues you specify (default uses brighter)
+HURT = Will hurt things that touch it.
+.dmg = how much to hurt people who touch fire - damage/20th of a second.  Default = .2;
 
 NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS NEED THIS INFO
 */
 void() light_flame_large_yellow =
 {
 	precache_model ("models/flame1.mdl");
+	if(self.spawnflags&2)
+		spawn_burnfield(self.origin);
+	else
+		self.dmg=0;
+
 	FireAmbient ();
 	if(self.targetname)
 		self.use=torch_use;
@@ -329,11 +404,17 @@ void() light_flame_large_yellow =
 	{
 		self.drawflags(+)MLS_ABSLIGHT;
 		setmodel(self,self.weaponmodel);
-		makestatic (self);
+		if(deathmatch||teamplay)
+			makestatic (self);
+		else
+		{
+			self.solid=SOLID_NOT;
+			self.movetype=MOVETYPE_NONE;
+		}
 	}
 };
 
-/*QUAKED light_flame_small_yellow (0 1 0) (-8 -8 -8) (8 8 8) START_LOW
+/*QUAKED light_flame_small_yellow (0 1 0) (-8 -8 -8) (8 8 8) START_LOW HURT
 Small yellow flame ball
 ----------------------------------
 If triggered, will toggle between lightvalue1 and lightvalue2
@@ -343,12 +424,18 @@ Two values the light will fade-toggle between, 0 is black, 25 is brightest, 11 i
 .fadespeed (default 1) = How many seconds it will take to complete the desired lighting change
 The light will start on at a default of the higher light value unless you turn on the startlow flag.
 START_LOW = will make the light start at the lower of the lightvalues you specify (default uses brighter)
-
+HURT = Will hurt things that touch it.
+.dmg = how much to hurt people who touch fire - damage/20th of a second.  Default = .2;
 NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS NEED THIS INFO
 */
 void() light_flame_small_yellow =
 {
 	precache_model ("models/flame2.mdl");
+	if(self.spawnflags&2)
+		spawn_burnfield(self.origin);
+	else
+		self.dmg=0;
+
 	FireAmbient ();
 	if(self.targetname)
 		self.use=torch_use;
@@ -371,7 +458,13 @@ void() light_flame_small_yellow =
 	{
 		self.drawflags(+)MLS_ABSLIGHT;
 		setmodel(self,self.weaponmodel);
-		makestatic (self);
+		if(deathmatch||teamplay)
+			makestatic (self);
+		else
+		{
+			self.solid=SOLID_NOT;
+			self.movetype=MOVETYPE_NONE;
+		}
 	}
 };
 
@@ -414,7 +507,13 @@ void() light_flame_small_white =
 	{
 		self.drawflags(+)MLS_ABSLIGHT;
 		setmodel(self,self.weaponmodel);
-		makestatic (self);
+		if(deathmatch||teamplay)
+			makestatic (self);
+		else
+		{
+			self.solid=SOLID_NOT;
+			self.movetype=MOVETYPE_NONE;
+		}
 	}
 };
 */
@@ -458,9 +557,17 @@ void() light_gem =
 	{
 		self.drawflags(+)MLS_ABSLIGHT;
 		setmodel(self,self.weaponmodel);
-		makestatic (self);
+		if(deathmatch||teamplay)
+			makestatic (self);
+		else
+		{
+			self.solid=SOLID_NOT;
+			self.movetype=MOVETYPE_NONE;
+		}
 	}
 };
+
+
 
 /*QUAKED light_newfire (0 1 0) (-10 -10 -13) (10 10 41) START_LOW HURT
 Large yellow flame
@@ -479,13 +586,12 @@ NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS 
 */
 void() light_newfire =
 {
-	precache_model ("models/newfire.mdl");
-	/*precache_model4 ("models/newfire.mdl");	PoP stuff
+	precache_model4 ("models/newfire.mdl");
 	if(self.spawnflags&2)
 		spawn_burnfield(self.origin);
 	else
-		self.dmg=0;*/
-	
+		self.dmg=0;
+
 	FireAmbient ();
 	if(self.spawnflags&4)
 		self.drawflags = self.drawflags|SCALE_ORIGIN_BOTTOM;
@@ -520,3 +626,4 @@ void() light_newfire =
 		}
 	}
 };
+

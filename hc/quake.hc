@@ -22,7 +22,7 @@ vector dir;
 //FIXME:  Add particle dust
 	while (head)
 	{
-		if ((head.movetype==MOVETYPE_STEP||head.movetype==MOVETYPE_WALK||head.movetype==MOVETYPE_PUSHPULL)&&head.solid!=SOLID_BSP&&head.mass<500 && head != self.owner && ((head.classname != "monster_golem_bronze") &&(head.classname != "monster_golem_iron") && (head.classname != "monster_golem_stone")&& (head.classname != "monster_golem_crystal")))
+		if ((head.movetype==MOVETYPE_STEP||head.movetype==MOVETYPE_WALK||head.movetype==MOVETYPE_PUSHPULL)&&head.solid!=SOLID_BSP&&head.mass<500 && head != self.owner && ((head.classname != "monster_golem_bronze") &&(head.classname != "monster_golem_iron") && (head.classname != "monster_golem_stone") && (head.classname != "monster_golem_crystal")&& (head.classname != "buddha_firewalker")))
 		{	
 //			bprint(head.classname);
 			dist=vlen(self.origin-head.origin)/self.mass;

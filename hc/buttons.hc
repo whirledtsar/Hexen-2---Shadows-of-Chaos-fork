@@ -1,10 +1,11 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/buttons.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/buttons.hc,v 1.2 2007-02-07 16:59:30 sezero Exp $
  */
 // button and multiple button
 
 float SPAWNFLAG_BUTTON_ACTIVATE = 1;
 float FIRE_MULTIPLE				= 4;
+float BUTTON_TOGGLE				= 8;
 
 void() button_wait;
 void() button_return;
@@ -60,7 +61,12 @@ void() button_fire =
 		return;	
 	}
 
-	if (self.state == STATE_UP)
+	if(self.spawnflags&BUTTON_TOGGLE&&self.state==STATE_TOP)
+	{//Toggle button, done moving
+		button_return();
+		return;
+	}
+	else if (self.state == STATE_UP)
 		return;
 
 	self.check_ok = TRUE;
@@ -98,11 +104,12 @@ void() button_killed =
 	button_fire ();
 };
 
-/*QUAKED func_button (0 .5 .8) ? deactivated FIREONLY FIRE_MULTIPLE x x x
+/*QUAKED func_button (0 .5 .8) ? deactivated FIREONLY FIRE_MULTIPLE TOGGLE x x
 When a button is touched, it moves some distance in the direction of it's angle, triggers all of it's targets, waits some time, then returns to it's original position where it can be triggered again,
 unless it's a pressure plate, in which case it will not return to it's position until it's not being touched anymore.
 FIREONLY - has to be killed, touching won't do it.
 FIRE_MULTIPLE - can be shot over and over (give it a high health)
+TOGGLE - Button will wait at up and down positions for activations, assumes a wait of -1
 -----------------------FIELDS-------------------------
 "angle"		determines the opening direction
 "target"	all entities with a matching targetname will be used
@@ -142,11 +149,6 @@ void() func_button =
 		precache_sound ("buttons/button4.wav");
 		self.noise = "buttons/button4.wav";
 	}
-	if (self.soundtype == 4)
-	{
-		precache_sound ("buttons/chainpull.wav");
-		self.noise = "buttons/chainpull.wav";
-	}
 	
 	SetMovedir ();
 
@@ -178,6 +180,8 @@ void() func_button =
 
 	if (!self.speed)
 		self.speed = 40;
+	if(self.spawnflags&BUTTON_TOGGLE)
+		self.wait=-1;
 	if (!self.wait)
 		self.wait = 1;
 	if (!self.lip)
@@ -272,12 +276,13 @@ entity found;
 				if(found_bottom_y>self.absmin_y&&found_bottom_y<self.absmax_y)
 					if(found_bottom_z>=self.absmax_z - 3&&found_bottom_z<=self.absmax_z+7)
 						return TRUE;
-					else
+			/*		else
 						dprint("Not right height\n");
 				else
 					dprint("Not right y\n");
 			else
 				dprint("Not right x\n");
+			*/
 		found=found.chain;
 	}
 	return FALSE;

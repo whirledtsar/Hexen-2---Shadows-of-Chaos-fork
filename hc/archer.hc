@@ -1,6 +1,6 @@
 
 /*
- * $Header: /H2 Mission Pack/HCode/archer.hc 17    3/19/98 12:17a Mgummelt $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/archer.hc,v 1.2 2007-02-07 16:59:29 sezero Exp $
  */
 
 /*
@@ -98,7 +98,6 @@ $frame walk11       walk12       walk13       walk14       walk15
 $frame walk16       
 
 
-
 void archer_run(void);
 void archer_stand(void);
 void archerredraw(void);
@@ -106,7 +105,6 @@ void archerdraw(void);
 void archerdrawhold(void);
 void archermissile(void);
 void archer_check_defense(void);
-
 
 float ARCHER_STUCK = 2;	// Archer can't run
 
@@ -254,9 +252,7 @@ void archer_arrow_touch(void)
 void archer_dying (void) [++ $deathA1..$deathA22]
 {
 	stopSound(self,CHAN_WEAPON);
-	//if(self.model == "models/archerdecap.mdl")
-		//particleexplosion(self.origin+ '0 0 25',8,1,10);
-	//sound (self, CHAN_WEAPON, "misc/null.wav", 1, ATTN_NORM);
+	
 	if (self.health < -80)
 	{
 		chunk_death();
@@ -291,7 +287,6 @@ void() archer_die =
 		chunk_death();
 		return;
 	}
-	//else if (random(100) < 45)
 	else if (self.decap>0 && random()<0.5)	//ws: only sharp weapons will decapitate; see damage.hc
 	{
 		setmodel (self, "models/archerdecap.mdl");
@@ -669,7 +664,7 @@ void archerdraw () [++ $tranA1..$tranA13]
 			if (random() < .70)	
 				sound (self, CHAN_BODY, "archer/growl2.wav", 1, ATTN_NORM);
 			else
- 				sound (self, CHAN_BODY, "archer/growl3.wav", 1, ATTN_NORM);
+				sound (self, CHAN_BODY, "archer/growl3.wav", 1, ATTN_NORM);
 		}
 	}
 }
@@ -696,7 +691,7 @@ void archer_run(void)
 			if (random() < .70)	
 				sound (self, CHAN_BODY, "archer/growl2.wav", 1, ATTN_NORM);
 			else
- 				sound (self, CHAN_BODY, "archer/growl3.wav", 1, ATTN_NORM);
+				sound (self, CHAN_BODY, "archer/growl3.wav", 1, ATTN_NORM);
 		}
 	}
 
@@ -733,7 +728,7 @@ void archer_walk(void) [++ $patrol1..$patrol22]
 			if (random() < .70)	
 				sound (self, CHAN_BODY, "archer/growl2.wav", 1, ATTN_NORM);
 			else
- 				sound (self, CHAN_BODY, "archer/growl3.wav", 1, ATTN_NORM);
+				sound (self, CHAN_BODY, "archer/growl3.wav", 1, ATTN_NORM);
 		}
 	}	
 
@@ -754,10 +749,12 @@ void archer_stand(void) [++ $waitA1..$waitA18]
 {
 	if (random()<0.5)
 	{
+		
 		archer_check_defense();
 		ai_stand();
 	}
 }
+
 
 /*QUAKED monster_archer (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
 The Archer Knight monster
@@ -778,15 +775,13 @@ void monster_archer ()
 		return;
 	}
 
-	/*if(!self.th_init)
+	if(!self.th_init)
 	{
 		self.th_init=monster_archer;
 		self.init_org=self.origin;
-	}*/
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-	{
-		precache_archer();
 	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		precache_archer();
 
 	if(!self.health)
 		self.health = 80;
@@ -826,7 +821,6 @@ void monster_archer ()
 	self.view_ofs = '0 0 40';
 
 	self.hull=HULL_PLAYER;
-	
 	walkmonster_start();
 }
 
@@ -849,37 +843,19 @@ void monster_archer_lord ()
 		return;
 	}
 
-	/*if(!self.th_init)
+	if(!self.th_init)
 	{
 		self.th_init=monster_archer_lord;
 		self.init_org=self.origin;
-	}*/
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-	{
-		precache_model("models/archer.mdl");
-		precache_model("models/archerhd.mdl");
-
-		precache_model("models/gspark.spr");
-
-		precache_sound ("archer/arrowg.wav");
-		precache_sound ("archer/arrowr.wav");
-
-		precache_sound ("archer/growl2.wav");
-		precache_sound ("archer/growl3.wav");
-		precache_sound ("archer/growl4.wav");
-		precache_sound ("archer/pain2.wav");
-		precache_sound ("archer/sight2.wav");
-		precache_sound ("archer/death2.wav");
-		precache_sound ("archer/draw.wav");
 	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		precache_archerlord();
 
 	if(!self.experience_value)
-		self.experience_value = 50;
-		//self.experience_value = 200;
+		self.experience_value = 50;		//200
 	if(!self.health)
-		self.health = 160;
-		//self.health = 325;
-	//ws - reduced health to 2x normal
+		self.health = 160;		//325
+	//ws - reduced health to 2x normal archer
 
 	CreateEntityNew(self,ENT_ARCHER,"models/archer.mdl",archer_die);
 
@@ -906,10 +882,8 @@ void monster_archer_lord ()
 	self.view_ofs = '0 0 40';
 
 	self.init_exp_val = self.experience_value;
-	
 	walkmonster_start();
 }
-
 
 /*QUAKED monster_archer_ice (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
 The Archer monster with snow booties
@@ -924,11 +898,11 @@ Dislikes: Sunshine and happiness
 */
 void monster_archer_ice ()
 {
-	/*if(!self.th_init)
+	if(!self.th_init)
 	{
 		self.th_init=monster_archer_ice;
 		self.init_org=self.origin;
-	}*/
+	}
 	self.netname=self.classname;
 	self.classname="monster_archer";
 	monster_archer();
@@ -1023,203 +997,4 @@ float ArcherCheckAttack (void)
 	return FALSE;
 }
 */
-/*
- * $Log: /H2 Mission Pack/HCode/archer.hc $
- * 
- * 17    3/19/98 12:17a Mgummelt
- * last bug fixes
- * 
- * 16    3/13/98 3:27a Mgummelt
- * Replaced all sounds that played a null.wav with stopSound commands
- * 
- * 15    3/09/98 3:05p Mgummelt
- * 
- * 14    3/04/98 3:39p Mgummelt
- * 
- * 13    3/03/98 7:31p Mgummelt
- * 
- * 12    2/27/98 11:52a Mgummelt
- * 
- * 11    2/25/98 6:10p Mgummelt
- * 
- * 10    2/12/98 5:55p Jmonroe
- * remove unreferenced funcs
- * 
- * 9     2/05/98 12:30p Mgummelt
- * 
- * 8     2/04/98 4:58p Mgummelt
- * spawnflags on monsters cleared out
- * 
- * 7     1/20/98 10:58a Mgummelt
- * 
- * 6     1/19/98 6:20p Mgummelt
- * 
- * 5     1/16/98 11:11a Mgummelt
- * 
- * 4     1/14/98 7:43p Mgummelt
- * 
- * 104   10/30/97 2:29p Jheitzman
- * 
- * 103   10/29/97 4:05p Mgummelt
- * 
- * 102   10/28/97 1:00p Mgummelt
- * Massive replacement, rewrote entire code... just kidding.  Added
- * support for 5th class.
- * 
- * 100   9/09/97 11:48a Rlove
- * 
- * 99    9/03/97 9:14p Mgummelt
- * Fixing targetting AI
- * 
- * 98    9/02/97 7:02p Mgummelt
- * 
- * 96    9/02/97 6:33p Mgummelt
- * 
- * 95    9/02/97 4:15p Rlove
- * 
- * 94    9/01/97 12:07a Mgummelt
- * 
- * 93    8/31/97 11:33p Mgummelt
- * 
- * 92    8/30/97 6:58p Mgummelt
- * 
- * 91    8/30/97 12:22a Rjohnson
- * Precaching for monster spawners
- * 
- * 90    8/29/97 4:17p Mgummelt
- * Long night
- * 
- * 89    8/29/97 3:04a Mgummelt
- * 
- * 88    8/29/97 1:00a Mgummelt
- * 
- * 87    8/27/97 10:52p Mgummelt
- * 
- * 86    8/27/97 8:11p Mgummelt
- * 
- * 84    8/27/97 7:07p Mgummelt
- * 
- * 83    8/27/97 4:17p Mgummelt
- * 
- * 82    8/26/97 6:44p Jweier
- * 
- * 78    8/26/97 9:00a Mgummelt
- * 
- * 77    8/23/97 4:26p Rlove
- * 
- * 76    8/21/97 10:05a Rlove
- * 
- * 75    8/20/97 11:35p Mgummelt
- * 
- * 74    8/20/97 8:07p Rlove
- * 
- * 73    8/20/97 6:30a Rlove
- * 
- * 69    8/19/97 4:14p Rlove
- * 
- * 64    7/24/97 3:53p Rlove
- * 
- * 62    7/21/97 3:03p Rlove
- * 
- * 60    7/18/97 11:44a Rlove
- * 
- * 57    7/15/97 7:21p Rlove
- * 
- * 56    7/15/97 9:08a Rlove
- * 
- * 55    7/12/97 9:09a Rlove
- * Reworked Assassin Punch Dagger
- * 
- * 51    7/03/97 5:06p Rlove
- * 
- * 50    7/03/97 8:47a Rlove
- * 
- * 47    6/30/97 9:41a Rlove
- * 
- * 46    6/27/97 10:18a Rlove
- * Monsters drop stuff on death
- * 
- * 45    6/25/97 9:48a Rlove
- * 
- * 44    6/20/97 8:25a Rlove
- * 
- * 43    6/19/97 4:43p Rlove
- * Now he's got an attitude.
- * 
- * 40    6/19/97 9:13a Rlove
- * 
- * 38    6/19/97 8:50a Rlove
- * 
- * 37    6/18/97 4:30p Rlove
- * Rewrote entity spawning code
- * 
- * 36    6/17/97 10:20a Rlove
- * 
- * 35    6/16/97 9:12a Rlove
- * Doesn't growl so much anymore
- * 
- * 34    6/15/97 3:01p Mgummelt
- * 
- * 33    6/14/97 1:12p Rlove
- * 
- * 32    6/12/97 12:13p Rlove
- * Archer arrows generate red or green sparks
- * 
- * 31    6/11/97 6:08p Rlove
- * 
- * 30    6/11/97 9:57a Rlove
- * Added sounds to the old boy.
- * 
- * 29    6/02/97 7:58p Mgummelt
- * 
- * 28    5/23/97 3:43p Mgummelt
- * 
- * 27    5/22/97 6:30p Mgummelt
- * 
- * 26    5/22/97 3:29p Mgummelt
- * 
- * 25    5/20/97 8:42a Rlove
- * 
- * 24    5/19/97 11:36p Mgummelt
- * 
- * 23    5/16/97 2:12p Mgummelt
- * 
- * 22    5/13/97 2:26p Rlove
- * 
- * 19    5/12/97 11:06a Rlove
- * 
- * 18    5/12/97 10:31a Rlove
- * 
- * 14    5/07/97 11:03a Rlove
- * 
- * 12    5/02/97 11:50a Rlove
- * 
- * 11    4/29/97 4:08p Rlove
- * 
- * 10    4/21/97 8:47p Mgummelt
- * 
- * 9     4/21/97 6:14p Mgummelt
- * 
- * 8     3/21/97 9:38a Rlove
- * Created CHUNK.HC and MATH.HC, moved brush_die to chunk_death so others
- * can use it.
- * 
- * 7     3/20/97 12:31p Rlove
- * More updates to monster AI
- * 
- * 6     3/12/97 4:23p Rlove
- * New Monster AI
- * 
- * 5     3/10/97 8:29a Rlove
- * Halfway through rewriting Monster AI
- * 
- * 4     3/04/97 3:57p Aleggett
- * Added done_precache checking for monster spawner
- * 
- * 3     2/26/97 3:14p Rlove
- * Changes to basic monster ai
- * 
- * 2     2/19/97 11:58a Rlove
- * 
- * 1     2/19/97 10:01a Rlove
- */
+

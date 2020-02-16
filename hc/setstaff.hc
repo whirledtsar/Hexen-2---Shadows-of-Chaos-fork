@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/setstaff.hc,v 1.5 2007-02-07 16:57:09 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/setstaff.hc,v 1.5 2007-02-07 16:59:36 sezero Exp $
  */
 
 /*
@@ -129,7 +129,7 @@ vector dir;
 				sound(self.enemy,CHAN_BODY,"assassin/chntear.wav",1,ATTN_NORM);
         }
 
-		if(self.enemy.health<=self.health/200&&self.frags)
+		if((self.enemy.health<=self.health/100||self.enemy.health<=3)&&self.frags)
 	    {
 			T_Damage (self.enemy, self, self.owner, 5000);
 			self.lifetime=time+2;
@@ -138,12 +138,8 @@ vector dir;
 			return;
 		}
         else
-        {
-		if (self.enemy.health<=5)
-			T_Damage (self.enemy, self, self.owner, 80);
-		else
 			T_Damage (self.enemy, self, self.owner, self.health/200);
-	}
+
 		DrawLinks();
 
 		if(self.enemy.classname!="player")
@@ -226,6 +222,7 @@ void(entity bound) Grab=
 		self.attack_finished=time+10;
         self.think=Yank;
         thinktime self : 0;
+
 		T_Damage (bound, self, self.owner, 3);
 };
 
@@ -357,7 +354,6 @@ void scarab_die ()
 		remove(self.movechain);
 		self.movechain = world;
 	}
-	//T_Damage(self.lockentity,self,self.owner,400);
 	MultiExplode();
 }
 
@@ -627,7 +623,7 @@ void setstaff_readyfire (void)
 	{
 		sound(self,CHAN_WEAPON,"misc/pulse.wav",1,ATTN_NORM);
 		self.weaponframe_cnt=time+1.7;
-		/*if(self.greenmana>=10)	//ws: commented out because it seems pointless and forces you to fire when youre not ready
+	 	/*if(self.greenmana>=10)	//ws: commented out because it seems pointless and forces you to fire when youre not ready
 			self.greenmana-=10;
 		else
 			self.button0=FALSE;
@@ -636,7 +632,7 @@ void setstaff_readyfire (void)
 		else
 			self.button0=FALSE;*/
 	}
-	
+			
 	self.th_weapon = setstaff_readyfire;
 
 	if(!self.button0||self.greenmana<=0||self.bluemana<=0)

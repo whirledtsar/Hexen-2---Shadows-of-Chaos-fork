@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/barrel.hc,v 1.2 2007-02-07 16:56:56 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/barrel.hc,v 1.2 2007-02-07 16:59:29 sezero Exp $
  */
 /*
 ==============================================================================
@@ -15,6 +15,20 @@ $base base 128 128
 $skin skin
 $frame resting
 
+void barrel_go ();
+void spawn_rep_barrel (vector org)
+{
+	entity replacement;
+	replacement=spawn();
+	replacement.spawnflags=self.spawnflags;
+	replacement.origin=self.wallspot;
+	replacement.frags=self.frags;
+	replacement.classname=self.netname;
+	replacement.think=barrel_go;
+	replacement.flags2(+)FL_SUMMONED;
+	replacement.targetname=self.targetname;
+	thinktime replacement : 0.5;
+}
 
 //void	MakeExplosion(string explodemodel);
 void()barrel_check_float;
@@ -125,15 +139,10 @@ vector org;
 /*
  * obj_barrel_explode() -- Blows the barrel up.
  */
- 
 
-
-void obj_barrel_explode()
+void obj_barrel_explode_go()
 {
 entity attacker;
-
-	self.th_die=SUB_Null;
-	self.takedamage = DAMAGE_NO;
 
 	if(self.enemy.flags2&FL_ALIVE)//give credit to person who blew it up
 		attacker=self.enemy;
@@ -142,19 +151,35 @@ entity attacker;
 
 	T_RadiusDamage(self, attacker, 100, self);
 
-	sound(self, CHAN_AUTO, "weapons/explode.wav", 1, ATTN_NORM);
+	sound(self, CHAN_VOICE, "weapons/explode.wav", 1, ATTN_NORM);
 
 	particleexplosion(self.origin + '0 0 83',384,60,40);
 
 	starteffect(CE_LG_EXPLOSION , (self.absmin+self.absmax)*0.5);
 
+	if(self.spawnflags&BARREL_RESPAWN)
+		spawn_rep_barrel(self.wallspot);
+
 	chunk_death();
 }
 
-void obj_barrel_exdeath()
+void obj_barrel_explode ()
 {
-	self.think = obj_barrel_explode;
-	thinktime self : .13;
+	//delay so too many don't cause crash
+	self.th_die=SUB_Null;
+	self.takedamage = DAMAGE_NO;
+
+	self.think=obj_barrel_explode_go;
+	thinktime self : random()+0.05;
+}
+
+void obj_barrel_use_explode ()
+{//no delay
+	self.th_die=SUB_Null;
+	self.takedamage = DAMAGE_NO;
+
+	self.think=obj_barrel_explode_go;
+	thinktime self : 0;
 }
 
 void()monster_rat;
@@ -184,6 +209,8 @@ void barrel_die ()
 			r-=1;
 		}
 	}
+	if(self.spawnflags&BARREL_RESPAWN)
+		spawn_rep_barrel(self.wallspot);
 	if(self.classname!="monster_ratnest")
 		chunk_death();
 	else
@@ -322,6 +349,15 @@ void obj_barrel_shoot()
  * obj_barrel_use() -- Called when a barrel is triggered.
  */
 
+void barrel_drop ()
+{
+	self.movetype=MOVETYPE_FLYMISSILE;
+//	setorigin(self,self.origin - '0 0 20');
+	self.flags(-)FL_PUSH|FL_ONGROUND;
+	self.velocity='0 0 -200';
+	self.touch=self.th_die;
+}
+
 void obj_barrel_use()
 {
 //	if(other.movetype == MOVETYPE_STEP)
@@ -333,9 +369,13 @@ void obj_barrel_use()
 
 void spawn_barrel(float barrel_type)
 {
-	precache_model("models/barrel.mdl");
-	if(barrel_type==BARREL_NORMAL)
-		precache_model("models/rat.mdl");
+	self.frags=barrel_type;
+	if(!self.flags2&FL_SUMMONED)
+	{
+		precache_model("models/barrel.mdl");
+		if(barrel_type==BARREL_NORMAL)
+			precache_model("models/rat.mdl");
+	}
 
 	CreateEntityNew(self,ENT_BARREL,"models/barrel.mdl",chunk_death);
 
@@ -353,6 +393,7 @@ void spawn_barrel(float barrel_type)
 	if (self.scale)
 		self.mass *=self.scale;
 
+	self.netname=self.classname;
 	self.classname = "barrel";
 
 	self.flags(+)FL_PUSH;
@@ -372,7 +413,7 @@ void spawn_barrel(float barrel_type)
 	}
 	else if (barrel_type==BARREL_EXPLODING)
 	{
-		self.th_die	= obj_barrel_exdeath;
+		self.th_die	= obj_barrel_explode;
 		self.skin=2;
 	}
 
@@ -391,12 +432,25 @@ void spawn_barrel(float barrel_type)
 	else if(!self.flags2&FL_SUMMONED&&!self.spawnflags&BARREL_NO_DROP)
 		droptofloor();
 
-	if(self.targetname)
-		self.use=self.th_die;
+	if(self.spawnflags&DROP_USE)
+	{
+		self.movetype=MOVETYPE_NONE;
+		self.use=barrel_drop;
+		if(barrel_type==BARREL_EXPLODING)
+			self.th_die=obj_barrel_use_explode;
+	}
+	else if(self.targetname)
+		if(barrel_type==BARREL_EXPLODING)
+			self.use=obj_barrel_use_explode;
+		else
+			self.use=self.th_die;
+
+	if(self.spawnflags&BARREL_RESPAWN)
+		self.wallspot=self.origin;
 }
 
 
-/*QUAKED obj_barrel (0.3 0.1 0.6) (-13 -13 0) (13 13 36) DOWNHILL NO_DROP ON_SIDE SINK
+/*QUAKED obj_barrel (0.3 0.1 0.6) (-13 -13 0) (13 13 36) DOWNHILL NO_DROP ON_SIDE SINK DROP_USE RESPAWN
 
 A barrel, just a plain old barrel
 -------------------------FIELDS-------------------------
@@ -406,18 +460,22 @@ DOWNHILL - This barrel will slide downhill with gravity.
 NO_DROP - Will not drop to floor before spawning
 ON_SIDE - Will make the barrel appear to be on it's side, the top will point right (90 degrees)
 			Note- barrels on their side must be placed at least 13 units above the floor.
-SINK - Floats in water
+SINK - Sinks in water
+DROP_USE - Barrel has no gravity until used, then will drop
+RESPAWN - Barrel will RESPAWN at it's initial origin when it is destroyed
 --------------------------------------------------------
 */
 void obj_barrel(void)
 {
+	if(self.spawnflags&DROP_USE)
+		self.spawnflags(+)BARREL_NO_DROP;
 	precache_sound("misc/squeak.wav");
 	spawn_barrel(BARREL_NORMAL);
 	self.mass = 75;
 }
 
 
-/*QUAKED obj_barrel_indestructible (0.3 0.1 0.6) (-13 -13 0) (13 13 36) DOWNHILL NO_DROP ON_SIDE SINK
+/*QUAKED obj_barrel_indestructible (0.3 0.1 0.6) (-13 -13 0) (13 13 36) DOWNHILL NO_DROP ON_SIDE SINK DROP_USE RESPAWN
 
 A barrel you just can't break
 -------------------------FIELDS-------------------------
@@ -425,33 +483,68 @@ DOWNHILL - This barrel will slide downhill with gravity.
 NO_DROP - Will not drop to floor before spawning
 ON_SIDE - Will make the barrel appear to be on it's side, the top will point right (90 degrees)
 			Note- barrels on their side must be placed at least 13 units above the floor.
-SINK - Floats in water
+SINK - Sinks in water
+DROP_USE - Barrel has no gravity until used, then will drop
+RESPAWN - Barrel will RESPAWN at it's initial origin when it is destroyed
 --------------------------------------------------------
 */
 void obj_barrel_indestructible(void)
 {
+	if(self.spawnflags&DROP_USE)
+		self.spawnflags(+)BARREL_NO_DROP;
 	spawn_barrel(BARREL_INDESTRUCTIBLE);
 	self.mass = 95;
 }
 
 
-/*QUAKED obj_barrel_exploding (0.3 0.1 0.6) (-13 -13 0) (13 13 36) DOWNHILL NO_DROP ON_SIDE SINK
+/*QUAKED obj_barrel_exploding (0.3 0.1 0.6) (-13 -13 0) (13 13 36) DOWNHILL NO_DROP ON_SIDE SINK DROP_USE RESPAWN
 An exploding barrel with red XXX on the side
 WARNING!:  Putting too many exploding barrels next to each other will cause a crash, there is no way around this, so if it happens, it's to be considered a Designer error!  
 Putting them in lines and chains seems to be ok, as long as you don't stack them or group them too closely, more than 4 in a tight group is probably pushing it.
 -------------------------FIELDS-------------------------
 .health  - How hard it is to blow up
            Default: 25
+.targetname - set a targetname on a barrel and it will not delay when it explodes (default is arandom delay to prevent too many explosions at once)
 DOWNHILL - This barrel will slide downhill with gravity.
 NO_DROP - Will not drop to floor before spawning
 ON_SIDE - Will make the barrel appear to be on it's side, the top will point right (90 degrees)
 			Note- barrels on their side must be placed at least 13 units above the floor.
 SINK - Sinks in water
- --------------------------------------------------------
+DROP_USE - Barrel has no gravity until used, then will drop
+RESPAWN - Barrel will RESPAWN at it's initial origin when it is destroyed
+--------------------------------------------------------
 */
 void obj_barrel_exploding(void)
 {
+	if(self.spawnflags&DROP_USE)
+		self.spawnflags(+)BARREL_NO_DROP;
 	spawn_barrel(BARREL_EXPLODING);
 	self.mass = 85;
+}
+
+
+void barrel_go(void)
+{
+	if(self.classname=="obj_barrel_normal")
+	{
+		if(self.spawnflags&DROP_USE)
+			self.spawnflags(+)BARREL_NO_DROP;
+		spawn_barrel(BARREL_NORMAL);
+		self.mass = 75;
+	}
+	else if(self.classname=="obj_barrel_indestructible")
+	{
+		if(self.spawnflags&DROP_USE)
+			self.spawnflags(+)BARREL_NO_DROP;
+		spawn_barrel(BARREL_INDESTRUCTIBLE);
+		self.mass = 95;
+	}
+	else if(self.classname=="obj_barrel_exploding")
+	{
+		if(self.spawnflags&DROP_USE)
+			self.spawnflags(+)BARREL_NO_DROP;
+		spawn_barrel(BARREL_EXPLODING);
+		self.mass = 85;
+	}
 }
 

@@ -4,7 +4,7 @@
 //** scorpion.hc
 //** bgokey
 //**
-//** $Header: /cvsroot/uhexen2/gamecode/hc/h2/scorpion.hc,v 1.1.1.1 2004-11-29 11:40:21 sezero Exp $
+//** $Header: /cvsroot/uhexen2/gamecode/hc/portals/scorpion.hc,v 1.1.1.1 2004-11-29 11:35:22 sezero Exp $
 //**
 //**************************************************************************
 
@@ -89,7 +89,7 @@ void ScorpionMelee1(void);
 void ScorpionMelee2(void);
 void ScorpionMelee3(void);
 void ScorpionMelee4(void);
-void ScorpionDie(void);
+//void ScorpionDie(void);
 void ScorpionDieInit(void);
 entity ScorpionLookProjectiles(void);
 float ScorpionCheckDefense(void);
@@ -120,6 +120,11 @@ AMBUSH
 
 void monster_scorpion_yellow(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_scorpion_yellow;
+		self.init_org=self.origin;
+	}
 	ScorpionInit(SCORPION_YELLOW);
 }
 
@@ -139,6 +144,11 @@ AMBUSH
 
 void monster_scorpion_black(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_scorpion_black;
+		self.init_org=self.origin;
+	}
 	ScorpionInit(SCORPION_BLACK);
 }
 
@@ -156,7 +166,7 @@ void ScorpionInit(float type)
 		return;
 	}
 
-	if (!self.flags2 & FL_SUMMONED && !self.flags2&FL2_RESPAWN)
+	if (!self.flags2 & FL_SUMMONED &&!self.flags2&FL2_RESPAWN)
 		precache_scorpion();
 	setmodel(self, "models/scorpion.mdl");
 
@@ -176,17 +186,22 @@ void ScorpionInit(float type)
 	//self.touch = SUB_Null;
 	//self.use = SUB_Null;
 	setsize(self, '-16 -16 0', '16 16 64');
+	self.hull=HULL_PLAYER;
 
 	if(type == SCORPION_YELLOW)
 	{
-		self.health = 100;
+		if(!self.health)
+			self.health = 100;
 		self.experience_value = 60;
 	}
 	else
 	{
-		self.health = 200;
+		if(!self.health)
+			self.health = 200;
 		self.experience_value = 150;
 	}
+	if(!self.max_health)
+		self.max_health=self.health;
 
 	self.takedamage = DAMAGE_YES;
 
@@ -197,7 +212,7 @@ void ScorpionInit(float type)
 		self.th_run = ScorpionRunBlack;
 	else 
 		self.th_run = ScorpionRun;
-	
+
 	self.th_jump = monster_jump;	self.jumpframe = $ScPain2;
 	self.th_melee = ScorpionMeleeDecide;
 	self.th_pain = ScorpionPainDecide;
@@ -210,9 +225,8 @@ void ScorpionInit(float type)
 	{
 		self.skin = 1;
 	}
-	
+	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	
 	ApplyMonsterBuff(self, FALSE);
 }
 
@@ -271,7 +285,7 @@ void ScorpionWalk(void) [++ $scwalk1..$scwalk16]
 	}
 	ai_walk(2);
 	if(random()<0.1)
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 }
 
 //==========================================================================
@@ -330,7 +344,7 @@ void ScorpionRunBlack(void) [++ $scwalk1..$scwalk16]
 
 	ai_run(8);
 	if(random()<0.1)
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 }
 
 //==========================================================================
@@ -390,7 +404,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 
 	ai_run(6);
 	if(random()<0.1)
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0',self);
 }
 //==========================================================================
 //
@@ -435,7 +449,7 @@ void ScorpionMelee(float damage)
 	source = self.origin;
 	traceline (source, source + v_forward*60, FALSE, self);
 	if (trace_ent == world)
-		traceline (source + v_up*10, source + v_up*24 + v_forward*60, FALSE, self);  //ws: crouching players are no longer invulnerable
+		traceline (source + v_up*10, source + v_up*10 + v_forward*60, FALSE, self);  //ws: crouching players are no longer invulnerable
 
 	if (trace_ent != self.enemy) return;
 
@@ -727,6 +741,7 @@ void ScorpionDie(void)
 		MakeSolidCorpse();
 		return;
 	}
+
 
 	if(self.health < -30)
 	{

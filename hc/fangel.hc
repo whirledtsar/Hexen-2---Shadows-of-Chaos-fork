@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/fangel.hc,v 1.2 2007-02-07 16:57:01 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/fangel.hc,v 1.2 2007-02-07 16:59:32 sezero Exp $
  */
 
 /*
@@ -98,10 +98,13 @@ entity item;
 vector vec, realVec;
 float dot;
 
-	if(range(self.enemy)<=RANGE_MELEE && random() < 0.5)
+	if(range(self.enemy)<=RANGE_MELEE)
 		return FALSE;
+	
+	if ( (self.think==fangel_wingframes || self.think==fangel_handframes) && random()<0.9 )
+		return FALSE;	//ws: not likely to block if in attack state
 
-	if(fov(self,self.enemy,30)&&self.enemy.last_attack+0.75>time && random() < 0.3)
+	if(fov(self,self.enemy,30)&&self.enemy.last_attack+0.75>time)
 	{
 		self.th_save = self.think;
 		self.fangel_Count = 0;
@@ -125,11 +128,8 @@ float dot;
 			{
 				self.th_save = self.think;
 				self.fangel_Count = 0;
-				if (random() < 0.3)
-				{
-					fangel_blockframes();
-					return TRUE;
-				}
+				fangel_blockframes();
+				return TRUE;
 			}
 		}
 		item = item.chain;
@@ -456,10 +456,8 @@ float fangel_fly_offsets[20] =
 
 void() fangel_blockframes =
 {
-	
 float RetVal;
 float chance;
-
 	self.think = fangel_blockframes;
 	thinktime self : HX_FRAME_TIME;
 
@@ -523,6 +521,7 @@ void() fangel_deathframes =
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/bloodpool.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
+		stopSound(self,CHAN_WEAPON);//cut off wings sound
 		chunk_death();
 		return;
 	}
@@ -666,8 +665,6 @@ void() fangel_painframes =
 
 	self.think = fangel_painframes;
 	thinktime self : HX_FRAME_TIME;
-
-	
 	if (AdvanceFrame($fpain1,$fpain12) == AF_END)
 	{
 		fangel_check_incoming();
@@ -773,17 +770,21 @@ void() fangel_wingframes =
 };
 
 void(entity attacker, float damage) fangel_pain =
-{
-	if (random(self.health) > damage||self.pain_finished>time)
+{	//ws: increase pain chance
+	//if (random(self.health*0.5) > damage||self.pain_finished>time)
+	//	return;		// didn't flinch
+	if (self.pain_finished>time)
 		return;		// didn't flinch
+	
+	float dopain;
+	dopain = FALSE;	dopain = TRUE;
 
 	self.pain_finished=time + 1 + self.skin;
 	ThrowGib ("models/blood.mdl", self.health);
 	if (self.health < 50)
 		self.drawflags (-) DRF_TRANSLUCENT|MLS_POWERMODE;
-
-	if ((self.frame >= $ffly11 && self.frame <= $ffly13) ||
-	    (self.frame >= $ffly26 && self.frame <= $ffly28))
+	
+	if (self.frame >= $ffly11 && self.frame <= $ffly28)
 	{
 		if (self.classname == "monster_fallen_angel")
 			sound (self, CHAN_WEAPON, "fangel/pain.wav", 1, ATTN_NORM);
@@ -795,6 +796,34 @@ void(entity attacker, float damage) fangel_pain =
 		self.th_save = fangel_flyframes;
 		fangel_painframes();
 	}
+	/*if (self.frame >= $ffly1 && self.frame <= $ffly30)
+	{	dprint("fly pain\n");
+		dopain = TRUE;
+		// didn't want to use self.think just in case we just began to attack
+		self.th_save = fangel_flyframes;
+	}
+	else if (self.frame >= $fmove1 && self.frame <= $fmove20)
+	{	dprint("move pain\n");
+		dopain = TRUE;
+		// didn't want to use self.think just in case we just began to attack
+		self.th_save = fangel_flyframes;
+	}
+	else if (self.frame >= $fwing1 && self.frame <= $fwing30)
+	{	dprint("wing pain\n");
+		dopain = TRUE;
+		// didn't want to use self.think just in case we just began to attack
+		self.th_save = fangel_wingframes;
+	}
+	if (dopain)
+	{
+		if (self.classname == "monster_fallen_angel")
+			sound (self, CHAN_WEAPON, "fangel/pain.wav", 1, ATTN_NORM);
+		else
+			sound (self, CHAN_WEAPON, "fangel/pain2.wav", 1, ATTN_NORM);
+		self.th_save = fangel_flyframes;
+		self.fangel_SaveFrame = self.frame;
+		fangel_painframes();
+	}*/
 };
 
 
@@ -808,45 +837,53 @@ void() init_fangel =
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
-	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
-		precache_model2 ("models/fangel.mdl");
+		precache_model4 ("models/fangel.mdl");//converted for MP
 		precache_model2 ("models/faspell.mdl");
 		precache_model2 ("models/fablade.mdl");
-		precache_model2 ("models/h_fangel.mdl");
+		precache_model4 ("models/h_fangel.mdl");
 
 		precache_sound2("fangel/fly.wav");
 		precache_sound2("fangel/deflect.wav");
 		precache_sound2("fangel/hand.wav");
 		precache_sound2("fangel/wing.wav");
-		
-		if (self.classname == "monster_fallen_angel")
-		{
-			precache_sound2("fangel/ambi1.wav");
-		}
-		else
-		{
-			precache_sound2("fangel/ambi2.wav");
-		}
 	}
 
+	if (self.classname == "monster_fallen_angel")
+	{
+		if(!self.health)
+			self.health = 250;
+		if(!self.experience_value)
+			self.experience_value = 150;
+	}
+	else
+	{
+		if(!self.health)
+			self.health = 500;
+		if(!self.experience_value)
+			self.experience_value = 400;
+	}
 	CreateEntityNew(self,ENT_FANGEL,"models/fangel.mdl",fangel_deathframes);
 
 	self.skin = 0;
 
-	self.hull = HULL_BIG;
+	self.hull = HULL_SCORPION;//HULL_BIG;
 	if (self.classname == "monster_fallen_angel")
 	{
+		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+			precache_sound2("fangel/ambi1.wav");
 		self.skin = 0;
-		self.health = 250;
-		self.experience_value = 250;
 	}
 	else
 	{
+		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+			precache_sound2("fangel/ambi2.wav");
 		self.skin = 1;
-		self.health = 500;
-		self.experience_value = 500;
 	}
+
+	if(!self.max_health)
+		self.max_health=self.health;
 
 	self.th_stand = fangel_flyframes;
 	self.th_walk = fangel_flyframes;
@@ -871,6 +908,7 @@ void() init_fangel =
 	if (self.classname == "monster_fallen_angel_lord")
 		self.drawflags (+) DRF_TRANSLUCENT;
 
+	self.init_exp_val = self.experience_value;
 	self.pausetime = 99999999;
 	self.frame=$fhand1;
 	self.think=fangel_wait;
@@ -879,7 +917,7 @@ void() init_fangel =
 };
 
 
-/*QUAKED monster_fallen_angel (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_fallen_angel (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP x DORMANT
 New item for QuakeEd
 
 -------------------------FIELDS-------------------------
@@ -888,18 +926,22 @@ New item for QuakeEd
 */
 void() monster_fallen_angel =
 {
-	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if(!self.th_init)
+	{
+		self.th_init=monster_fallen_angel;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_sound2("fangel/death.wav");
 		precache_sound2("fangel/pain.wav");
 	}
-	
+
 	init_fangel();
-	
 	ApplyMonsterBuff(self, FALSE);
 };
 
-/*QUAKED monster_fallen_angel_lord (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_fallen_angel_lord (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP x DORMANT
 New item for QuakeEd
 
 -------------------------FIELDS-------------------------
@@ -908,11 +950,13 @@ New item for QuakeEd
 */
 void() monster_fallen_angel_lord =
 {
-	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if(!self.th_init)
 	{
-		precache_sound2("fangel/death.wav");
-		precache_sound2("fangel/pain.wav");
-		
+		self.th_init=monster_fallen_angel_lord;
+		self.init_org=self.origin;
+	}
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
 		precache_sound2("fangel/death2.wav");
 		precache_sound2("fangel/pain2.wav");
 	}

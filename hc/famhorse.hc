@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/famhorse.hc,v 1.2 2007-02-07 16:57:01 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/famhorse.hc,v 1.2 2007-02-07 16:59:32 sezero Exp $
  */
 
 /*
@@ -679,7 +679,8 @@ void famhorse_move(void)
 				{
 					if(self.controller)
 						remove(self.controller);
-					sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
+					stopSound(self,CHAN_WEAPON);
+					//sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
 				}
 
 				hurttime = time + 1;
@@ -689,7 +690,8 @@ void famhorse_move(void)
 			{
 				if(self.controller)
 					remove(self.controller);
-				sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
+				stopSound(self,CHAN_WEAPON);
+				//sound(self,CHAN_WEAPON,"misc/null.wav",1,ATTN_NORM);
 
 				self.movechain.drawflags(-)MLS_ABSLIGHT;
 				self.movechain.frame += 50;				
@@ -747,10 +749,14 @@ void rider_famine(void)
 		return;
 	}
 
+	// TE_STREAM_FAMINE
+	precache_model3("models/fambeam.mdl");	//Famine's beam attack
+
 	precache_model3 ("models/boss/famhorse.mdl");
 	precache_model3 ("models/boss/famrider.mdl");
 
 	precache_model3 ("models/famshot.mdl");
+	precache_model3 ("models/soulball.mdl");//Soul sphere
 
 	precache_sound3 ("famine/die.wav");
 	precache_sound3 ("famine/laugh.wav");
@@ -761,7 +767,7 @@ void rider_famine(void)
 	precache_sound3 ("famine/clop1.wav");
 	precache_sound3 ("famine/clop2.wav");
 	precache_sound3 ("famine/clop3.wav");
-	precache_sound3 ("misc/null.wav");
+//	precache_sound3 ("misc/null.wav");
 	precache_sound3 ("raven/blast.wav");
 	precache_sound3 ("skullwiz/blinkout.wav");
 	precache_sound3 ("skullwiz/blinkin.wav");
@@ -788,7 +794,7 @@ void rider_famine(void)
 	self.flags2 (+) FL_ALIVE;
 	self.monsterclass = CLASS_BOSS;
 	self.yaw_speed = 10;
-	self.experience_value = 1000;
+	self.experience_value = self.init_exp_val = 500;
 
 	create_famrider(self);
 	self.attack_finished = 0;

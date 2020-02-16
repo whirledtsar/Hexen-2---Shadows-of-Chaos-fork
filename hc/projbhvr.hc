@@ -29,6 +29,7 @@ Values Used: .o_angle (.movetype must be
 	MOVETYPE_BOUNCEMISSILE)
 =====================================================
 */
+/*
 float Skip (void)
 {
 	vector dir1,dir2;
@@ -44,7 +45,7 @@ float Skip (void)
 	else
 		return FALSE;
 }
-
+*/
 /*
 ====================================================
 void Veer(float amount)
@@ -69,14 +70,14 @@ vector veerdir;
 		self.velocity+=RandomVector(veerdir);
 		self.angles=vectoangles(self.velocity);
 }
-
+/*
 void VeerThink ()
 {
 	Veer(self.veer);
 	if(self.think==Veer)
 		thinktime self : 0.1;
 }
-
+*/
 /*
 =========================================================
 float ahead (entity loser, entity from)
@@ -261,11 +262,18 @@ Values Used: .speed, .homerate, .veer,
 void HomeThink()
 {
 	local vector huntdir;
-	
-	if(self.classname == "bishop star")
-		AdvanceFrame(0,4);
 
-	
+	if(self.classname=="lightning ball")
+	{
+		updateSoundPos(self,CHAN_BODY);
+		updateSoundPos(self,CHAN_WEAPON);
+		if(self.t_width<time)
+		{
+			sound(self,CHAN_BODY,"succubus/buzz2.wav",1,ATTN_LOOP);
+			self.t_width=time+99999999999999;
+		}
+	}
+
 	if(self.thingtype==THINGTYPE_FIRE)
 	{
 		local float waterornot;

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/fx.hc,v 1.2 2007-02-07 16:57:04 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/fx.hc,v 1.2 2007-02-07 16:59:32 sezero Exp $
  */
 
 float WHITE_PUFF	= 0;
@@ -45,7 +45,12 @@ void CreateRedCloud (vector org,vector vel,float framelength)
 {
 	starteffect(CE_REDCLOUD, org,vel, framelength);
 }
-
+/*
+void CreateFlameStream (vector org,vector vel,float framenumber)
+{
+	starteffect(CE_FLAMESTREAM, org,vel, framenumber);
+}
+*/
 // ============= FLASHES ================================
 
 void CreateLittleWhiteFlash (vector spot)
@@ -145,7 +150,6 @@ void CreateWaterSplash (vector spot)
 
 }
 
-
 /*
 ================
 SpawnPuff
@@ -156,7 +160,9 @@ void  SpawnPuff (vector org, vector vel, float damage,entity victim)
 	float part_color;
 	float rad;
 
-	if (victim.thingtype==THINGTYPE_FLESH && victim.classname!="mummy" && victim.netname != "spider")
+	if(victim.frozen>0)
+		part_color = 406+random(8);				// Ice particles
+	else if (victim.thingtype==THINGTYPE_FLESH && victim.classname!="mummy" && victim.netname != "spider")
 		part_color = 256 + 8 * 16 + random(9);				//Blood red
 	else if ((victim.thingtype==THINGTYPE_GREYSTONE) || (victim.thingtype==THINGTYPE_BROWNSTONE))
 		part_color = 256 + 20 + random(8);			// Gray
@@ -186,6 +192,11 @@ void(vector spot) CreateRedFlash =
 };
 
 void() DeathBubblesSpawn;
+
+void () flash_remove =
+{
+	remove(self);
+};
 
 void GenerateTeleportSound (entity center)
 {
@@ -279,6 +290,7 @@ lifespan - fill this in and it will only puff for this long
 */
 void() fx_smoke_generator =
 {
+
 	setmodel(self, "models/null.spr");
 
 	self.solid = SOLID_NOT;
@@ -318,7 +330,6 @@ void (vector org, float effect) fx_light =
 	setsize (newent, '0 0 0', '0 0 0');
 };
 
-/*
 void () friction_change_touch =
 {
 	if (other == self.owner)
@@ -328,9 +339,9 @@ void () friction_change_touch =
 		other.friction=self.friction;
 
 };
-*/
-/*QUAK-ED fx_friction_change (0 1 1) ?
 
+/*QUAKED fx_friction_change (0 1 1) ?
+ONLY WORKS ON PLAYERS
 Set the friction within this area.
 
 -------------------------FIELDS-------------------------
@@ -339,9 +350,13 @@ Set the friction within this area.
              1       : normal friction
              >0 & <1 : slippery
              >1      : high friction
+
+default = 0
+
+Player's Friction will be reset when they leave the brush's bounds
 --------------------------------------------------------
 */
-/*
+
 void() fx_friction_change =
 {
 	self.movetype = MOVETYPE_NONE;
@@ -356,28 +371,68 @@ void() fx_friction_change =
 
 	self.touch = friction_change_touch;
 };
+
+
+void () gravity_change_touch =
+{
+	if (other == self.owner||other.gravity==self.gravity)
+		return;
+	dprintf("Changing gravity to %s\n",self.gravity);
+//	if (other.classname == "player")
+		other.gravity=other.standard_grav=self.gravity;
+
+};
+
+/*QUAKED fx_gravity_change (0 1 1) ?
+
+Set the gravity within this area.
+
+-------------------------FIELDS-------------------------
+'gravity' :  this is how quickly the player will fall
+
+             100       : 1 G
+             >0 & <100 : low grav
+             >100      : high grav
+--------------------------------------------------------
 */
 
+void() fx_gravity_change =
+{
+	self.gravity/=100;
+	self.movetype = MOVETYPE_NONE;
+	self.owner = self;
+	self.solid = SOLID_TRIGGER;
+	setorigin (self, self.origin);
+	setmodel (self, self.model);
+	self.modelindex = 0;
+	self.model = "";
+
+	setsize (self, self.mins , self.maxs);
+
+	self.touch = gravity_change_touch;
+};
+
+/*
 void() explosion_done =
 {
 	self.effects=EF_DIMLIGHT;
 };
+*/
 
+/*
 void() explosion_use =
 {
-/*
 	if (self.spawnflags & FLASH)
 	{
 		self.effects=EF_BRIGHTLIGHT;
 		self.think=p_explosion_done;
 		self.nextthink= time + 1;
 	}
-*/
 	sound (self, CHAN_BODY, self.noise1, 1, ATTN_NORM);
-
 	particleexplosion(self.origin,self.color,self.exploderadius,self.counter);
 
 };
+*/
 
 /*QUAK-ED fx_particle_explosion (0 1 1) ( -5 -5 -5) (5 5 5) FLASH
  Gives off a spray of particles like an explosion.

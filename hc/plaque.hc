@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/plaque.hc,v 1.2 2007-02-07 16:57:08 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/plaque.hc,v 1.2 2007-02-07 16:59:35 sezero Exp $
  */
 
 float PLAQUE_INVISIBLE = 1;
@@ -12,8 +12,6 @@ plague_use
 Activate a plaque
 ================
 */
-
-
 void plaque_use (void)
 {
 	if (self.spawnflags & PLAQUE_ACTIVATE)
@@ -85,7 +83,7 @@ void plaque_touch (void)
 	}
 }
 
-/*QUAKED plaque (.5 .5 .5) ? INVISIBLE deactivated
+/*QUAKED plaque (.5 .5 .5) ? INVISIBLE deactivated no_line_of_sight not_solid
 
 A plaque on the wall a player can read
 -------------------------FIELDS-------------------------
@@ -95,6 +93,7 @@ A plaque on the wall a player can read
 "noise1" the wav file activated when plaque is used
 
 deactivated - if this is on, the plaque will not be readable until a trigger has activated it.
+no_line_of_sight - you don't have to be actually LOOKING at the plaque to have the message come up
 --------------------------------------------------------
 */
 void() plaque =
@@ -102,6 +101,7 @@ void() plaque =
 	setsize (self, self.mins, self.maxs);
 	setorigin (self, self.origin);	
 	setmodel (self, self.model);
+	
 	if (self.spawnflags & 8)
 		self.solid = SOLID_TRIGGER;
 	else

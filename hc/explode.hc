@@ -1,5 +1,6 @@
 void() CB_BoltStick;
 void FireMeteor (string type);
+void FireAcidBlob (string type);
 
 void()BlowUp=
 {
@@ -7,11 +8,11 @@ void()BlowUp=
 	{
 		self.v_angle=RandomVector('180 180 180');
 		self.scale=self.dmg;
-	    T_RadiusDamage (self, self.owner, self.dmg*100, world);
-		self.dmg += 0.1;
 		if(self.enemy)
 			if(self.enemy.health>0&&self.enemy.flags2&FL_ALIVE)//Stay with enemy;
-				setorigin(self,self.enemy.origin+self.view_ofs);	//backported from PoP, was teleporting to world origin before
+				setorigin(self,self.enemy.origin+self.view_ofs);
+	    T_RadiusDamage (self, self.owner, self.dmg*100, world);
+		self.dmg += 0.1;
 		self.think=BlowUp;
 		thinktime self : 0.025;
 	}
@@ -53,7 +54,8 @@ void BecomeExplosion (float explodetype)
 		if(explodetype==CE_FLOOR_EXPLOSION)
 			starteffect(CE_FLOOR_EXPLOSION , self.origin+'0 0 64');
 		else
-			starteffect(explodetype , self.origin);
+			starteffect(explodetype, self.origin);
+		//ws: dynamic light effects
 		if(explodetype==CE_FLOOR_EXPLOSION || explodetype==CE_FLOOR_EXPLOSION2)
 			fx_light(self.origin, EF_BRIGHTLIGHT);
 		else if (explodetype==CE_LG_EXPLOSION)	//exploding barrels
@@ -63,7 +65,9 @@ void BecomeExplosion (float explodetype)
 	}
 	else
 	{
-		if (self.flags2&FL_SMALL) {
+		if(self.classname=="acidblob")
+			starteffect(CE_ACID_EXPL,self.origin - self.movedir*8,'0 0 0',HX_FRAME_TIME*2);
+		else if (self.flags2&FL_SMALL) {
 			starteffect(CE_SM_EXPLOSION , self.origin);
 			fx_light(self.origin, EF_DIMLIGHT);
 		}
@@ -101,7 +105,7 @@ entity ignore;
 	if(self.classname=="timebomb")
 	{
 		sound(self,CHAN_AUTO,"weapons/explode.wav",1,ATTN_NORM);
-		ignore=self.enemy;
+		ignore=self.owner;
 	}
 	else if(self.classname=="pincer")
 	{
@@ -136,6 +140,7 @@ entity ignore;
 
 void() MultiExplode =
 {
+float nummeteorites;
 //FIXME: For some reason, the light casting effects in Hex2
 //are a lot more costly than they were in Quake...
 	if(self.classname=="stickmine")
@@ -146,14 +151,27 @@ void() MultiExplode =
 
 	T_RadiusDamage (self, self.owner, self.dmg, world);
 
-	if(self.classname=="meteor")
+	if(self.classname=="meteor"||self.classname=="acidblob"||self.classname=="monster_pentacles")
 	{
-	local float nummeteorites;
 		nummeteorites=random(3,10);
-		while(nummeteorites>0)
+		if(deathmatch||coop)
 		{
-			FireMeteor("minimeteor");
-			nummeteorites -=1;
+			if(self.classname=="acidblob")
+				starteffect(CE_CHUNK, self.origin, THINGTYPE_ACID,'0 0 600', nummeteorites);
+			else
+				starteffect(CE_CHUNK, self.origin, THINGTYPE_METEOR,'0 0 600', nummeteorites);
+		}
+		else while(nummeteorites>0)
+		{
+			if(self.classname=="acidblob")//FIXME: Need wet acid explode sound
+			{
+				if(nummeteorites==1)
+					sound(self,CHAN_BODY,"succubus/blobexpl.wav",1,ATTN_NORM);
+				FireAcidBlob("aciddrop");
+			}
+			else
+				FireMeteor("minimeteor");
+			nummeteorites =nummeteorites - 1;
 		}
 	}
 
@@ -191,6 +209,10 @@ void() GrenadeTouch2 =
 	        self.think=SuperGrenadeExplode;
         else if(self.classname=="minigrenade"||self.classname=="flaming arrow")
 			self.think=DarkExplosion;
+		else if(self.classname=="poison grenade")
+		{
+			self.think=SpewPoison;
+		}
 		else
 			self.think=MultiExplode;
 		thinktime self : 0;
@@ -262,7 +284,6 @@ vector stickdir;
 
 void() Use_Fireball =
 {
-	sound (self,CHAN_VOICE,"fx/glyphuse.wav",1,ATTN_NORM);
 	self.glyph_finished=time + 0.7;//So you can't have a ton of them
 	makevectors(self.v_angle);
 //sound

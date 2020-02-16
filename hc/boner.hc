@@ -331,7 +331,7 @@ void bone_turret_think ()
 	
 	particle4(self.origin,30,random(368,384),PARTICLETYPE_GRAV,1);
 	if (self.attack_finished < time) {
-		CreateGreySmoke(self.origin+'0 0 8'*self.scale,'0 0 4', HX_FRAME_TIME*2);
+		CreateGreySmoke(self.origin+'0 0 6'*self.scale,'0 0 4', HX_FRAME_TIME*2);
 		self.attack_finished = time+random(0.75,1.25);
 	}
 	
@@ -518,7 +518,7 @@ void bone_fire(float ball, float tome, vector ofs)
 	}
 }
 
-void  bone_normal()
+void bone_normal()
 {
 	vector dir;
 	
@@ -609,7 +609,7 @@ void boneshard_fire ()
 		if (tome && self.greenmana>=(BONE_NORMAL_COST*2)+BONE_TOMED_COST)
 			bone_fire_once(TRUE);
 	}
-	if(random()<0.7&&self.weaponframe<=$fire6)	//ws: lowered from 0.8
+	if(random()<0.7&&self.weaponframe<=$fire6)	//0.8
 		bone_fire_once(FALSE);
 	
 	if (self.wfs == WF_LAST_FRAME)

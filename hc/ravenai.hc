@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/ravenai.hc,v 1.2 2007-02-07 16:57:09 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/ravenai.hc,v 1.2 2007-02-07 16:59:35 sezero Exp $
  */
 
 float() LocateTarget =

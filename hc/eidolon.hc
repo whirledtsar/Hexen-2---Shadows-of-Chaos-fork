@@ -452,7 +452,14 @@ vector displace;
 	self.ideal_yaw = vectoyaw(self.path_current.origin - self.origin);
 	ChangeYaw();
 
-	self.flags(+)FL_ONGROUND;
+// if an Imp Lord hits Eidolon before the first roaring
+// sequence, landing may fail (see devel/eidolon.txt) :
+	// not really elegant, but short and effective
+	if (checkbottom(self))
+		self.flags(+)FL_ONGROUND;
+	else
+		droptofloor();
+
 	if(!walkmove(self.angles_y, move_speed, TRUE))
 	{
 	float cant_move;
@@ -569,6 +576,7 @@ entity oself;
 	self=oself;
 }
 
+/* see devel/eidolon.txt for why god mode is needed. */
 void eidolon_roar () [++ $howl1 .. $howl60]
 {
 	if(random()<0.5&&self.lockentity!=world&&self.frame>$howl13)
@@ -576,6 +584,7 @@ void eidolon_roar () [++ $howl1 .. $howl60]
 	if(self.frame==$howl60)
 	{
 		self.movetype = MOVETYPE_NONE;
+		self.flags(-)FL_GODMODE;
 		self.th_pain = eidolon_check_fake;
 		self.attack_finished=time+3;
 		self.think=eidolon_guarding;
@@ -720,7 +729,11 @@ void eidolon_fake_die () [++ $death1 .. $death30]
 			self.think=eidolon_darken_sky;
 		}
 		else
+		{
+			self.flags(-)FL_GODMODE;
+			self.th_pain=eidolon_check_fake;
 			self.think=eidolon_run;
+		}
 }
 
 void eidolon_orb_pain () [++ $painB1 .. $painB20]
@@ -796,6 +809,8 @@ float pain_chance;
 
 	if(self.dmg>=2000&&self.scale<1)
 	{
+	/* see devel/eidolon.txt for why god mode is needed. */
+		self.flags(+)FL_GODMODE;
 		self.th_pain=SUB_Null;
 		if(attacker.classname=="player")
 			AwardExperience(attacker,self,self.experience_value);
@@ -1179,40 +1194,42 @@ void eidolon_walk () [++ $walk1 .. $walk24]
 	ai_walk(self.speed*self.scale);
 }
 
+void eidolon_enemy ()
+{
+	if (self.enemy == world)
+	{
+		if (self.oldenemy != world && self.oldenemy.flags2 & FL_ALIVE)
+		{
+			self.enemy = self.oldenemy;
+			self.goalentity = self.enemy;
+		}
+		else
+			self.think = eidolon_wait;
+	}
+	else if (!self.enemy.flags2 & FL_ALIVE)
+	{
+		self.think = eidolon_ready_roar;
+		self.enemy = world;
+	}
+	else
+		ai_run(self.speed * self.scale);
+}
+
 void eidolon_run () [++ $walk1 .. $walk24]
 {
 //	dprint("Chasing\n");
 //	check_use_model("models/boss/smaleido.mdl");
-
 	if(self.scale>1&&(self.frame==$walk2 ||self.frame==$walk14))
 		sound(self,CHAN_BODY,"eidolon/stomp.wav",1,ATTN_NONE);
-
-	if(self.enemy!=world&&!self.enemy.flags2&FL_ALIVE)
-	{
-		self.think=eidolon_ready_roar;
-		self.enemy=world;
-	}
-	else if(self.enemy==world)
-		self.think=eidolon_wait;
-	else
-		ai_run(self.speed*self.scale);
+	eidolon_enemy();
 }
 
 void eidolon_guarding () [++ $wait1 .. $wait16]
 {
 //	check_use_model("models/boss/smaleido.mdl");
-
 //	dprint("Guarding\n");
 	ai_face();
-	if(self.enemy!=world&&!self.enemy.flags2&FL_ALIVE)
-	{
-		self.think=eidolon_ready_roar;
-		self.enemy=world;
-	}
-	else if(self.enemy==world)
-		self.think=eidolon_wait;
-	else
-		ai_run(self.speed*self.scale);
+	eidolon_enemy();
 }
 
 void eidolon_wait () [++ $wait1 .. $wait16]
@@ -1243,9 +1260,12 @@ float num_players;
 		}
 		if(num_players>4)
 			num_players=4;
-		self.max_health+=1000*num_players;
+		if(num_players>0)
+		{
+			self.max_health+=1000*num_players;
+			self.torncount=num_players - 1;
+		}
 		self.health=self.max_health;
-		self.torncount=num_players - 1;
 	}
 	if(self.th_save!=SUB_Null)
 		self.th_save();
@@ -1274,15 +1294,15 @@ void monster_eidolon(void)
     precache_model2 ("models/boss/shaft.mdl");
     precache_model2 ("models/boss/circle.mdl");
     precache_model2 ("models/boss/star.mdl");
-	precache_model2 ("models/xplod29.spr");	//eidolon and purifier
-	precache_model2 ("models/ring.mdl");		//Smoke ring
+    precache_model2 ("models/xplod29.spr");	//eidolon and purifier
+    precache_model2 ("models/ring.mdl");		//Smoke ring
 
 	precache_sound2 ("eidolon/roar.wav");
-	precache_sound2 ("eidolon/pain.wav");		//Hurt
-	precache_sound2 ("eidolon/death.wav");		//Dies- long and agonizing
-	precache_sound2 ("eidolon/fakedie.wav");	//1st death- fake
-	precache_sound2 ("eidolon/spell.wav");		//Spell attack (tracking globes)
-	precache_sound2 ("eidolon/stomp.wav");		//Hot-steppin'
+	precache_sound2 ("eidolon/pain.wav");	//Hurt
+	precache_sound2 ("eidolon/death.wav");	//Dies- long and agonizing
+	precache_sound2 ("eidolon/fakedie.wav");//1st death- fake
+	precache_sound2 ("eidolon/spell.wav");	//Spell attack (tracking globes)
+	precache_sound2 ("eidolon/stomp.wav");	//Hot-steppin'
 	precache_sound2 ("eidolon/fireball.wav");	//Launching Nasty fireballs
 	precache_sound2 ("eidolon/flamstrt.wav");	//
 	precache_sound2 ("eidolon/flambrth.wav");	//
@@ -1301,7 +1321,8 @@ void monster_eidolon(void)
 	self.movetype = MOVETYPE_STEP;
 	self.takedamage=DAMAGE_YES;
 	self.monsterclass=CLASS_FINAL_BOSS;
-	self.flags(+)FL_MONSTER;
+	/* see devel/eidolon.txt for why god mode is needed. */
+	self.flags(+)FL_MONSTER|FL_GODMODE;
 	self.flags2(+)FL_ALIVE|FL_SMALL;
 	self.thingtype=THINGTYPE_FLESH;
 
@@ -1353,143 +1374,4 @@ void Escargolon ()
 	self.drawflags(+)MLS_ABSLIGHT|SCALE_TYPE_UNIFORM|SCALE_ORIGIN_BOTTOM;
 	self.abslight=0.5;
 }
-
-/*
- * $Log: /H2 Mission Pack/HCode/eidolon.hc $
- * 
- * 19    3/18/98 3:50p Mgummelt
- * 
- * 18    3/18/98 3:49p Mgummelt
- * Last minute original game fixes, doors, eidolon, icemace, rats.
- * 
- * 17    3/13/98 5:53p Mgummelt
- * 
- * 16    3/13/98 5:08p Mgummelt
- * 
- * 15    3/03/98 7:31p Mgummelt
- * 
- * 14    3/02/98 3:27p Mgummelt
- * 
- * 13    3/02/98 12:41p Mgummelt
- * 
- * 12    2/27/98 2:46p Mgummelt
- * 
- * 11    2/27/98 11:52a Mgummelt
- * 
- * 10    2/26/98 2:03p Mgummelt
- * 
- * 9     2/26/98 1:38a Mgummelt
- * 
- * 8     2/24/98 6:39p Mgummelt
- * 
- * 7     2/24/98 10:20a Jweier
- * 
- * 6     2/02/98 1:20p Jmonroe
- * moved some more sprites to specific precache
- * 
- * 5     1/22/98 4:05p Mgummelt
- * 
- * 51    10/28/97 1:00p Mgummelt
- * Massive replacement, rewrote entire code... just kidding.  Added
- * support for 5th class.
- * 
- * 49    9/25/97 5:30p Mgummelt
- * 
- * 48    9/25/97 5:24p Mgummelt
- * 
- * 47    9/25/97 10:37a Mgummelt
- * 
- * 46    9/11/97 12:04p Mgummelt
- * 
- * 45    9/07/97 9:42a Mgummelt
- * 
- * 44    9/03/97 9:14p Mgummelt
- * Fixing targetting AI
- * 
- * 43    9/03/97 6:01a Mgummelt
- * 
- * 42    9/03/97 5:58a Mgummelt
- * 
- * 41    9/03/97 3:41a Mgummelt
- * 
- * 40    9/03/97 1:13a Mgummelt
- * 
- * 39    9/03/97 12:25a Mgummelt
- * 
- * 38    9/02/97 1:18a Mgummelt
- * 
- * 37    9/02/97 1:16a Mgummelt
- * 
- * 36    9/01/97 9:22p Mgummelt
- * 
- * 35    9/01/97 4:45p Mgummelt
- * 
- * 34    9/01/97 4:12p Mgummelt
- * 
- * 32    9/01/97 6:54a Mgummelt
- * 
- * 31    9/01/97 6:34a Mgummelt
- * 
- * 30    8/31/97 5:56p Mgummelt
- * 
- * 29    8/31/97 4:21p Mgummelt
- * 
- * 28    8/29/97 11:14p Mgummelt
- * 
- * 27    8/28/97 2:42p Mgummelt
- * 
- * 26    8/23/97 8:24p Mgummelt
- * 
- * 25    8/22/97 5:15p Mgummelt
- * 
- * 24    8/21/97 4:45a Mgummelt
- * 
- * 23    8/21/97 3:33a Mgummelt
- * 
- * 22    8/19/97 6:58p Mgummelt
- * 
- * 21    8/19/97 12:57p Mgummelt
- * 
- * 20    8/19/97 12:22a Mgummelt
- * 
- * 19    8/18/97 12:20p Mgummelt
- * 
- * 18    8/16/97 5:46p Mgummelt
- * 
- * 17    8/15/97 11:27p Mgummelt
- * 
- * 16    8/15/97 2:55a Mgummelt
- * 
- * 15    8/14/97 3:09p Mgummelt
- * 
- * 14    8/13/97 5:57p Mgummelt
- * 
- * 13    8/13/97 3:49p Mgummelt
- * 
- * 12    8/13/97 2:56p Mgummelt
- * 
- * 11    8/07/97 10:30p Mgummelt
- * 
- * 10    8/06/97 10:19p Mgummelt
- * 
- * 9     8/06/97 11:06a Mgummelt
- * 
- * 8     8/04/97 8:03p Mgummelt
- * 
- * 7     7/31/97 12:57a Mgummelt
- * 
- * 6     7/30/97 3:32p Mgummelt
- * 
- * 5     7/29/97 9:15p Mgummelt
- * 
- * 4     7/29/97 6:54p Mgummelt
- * 
- * 3     7/29/97 5:44p Mgummelt
- * 
- * 2     7/24/97 5:47p Rjohnson
- * name Change
- * 
- * 1     6/19/97 10:33p Rjohnson
- * Initial Version
- */
 

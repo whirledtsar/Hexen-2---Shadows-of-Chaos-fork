@@ -3,7 +3,7 @@
 //**
 //** entity.hc
 //**
-//** $Header: /cvsroot/uhexen2/gamecode/hc/h2/entity.hc,v 1.2 2007-02-07 16:24:55 sezero Exp $
+//** $Id: entity.hc 3951 2011-05-09 09:51:10Z sezero $
 //**
 //**************************************************************************
 
@@ -257,6 +257,8 @@ void end_sys_fields;
 .float worldtype; // 0=medieval 1=metal 2=base
 
 .string killtarget;
+.string failtarget;
+.string close_target;
 
 // QuakeEd fields
 .float light_lev; // Not used by game, but parsed by light util
@@ -293,7 +295,7 @@ void end_sys_fields;
 // outside of the inner physics stuff
 .vector	adjust_velocity;
 
-.union
+.union	//must all be the same type!
 { // Entity type specific stuff
 	struct // player stuff
 	{		
@@ -315,7 +317,33 @@ void end_sys_fields;
 		float act_state;		// Anim info
 		float raven_cnt;		// Number of raven's this guys has in the world
 		float newclass;			// If doing a quick class change
+		float sheep_call;
 	};
+/*	struct // Talking heads
+	{		
+		float voice1;	    // When to generate the next splash
+		float voice2;
+		float voice3;
+		float voice4;
+		float voice5;
+		float voice6;
+		float voice7;
+		float voice8;
+		float voice9;
+		float voice10;
+		float delay1;
+		float delay2;
+		float delay3;
+		float delay4;
+		float delay5;
+		float delay6;
+		float delay7;
+		float delay8;
+		float delay9;
+		float delay10;
+		float loop;
+	};
+*/
 	struct
 	{ // Fallen Angel
 		float fangel_SaveFrame;
@@ -450,10 +478,6 @@ void end_sys_fields;
 	{	// Skull missiles from skullwizard
 		float scream_time;
 	};
-	struct
-	{
-		float attack_cnt;
-	};
 	struct  
 	{  // Pestalance's Hive
 		float beginframe;
@@ -466,12 +490,23 @@ void end_sys_fields;
 	{	// Cube of force
 		float shot_cnt;   // Number of shots the force cube has shot
 	};
+	struct
+	{	// Trigger field
+		float failchance;   // percentage (chance) that trigger will not fire
+		// this is a design flaw by Raven: setting dest2 here overwrites
+		// super_damage in the "player" struct which used to lead T_Damage()
+		// making a pentacle monster in tibet1.bsp invulnerable, because of
+		// super_damage becoming negative..
+		vector dest, dest1, dest2;	//9 spots unioned
+	};
 };
+
+//Needed to remember set gravity compared to other grav changes
+.float standard_grav;
 
 // Once we can do unions above end_sys, have this with the field 'playerclass'
 .float monsterclass;
 
-// FIXME: Remove the ring of spell turning and all references to this
 .float turn_time;
 
 // Triggers / doors
@@ -521,11 +556,24 @@ void end_sys_fields;
 // Keeps track of the number of bubbles.
 .float bubble_count;
 
-// Keeps track of how the player died.
-.string deathtype;
+.union
+{ 
+	// Keeps track of how the player died.
+	struct 
+	{		
+		string deathtype;
+	};
+	struct 
+	{
+		string spawnername;
+	};
+	struct 
+	{
+		string mdl;
+	};
+};
 
 // Object stuff.
-.string mdl;
 .vector mangle; // Angle at start
 
 // Only used by secret door.
@@ -545,7 +593,7 @@ void end_sys_fields;
 
 
 // Doors, etc.
-.vector dest, dest1, dest2;
+//.vector dest, dest1, dest2;
 .float wait;					// Time from firing to restarting
 .float delay;					// Time from activation to firing
 .entity trigger_field;			// Door's trigger entity
@@ -564,7 +612,6 @@ void end_sys_fields;
 
 // What type of thing is this?
 .float thingtype;
-
 
 // Amount of time left on torch.
 .float torchtime;
@@ -645,9 +692,6 @@ void end_sys_fields;
 .void() th_die2;
 .void() th_goredeath;
 
-.void() th_possum;	//Monster playing dead
-.void() th_possum_up;	//Monster getting up from playing dead
-
 .float last_attack;	//Used for weapons that go into rest mode after
 					//a while
 .entity shield;
@@ -667,7 +711,6 @@ void end_sys_fields;
 .float imp_count;
 .vector proj_ofs;	//Projectile offset, different from view_ofs.
 
-.string spawnername;	//for monster spawner
 
 .entity catapulter;
 .float catapult_time;
@@ -678,6 +721,7 @@ void end_sys_fields;
 .float absorb_time;		//for 0.3 seconds after crouching, you will absorb 1/2 of your falling damage upon impact
 .float mintel;			//Monster intelligence- temp since entity.hc was checked out
 .vector wallspot;		//Last place enemy was seen- for waypoint ai
+.vector walldir;
 .vector lastwaypointspot;//explains itself
 .entity lockentity;		//for waypoint system
 .float last_impact;		//Last time touch function was called
@@ -690,7 +734,6 @@ void end_sys_fields;
 //.float upside_down;	unused
 .float lightvalue1;
 .float lightvalue2;
-//.float thvol;		unused
 .float fadespeed;
 .float point_seq;		//Waypoint sequence number
 .float sheep_time;		//How long you will be a sheep for
@@ -701,7 +744,7 @@ void end_sys_fields;
 .float check_ok;			//For trigger check, instead of re-using aflag
 .entity check_chain;		//for trigger_check, keeps track of it's targetted entities
 
-.void() th_spawn;			//Monster function you spawned with
+.void() th_init;			//Monster function you spawned with
 .float freeze_time;
 .float level_frags;
 .float visibility;
@@ -719,7 +762,13 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float torncount;
 .entity path_last;
 .float dflags;
+.float init_exp_val;
+.vector init_org;
 
+.float fire_damage;
+.float scoped;
+
+//Game of Tomes
 .float preventrespawn;
 .float playercontrolled;
 .float whiptime;
@@ -727,15 +776,11 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float bufftype;	 //used for monsters to determine bonus types on spawn
 .float tempscale;
 
-//EXPANSION CODE FOR YAKMAN
-/*.void() th_init;		//used for expansion respawning system
-.vector init_org;*/
-.float init_exp_val;
+//Bloodshot
+.void() storethink;
+.float welcomeshown;
 
-  //extras
-  .void() storethink;
-  .float welcomeshown;
-
+//WS
 .float altfiring;		//track altfire even when button isn't pressed
 .float glyph_finished;
 .string waketarget;		//monsters use self.waketarget upon sighting player

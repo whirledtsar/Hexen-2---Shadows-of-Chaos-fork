@@ -316,9 +316,7 @@ float FireShockingGrasp (float intmod, float damg)
 				forwardDiff = normalize(v_forward) * radius;
 				shockangle = AngleBetween(diff, forwardDiff);
 				
-				dprint("Shock angle: ");
-				dprint(ftos(shockangle));
-				dprint("\n");
+				dprint("Shock angle: "); dprint(ftos(shockangle)); dprint("\n");
 				
 				if (shockangle < MMIS_SHOCK_ANGLE)
 				{
@@ -482,7 +480,7 @@ void() launch_bloodparent =
 
 */
 
-void  mmis_power()	//buffed, because it should make up for the short range with power (otherwise theres no incentive not to use regular missiles) -ws
+void  mmis_power()	//ws: buffed, because it should make up for short range with power (otherwise theres no incentive not to use regular missiles)
 {
 	float wismod, intmod, damg, shocksuccess, tome;
 	

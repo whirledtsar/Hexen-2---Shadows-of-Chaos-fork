@@ -1,6 +1,4 @@
-/*
- * h2/soul.hc
- */
+/* portals/soul.hc */
 
 void () crusader_soul_touch =
 {
@@ -21,6 +19,10 @@ void () crusader_soul_touch =
 			if (other.health > other.max_health)
 				other.health = other.max_health;
 		}
+		if(other.flags2 & FL2_POISONED) {
+			other.flags2 (-) FL2_POISONED;
+			centerprint(other, "The poison has been cleansed from your blood...\n");
+		}
 		// Pa3PyX: end changes
 
 		self.touch = SUB_Null;
@@ -35,6 +37,7 @@ void () crusader_soul_touch =
 	// Bad people are hurt by this
 	else if ((other.classname == "player") &&
 			((other.playerclass==CLASS_NECROMANCER) ||
+			 (other.playerclass==CLASS_SUCCUBUS) ||
 			 (other.playerclass==CLASS_ASSASSIN)))
 	{
 		if (self.pain_finished < time)
@@ -79,7 +82,7 @@ void () necro_soul_touch =
 		if (pot_mult < 0)
 			pot_mult = 0;
 		if (other.health < other.max_health) {
-			sprint(other, ftos(self.lifetime));
+		//	sprint(other, ftos(self.lifetime));
 			other.health += 2.0 * pot_mult;
 			if (other.health > other.max_health)
 				other.health = other.max_health;
@@ -152,7 +155,7 @@ void () soul_move =
 
 	if (self.health <= 0)
 	{
-		sound (self, CHAN_VOICE, "misc/null.wav", 1, ATTN_NORM);
+		stopSound(self,CHAN_VOICE);
 		CreateLittleWhiteFlash(self.origin);
 		remove(self);
 		remove(self.enemy);

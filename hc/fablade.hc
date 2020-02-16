@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/fablade.hc,v 1.2 2007-02-07 16:57:01 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/fablade.hc,v 1.2 2007-02-07 16:59:31 sezero Exp $
  */
 
 /*

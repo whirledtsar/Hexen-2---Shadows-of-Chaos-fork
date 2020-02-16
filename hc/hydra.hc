@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/hydra.hc,v 1.2 2007-02-07 16:57:05 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/hydra.hc,v 1.2 2007-02-07 16:59:33 sezero Exp $
  */
 
 /*
@@ -190,7 +190,7 @@ float hydra_check_blind_melee(void)
 {
 	float dist, c1;//, c2;
 
-	if (self.enemy.watertype != CONTENT_WATER && self.enemy.watertype != CONTENT_SLIME) return 0;
+	if (self.enemy.watertype != CONTENT_WATER) return 0;
 	if (self.cnt > time) return 0;
 
 	dist = vhlen(self.enemy.origin - self.origin);
@@ -223,7 +223,7 @@ void hydra_checkForBlind(void)
 
 	r = pointcontents(self.enemy.origin);
 
-	if (r != CONTENT_WATER && r != CONTENT_SLIME) 
+	if (r != CONTENT_WATER) 
 	{
 		self.think = self.th_run;
 		thinktime self : 0.1;
@@ -333,6 +333,7 @@ void hydra_float(void)
 	CheckMonsterAttack(MA_MISSILE,8.0);
 }
 
+/*
 void hydra_reverse(void)
 {
 	float retval;
@@ -342,19 +343,11 @@ void hydra_reverse(void)
 	dist = 4.0;  // Movement distance this turn
 
 	retval = walkmove(self.angles_y + 180, dist, FALSE);
-	/*if (!retval)
-	{
-		self.ideal_yaw = FindDir();
-		self.monster_duration = 0;//random(40,70);
-		self.monster_stage = HYDRA_STAGE_STRAIGHT;
-		ChangeYaw();//hydra_turn(200);
-		return;
-	}*/
 	
 	//self.monster_stage = HYDRA_STAGE_FLOAT;
 	
 }
-
+*/
 void hydra_move(float thrust) 
 {
 	check_pos_enemy();
@@ -510,24 +503,6 @@ float hydra_TentAttacks[24] =
 	0
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Attacking others
 void hydra_AttackDieFrames(void)
 {
@@ -594,7 +569,7 @@ void hydra_OpenFrames(void)
 	self.think = hydra_OpenFrames;
 	thinktime self : HX_FRAME_TIME;
 
-	if (self.enemy.watertype != CONTENT_WATER && self.enemy.watertype != CONTENT_SLIME) 
+	if (self.enemy.watertype != CONTENT_WATER) 
 	{			
 		self.monster_stage = HYDRA_STAGE_FLOAT;
 		self.think = self.th_run;
@@ -733,12 +708,14 @@ void do_hydra_die(void)
 		hydra_SwimDieFrames();
 }
 
+/*
 void hydra_retreat()
 {
 	self.monster_stage = HYDRA_STAGE_REVERSE;
 	self.think = self.th_run;
 	thinktime self : 0.1;
 }
+*/
 	
 void hydra_pain(entity attacker, float damage) 
 {
@@ -755,8 +732,11 @@ void init_hydra(void)
 
 	self.monster_stage = HYDRA_STAGE_WAIT;
 
-	precache_model ("models/hydra.mdl");
-	precache_model ("models/spit.mdl");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model ("models/hydra.mdl");
+		precache_model ("models/spit.mdl");
+	}
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_SWIM;
@@ -770,8 +750,11 @@ void init_hydra(void)
 	setsize (self, '-30 -30 -24', '30 30 24');
 	self.hull = HULL_SCORPION;
 //self.hull = HULL_HYDRA;
-	self.health = 125;
-	self.experience_value = 75;
+	if(!self.health)
+		self.health = 125;
+	if(!self.max_health)
+		self.max_health=self.health;
+	self.experience_value = 50;
 	self.mintel = 4;
 
 	self.th_stand = hydra_SwimFrames;
@@ -797,30 +780,40 @@ void init_hydra(void)
 
 	total_monsters += 1;
 
+	self.init_exp_val = self.experience_value;
+
 	thinktime self : random(0.5);
 	self.think = self.th_stand;
 }
 
 
-/*QUAKED monster_hydra (1 0.3 0) (-40 -40 -42) (40 40 42) STAND HOVER JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_hydra (1 0.3 0) (-40 -40 -42) (40 40 42) STAND HOVER JUMP x DORMANT
 New item for QuakeEd
 
 -------------------------FIELDS-------------------------
-NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, play_dead, no_drop)
+NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, x, no_drop)
 --------------------------------------------------------
 
 */
 void monster_hydra(void)
 {
+	if(!self.th_init)
+	{
+		self.th_init=monster_hydra;
+		self.init_org=self.origin;
+	}
 	init_hydra();
 
-	precache_sound("hydra/pain.wav");
-	precache_sound("hydra/die.wav");
-	precache_sound("hydra/open.wav");
-	precache_sound("hydra/turn-s.wav");
-	precache_sound("hydra/turn-b.wav");
-	precache_sound("hydra/swim.wav");
-	precache_sound("hydra/tent.wav");
-	precache_sound("hydra/spit.wav");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_sound("hydra/pain.wav");
+		precache_sound("hydra/die.wav");
+		precache_sound("hydra/open.wav");
+		precache_sound("hydra/turn-s.wav");
+		precache_sound("hydra/turn-b.wav");
+		precache_sound("hydra/swim.wav");
+		precache_sound("hydra/tent.wav");
+		precache_sound("hydra/spit.wav");
+	}
 }
 
