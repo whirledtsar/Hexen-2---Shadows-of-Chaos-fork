@@ -550,6 +550,7 @@
 		1 : "Pully"
 		2 : "Chain"
 		3 : "Stone"
+		-1 : "Silent"
 	]
 	dmg(integer) : "Damage" : 0
 	wait(integer) : "Wait" : 3
