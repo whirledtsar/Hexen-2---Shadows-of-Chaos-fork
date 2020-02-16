@@ -597,7 +597,7 @@ void boneshard_fire ()
 	tome = self.artifact_active & ART_TOMEOFPOWER;
 	
 	self.wfs = advanceweaponframe($fire1,$fire12);
-	if(self.button0 && self.weaponframe>$fire3 && !tome)
+	if( (self.button0 || (self.button1 && self.level<3) ) && self.weaponframe>$fire3 && !tome)
 		self.weaponframe=$fire3;
 	self.th_weapon=boneshard_fire;
 	self.last_attack=time;
@@ -609,7 +609,7 @@ void boneshard_fire ()
 		if (tome && self.greenmana>=(BONE_NORMAL_COST*2)+BONE_TOMED_COST)
 			bone_fire_once(TRUE);
 	}
-	if(random()<0.7&&self.weaponframe<=$fire6)	//0.8
+	if(random()<0.7&&self.weaponframe<=$fire6)	//ws: lowered from 0.8
 		bone_fire_once(FALSE);
 	
 	if (self.wfs == WF_LAST_FRAME)
