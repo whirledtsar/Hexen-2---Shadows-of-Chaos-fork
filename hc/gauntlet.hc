@@ -103,15 +103,16 @@ void gauntlet_fire (float anim)
 		if (anim >= 5)	//altfire
 		{
 			force += 4;
-			damg *= 1.75;
+			damg *= 1.5;
 			if (anim == 5)	//uppercut
-				zmod = 0.75;
+				zmod = 0.7;
 		}
 		
 		if (tome)
 		{
-			force += 6;
+			force += 30;
 			damg *= 1.75;
+			zmod += 0.2;
 			CreateLittleWhiteFlash(org + v_forward*-4);
 		}
 		
@@ -256,6 +257,8 @@ void gauntlet_d ()
 
 	if (self.wfs == WF_LAST_FRAME)
 		gauntlet_ready();
+	else if (self.artifact_active & ART_TOMEOFPOWER)
+		thinktime self : HX_FRAME_TIME*0.5;
 }
 
 void gauntlet_c () 
@@ -270,6 +273,8 @@ void gauntlet_c ()
 
 	if (self.wfs == WF_LAST_FRAME)
 		gauntlet_ready();
+	else if (self.artifact_active & ART_TOMEOFPOWER)
+		thinktime self : HX_FRAME_TIME*0.5;
 }
 
 void gauntlet_b ()
@@ -287,6 +292,8 @@ void gauntlet_b ()
 
 	if (self.wfs == WF_LAST_FRAME)
 		gauntlet_ready();
+	else if (self.artifact_active & ART_TOMEOFPOWER)
+		thinktime self : HX_FRAME_TIME*0.5;
 }
 
 void gauntlet_a ()
@@ -301,6 +308,8 @@ void gauntlet_a ()
 
 	if (self.wfs == WF_LAST_FRAME)
 		gauntlet_ready();
+	else if (self.artifact_active & ART_TOMEOFPOWER)
+		thinktime self : HX_FRAME_TIME*0.5;
 }
 
 void pal_gauntlet_fire(float rightclick)
@@ -333,7 +342,10 @@ void pal_gauntlet_fire(float rightclick)
 		}
 
 		self.attack_cnt += 1;
-		self.attack_finished = time + 0.5;
+		if (self.artifact_active & ART_TOMEOFPOWER)
+			self.attack_finished = time + 0.333;
+		else
+			self.attack_finished = time + 0.5;
 	}
 }
 
