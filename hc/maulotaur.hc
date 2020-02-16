@@ -159,7 +159,7 @@ void maul_charge () [++ $maulat1 .. $maulat12]
 
 void maul_die () [++ $mauldt1 .. $mauldt29]
 {
-	if (self.health <= (-self.height*0.1))
+	if (self.health <= (-self.max_health*0.1))
 		chunk_death();
 	
 	if (cycle_wrapped) {
@@ -622,7 +622,7 @@ void monster_maulotaur ()
 		if(!self.health)
 			self.health = 500;
 	}
-	self.height = self.health;	//save initial health for gib check
+	self.max_health = self.health;	//save initial health for gib check
 	
 	self.th_stand = maul_stand;
 	self.th_walk = maul_walk;
