@@ -68,7 +68,6 @@ void()	death_knight_walk14	=[	24,	death_knight_walk15	] {ai_walk(3);};
 void()	death_knight_walk15	=[	25,	death_knight_walk16	] {ai_walk(3);};
 void()	death_knight_walk16	=[	26,	death_knight_walk1	] {ai_walk(3);};
 
-
 void()	death_knight_run1	=[	27,		death_knight_run2	] {ai_run(16);};
 void()	death_knight_run2	=[	28,		death_knight_run3	] {ai_run(20);};
 void()	death_knight_run3	=[	29,		death_knight_run4	] {ai_run(15);};
@@ -84,28 +83,14 @@ void()	death_knight_run12	=[	38,		death_knight_run13	] {ai_run(14);};
 void()	death_knight_run13	=[	39,		death_knight_run14	] {ai_run(10);};
 void()	death_knight_run14	=[	40,		death_knight_run1	] {ai_run(10);};
 
-/*
-
-void()	death_knight_runatk1	=[	$runattack1,		death_knight_runatk2	]
+void death_knight_melee ()
 {
-if (random() > 0.5)
-	sound (self, CHAN_WEAPON, "death_knight/sword2.wav", 1, ATTN_NORM);
-else
-	sound (self, CHAN_WEAPON, "death_knight/sword1.wav", 1, ATTN_NORM);
-ai_charge(20);
-};
-void()	death_knight_runatk2	=[	$runattack2,	death_knight_runatk3	] {ai_charge_side();};
-void()	death_knight_runatk3	=[	$runattack3,	death_knight_runatk4	] {ai_charge_side();};
-void()	death_knight_runatk4	=[	$runattack4,	death_knight_runatk5	] {ai_charge_side();};
-void()	death_knight_runatk5	=[	$runattack5,	death_knight_runatk6	] {ai_melee_side();};
-void()	death_knight_runatk6	=[	$runattack6,	death_knight_runatk7	] {ai_melee_side();};
-void()	death_knight_runatk7	=[	$runattack7,	death_knight_runatk8	] {ai_melee_side();};
-void()	death_knight_runatk8	=[	$runattack8,	death_knight_runatk9	] {ai_melee_side();};
-void()	death_knight_runatk9	=[	$runattack9,	death_knight_runatk10	] {ai_melee_side();};
-void()	death_knight_runatk10	=[	$runattack10,	death_knight_runatk11	] {ai_charge_side();};
-void()	death_knight_runatk11	=[	$runattack11,	death_knight_run1	] {ai_charge(10);};
-
-*/
+	ai_melee();
+	if (trace_ent.takedamage && self.check_ok) {
+		sound(self,CHAN_AUTO,"weapons/met2flsh.wav",1,ATTN_NORM);
+		self.check_ok = FALSE;
+	}
+}
 
 void()	death_knight_atk1	=[	41,		death_knight_atk2	]
 {
@@ -115,16 +100,11 @@ void()	death_knight_atk2	=[	42,		death_knight_atk3	] {ai_charge(5);};
 void()	death_knight_atk3	=[	43,		death_knight_atk4	] {ai_charge(4);};
 void()	death_knight_atk4	=[	44,		death_knight_atk5	] {ai_charge(0);};
 void()	death_knight_atk5	=[	45,		death_knight_atk6	] {ai_charge(3);};
-void()	death_knight_atk6	=[	46,		death_knight_atk7	] {ai_charge(5); ai_melee();};
-void()	death_knight_atk7	=[	47,		death_knight_atk8	] {ai_charge(5); ai_melee(); if (trace_ent.takedamage) sound(self,CHAN_AUTO,"weapons/met2flsh.wav",1,ATTN_NORM);};
-void()	death_knight_atk8	=[	48,		death_knight_atk9	] {ai_charge(3);
-ai_melee();};
+void()	death_knight_atk6	=[	46,		death_knight_atk7	] {ai_charge(5); self.check_ok=TRUE; death_knight_melee(); };
+void()	death_knight_atk7	=[	47,		death_knight_atk8	] {ai_charge(5); death_knight_melee(); };
+void()	death_knight_atk8	=[	48,		death_knight_atk9	] {ai_charge(3); death_knight_melee(); };
 void()	death_knight_atk9	=[	49,		death_knight_atk10] {ai_charge(1);};
 void()	death_knight_atk10=[	50,		death_knight_run1	] {ai_charge(5);};
-
-//void()	death_knight_atk9	=[	$attack9,		death_knight_atk10	] {};
-//void()	death_knight_atk10	=[	$attack10,		death_knight_atk11	] {};
-//void()	death_knight_atk11	=[	$attack11,		death_knight_run1	] {};
 
 //===========================================================================
 
@@ -138,8 +118,7 @@ void()	death_knight_pain7	=[	63,	death_knight_pain8	] {ai_pain(1);};
 void()	death_knight_pain8	=[	64,	death_knight_pain9	] {ai_pain(1);};
 void()	death_knight_pain9	=[	65,	death_knight_pain10	] {ai_pain(1);};
 void()	death_knight_pain10	=[	66,	death_knight_pain11	] {};
-void()	death_knight_pain11	=[	67,	death_knight_pain12	] {};
-void()	death_knight_pain12	=[	68,	death_knight_run1	] {};
+void()	death_knight_pain11	=[	67,	death_knight_run1	] {};
 
 void(entity attacker, float damage)	death_knight_pain =
 {
@@ -155,11 +134,9 @@ void(entity attacker, float damage)	death_knight_pain =
 	ThrowGib ("models/blood.mdl", self.health);
 	death_knight_pain1 ();
 	self.pain_finished = time + 1;
-	
 };
 
 //===========================================================================
-
 
 void()	death_knight_die1	=[	69,	death_knight_die2	] {};
 void()	death_knight_die2	=[	70,	death_knight_die3	] {/*setsize (self, '-17 -17 -9', '17 17 2');*/};
@@ -283,9 +260,10 @@ void() monster_death_knight =
 	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
-		self.experience_value = 12;
+		self.experience_value = 15;
+	
 	if(!self.mass)
-		self.mass = 10;
+		self.mass = 11;
 		
 	self.headmodel = "models/footsoldierhd.mdl";
 
