@@ -287,7 +287,7 @@ entity new;
 		//new.avelocity_z = random(600);
 		new.scale=.8;
 	}
-	else if (new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/afritwing.mdl" || new.model == "models/h_imp.mdl")
+	else if (new.model == "models/ZombiePal_hd.mdl" || new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/afritwing.mdl" || new.model == "models/h_imp.mdl")
 	{
 		new.avelocity = 0;
 		new.avelocity_x = 20;
