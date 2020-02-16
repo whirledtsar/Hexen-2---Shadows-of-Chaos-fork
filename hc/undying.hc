@@ -42,22 +42,27 @@ void undying_standup(void) [++ 131 .. 182]
 		//centerprint(find(world, classname, "player"), "not stuck");
 	}
 	
-	if (self.frame == 141)
+	if (self.frame >= 140)
 	{
-		setorigin(self, self.origin + '0 0 3');
+		//setorigin(self, self.origin + '0 0 3');
 		//self.flags(-)FL_ONGROUND;
 		setsize (self, undying_mins, undying_maxs);
 		self.solid = SOLID_SLIDEBOX;
 	}
 	
 	if (self.frame >= 181)
-		self.think = self.th_run;
+	{
+		if (self.enemy)
+			self.think = self.th_run;
+		else
+			self.think = self.th_stand;
+	}
 }
 
 void() check_stand
 {
 	thinktime self : 2;
-	self.frame = 131;
+	self.frame = 131;	//rise1
 	setorigin(self, self.origin + '0 0 1');
 	self.think = undying_standup;
 }
@@ -74,17 +79,13 @@ void undying_debug(void) [++ 0 .. 182]
 
 void undying_painfall(void) [++ 90 .. 130]
 {
-	
 	if (self.frame == 130)
-		thinktime self : 4;
+		thinktime self : random(3.75,4.25);
 	else
 		thinktime self : HX_FRAME_TIME;
 	
-	
-		
 	if (self.frame == 92)
 	{
-
 		if (random(100) < 80)
 		{
 			ThrowGib(self.headmodel, self.health);
@@ -95,28 +96,29 @@ void undying_painfall(void) [++ 90 .. 130]
 		}
 		else
 			sound(self,CHAN_VOICE,"undying/udeath.wav",1,ATTN_NORM);
-			
 	}
 	
-	if (self.frame == 110)
+	if (self.frame == 121)	//death33
 	{
 		self.solid = SOLID_NOT;
 		setsize (self, '-23 -13 -6', '23 13 6');
 	}
+	else if (self.frame == 119)	//death31
+		setsize (self, '-16 -16 -6', '16 16 25');
+	else if (self.frame == 104)	//death16
+		setsize (self, '-16 -16 -6', '16 16 35');
+	else if (self.frame == 100)	//death12
+		setsize (self, '-16 -16 -6', '16 16 45');
 	
-	//if (self.frame >= 131)
-	//	MakeSolidCorpse();
-		//self.think = CorpseThink;
-	self.cnt++;
+	self.counter++;
 		
 	if (self.frame >= 130)
 		self.think = undying_standup;
-	
 }
 
 void undying_pain(void) [++ 90 .. 99]
 {
-	if (self.health < 40 && !self.cnt)
+	if (self.health < 40 && !self.counter)
 		undying_painfall();
 	thinktime self : HX_FRAME_TIME;
 	
@@ -135,10 +137,7 @@ void undying_pain(void) [++ 90 .. 99]
 	
 	if(self.frame >= 99)
 		self.think = self.th_run;
-	
-
 }
-
 
 void undying_attack(void) [++ 65 .. 88]
 {
@@ -163,7 +162,6 @@ void undying_attack(void) [++ 65 .. 88]
 		
 	if(self.frame >= 88)
 		self.think = self.th_run;
-
 }
 
 void undying_leap(void) [++ 65 .. 88]
@@ -191,7 +189,6 @@ void undying_leap(void) [++ 65 .. 88]
 		
 	if(cycle_wrapped)
 		self.think = self.th_run;
-
 }
 
 /*-----------------------------------------
@@ -220,13 +217,11 @@ void()	undying_run12	=[	61,		undying_run13	] {ai_run(self.speed*2);};
 void()	undying_run13	=[	62,		undying_run14	] {ai_run(self.speed*2);};
 void()	undying_run14	=[	63,		undying_run1	] {ai_run(self.speed*2);};
 
-
 void() undying_gibs =
 {
 	ThrowGib ("models/ZombiePal_hd.mdl", self.health);
 	remove(self);
 }
-
 
 void undying_dying(void) [++ 90 .. 130]
 {
@@ -253,14 +248,10 @@ void undying_dying(void) [++ 90 .. 130]
 	{
 		self.frame = 130;
 		MakeSolidCorpse();
-	}
-		//self.think = CorpseThink;
+	}	//self.think = CorpseThink;
 	
 	if (self.health < -25)
 		chunk_death();
-		
-	
-		
 }
 
 /*-----------------------------------------
@@ -275,10 +266,8 @@ void undying_walk(void) [++ 22 .. 50]
 	else
 		ai_walk(self.speed);
 	
-	
 	if(cycle_wrapped)
 		self.think = self.th_walk;
-
 }
 
 /*-----------------------------------------
@@ -290,18 +279,13 @@ void undying_stand(void) [++ 0 .. 21]
 	
 	if(cycle_wrapped)
 		self.think = self.th_stand;
-	
 }
 
-/*QUAKED monster_archer_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
+/*QUAKED monster_undying (1 0.3 0) (-16 -16 -6) (16 16 56) AMBUSH
 Zombified Paladin monster
 -------------------------FIELDS-------------------------
-Health : 325
-Experience Pts: 200
-Favorite Cities: Madrid & Las Vegas
-Favorite Flower: Orchid
-What people don't know about me: I cry at sad movies
-What people say when they see me: Don't shoot!! Don't shoot!!
+Health : 85
+Experience Pts: 50
 --------------------------------------------------------
 */
 void monster_undying ()
@@ -323,11 +307,9 @@ void monster_undying ()
 	}
 
 	if(!self.experience_value)
-		self.experience_value = 100;
+		self.experience_value = 50;
 	if(!self.health)
 		self.health = 85;
-
-	//CreateEntityNew(self,ENT_ARCHER,"models/archer.mdl",archer_die);
 
 	self.th_stand = undying_stand;
 	self.th_walk = undying_walk;
@@ -338,8 +320,6 @@ void monster_undying ()
 	self.th_die = undying_dying;
 	self.decap = 0;
 	self.headmodel = "models/ZombiePal_hd.mdl";
-	//if(!self.spawnflags&ARCHER_STUCK)
-	//	self.mintel = 7;
 	
 	if(!self.speed)
 		self.speed=1.3;
@@ -350,7 +330,7 @@ void monster_undying ()
 
 	self.thingtype=THINGTYPE_FLESH;
 	
-	self.mass = 10;
+	self.mass = 11;		//ws: increased by 1. 10 seems to be the magic number for when they take impact damage from player running into them
 	
 	self.netname="undying";
 	self.flags (+) FL_MONSTER;
