@@ -858,7 +858,7 @@ void imp_swoop_end () [++ $swpend1 .. $swpend15]
 }
 
 void imp_swoop_charge () [++ $swpcyc1 .. $swpcyc4]
-{	eprint(self.enemy);
+{
 vector dir,destiny,org;
 	self.last_attack=time;
 	check_pos_enemy();
