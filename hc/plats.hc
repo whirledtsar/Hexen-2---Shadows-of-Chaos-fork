@@ -192,7 +192,7 @@ void() func_plat =
 		self.soundtype = 2;
 // FIX THIS TO LOAD A GENERIC PLAT SOUND
 
-	else if (self.soundtype == 1)
+	if (self.soundtype == 1)
 	{
 		precache_sound ("plats/pulyplt1.wav");
 		precache_sound ("plats/pulyplt2.wav");
@@ -214,6 +214,12 @@ void() func_plat =
 		precache_sound ("plats/platstp.wav");
 		self.noise = "plats/platslid.wav";
 		self.noise1 = "plats/platstp.wav";
+	}
+	
+	else if (self.soundtype < 0)
+	{
+		self.noise = self.noise1 = "misc/null.wav";
+		precache_sound ("misc/null.wav");
 	}
 
 	self.mangle = self.angles;
