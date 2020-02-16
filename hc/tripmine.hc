@@ -234,13 +234,12 @@ void TripDie (void)
 void() Use_Tripwire =
 {
 entity missile;
-
+	
 	self.glyph_finished = time+0.25;
-
+	
 	missile=spawn();
 	missile.owner=self;
 
-	sound (self,CHAN_VOICE,"fx/glyphuse.wav",1,ATTN_NORM);
 	missile.movetype=MOVETYPE_FLYMISSILE;
 	missile.solid=SOLID_BBOX;
 	missile.health=25;
@@ -249,9 +248,6 @@ entity missile;
 	missile.th_die=TripDie;
 	missile.classname="tripwire";
 	makevectors(self.v_angle);
-	missile.dmg=40+self.level*10;
-	if(missile.dmg>120)
-		missile.dmg=120;
 	missile.touch=TripTouch;
 	missile.think=SUB_Null;
 	missile.nextthink= -1;

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/weather.hc,v 1.3 2007-02-07 16:57:11 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/weather.hc,v 1.3 2007-02-07 16:59:38 sezero Exp $
  */
- 
+
 void reset_solid_trigger ()
 {
 	self.solid=SOLID_TRIGGER;
@@ -66,7 +66,7 @@ void weather_dust ()
 	if (!self.count) 
 		self.count=50;
 }
-/*
+
 void rubble_touch ()
 {
 	if(self.inactive)
@@ -125,7 +125,7 @@ CLEARGLASS 		= 19
 REDGLASS 		= 20
 ACID	 		= 21
 */
-/*
+
 void trigger_rubble ()
 {
 	InitTrigger();
@@ -148,8 +148,8 @@ void trigger_rubble ()
 	if(!self.thingtype)
 		self.thingtype = THINGTYPE_GREYSTONE;
 }
-*/
 
+/*
 void () rain_use =
 {
 	dprint(" rain ");
@@ -157,6 +157,7 @@ void () rain_use =
 	rain_go(self.mins,self.maxs,self.size,'125 100 0',self.color+random(8),self.counter);
 	self.nextthink = time + self.wait;
 };
+*/
 
 float RAIN_STRAIGHT = 1;
 
@@ -246,7 +247,6 @@ float splat_count;
 	else
 		dir = '125 100 0';
 
-	self.color=414;
 	starteffect(CE_RAIN, self.mins, self.maxs, self.size, dir, self.color, self.counter, self.wait);
 
 	if(!self.soundtype)
@@ -265,125 +265,12 @@ float splat_count;
 		remove(self);
 };
 
-void () weather_lightning_use =
-{
-	local vector p1,p2;
-	local entity targ;
-
-	if (self.classname == "weather_sunbeam_start")
-		sound(self,CHAN_WEAPON,"crusader/sunhum.wav",1,ATTN_NORM);
-	
-	if (!self.target)
-	{
-		dprint("No target for lightning\n");
-		return;
-	}
-	
-	targ = find (world, targetname, self.target);  // Get ending point
-	
-	if (!targ)
-	{
-		dprint("No target for beam effect\n");
-		return;
-	}
-
-/*	if(!self.aflag&&self.spawnflags&2)
-	{
-		self.aflag=TRUE;
-		if(random()<0.5)
-			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
-		else
-			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
-	}*/
-
-	
-	p1 = self.origin;
-	p2 = targ.origin;
-	p1+=normalize(p2-p1)*15;	//So beam is drawn at startpoint
-				
-	if(self.classname=="weather_lightning_start")
-		do_lightning (self,1,0,4,p1,p2,10);
-
-	else if(self.classname=="weather_sunbeam_start")
-	{
-		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-		WriteByte (MSG_BROADCAST, TE_STREAM_SUNSTAFF1);
-		WriteEntity (MSG_BROADCAST, self);
-		WriteByte (MSG_BROADCAST, 0);
-		WriteByte (MSG_BROADCAST, 4);
-	
-		WriteCoord (MSG_BROADCAST, p1_x);
-		WriteCoord (MSG_BROADCAST, p1_y);
-		WriteCoord (MSG_BROADCAST, p1_z);
-
-		WriteCoord (MSG_BROADCAST, p2_x);
-		WriteCoord (MSG_BROADCAST, p2_y);
-		WriteCoord (MSG_BROADCAST, p2_z);
-		
-		LightningDamage (p1, p2, self, 10,"sunbeam");
-	}
-	else if(self.classname=="fx_colorbeam_start")
-	{
-//FIXME: make a temp ent colored beam where you can pass the color
-//	Uses 1 model, but several diff. color skins
-		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-		WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
-		WriteEntity (MSG_BROADCAST, self);				//owner
-		WriteByte (MSG_BROADCAST, 0);					//tag + flags
-		WriteByte (MSG_BROADCAST, 4);					//time
-		WriteByte (MSG_BROADCAST, self.color);			//color
-	
-		WriteCoord (MSG_BROADCAST, p1_x);
-		WriteCoord (MSG_BROADCAST, p1_y);
-		WriteCoord (MSG_BROADCAST, p1_z);
-
-		WriteCoord (MSG_BROADCAST, p2_x);
-		WriteCoord (MSG_BROADCAST, p2_y);
-		WriteCoord (MSG_BROADCAST, p2_z);
-	}
-	else
-		return;
-
-	if (self.lifetime > time )  // Not done living
-		thinktime self : 0.2;
-  	else if (self.wait>-1)  // constantly running lightning needs to be reset
-  	{
-		thinktime self : self.wait;
-		self.think = weather_lightning_use;
-		self.lifetime = self.lifespan + self.nextthink;
-		self.aflag=FALSE;
-  	}
-	else
-		self.nextthink=-1;
-};
-
-
-void () lightning_init =
-{
-	if (self.lifetime > time )  // Being triggered right now
-		return; 
-
-	self.think = weather_lightning_use;
-	self.lifetime = self.lifespan + time;
-	if(self.spawnflags&2)
-	{
-		if(random()<0.5)
-			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
-		else
-			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
-		self.aflag=TRUE;
-	}
-	weather_lightning_use ();  // Make it run
-
-};
-
 void snow_use(void)
 {
 	starteffect(CE_SNOW, self.mins, self.maxs, self.spawnflags, self.movedir, self.counter);
 	ambientsound ((self.absmin+self.absmax)*0.5, "ambience/wind.wav",1 , ATTN_NORM);
 	remove(self);
 }
-
 
 /*QUAKED weather_snow (0 1 1) ? fluffy mixed half_bright no_melt in_bounds no_trans
 MG
@@ -475,6 +362,117 @@ void() weather_snow =
 	}
 };
 
+void () weather_lightning_use =
+{
+vector p1,p2;
+entity targ;
+
+	
+	if (!self.target)
+	{
+		dprint("No target for lightning\n");
+		return;
+	}
+	
+	targ = find (world, targetname, self.target);  // Get ending point
+	
+	if (!targ)
+	{
+		dprint("No target for beam effect\n");
+		return;
+	}
+
+/*	if(!self.aflag&&self.spawnflags&2)
+	{
+		self.aflag=TRUE;
+		if(random()<0.5)
+			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
+		else
+			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
+	}*/
+
+	
+	p1 = self.origin;
+	p2 = targ.origin;
+	p1+=normalize(p2-p1)*15;	//So beam is drawn at startpoint
+				
+	if(self.classname=="weather_lightning_start")
+		do_lightning (self,1,0,4,p1,p2,10,TE_STREAM_LIGHTNING);
+
+	else if(self.classname=="weather_sunbeam_start")
+	{
+		sound(self,CHAN_WEAPON,"crusader/sunhum.wav",1,ATTN_NORM);
+
+		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte (MSG_BROADCAST, TE_STREAM_SUNSTAFF1);
+		WriteEntity (MSG_BROADCAST, self);
+		WriteByte (MSG_BROADCAST, 0);
+		WriteByte (MSG_BROADCAST, 4);
+	
+		WriteCoord (MSG_BROADCAST, p1_x);
+		WriteCoord (MSG_BROADCAST, p1_y);
+		WriteCoord (MSG_BROADCAST, p1_z);
+
+		WriteCoord (MSG_BROADCAST, p2_x);
+		WriteCoord (MSG_BROADCAST, p2_y);
+		WriteCoord (MSG_BROADCAST, p2_z);
+		
+		LightningDamage (p1, p2, self, 10,"sunbeam");
+	}
+	else if(self.classname=="fx_colorbeam_start")
+	{
+//FIXME: make a temp ent colored beam where you can pass the color
+//	Uses 1 model, but several diff. color skins
+		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
+		WriteEntity (MSG_BROADCAST, self);				//owner
+		WriteByte (MSG_BROADCAST, 0);					//tag + flags
+		WriteByte (MSG_BROADCAST, 4);					//time
+		WriteByte (MSG_BROADCAST, self.color);			//color
+	
+		WriteCoord (MSG_BROADCAST, p1_x);
+		WriteCoord (MSG_BROADCAST, p1_y);
+		WriteCoord (MSG_BROADCAST, p1_z);
+
+		WriteCoord (MSG_BROADCAST, p2_x);
+		WriteCoord (MSG_BROADCAST, p2_y);
+		WriteCoord (MSG_BROADCAST, p2_z);
+	}
+	else
+		return;
+
+	if (self.lifetime > time )  // Not done living
+		thinktime self : 0.2;
+  	else if (self.wait>-1)  // constantly running lightning needs to be reset
+  	{
+		thinktime self : self.wait;
+		self.think = weather_lightning_use;
+		self.lifetime = self.lifespan + self.nextthink;
+		self.aflag=FALSE;
+  	}
+	else
+		self.nextthink=-1;
+};
+
+
+void () lightning_init =
+{
+	if (self.lifetime > time )  // Being triggered right now
+		return; 
+
+	self.think = weather_lightning_use;
+	self.lifetime = self.lifespan + time;
+	if(self.spawnflags&2)
+	{
+		if(random()<0.5)
+			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
+		else
+			sound (self,CHAN_AUTO,"crusader/lghtn1.wav",1,ATTN_NORM);
+		self.aflag=TRUE;
+	}
+	weather_lightning_use ();  // Make it run
+
+};
 
 
 /*QUAKED weather_lightning_start (0 1 1) (-8 -8 -8) (8 8 8) STARTOFF thunder_sound
@@ -625,13 +623,13 @@ color - color of the beam
 lifespan - amount of time beam will exist.
 --------------------------------------------------------
 */
-/*
+
 void () fx_colorbeam_start =
 {
 	precache_model("models/stclrbm.mdl");
 	weather_lightning_start();
 };
-*/
+
 
 /*QUAKED fx_colorbeam_end (0 1 1) (-8 -8 -8) (8 8 8)
 Where colorbeam from weather_colorbeam_start will hit.
@@ -639,10 +637,9 @@ Where colorbeam from weather_colorbeam_start will hit.
 none
 --------------------------------------------------------
 */
-/*
+
 void () fx_colorbeam_end =
 {
 	weather_lightning_end();
 };
-*/
 

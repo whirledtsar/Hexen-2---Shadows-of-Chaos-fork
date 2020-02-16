@@ -3,7 +3,7 @@
 //**
 //** strings.hc
 //**
-//** $Header: /cvsroot/uhexen2/gamecode/hc/h2/strings.hc,v 1.1.1.1 2004-11-29 11:40:44 sezero Exp $
+//** $Header: /cvsroot/uhexen2/gamecode/hc/portals/strings.hc,v 1.1.1.1 2004-11-29 11:36:03 sezero Exp $
 //**
 //**************************************************************************
 
@@ -32,6 +32,11 @@ string STR_MAGICMISSILE;
 string STR_BONESHARD;
 string STR_SET1;
 string STR_SET2;
+
+string STR_ACIDORB;
+string STR_FLAMEORB;
+string STR_LIGHTNING1;
+string STR_LIGHTNING2;
 
 string STR_NOCARRYWEAPON;
 string STR_NOTENOUGHMANA;
@@ -102,6 +107,11 @@ void StringsInit(void)
 	STR_BONESHARD			= "Bone Shard";
 	STR_SET1				= "Scarab Staff Piece 1";
 	STR_SET2				= "Scarab Staff Piece 2";
+
+	STR_ACIDORB				= "Acid Rune";
+	STR_FLAMEORB			= "Firestorm";
+	STR_LIGHTNING1			= "Tempest Staff Piece 1";
+	STR_LIGHTNING2			= "Tempest Staff Piece 2";
 
 	STR_NOCARRYWEAPON		= "You do not carry that weapon.\n";
 	STR_NOTENOUGHMANA		= "Not enough mana for that weapon.\n";

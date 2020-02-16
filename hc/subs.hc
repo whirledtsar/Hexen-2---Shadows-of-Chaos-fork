@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/subs.hc,v 1.2 2007-02-07 16:57:11 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/subs.hc,v 1.2 2007-02-07 16:59:37 sezero Exp $
  */
 
 float SPAWNFLAG_ACTIVATED	= 8;
@@ -9,8 +9,13 @@ void SUB_Null() {}
 
 void SUB_Remove()
 {
+	stopSound(self,0);	/* FIXME: this stopSound here cuts off many sounds,
+				 * for instance when harvesting soul spheres. only
+				 * the portals hcode has it here !..  -- THOMAS  */
 	remove(self);
 }
+
+void obj_barrel_explode (void);	//ref from barrel.hc
 
 /*
 void spawntestmarker(vector org, float life, float skincolor)
@@ -44,6 +49,13 @@ void SetMovedir()
 	{
 		makevectors(self.angles);
 		self.movedir = v_forward;
+		//Have to do this to correct for floating point optimizations
+		if(fabs(self.movedir_x)<0.001)
+			self.movedir_x=0;
+		if(fabs(self.movedir_y)<0.001)
+			self.movedir_y=0;
+		if(fabs(self.movedir_z)<0.001)
+			self.movedir_z=0;
 	}
 
 	self.angles = '0 0 0';
@@ -77,8 +89,8 @@ void InitTrigger()
 
 void(vector tdest, float tspeed, void() func) SUB_CalcMove =
 {
-	local vector vdestdelta;
-	local float  len, traveltime;
+vector vdestdelta;
+float  len, traveltime;
 
 	if(!tspeed)
 		objerror("No speed is defined!");
@@ -135,8 +147,13 @@ void(entity ent, vector tdest, float tspeed, void() func) SUB_CalcMoveEnt =
 void SUB_CalcMoveDone()
 {
 	setorigin(self, self.finaldest);
-	self.velocity = '0 0 0';
-	self.nextthink = -1;
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+	{
+		self.velocity = '0 0 0';
+		self.nextthink = -1;
+	}
+	else
+		thinktime self : 99999999;
 	if(self.think1)
 		self.think1();
 }
@@ -150,8 +167,8 @@ void SUB_CalcMoveDone()
 
 void(vector destangle, float tspeed, void() func) SUB_CalcAngleMove =
 {
-	local vector destdelta;
-	local float  len, traveltime;
+vector destdelta;
+float  len, traveltime;
 
 	if(!tspeed)
 		objerror("SUB_CalcAngleMove: No speed defined!");
@@ -193,9 +210,15 @@ void(entity ent, vector destangle, float tspeed, void() func) SUB_CalcAngleMoveE
 
 void SUB_CalcAngleMoveDone()
 {
+//	dprint("Done rotating\n");
 	self.angles = self.finalangle;
-	self.avelocity = '0 0 0';
-	self.nextthink = -1;
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+	{
+		self.avelocity = '0 0 0';
+		self.nextthink = -1;
+	}
+	else
+		thinktime self : 99999999;
 	if (self.think1)
 		self.think1();
 }
@@ -206,25 +229,39 @@ void SUB_CalcAngleMoveDone()
 
 void SUB_CalcMoveAndAngleDone(void)
 {
+//	dprint("Angle and move done\n");
 	setorigin(self, self.finaldest);
 	self.angles = self.finalangle;
-	self.velocity = self.avelocity = '0 0 0';
-	self.nextthink = -1;
-	if (self.think1)
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+	{
+		self.velocity = self.avelocity = '0 0 0';
+		self.nextthink = -1;
+	}
+	else
+		thinktime self : 99999999;
+	if (self.think1!=SUB_Null)
+	{
+//		dprint("Going to next func\n");
 		self.think1();
+	}
+//	else
+//		dprint("No next func\n");
 }
 
 void()SUB_CalcAngleOnlyDone;
 
 void SUB_CalcMoveOnlyDone(void)
 {
+//	dprint("Move done\n");
 	setorigin(self, self.finaldest);
-	self.velocity = '0 0 0';
+	if(self.wait!=0||self.enemy.classname!="path_corner")
+		self.velocity = '0 0 0';
 	self.movetime=0;
-	if(self.angletime>0)
+	if(self.angletime>0.01)//1/5th of a frame
 	{
 		self.think=SUB_CalcAngleOnlyDone;
 		self.nextthink=self.ltime+self.angletime;
+//		dprintf("ETA - %s\n",self.nextthink - self.ltime);
 	}
 	else
 		SUB_CalcMoveAndAngleDone();
@@ -232,13 +269,18 @@ void SUB_CalcMoveOnlyDone(void)
 
 void SUB_CalcAngleOnlyDone(void)
 {
+//	dprint("Angle done\n");
 	self.angles = self.finalangle;
 	self.avelocity = '0 0 0';
 	self.angletime = 0;
-	if(self.movetime>0)
+	if(self.movetime>0.01)//1/5th of a frame
 	{
 		self.think=SUB_CalcMoveOnlyDone;
-		self.nextthink=self.ltime+self.movetime;
+		self.nextthink=self.ltime+self.movetime;//was 0.0000002384, and would not think
+//		dprintf("Movetime*1000000000 - %s\n",self.movetime*1000000000);
+//		dprintf("ETA - %s\n",(self.nextthink - self.ltime));
+//		dprintf("Ltime - %s\n",self.ltime);
+//		dprintf("Nextthink - %s\n",self.nextthink);
 	}
 	else
 		SUB_CalcMoveAndAngleDone();
@@ -321,17 +363,20 @@ float  len, alen;
 		self.movetime-=self.angletime;
 		self.think = SUB_CalcAngleOnlyDone;
 		self.nextthink=self.ltime+self.angletime;
+//		dprintf("1: ETA - %s\n",self.nextthink - self.ltime);
 	}
 	else if(self.movetime<self.angletime)
 	{
 		self.angletime-=self.movetime;
 		self.think = SUB_CalcMoveOnlyDone;
 		self.nextthink=self.ltime+self.movetime;
+//		dprintf("2: ETA - %s\n",self.nextthink - self.ltime);
 	}
 	else
 	{
 		self.think = SUB_CalcMoveAndAngleDone;
 		self.nextthink=self.ltime+self.movetime;
+//		dprintf("3: ETA - %s\n",self.nextthink - self.ltime);
 	}
 }
 
@@ -346,6 +391,8 @@ void(vector tdest, float tspeed, vector destangle, float aspeed,void() func,floa
 	self.finalangle = destangle;
 	self.anglespeed = aspeed;
 	self.think1 = func;
+//	if(self.think1==SUB_Null)
+//		dprint("No next func!\n");
 	SUB_CalcMoveAndAngle(synchronize);
 };
 
@@ -356,7 +403,10 @@ void(vector tdest, float tspeed, vector destangle, float aspeed,void() func,floa
 void DelayThink()
 {
 	activator = self.enemy;
+	if(self.level)
+		self.check_ok=self.owner.check_ok=TRUE;
 	SUB_UseTargets();
+	self.check_ok=self.owner.check_ok=FALSE;
 	remove(self);
 }
 
@@ -389,14 +439,28 @@ string s;
 	if(self.delay)
 	{
 		// create a temp object to fire at a later time
+//		dprint(activator.classname);
+//		dprint(" using something with a delay\n");
 		t = spawn();
-		//t.classname = "DelayedUse";	ws: commented out because it seems to have no usage and only causes problems
+		t.netname = "DelayedUse";
+		t.classname = self.classname;
+		t.owner = self;
 		thinktime t : self.delay;
 		t.think = DelayThink;
 		t.enemy = activator;
 		t.message = self.message;
 		t.killtarget = self.killtarget;
 		t.target = self.target;
+		t.failtarget = self.failtarget;
+		t.close_target = self.close_target;
+		t.nexttarget = self.nexttarget;
+		t.style = self.style;
+		t.mangle = self.mangle;
+		t.frags = self.frags;
+		t.use=self.use;
+		t.inactive=self.inactive;
+		if(self.check_ok)
+			t.level=TRUE;
 		return;
 	}
 
@@ -421,7 +485,30 @@ string s;
 		{
 			t = find(t, targetname, self.killtarget);
 			if(t!=world)
-				remove(t);
+			{
+				if(self.classname=="func_train")
+				{//Trains can't target things when they die, so use killtarget
+					if(t.th_die)
+					{
+						if(t.th_die==obj_barrel_explode)
+							t.think=t.use;
+						else
+							t.think=t.th_die;
+						thinktime t : .01;
+						t.targetname="";
+					}
+					else if(t.health)
+					{
+						t.think=chunk_death;
+						thinktime t : .01;
+						t.targetname="";
+					}
+					else
+						remove(t);
+				}
+				else
+					remove(t);
+			}
 		}
 		while(t!=world);
 	}
@@ -439,14 +526,21 @@ string s;
 			if (!t)
 			{
 				if(self.nexttarget!=""&&self.target!=self.nexttarget)
-					self.target=self.nexttarget;
+					if(self.netname=="DelayedUse")
+						self.owner.target=self.nexttarget;
+					else
+						self.target=self.nexttarget;
 				return;
 			}
 			if(t.style>=32&&t.style!=self.style)
 			{
 				self.style=t.style;
 				if(self.classname=="breakable_brush")
+				{
 					lightstylestatic(self.style,0);
+					stopSound(self,CHAN_BODY);
+					//sound(self,CHAN_BODY, "misc/null.wav", 0.5, ATTN_STATIC);
+				}
 				else
 					lightstyle_change(t);
 			}
@@ -485,8 +579,22 @@ string s;
 			}
 			else if (self.use != SUB_Null&&!self.inactive)
 			{	//Else here because above trigger types should not use it's target
+//				if(self.classname=="obj_talkinghead"&&self.think!=talkhead_idle)
+//					dprint("Already talking, please wait!\n");
+//				else 
 				if (self.use)
-					self.use ();
+				{
+/*					if(self.classname=="trigger_changelevel")
+					{
+						dprint(stemp.classname);
+						dprint(" firing ");
+						dprint(self.classname);
+						dprint(" target: ");
+						dprint(self.targetname);
+						dprint("\n");
+					}
+*/					self.use ();
+				}
 			}
 			self = stemp;
 			other = otemp;
@@ -494,6 +602,7 @@ string s;
 		} /*while (1);*/
 	}
 }
+
 
 /*
  * SUB_AttackFinished() -- Gets ready to finish the attack.  In Nightmare
@@ -540,4 +649,3 @@ void SUB_UseWakeTargets()
 	self.target = otarget;
 	self.waketarget = "";	//only use waketarget once!
 }
-

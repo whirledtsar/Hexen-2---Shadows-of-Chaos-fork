@@ -48,14 +48,12 @@ float VORP_BASE_DAMAGE			= 15;
 float VORP_ADD_DAMAGE			= 10;
 float VORP_PWR_BASE_DAMAGE		= 50;
 float VORP_PWR_ADD_DAMAGE		= 30;
-float VORP_RADIUS			= 150;
-float VORP_FORCE			= 10;
+float VORP_RADIUS				= 150;
+float VORP_FORCE				= 10;
 float VORP_THROW_COST = 4;
 float VORP_TOME_EXTRACOST = 2;
 
 string VORP_TEXMOD				= "models/vorpal.mdl";
-
-float HasSpecialAttackInt(entity ent);
 
 void missile_gone(void)
 {

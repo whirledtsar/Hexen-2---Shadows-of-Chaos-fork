@@ -104,9 +104,7 @@ void sound_again(void)
 		sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 
 	self.think = sound_again;
-						 
-  
-	thinktime self : random(self.flags,self.flags2);							   
+	thinktime self : random(self.flags,self.flags2);
 }
 
 
@@ -133,9 +131,9 @@ Creates an ambient sound in the world.
   16 - gurgling water noise
 --------------------------------------------------------
 */
-
 void sound_ambient (void)
 {
+
 	if (self.soundtype == 1)
 	{
 		precache_sound ("ambience/windmill.wav");
@@ -148,7 +146,6 @@ void sound_ambient (void)
 		self.flags = 5;
 		self.flags2 = 30;
 		self.think = sound_again;
-								
 	}
 	else if (self.soundtype == 3)
 	{
@@ -157,7 +154,6 @@ void sound_ambient (void)
 		self.flags = 5;
 		self.flags2 = 30;
 		self.think = sound_again;
-								
 	}
 	else if (self.soundtype == 4)
 	{
@@ -171,7 +167,6 @@ void sound_ambient (void)
 		self.flags = 5;
 		self.flags2 = 30;
 		self.think = sound_again;
-								
 	}
 	else if (self.soundtype == 6)
 	{
@@ -180,7 +175,6 @@ void sound_ambient (void)
 		self.flags = 15;
 		self.flags2 = 60;
 		self.think = sound_again;
-								 
 	}
 	else if (self.soundtype == 7)
 	{
@@ -189,7 +183,6 @@ void sound_ambient (void)
 		self.flags = 15;
 		self.flags2 = 60;
 		self.think = sound_again;
-								 
 	}
 	else if (self.soundtype == 8)
 	{
@@ -198,7 +191,6 @@ void sound_ambient (void)
 		self.flags = 15;
 		self.flags2 = 60;
 		self.think = sound_again;
-								 
 	}
 	else if (self.soundtype == 9)
 	{
@@ -293,8 +285,6 @@ void custom_sound_ambient (void)
 	self.noise1 = (self.netname);
 
 	if (self.flags) {		
-				   
-							
 		self.think = sound_again;
 		thinktime self : random(self.flags,self.flags2);
 	}

@@ -27,6 +27,13 @@
 //			4.2 -  w_l42_c4  -  vindctus staff
 //
 //
+//   Succubus:
+//			2   -  w_l2_c5   -  Acid Orb
+//			3   -  w_l3_c5   -  Flame Orb
+//			4.1 -  w_l41_c5  -  Lightning head
+//			4.2 -  w_l42_c5  -  Lightning staff
+//
+//
 //====================================================================================================
 
 
@@ -37,7 +44,7 @@
 //
 //====================================================================================================
 
-/*QUAKED wp_weapon2 (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon2 (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 2 pickup for single player mode
 -------------------------FIELDS-------------------------
 none
@@ -48,6 +55,7 @@ void wp_weapon2 (void)
 	precache_model("models/w_l2_c1.mdl");
 	precache_model("models/w_l2_c2.mdl");
 	precache_model("models/w_l2_c3.mdl");
+	precache_model4("models/w_l2_c5.mdl");
 	precache_model("models/w_l2_c4.mdl");
 
 	CreateEntityNew(self,ENT_WEAPON2_ART,"models/w_l2_c1.mdl",SUB_Null);
@@ -62,7 +70,7 @@ void wp_weapon2 (void)
 }
 
 
-/*QUAKED wp_weapon3 (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon3 (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 3 pickup for single player mode
 -------------------------FIELDS-------------------------
 none
@@ -73,6 +81,7 @@ void wp_weapon3 (void)
 	precache_model("models/w_l3_c1.mdl");
 	precache_model("models/w_l3_c2.mdl");
 	precache_model("models/w_l3_c3.mdl");
+	precache_model4("models/w_l3_c5.mdl");
 	precache_model("models/w_l3_c4.mdl");
 
 	CreateEntityNew(self,ENT_WEAPON41_ART,"models/w_l3_c1.mdl",SUB_Null);
@@ -86,7 +95,7 @@ void wp_weapon3 (void)
 
 }
 
-/*QUAKED wp_weapon4_head (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon4_head (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 4 pickup (staff head) for single player mode
 -------------------------FIELDS-------------------------
 none
@@ -97,6 +106,7 @@ void wp_weapon4_head (void)
 	precache_model("models/w_l41_c1.mdl");
 	precache_model("models/w_l41_c2.mdl");
 	precache_model("models/w_l41_c3.mdl");
+	precache_model4("models/w_l41_c5.mdl");
 	precache_model("models/w_l41_c4.mdl");
 
 	CreateEntityNew(self,ENT_WEAPON41_ART,"models/w_l41_c1.mdl",SUB_Null);
@@ -110,7 +120,7 @@ void wp_weapon4_head (void)
 
 }
 
-/*QUAKED wp_weapon4_staff (0 0 0) (-8 -8 -44) (8 8 20) FLOATING
+/*QUAKED wp_weapon4_staff (0 1 1) (-8 -8 -44) (8 8 20) FLOATING
 In world weapon 4 pickup (staff) for single player mode
 -------------------------FIELDS-------------------------
 none
@@ -121,6 +131,7 @@ void wp_weapon4_staff (void)
 	precache_model("models/w_l42_c1.mdl");
 	precache_model("models/w_l42_c2.mdl");
 	precache_model("models/w_l42_c3.mdl");
+	precache_model4("models/w_l42_c5.mdl");
 	precache_model("models/w_l42_c4.mdl");
 
 	CreateEntityNew(self,ENT_WEAPON42_ART,"models/w_l42_c1.mdl",SUB_Null);

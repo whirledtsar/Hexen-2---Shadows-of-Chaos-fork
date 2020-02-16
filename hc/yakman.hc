@@ -453,9 +453,6 @@ void yakman_die () [++ $howl1 .. $howl12]
 	if (self.health < -40)
 	{
 		chunk_death();
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/bloodpool.mdl", self.health);
 		return;
 	}
 	if(cycle_wrapped)
@@ -1104,18 +1101,6 @@ void yakman_stand () [++ $wait1 .. $wait24]
 }
 
 
-void() yakman_create =
-{
-	setmodel (self, "models/yakman.mdl");
-	self.hull=HULL_PLAYER;
-	setsize(self, '-18 -18 0', '18 18 80');
-	self.takedamage = DAMAGE_YES;
-	self.use=monster_use;
-	spawn_tfog(self.origin);
-	walkmonster_start ();
-	self.movetype = MOVETYPE_STEP;
-}
-
 /*QUAKED monster_yakman (1 0.3 0) (-28 -28 0) (28 28 80) AMBUSH STUCK JUMP x DORMANT 
 The Yakman Cometh... and the Yakman taketh away...
 skin:	0 - white: more often uses ice, and less often charges
@@ -1131,11 +1116,11 @@ void() monster_yakman =
 	  return;
 	}
 
-	/*if(!self.th_init)
+	if(!self.th_init)
 	{
 		self.th_init=monster_yakman;
 		self.init_org=self.origin;
-	}*/
+	}
 
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
@@ -1152,11 +1137,10 @@ void() monster_yakman =
 		precache_sound4 ("yakman/snort2.wav");
 		precache_sound4 ("yakman/roar.wav");
 		precache_sound4 ("yakman/die.wav");
-		precache_sound2 ("mezzo/attack.wav");
-		precache_sound3 ("crusader/icewall.wav");	
+		precache_sound ("crusader/icewall.wav");	
 		precache_sound4 ("yakman/icespell.wav");	
-		precache_sound3 ("crusader/icefire.wav");	
-		precache_sound3 ("misc/tink.wav");				//Ice shots bounce
+		precache_sound ("crusader/icefire.wav");	
+		precache_sound ("misc/tink.wav");				//Ice shots bounce
 		precache_sound3 ("mezzo/skid.wav");
 /*
 		precache_model4 ("models/yakref.spr");
@@ -1186,8 +1170,6 @@ void() monster_yakman =
 		else
 			self.skin=2;
 	} 
-	else if(self.skin == 3)
-		self.skin=0;
 	else if(self.skin>2)
 	{
 		dprintf("Yak skin value is too high %s\n",self.skin);
@@ -1219,7 +1201,6 @@ void() monster_yakman =
 */
 
 	self.classname="monster_yakman";
-	self.netname = "yakman";
 	self.th_stand=yakman_stand;
 	self.th_walk=yakman_walk;
 	self.th_run=yakman_run;
@@ -1236,7 +1217,7 @@ void() monster_yakman =
 
 //	self.scale=.8;
 //	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
-	setsize(self, '-18 -18 0', '18 18 80');//setsize(self, '-16 -16 0', '16 16 80');
+	setsize(self, '-16 -16 0', '16 16 80');
 //	setsize(self, '-28 -28 0', '28 28 80');
 //	self.hull=HULL_GOLEM;
 //	self.hull=HULL_SCORPION;
@@ -1245,13 +1226,5 @@ void() monster_yakman =
 	self.frame=$shard32;
 
 	self.init_exp_val = self.experience_value;
-	if (self.spawnflags&128)
-	{
-		self.movetype = MOVETYPE_NONE;
-		self.takedamage = DAMAGE_NO;
-		setmodel (self, "");
-		self.use = yakman_create;
-	}
-	else
-		walkmonster_start();
+	walkmonster_start();
 };

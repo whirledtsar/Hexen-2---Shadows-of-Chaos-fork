@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/warhorse.hc,v 1.2 2007-02-07 16:57:11 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/warhorse.hc,v 1.2 2007-02-07 16:59:38 sezero Exp $
  */
 
 /*
@@ -656,6 +656,7 @@ void rider_war(void)
 	self.monsterclass = CLASS_BOSS;
 	self.yaw_speed = 2;
 	self.experience_value = 2000;
+	self.init_exp_val = self.experience_value;
 	setmodel (self, "models/boss/warhorse.mdl");
 	self.skin = 0;
 
@@ -666,7 +667,7 @@ void rider_war(void)
 	
 	self.hull = HULL_POINT;
 
-	self.health = 6000;
+	self.health = self.max_health = 6000;
 	self.rider_gallop_mode = 2;
 	self.speed = war_speed[self.rider_gallop_mode];
 	self.rider_path_distance = 200;
@@ -737,6 +738,7 @@ void rider_quake_think(void)
 
 /*QUAKED rider_quake (1 0 0) ?
 -------------------------FIELDS-------------------------
+rider_quake are just trains that shake and move like an earthquake.  rider_quake_center is the entity that triggers the rider_quakes (it searches in a radius of 500).  The rider_quake_center must be activated by another trigger.
 --------------------------------------------------------
 
 */
@@ -813,6 +815,7 @@ void rider_quake_center_use(void)
 
 /*QUAKED rider_quake_center (1 0 0) (-8 -8 -8) (8 8 8)
 -------------------------FIELDS-------------------------
+rider_quake are just trains that shake and move like an earthquake.  rider_quake_center is the entity that triggers the rider_quakes (it searches in a radius of 500).  The rider_quake_center must be activated by another trigger.
 --------------------------------------------------------
 
 */

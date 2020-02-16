@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/stats.hc,v 1.3 2007-02-07 16:57:10 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/stats.hc,v 1.3 2007-02-07 16:59:37 sezero Exp $
  */
 
 // ExperienceValues for each level indicate the minimum at which
@@ -7,7 +7,7 @@
 // of experience needed for each level past 10
 
 
-/*float ExperienceValues[44] =
+float ExperienceValues[55] =
 {
 	// Paladin
 	 945,			// Level 2
@@ -59,13 +59,26 @@
 	86000,			// Level 9
 	110000,			// Level 10
 	150000,			// Level 11
-	150000			// Required amount for each level afterwards
-};*/
+	150000,			// Required amount for each level afterwards
+
+	// Succubus
+	 871,			// Level 2
+	2060,			// Level 3
+	4822,			// Level 4
+	9319,			// Level 5
+	19278,			// Level 6
+	36626,			// Level 7
+	66804,			// Level 8
+	110494,			// Level 9
+	141334,			// Level 10
+	192700,			// Level 11
+	192700			// Required amount for each level afterwards
+};
 
 //  min health, max health,
 //  min health per level up to level 10,  min health per level up to level 10, 
 //  health per level past level 10
-float hitpoint_table[20] =
+float hitpoint_table[25] =
 {
 	70,		85,				// Paladin
 	8,		13,      4,
@@ -77,51 +90,58 @@ float hitpoint_table[20] =
 	5,		10,      3,
 
 	65,		75,				// Assassin
-	5,		10,      3
+	5,		10,      3,
 
+	65,		75,				// Succubus
+	5,		10,      3
 };
 
-float mana_table[20] =
+float mana_table[25] =
 {
 //    Startup    Per Level     Past
-//  min    max    min  max      10th Level
-	84,		94,		6,   9, 	 1,		// Paladin
-	88,		98,		7,  10, 	 2, 	// Crusader
-    96,	   106,	   10,  12, 	 4,     // Necromancer
-	92,	   102,		9,  11, 	 3		// Assassin
+//  min    max    min		max     10th Level
+	84,		94,		6,		9, 		1,		// Paladin
+	88,		98,		7,		10, 	2, 	// Crusader
+    96,	   106,		10,		12, 	4,     // Necromancer
+	92,	   102,		9,		11, 	3,		// Assassin
+	90,	   100,		8,		11, 	3		// Succubus
 };
 
 
-float strength_table[8] =
+float strength_table[10] =
 {
 	15,		18,		// Paladin
 	12,		15,		// Crusader
 	6,		10,		// Necromancer
-	10,		13		// Assassin
+	10,		13,		// Assassin
+	11,		14		// Succubus
 };
 
-float intelligence_table[8] =
+float intelligence_table[10] =
 {
 	6,		10,		// Paladin
 	10,		13,		// Crusader
 	15,		18,		// Necromancer
-	6,		10		// Assassin
+	6,		10,		// Assassin
+	9,		13		// Succubus
 };
 
-float wisdom_table[8] =
+float wisdom_table[10] =
 {
 	6,		10,		// Paladin
 	15,		18,		// Crusader
 	10,		13,		// Necromancer
-	12,		15		// Assassin
+	12,		15,		// Assassin
+	11,		14		// Succubus
 };
 
-float dexterity_table[8] =
+float dexterity_table[10] =
 {
 	10,		13,		// Paladin
 	6,		10,		// Crusader
 	8,		12,		// Necromancer
-	15,		18		// Assassin
+	15,		18,		// Assassin
+	9,		13		// Succubus
 };
 
 /*
@@ -129,6 +149,7 @@ float CLASS_PALADIN					= 1;
 float CLASS_CRUSADER				= 2;
 float CLASS_NECROMANCER				= 3;
 float CLASS_ASSASSIN				= 4;
+float CLASS_SUCCUBUS				= 5;
 */
 
 // Make sure we get a real distribution beteen
@@ -153,7 +174,7 @@ void stats_NewPlayer(entity e)
 	// Stats already set?
 	if (e.strength) return;
 
-	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_ASSASSIN)
+	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_SUCCUBUS)
 	{
 		sprint(e,"Invalid player class ");
 		sprint(e,ftos(e.playerclass));
@@ -192,7 +213,10 @@ void player_level_cheat()
 	else
 		index += self.level - 1;
 
-	self.experience = 0; //reset xp to 0 at every level gain
+	self.experience = ExperienceValues[index];
+
+	if (self.level > MAX_LEVELS)
+		self.experience += (self.level - MAX_LEVELS) * ExperienceValues[index+1];
 
 	PlayerAdvanceLevel(self.level+1);
 }
@@ -200,11 +224,6 @@ void player_level_cheat()
 void player_experience_cheat(void)
 {
 	AwardExperience(self,self,350);
-}
-
-float GetPlayerXPNeeded(float currentLevel)
-{
-	return currentLevel * 1000;
 }
 
 /*
@@ -215,13 +234,13 @@ This routine is called (from the game C side) when a player is advanced a level
 (self.level)
 ================
 */
-float STAT_POOL_COUNT = 4;
 void PlayerAdvanceLevel(float NewLevel)
 {
 	string s2;
 	float OldLevel,Diff;
 	float index,HealthInc,ManaInc;
-	float statpool, statspread, statrandom;
+
+	sound (self, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NONE);
 
 	OldLevel = self.level;
 	self.level = NewLevel;
@@ -231,16 +250,47 @@ void PlayerAdvanceLevel(float NewLevel)
 	s2 = ftos(self.level);
 	sprint(self,s2);
 	sprint(self,"!\n");
-	
+
 	if(!self.newclass)
 	{
-		centerprint(self, "Level up!");
-		sound (self, CHAN_AUTO, "fx/level.wav", 1, ATTN_NORM);
+		switch (self.playerclass)
+		{
+		case CLASS_PALADIN:
+		   centerprint(self, "Paladin gained a level\n");
+		   if (self.level==3)
+				sprint(self,"You have learned a new use for the Vorpal Blade\n");
+		break;
+		case CLASS_CRUSADER:
+			centerprint(self,"Crusader gained a level\n");
+			// Special ability #1, full mana at level advancement
+			// Pa3PyX: only do this at level 3 and on, and also
+			//	   fully heal, to make this more useful, and
+			//	   consistent with the manual
+			if (self.level > 2) {
+				self.bluemana = self.greenmana = self.max_mana;
+				/*if (self.health < self.max_health) {
+					self.health = self.max_health;*
+				}*/
+			}
+			if (self.level==3)
+				sprint(self,"You have learned a new use for the Warhammer\n");
+		break;
+		case CLASS_NECROMANCER:
+		   centerprint(self,"Necromancer gained a level\n");
+		   if (self.level==3)
+				sprint(self,"You have learned a new use for the Bone Shard\n");
+		break;
+		case CLASS_ASSASSIN:
+		   centerprint(self,"Assassin gained a level\n");
+		break;
+		case CLASS_SUCCUBUS:
+		   centerprint(self,"Demoness gained a level\n");
+		break;
+		}
 	}
 
-	//if not a player, exit
 	if (self.playerclass < CLASS_PALADIN ||
-		self.playerclass > CLASS_ASSASSIN)
+		self.playerclass > CLASS_SUCCUBUS)
 		return;
 
 	index = (self.playerclass - 1) * 5;
@@ -261,122 +311,47 @@ void PlayerAdvanceLevel(float NewLevel)
 			HealthInc = hitpoint_table[index+4];
 			ManaInc = mana_table[index+4];
 		}
+		self.health += HealthInc;
 		self.max_health += HealthInc;
 
-		if (self.max_health > 999)
-			self.max_health = 999;
-		
-		//give int bonus to mana increase
-		ManaInc += rint(self.intelligence / 12);
+		//	An upper limit of 150 on health
+		if (self.health > 150) 
+			self.health = 150;
 
-		//recharge mana
-		self.max_mana += ManaInc;
-		
-		if (self.max_mana > 999)
-			self.max_mana = 999;
+		if (self.max_health > 150)
+			self.max_health = 150;
 
-		//base stat increase of 1 for all
-		self.strength += 1;
-		self.wisdom += 1;
-		self.intelligence += 1;
-		self.dexterity += 1;
-		
-		//increase stats at random
-		statpool = STAT_POOL_COUNT; //distribute more at random, and favor highest stats
-		while(statpool > 0)
-		{
-			//create a tower of existing stats
-			statspread = self.strength + self.wisdom + self.intelligence + self.dexterity;
-			statrandom = random(0, statspread - 1);
-			
-			//assign stat depending on where it lands in the tower
-			if (statrandom < self.strength)
-			{
-				self.strength += 1;
-			}
-			else if (statrandom < self.strength + self.wisdom)
-			{
-				self.wisdom += 1;
-			}
-			else if (statrandom < self.strength + self.wisdom + self.intelligence)
-			{
-				self.intelligence += 1;
-			}
-			else
-			{
-				self.dexterity += 1;
-			}
-				
-			statpool -= 1;
-		}
-	}
-	
-	if (self.bluemana + ManaInc > self.max_mana)
-		self.bluemana = self.max_mana;
-	else
-		self.bluemana += ManaInc;
-	
-	if (self.greenmana + ManaInc > self.max_mana)
-		self.greenmana = self.max_mana;
-	else
 		self.greenmana += ManaInc;
-	
-	if (self.health < self.max_health)
-	{
-		if (self.health + HealthInc > self.max_health)
-			self.health = self.max_health;
-		else
-			self.health += HealthInc;
+		self.bluemana += ManaInc;
+		self.max_mana += ManaInc;
+
+		sprint(self, "Stats: MP +");
+		s2 = ftos(ManaInc);
+		sprint(self, s2);
+
+		sprint(self, "  HP +");
+		s2 = ftos(HealthInc);
+		sprint(self, s2);
+		sprint(self, "\n");
 	}
-	
-		if (self.playerclass == CLASS_PALADIN)
-		{
-		   sprint(self,"Paladin gained a level\n");
-			if (self.level==3)
-				sprint(self,"You have learned a new use for the Vorpal Blade\n");
-		}
-		else if (self.playerclass == CLASS_CRUSADER)
-		{
-			sprint(self,"Crusader gained a level\n");
-			if (self.level > 2) {
-				self.bluemana = self.greenmana = self.max_mana;
-			}
-			if (self.level==3)
-				sprint(self,"You have learned a new use for the Warhammer\n");
-		}
-		else if (self.playerclass == CLASS_NECROMANCER)
-		{
-			sprint(self,"Necromancer gained a level\n");
-				
-			if (self.level==3)
-				sprint(self,"You have learned a new use for the Bone Shard\n");
-		}
-		else if (self.playerclass == CLASS_ASSASSIN)
-		{
-			sprint(self,"Assassin gained a level\n");
-		}
 
 	if (self.level > 2)
 		self.flags(+)FL_SPECIAL_ABILITY1;
 
-	if (self.level > 5)
+	if (self.level >5)
 		self.flags(+)FL_SPECIAL_ABILITY2;
-	
-	//reset armor
-	ApplyNaturalArmor(self);
 }
+
 
 float FindLevel(entity WhichPlayer)
 {
-	//float Chart;
-	//float Amount,Position,Level;
+	float Chart;
+	float Amount,Position,Level;
 
-	//not a player class
 	if (WhichPlayer.playerclass < CLASS_PALADIN ||
-		WhichPlayer.playerclass > CLASS_ASSASSIN)
+		WhichPlayer.playerclass > CLASS_SUCCUBUS)
 		return WhichPlayer.level;
 
-	/*
 	Chart = (WhichPlayer.playerclass - 1) * (MAX_LEVELS+1);
 
 	Level = 0;
@@ -393,19 +368,18 @@ float FindLevel(entity WhichPlayer)
 	{
 		Amount = WhichPlayer.experience - ExperienceValues[Chart + MAX_LEVELS - 1];
 		Level = ceil(Amount / ExperienceValues[Chart + MAX_LEVELS]) + MAX_LEVELS;
-	}*/
-	
-	return WhichPlayer.level;
+	}
+
+	return Level;
 }
 
 
 void AwardExperience(entity ToEnt, entity FromEnt, float Amount)
 {
-	//float AfterLevel;
+	float AfterLevel;
 	float IsPlayer;
 	entity SaveSelf;
-	//float index,test40,test80,diff,index2,totalnext,wis_mod;
-	float xpneeded;
+	float index,test40,test80,diff,index2,totalnext,wis_mod;
 
 	if (!Amount) return;
 
@@ -419,7 +393,6 @@ void AwardExperience(entity ToEnt, entity FromEnt, float Amount)
 		Amount = FromEnt.experience_value;
 	}
 
-	/*
 	if (ToEnt.level <4)
 		Amount *= .5;
 
@@ -433,24 +406,60 @@ void AwardExperience(entity ToEnt, entity FromEnt, float Amount)
 	wis_mod = ToEnt.wisdom - 11;
 	Amount+=Amount*wis_mod/20;//from .75 to 1.35
 
-	*/
-	
+	ToEnt.experience += Amount;
+
 	if (IsPlayer)
 	{
-		ToEnt.experience += Amount;
-		xpneeded = GetPlayerXPNeeded(ToEnt.level);
-		
-		while (ToEnt.experience >= xpneeded)
+		AfterLevel = FindLevel(ToEnt);
+
+//		dprintf("Total Experience: %s\n",ToEnt.experience);
+
+		if (ToEnt.level != AfterLevel)
 		{
 			SaveSelf = self;
 			self = ToEnt;
 
-			//Reduce experience by needed xp (resets every level at 0 XP to make level grinding easier to predict)
-			self.experience -= xpneeded;
-			
-			PlayerAdvanceLevel(ToEnt.level + 1);
+			PlayerAdvanceLevel(AfterLevel);
 
 			self = SaveSelf;
+		}
+
+	// Crusader Special Ability #1: award full health at 40% and 80% of levels experience
+		// O.S.: this is supposed to be for level3+
+		if (ToEnt.playerclass == CLASS_CRUSADER && ToEnt.level > 2)
+		{
+			index = (ToEnt.playerclass - 1) * (MAX_LEVELS+1);
+			if ((ToEnt.level - 1) > MAX_LEVELS)
+				index += MAX_LEVELS;
+			else
+				index += ToEnt.level - 1;
+
+		//	if (ToEnt.level == 1)
+		//	{
+		//		test40 = ExperienceValues[index] * .4;
+		//		test80 = ExperienceValues[index] * .8;
+		//	}
+		//	else
+			if ((ToEnt.level - 1) <= MAX_LEVELS)
+			{
+				index2 = index - 1;
+				diff = ExperienceValues[index] - ExperienceValues[index2]; 
+				test40 = ExperienceValues[index2] + (diff * .4);
+				test80 = ExperienceValues[index2] + (diff * .8);
+			}
+			else // Past MAX_LEVELS
+			{
+				totalnext = ExperienceValues[index - 1];   // index is 1 past MAXLEVEL at this point
+				totalnext += ((ToEnt.level - 1) - MAX_LEVELS) * ExperienceValues[index];
+
+				test40 = totalnext + (ExperienceValues[index] * .4);
+				test80 = totalnext + (ExperienceValues[index] * .8);
+			}
+
+			if (((ToEnt.experience - Amount) < test40) && (ToEnt.experience> test40))
+				ToEnt.health = ToEnt.max_health;
+			else if (((ToEnt.experience - Amount) < test80) && (ToEnt.experience> test80))
+				ToEnt.health = ToEnt.max_health;
 		}
 	}
 }
@@ -468,7 +477,7 @@ void stats_NewClass(entity e)
 entity oself;
 float index,newlevel;
 
-	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_ASSASSIN)
+	if (e.playerclass < CLASS_PALADIN || e.playerclass > CLASS_SUCCUBUS)
 	{
 		sprint(e,"Invalid player class ");
 		sprint(e,ftos(e.playerclass));
@@ -512,67 +521,45 @@ lose all exp, just enough to drop you
 down one level.
 ======================================
 */
-float STAT_PUNISH_MIN = 1;
+
 void drop_level (entity loser,float number)
 {
-	float pos;
-	float statspread, statrandom, statpool;
-	
+float pos,lev_pos,new_exp,mana_dec,health_dec,dec_pos;
 	if(loser.classname!="player")
 		return;
 
+	if(loser.level-number<1)
+	{//would drop below level 1, set to level 1
+		loser.experience=0;
+		dec_pos = (loser.playerclass - 1) * 5;
+		loser.max_health= hitpoint_table[dec_pos];
+		loser.max_mana = mana_table[dec_pos];
+		if(loser.health>loser.max_health)
+			loser.health=loser.max_health;
+		if(loser.bluemana>loser.max_mana)
+			loser.bluemana=loser.max_mana;
+		if(loser.greenmana>loser.max_mana)
+			loser.greenmana=loser.max_mana;
+		return;
+	}
+
+	pos = (loser.playerclass - 1) * (MAX_LEVELS+1);
 	if(loser.level-number>1)
 	{
 		loser.level-=number;
-		pos = (loser.playerclass - 1) * (MAX_LEVELS+1);
-		loser.experience = 0;//ExperienceValues[pos+loser.level - 2];
+		lev_pos+=loser.level - 2;
+		if(lev_pos>9)//last number in that char's 
+		{
+			new_exp=ExperienceValues[pos+10];
+			loser.experience=new_exp+new_exp*(lev_pos - 9);
+		}
+		else
+			loser.experience = ExperienceValues[pos+lev_pos];
 	}
 	else
 	{
 		loser.level=1;
 		loser.experience=0;
-	}
-	
-	//base stat decrease of 1 for all
-	self.strength -= 1;
-	self.wisdom -= 1;
-	self.intelligence -= 1;
-	self.dexterity -= 1;
-		
-	//randomly punish stats
-	statpool = STAT_POOL_COUNT;
-	while(statpool > 0)
-	{
-		//create a tower of existing stats
-		statspread = loser.strength + loser.wisdom + loser.intelligence + loser.dexterity;
-		statrandom = random(0, statspread - 1);
-		
-		//assign stat depending on where it lands in the tower
-		if (statrandom < loser.strength)
-		{
-			 //prevent 0's and negatives. This has a miniscule chance of making more than 3 level drops hit the min, and grant the player extra stats
-			 // HOWEVER, this is intentional. If a player is stunted down to 1 of any stat, they are in a bad position and the advantage
-			 // is completely negated. Assigning any more points to the stunted stat in future levels is about 1 in 60
-			if (loser.strength > STAT_PUNISH_MIN)
-				loser.strength -= 1;
-		}
-		else if (statrandom < loser.strength + loser.wisdom)
-		{
-			if (loser.strength > STAT_PUNISH_MIN)
-				loser.strength -= 1;
-		}
-		else if (statrandom < loser.strength + loser.wisdom + loser.intelligence)
-		{
-			if (loser.strength > STAT_PUNISH_MIN)
-				loser.strength -= 1;
-		}
-		else
-		{
-			if (loser.strength > STAT_PUNISH_MIN)
-				loser.strength -= 1;
-		}
-			
-		statpool -= 1;
 	}
 
 	if (loser.level <= 2)
@@ -580,20 +567,19 @@ void drop_level (entity loser,float number)
 
 	if (loser.level <=5)
 		loser.flags(-)FL_SPECIAL_ABILITY2;
-	
-	//reset armor
-	ApplyNaturalArmor(self);
-}
 
-//Classes with special magical attacks must have enough intelligence to use them
-// i.e. paladin vorpal sword lightning attack
-float HasSpecialAttackInt (entity ent)
-{
-	if (ent.intelligence >= 14)
-	{
-		return TRUE;
-	}
-	
-	return FALSE;
+	dec_pos = (loser.playerclass - 1) * 5;
+	health_dec = hitpoint_table[dec_pos+4];
+	mana_dec = mana_table[dec_pos+4];
+
+	loser.max_health -= health_dec *number;
+	if(loser.health>loser.max_health)
+		loser.health=loser.max_health;
+
+	loser.max_mana -= mana_dec *number;
+	if(loser.bluemana>loser.max_mana)
+		loser.bluemana=loser.max_mana;
+	if(loser.greenmana>loser.max_mana)
+		loser.greenmana=loser.max_mana;
 }
 

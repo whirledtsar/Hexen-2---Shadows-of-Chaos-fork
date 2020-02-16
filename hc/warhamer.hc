@@ -88,7 +88,7 @@ float numstrikes, strikelength;
 		makevectors(zapangle);
 		fromspot = self.origin + v_forward*16;
 		tospot=self.origin + (v_forward*random(strikelength+32,32)); //Keep it to 30 si it won' have to draw more than one model
-		do_lightning (self,self.level,STREAM_ATTACHED,1,fromspot,tospot,3);
+		do_lightning (self,self.level,STREAM_ATTACHED,1,fromspot,tospot,3,TE_STREAM_LIGHTNING);
 		self.level+=1;
 		numstrikes-=1;
 		if(self.level>32)

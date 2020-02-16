@@ -1,5 +1,5 @@
 /*
- * h2/triggers.hc
+ * portals/triggers.hc
  */
 
 void() button_return;
@@ -9,8 +9,6 @@ void() multi_touch;
 float SPAWNFLAG_DODAMAGE = 1;
 float SPAWNFLAG_QMULT = 2;
 float COUNTER_ORDERED = 2;
-
-entity stemp, otemp, s, old;
 
 void() trigger_reactivate =
 {
@@ -30,9 +28,8 @@ float SPAWNFLAG_REMOVE_PP	= 16;
 float SPAWNFLAG_NO_PP		= 32;
 
 float SPAWNFLAG_ALLTOUCH	= 65536;
-float PUSH_SHEEP			= 64;
+float PUSH_SHEEP			= 64;	//trigger_jump
 float JUMP_CHANGEANGLE		= 8;	//trigger_monsterjump
-
 // the wait time has passed, so set back up for another activation
 void() multi_wait =
 {
@@ -78,9 +75,14 @@ void() multi_trigger =
 		AwardExperience(activator,self,0);
 	}
 
-	self.check_ok=TRUE;
-	SUB_UseTargets();
+//	if(self.spawnflags & SPAWNFLAG_REMOVE_PP)
+//		if(self.check_ok)
+//			dprint("trig_mult checked OK!!!!!\n");
+//		else
+//			dprint("trig_mult NOT checked ok\n");
 
+	SUB_UseTargets();
+	self.check_ok=FALSE;//reset check_ok?
 	if (self.wait > 0)
 	{
 		self.think = multi_wait;
@@ -101,6 +103,7 @@ void() multi_trigger =
 void() multi_killed =
 {
 	self.enemy = damage_attacker;
+	self.check_ok=TRUE;
 	multi_trigger();
 };
 
@@ -201,31 +204,68 @@ void() multi_use =
 	string temp;
 	float removepp, inversepp;
 
-	if (time < self.attack_finished)
-		return;
+	if(self.failchance)
+		if(random()*100<self.failchance)
+			return;
+//	if(self.spawnflags & SPAWNFLAG_REMOVE_PP)
+//	{
+//		dprint("trig_mult used by:");
+//		dprint(other.classname);
+//		dprint("\n");
+//	}
 
-	if (self.spawnflags & SPAWNFLAG_ACTIVATED)
+//	if (time < self.attack_finished)
+//		return;
+
+	if (self.spawnflags & SPAWNFLAG_ACTIVATED && self.touch==SUB_Null)
 	{
 		self.touch = multi_touch;
+//		dprint("setting touch\n");
+		return;
+	}
+
+	if(self.inactive)
+	{
+//		dprint("trig_mult not active\n");
 		return;
 	}
 
 	removepp = (self.spawnflags & SPAWNFLAG_REMOVE_PP);
 	inversepp = (self.spawnflags & SPAWNFLAG_NO_PP);
 
-	if (!check_puzzle_pieces(other,removepp,inversepp))
+//	dprint(other.classname);
+	if(other.classname=="player")
 	{
-		if (self.no_puzzle_msg && !deathmatch)
+		if (!check_puzzle_pieces(other,removepp,inversepp))
 		{
-			temp = getstring(self.no_puzzle_msg);
-			if (!deathmatch)
-				centerprint (other, temp);
-			self.attack_finished = time + 2;
+			if (self.no_puzzle_msg && !deathmatch&& time>self.attack_finished)
+			{
+				temp = getstring(self.no_puzzle_msg);
+				if (!deathmatch)
+					centerprint (other, temp);
+				self.attack_finished = time + 2;
+			}
+			return;
 		}
+	}
+	else if(self.puzzle_piece_1!=""||
+		self.puzzle_piece_2!=""||
+		self.puzzle_piece_3!=""||
+		self.puzzle_piece_4!="")
+	{
+//		dprint("mult_trig triggered, not ok\n");
+		self.enemy = activator;
+		if(self.check_ok)
+		{
+//			dprint("Checked okay wrong!!!\n");
+			self.check_ok=FALSE;
+		}
+		multi_trigger();
 		return;
 	}
 
 	self.enemy = activator;
+	self.check_ok=TRUE;
 	multi_trigger();
 };
 
@@ -234,20 +274,26 @@ void() multi_touch =
 	float removepp, inversepp;
 	string temp;
 
-	if (time < self.attack_finished)
-		return;
+//	if (time < self.attack_finished)
+//		return;
+
+	if(self.impulse)
+		if(other.impulse!=self.impulse)
+			return;
+
+	if(self.failchance)
+		if(random()*100<self.failchance)
+			return;
 
 	if(self.inactive)
+	{
+//		dprint("trig_mult not active\n");
 		return;
+	}
 
 	if (self.spawnflags & SPAWNFLAG_MTOUCH)
 	{
 		if (!other.flags & FL_MONSTER)
-			return;
-	}
-	else if (self.spawnflags & SPAWNFLAG_ALLTOUCH)
-	{
-		if (!other.flags & FL_MONSTER && !other.flags & FL_CLIENT)
 			return;
 	}
 	else if (self.spawnflags & SPAWNFLAG_PUSHTOUCH)
@@ -262,7 +308,9 @@ void() multi_touch =
 
 	if (self.movedir != '0 0 0')
 	{
+//		dprintv("my movedir is: %s\n",self.movedir);
 		makevectors (other.angles);
+//		dprintv("Your forward is: %s\n",v_forward);
 		if (v_forward * self.movedir < 0)
 			return;		// not facing the right way
 	}
@@ -270,20 +318,32 @@ void() multi_touch =
 	removepp = (self.spawnflags & SPAWNFLAG_REMOVE_PP);
 	inversepp = (self.spawnflags & SPAWNFLAG_NO_PP);
 
-	if (!check_puzzle_pieces(other,removepp,inversepp))
+	if(other.classname=="player")
 	{
-		if (self.no_puzzle_msg && !deathmatch)
+		if (!check_puzzle_pieces(other,removepp,inversepp))
 		{
-			temp = getstring(self.no_puzzle_msg);
-			if (!deathmatch)
-				centerprint (other, temp);
-			self.attack_finished = time + 2;
+			if (self.no_puzzle_msg && !deathmatch&& time>self.attack_finished)
+			{
+				temp = getstring(self.no_puzzle_msg);
+				if (!deathmatch)
+					centerprint (other, temp);
+				self.attack_finished = time + 2;
+			}
+			return;
 		}
+	}
+	else if(self.puzzle_piece_1!=""||
+		self.puzzle_piece_2!=""||
+		self.puzzle_piece_3!=""||
+		self.puzzle_piece_4!="")
+	{
+		self.enemy = other;
+		multi_trigger();
 		return;
 	}
 
 	self.enemy = other;
-
+	self.check_ok=TRUE;
 	multi_trigger ();
 };
 
@@ -292,6 +352,10 @@ Variable sized repeatable trigger.  Must be targeted at one or more entities.
 If "health" is set, the trigger must be killed to activate each time.
 If "delay" is set, the trigger waits some time after activating before firing.
 "wait" : Seconds between triggerings. (.2 default)
+"failchance" - default 0 - chance that trigger may fail to fire (0 - 100%)
+"impulse" - if set, will only fire if the touching entity's impulse is the name number (meant for impulse 33- the "use" impulse)
+"angles" - if angles are set, player must be facing that general direction to activate the trigger- note that if you want the angles to be "0", it needs to be "1" or it will think it has no angle
+
 If notouch is set, the trigger is only fired by other entities, not by touching.
 If monstertouch is set, only monsters may set of the trigger
 If deactivated is set, trigger will not fire until it is triggered itself
@@ -310,6 +374,8 @@ Puzzle Pieces (use the puzzle_id value from the pieces)
    puzzle_piece_4
    no_puzzle_msg: message when player doesn't have the right pieces
 
+remove_pp - Will remove the puzzle piece from the player
+no_pp - Will activate when the player DOESN'T have the puzzle piece
 */
 void() trigger_multiple =
 {
@@ -358,6 +424,8 @@ void() trigger_multiple =
 /*QUAKED trigger_once (.5 .5 .5) ? notouch monstertouch pushtouch deactivated remove_pp no_pp lighttoggle  lightstartlow
 Variable sized trigger. Triggers once, then removes itself.  You must set the key "target" to the name of another object in the level that has a matching
 "targetname".  If "health" is set, the trigger must be killed to activate.
+"failchance" - default 0 - chance that trigger may fail to fire (0 - 100%)
+
 If notouch is set, the trigger is only fired by other entities, not by touching.
 If monstertouch is set, only monsters can set of the triggers
 If deactivated is set, trigger will not work until it is triggered
@@ -398,13 +466,20 @@ void() trigger_once =
 	trigger_multiple();
 };
 
-/*QUAKED trigger_activate (.5 .5 .5) ? ONCE RELAY x deactivated
+/*QUAKED trigger_activate (.5 .5 .5) ? ONCE RELAY no_touch deactivated
+Toggles on and off the active state of a trigger
+ONCE- Only fires once
+RELAY - ?
+no_touch - can't be activated by touch
+deactivated - starts inactive, must be used by a activate trigger first
 */
 void() trigger_activate =
 {	
 float temp_flags;
 	temp_flags=self.spawnflags;
-	self.spawnflags(-)1|2;	//Clear first two spawnflags before calling the main trigger funcs
+	self.spawnflags(-)1|2|4;	//Clear first two spawnflags before calling the main trigger funcs
+	if(temp_flags&4)
+		self.spawnflags(+)1;
 	if (temp_flags & 1)
 		trigger_once();
 	else if (temp_flags & 2) 
@@ -412,7 +487,12 @@ float temp_flags;
 	else trigger_multiple();
 };
 
-/*QUAKED trigger_deactivate (.5 .5 .5) ? ONCE RELAY x deactivated
+/*QUAKED trigger_deactivate (.5 .5 .5) ? ONCE RELAY no_touch deactivated
+Turns off the active state of a trigger
+ONCE- Only fires once
+RELAY - ?
+no_touch - can't be activated by touch
+deactivated - starts inactive, must be used by a activate trigger first
 */
 void() trigger_deactivate =
 {
@@ -423,7 +503,13 @@ void() trigger_deactivate =
 
 void () interval_use =
 {
-	SUB_UseTargets();
+	if(self.failchance)
+	{
+		if(random(100)>self.failchance)
+			SUB_UseTargets();
+	}
+	else
+		SUB_UseTargets();
 //	dprint("interval used\n");
 
 	self.think = interval_use;
@@ -431,6 +517,7 @@ void () interval_use =
 };
 
 /*QUAKED trigger_interval (.5 .5 .5) (-8 -8 -8) (8 8 8)
+"failchance" - default 0 - chance that trigger may fail to fire (0 - 100%)
 */
 void() trigger_interval =
 {
@@ -450,21 +537,34 @@ void() trigger_interval =
 This fixed size trigger cannot be touched, it can only be fired by
 other events.  It can contain killtargets, targets, delays, and 
 messages.
+"failchance" - default 0 - chance that trigger may fail to fire (0 - 100%)
 */
+void trigger_relay_check_reset ()
+{
+	self.check_ok=FALSE;
+}
 
 void() trigger_relay_use =
 {
-	if (self.cnt>0 && self.lifetime>0)
-	{
-		if (self.cnt>self.lifetime)
-			self.cnt = self.lifetime;
-		if (self.lifetime<self.cnt)
-			self.lifetime = self.cnt;
-		
-		self.delay = random(self.cnt, self.lifetime);
-	}
-	
+//	dprint("Trig_relay Used by: ");
+//	dprint(other.classname);
+//	dprint("\n");
+	if(self.failchance)
+		if(random()*100<self.failchance)
+			return;
+
+	if(!self.delay)
+		self.check_ok=TRUE;
+	if(world.spawnflags & 1) /* MISSIONPACK */
+		self.enemy = activator;
 	SUB_UseTargets();
+	if(self.wait)
+	{
+		self.think=trigger_relay_check_reset;
+		thinktime self : self.wait;
+	}
+	else
+		self.check_ok=FALSE;
 };
 
 void() trigger_relay =
@@ -473,7 +573,46 @@ void() trigger_relay =
 };
 
 
+/*QUAKED trigger_broadcast (.5 .5 .5) (-8 -8 -8) (8 8 8)
+This fixed size trigger cannot be touched, it can only be fired by
+other events.  It can contain killtargets, targets, delays, and 
+messages.
+"failchance" - default 0 - chance that trigger may fail to fire (0 - 100%)
+*/
+void trigger_broadcast_check_reset ()
+{
+	self.check_ok=FALSE;
+}
 
+void() trigger_broadcast_use =
+{
+//	dprint("Trig_relay Used by: ");
+//	dprint(other.classname);
+//	dprint("\n");
+	if(self.failchance)
+		if(random()*100<self.failchance)
+			return;
+
+	if(!self.delay)
+		self.check_ok=TRUE;
+	if(world.spawnflags & 1) /* MISSIONPACK */
+		self.enemy = activator;
+		
+	SUB_UseTargets();
+	
+	if(self.wait)
+	{
+		self.think=trigger_broadcast_check_reset;
+		thinktime self : self.wait;
+	}
+	else
+		self.check_ok=FALSE;
+};
+
+void() trigger_broadcast =
+{
+	self.use = trigger_broadcast_use;
+};
 
 //=============================================================================
 
@@ -565,6 +704,10 @@ float oldmsg;
 string temp;
 
 //replace flags with aflag
+	if(self.failchance)
+		if(random()*100<self.failchance)
+			return;
+
 	if(self.mangle)
 	{
 		if(
@@ -641,6 +784,7 @@ void() counter_use =
 	self.count -= 1;
 	if (self.count < 0)
 		return;
+//	dprintf("Counter used, count =%s\n",self.count);
 
 	if (self.count != 0)
 	{
@@ -727,6 +871,7 @@ This will pass it's "mangle" field to it's target- meant for use with an ordered
 It will pass the "mangle" but not USE the counter (it WILL use other targets normally, however).
 Otherwise, it behaves just like any other trigger.
 Giving it a wait of -1 will make it only work once.
+"failchance" - default 0 - chance that trigger may fail to fire (0 - 100%)
 */
 void trigger_combination_assign ()
 {
@@ -738,6 +883,7 @@ This will reset a trigger_counter to start counting again as if it hasn't been u
 It will reset the counter but not USE the counter (it WILL use other targets normally, however).
 Otherwise, it behaves just like any other trigger.
 Giving it a wait of -1 will make it only work once.
+"failchance" - default 0 - chance that trigger may fail to fire (0 - 100%)
 */
 void trigger_counter_reset ()
 {
@@ -752,7 +898,7 @@ entity starte, t;
 	t=nextent(world);
 
 	if (self.netname == "")
-		objerror("Check trigger without a netname\n");
+		dprint("Check trigger without a netname\n");
 
 	self.think = SUB_Null;
 
@@ -770,13 +916,25 @@ entity starte, t;
 		}
 	}
 	self=starte;
+	if(!self.check_chain)
+		dprint("Trigger_check found nothing with a matching netname, Holmes!!!\n");
 };
 
 void check_use ()
 {
 entity t;
 float failed;
+string hold_targ;
 
+	if(self.lifetime>time)
+		return;
+
+	if(self.failchance)
+		if(random()*100<self.failchance)
+			return;
+//	dprint("Trig_check used by:");
+//	dprint(other.classname);
+//	dprint("\n");
 	t=self.check_chain;
 	while(t)
 	{
@@ -786,6 +944,11 @@ float failed;
 		//	dprint(" failed!\n");
 			failed = TRUE;
 		}
+	//	else
+	//	{
+	//		dprint(t.classname);
+	//		dprint(" passed...\n");
+	//	}
 		t = t.check_chain;
 	}
 
@@ -801,6 +964,15 @@ float failed;
 		self.check_ok = FALSE;
 		SUB_UseTargets();
 	}
+	else if (self.failtarget!=""&&failed&&!self.check_ok)
+	{
+	//	dprint("Failed, never acvtivated, do fail target\n");
+		hold_targ=self.target;
+		self.target=self.failtarget;
+		SUB_UseTargets();
+		self.target=hold_targ;
+	}
+	self.lifetime = time + self.wait;
 }
 
 /*QUAKED trigger_check (.5 .5 .5) ? 
@@ -810,6 +982,9 @@ netname = the name to check for its child entities.  Like the trigger_counter, e
 			 entity that this checks must share its netname.  
 
 You do not need to specify how many children the trigger has
+
+failtarget = points to the entity to trigger if the check fails.  If left empty, nothing happens
+wait = how long to wait between checks so no other checks can be made
 */
 void() trigger_check =
 {
@@ -865,12 +1040,14 @@ entity player,firstent;
 };
 
 //Isn't this a great function name?
-void() quake_shake =
+void quake_shake ()
 {
 	if(self.spawnflags&4)
 		sound(self,CHAN_AUTO,"fx/icequake.wav",1,ATTN_NONE);
 	else if(self.spawnflags&16)
 		sound(self,CHAN_AUTO,"fx/skyrift.wav",1,ATTN_NONE);
+	else if(self.lifespan<2)
+		sound(self,CHAN_AUTO,"weapons/expsmall.wav",1,ATTN_NORM);
 	else
 	{
 		sound(self,CHAN_AUTO,"weapons/explode.wav",1,ATTN_NONE);
@@ -884,7 +1061,7 @@ void() quake_shake =
 
 	if (!self.spawnflags & SPAWNFLAG_QMULT)
 		self.wait = -1;
-};
+}
 
 void() quake_use =
 {
@@ -909,7 +1086,7 @@ wait default = 1;
 
 dodamage = inflict damage on player
 
-"items" radius of quake
+"items" radius of quake - default 256
 "dmg" damage done to victim
 "lifespan" duration of the quake
 "target" name of trigger to target (for other effects)
@@ -967,6 +1144,8 @@ void() play_teleport =
 
 void(vector org) spawn_tfog =
 {
+	entity s;
+
 	s = spawn ();
 	s.origin = org;
 	thinktime s : 0.05;
@@ -982,11 +1161,20 @@ void(vector org) spawn_tfog =
 
 void() tdeath_touch =
 {
+float force_frag;
 	if (other == self.owner)
 		return;
 
 // frag anyone who teleports in on top of an invincible player
-	if (other.classname == "player")
+	if(self.frags)
+	{
+		if(!other.takedamage||(other.classname=="player"&&(other.artifact_active&ART_INVINCIBILITY||other.flags&FL_GODMODE)))
+			force_frag=FALSE;
+		else
+			force_frag=TRUE;
+	}
+
+	if (other.classname == "player"&&!force_frag)//frags = 1 forces telefrag
 	{
 		if (self.owner.classname != "player")
 		{	// other monsters explode themselves
@@ -1038,7 +1226,7 @@ entity	death;
 	thinktime death : 0.2;
 	death.think = SUB_Remove;
 	death.owner = death_owner;
-
+	death.frags=self.frags;
 	force_retouch = 2;		// make sure even still objects get hit
 };
 
@@ -1046,7 +1234,7 @@ void teleport_effect_delay ()
 {
 	GenerateTeleportEffect(self.enemy.origin,0);
 	self.attack_finished=time+0.5;
-	if (self.classname == "teleportcoin")
+	if (self.netname == "teleportcoin"&&self.classname!="trigger_teleport")
 	{
 		self.think = SUB_Remove;
 		self.nextthink = time + HX_FRAME_TIME;
@@ -1077,26 +1265,38 @@ float poof_speed;
 	if (!self.spawnflags & SILENT)
 		GenerateTeleportEffect(other.origin,0);
 
-	if (self.classname != "teleportcoin")
+	if (self.netname != "teleportcoin")
 	{
 		t = find (world, targetname, self.target);
+
+		while(t!=world&&t.classname!="info_teleport_destination")
+			t = find (t, targetname, self.target);
+
 		if (!t)
 			objerror ("couldn't find target");
 	}
 	else
-		t = self.goalentity;
+		t = SelectSpawnPoint ();//self.goalentity;
 
 // spawn a tfog flash in front of the destination
 	if(t.avelocity!='0 0 0')
 		t.mangle=t.angles;
 
-	if(!t.spawnflags&1&&self.classname != "teleportcoin")
+	if(!t.spawnflags&1&&self.netname != "teleportcoin")
 	{
-		makevectors (t.mangle);
-		org = t.origin + 32 * v_forward;
+		if(!t.spawnflags&2||other.classname!="player")
+		{
+			makevectors (t.mangle);
+			org = t.origin + 32 * v_forward;
+		}
 	}
 	else
-		org=t.origin;
+	{
+		if (!self.spawnflags & SILENT)
+			org=t.origin - '0 0 27';
+		else
+			org=t.origin;
+	}
 
 	spawn_tdeath(t.origin, other);
 
@@ -1104,12 +1304,18 @@ float poof_speed;
 	if (!other.health&&other.size!='0 0 0')
 	{//Exclude projectiles!
 		other.origin = t.origin;
-		if(!t.spawnflags&1&&self.classname != "teleportcoin")	//In case you don't want to push them in a certain dir
+		if(!t.spawnflags&1&&self.netname != "teleportcoin")	//In case you don't want to push them in a certain dir
 			other.velocity = (v_forward * other.velocity_x) + (v_forward * other.velocity_y);
 		return;
 	}
 
-	setorigin (other, t.origin);
+	if((t.spawnflags&2||self.spawnflags&16)&&other.classname=="player")
+		other.velocity='0 0 0';//Kill all player's velocity
+
+	if (!self.spawnflags & SILENT)
+		setorigin (other, t.origin);
+	else
+		setorigin (other, t.origin - '0 0 27');
 
 	if (!self.spawnflags & SILENT)
 	{
@@ -1119,32 +1325,43 @@ float poof_speed;
 	}
 	other.teleport_time = time + 0.7;
 
-	if(!t.spawnflags&1&&self.classname != "teleportcoin")
+	if(!t.spawnflags&1&&self.netname != "teleportcoin")
 	{
-		other.angles = t.mangle;
-		other.fixangle = 1;		// turn this way immediately
-		if(other.classname!="player"&&other.velocity!='0 0 0')
-			poof_speed = vlen(other.velocity);
-		/* commented out my old ugly hack and using Thomas'
-		 * modified entities file for the Cathedral level, instead */
-		/*
-		else if(mapname=="cath" && !deathmatch)
-			poof_speed = 225; // otherwise cant reach the balcony
-		*/
-		else
-			poof_speed = 300;
-		other.velocity = v_forward * poof_speed;
+		if((!t.spawnflags&2||other.classname!="player")&&!self.spawnflags&16)
+		{
+			other.angles = t.mangle;
+			other.fixangle = 1;		// turn this way immediately
+			if(other.classname!="player"&&other.velocity!='0 0 0')
+				poof_speed = vlen(other.velocity);
+			/* commented out my old ugly hack and using Thomas'
+			 * modified entities file for the Cathedral level, instead */
+			/*
+			else if(mapname=="cath" && !deathmatch)
+				poof_speed = 225; // otherwise cant reach the balcony
+			*/
+			else
+			{
+				if (!self.spawnflags & SILENT)
+					poof_speed = 300;
+				else
+					poof_speed = vlen(other.velocity);
+			}
+			other.velocity = v_forward * poof_speed;
+		}
 	}
 
 	other.flags(-)FL_ONGROUND;
 };
 
-/*QUAKED info_teleport_destination (.5 .5 .5) (-8 -8 -8) (8 8 32) NO_THROW
+/*QUAKED info_teleport_destination (.5 .5 .5) (-8 -8 -8) (8 8 32) NO_THROW kill_velocity
 This is the destination marker for a teleporter.  It should have a "targetname" field with the same value as a teleporter's "target" field.
 
 NO_THROW = won't throw the entity it teleports in the direction (angles) it's facing
+kill_velocity = objects will come out the other side with no velocity
+
 =====FIELDS=====
 "angles" - Will turn player this way and push him in this direction unless the NO_THROW spawnflag is on.
+"frags" if set to '1', anything can telefrag anything with this teleporter (ie- monsters can telefrag players)
 ================
 */
 void() info_teleport_destination =
@@ -1170,11 +1387,11 @@ void() teleport_use =
 	self.think = SUB_Null;
 };
 
-/*QUAKED trigger_teleport (.5 .5 .5) ? PLAYER_ONLY SILENT ACTIVATE
+/*QUAKED trigger_teleport (.5 .5 .5) ? PLAYER_ONLY SILENT inactive inactive CHAOS
 Any object touching this will be transported to the corresponding info_teleport_destination entity. You must set the "target" field, and create an object with a "targetname" field that matches.
 
 SILENT = No effect or sound
-
+CHAOS = Will act like a Chaos device- teleports you to a start spot somewhere on the map
 COOL DESIGN IDEA: If you like, you can use a trigger_message_transfer to change the target of the teleporter so it can go different places at different times.
 
 If the trigger_teleport has a targetname, it will only teleport entities when it has been fired.
@@ -1184,9 +1401,10 @@ void() trigger_teleport =
 vector o;
 
 	InitTrigger ();
+
 	self.touch = teleport_touch;
 	// find the destination 
-	if (!self.target)
+	if (!self.target&&!self.spawnflags&16)
 		objerror ("no target");
 	self.use = teleport_use;
 
@@ -1199,39 +1417,10 @@ vector o;
 
 	if (self.spawnflags & 4)
 		self.inactive = TRUE;
+
+	if(self.spawnflags&16)//Chaos device behaviour
+		self.netname="teleportcoin";
 };
-
-
-/*-----------------------------------
-	Inter-Level Teleport - aleggett
-  -----------------------------------*/
-/*
-void teleport_newmap_touch()
-{
-	if(other.classname != "player" || other.health <= 0 ||
-	   other.solid != SOLID_SLIDEBOX)
-		return;
-	stuffcmd(self, self.target);
-}
-*/
-
-/*QUAK-ED trigger_teleport_newmap (.5 .5 .5)
-Any player touching this will be transported to the map named in .target.
-.target uses the syntax:
-
-	map e1m1
-
-or corresponding to any other levelname.
-*/
-/*
-void trigger_teleport_newmap()
-{
-	InitTrigger();
-	if(!self.target)
-		objerror("no target map");
-	self.touch = teleport_newmap_touch;
-}
-*/
 
 /*
 ==============================================================================
@@ -1240,30 +1429,27 @@ trigger_setskill
 
 ==============================================================================
 */
-/*
+
 void() trigger_skill_touch =
 {
-	string temp;
+	//string temp;
 
 	if (other.classname != "player")
 		return;
 
-	temp = getstring(self.message);
-	cvar_set ("skill", temp);
+	//temp = getstring(self.message);
+	cvar_set ("skill", self.noise);
 };
-*/
 
 /*QUAKED trigger_setskill (.5 .5 .5) ?
-sets skill level to the value of "message".
+sets skill level to the value of "noise".
 Only used on start map.
 */
-/*
 void() trigger_setskill =
 {
 	InitTrigger ();
 	self.touch = trigger_skill_touch;
 };
-*/
 
 /*
 ==============================================================================
@@ -1351,11 +1537,9 @@ float damage;
 			thinktime self : self.wait;
 		}
 	}
-
-	return;
 };
 
-/*QUAKED trigger_hurt (.5 .5 .5) PLAYER_ONLY MONSTER_ONLY x INACTIVE
+/*QUAKED trigger_hurt (.5 .5 .5) ? PLAYER_ONLY MONSTER_ONLY x INACTIVE
 Any object touching this will be hurt
 
 'dmg' damage amount
@@ -1370,7 +1554,9 @@ void() trigger_hurt =
 	InitTrigger ();
 	self.touch = hurt_touch;
 	if (!self.dmg)
-		self.dmg = 1000;
+		self.dmg = 5;
+	if(!self.wait)
+		self.wait = 1;
 };
 
 //============================================================================
@@ -1386,43 +1572,71 @@ void trigger_push_gone (void)
 
 void() trigger_push_touch =
 {
-	if(self.spawnflags&PUSH_SHEEP && other.model=="models/sheep.mdl")
-		return;
-	if (other.health > 0)
+	if(world.spawnflags&MISSIONPACK)
 	{
-		if (other.flags & FL_ONGROUND)
-		{
-			other.velocity = self.movedir * self.speed;
-			other.velocity_z = 500;
-		}
+		if(self.inactive)
+			return;
+
+		if(self.spawnflags&2)
+			if(other.flags&FL_ONGROUND)
+				return;
+	}
+
+	if (other.movetype&&other.solid!=SOLID_BSP)//health>0?
+	{
+		other.velocity = self.movedir * self.speed;
+		if(other.movedir!='0 0 0')
+			other.movedir=self.movedir;
 		if ((other.classname == "player") && (other.flags & FL_ONGROUND))
 		{
-			sound (other, CHAN_AUTO, "ambience/windpush.wav", 1, ATTN_NORM);
+			sound (other, CHAN_AUTO, "ambience/windpush.wav", 1, ATTN_NORM);//MAKE OPTIONAL
 			other.flags (-) FL_ONGROUND;
 		}
 	}
+
 	if (self.spawnflags & PUSH_ONCE)
 		remove(self);
 };
 
+void trigger_push_turn_on ()
+{
+	self.use = trigger_push_gone;
+	self.touch = trigger_push_touch;
+}
 
-/*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE
+/*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE no_pickup x INACTIVE
 
 Pushes the player in the direction set by angles
+When used while "on", removes it.
+
+PUSH_ONCE - will go away after one use.
+no_pickup - will not lift player off the ground- they have to jump first to be lifted
+INACTIVE - Must be turned on by a trigger_activate before it can be used
 -------------------------FIELDS-------------------------
 Angles - the direction to push
 Speed - how hard to push (default 500)
-If PUSH_ONCE is clicked it will go away after one use.
-If you target it, it removes itself when trigger is set off.
+If you target it, it waits to be triggered to turn on- next use will remove it.
 --------------------------------------------------------
 */
 
 void() trigger_push =
 {
+	if(self.angles=='0 0 0')
+		self.movedir='1 0 0';
+
 	InitTrigger ();
+
 	precache_sound ("ambience/windpush.wav");
-	self.touch = trigger_push_touch;
-	self.use = trigger_push_gone;
+
+	if(world.spawnflags&MISSIONPACK)
+		if(self.targetname)
+			self.use = trigger_push_turn_on;
+		else
+		{
+			self.use = trigger_push_gone;
+			self.touch = trigger_push_touch;
+		}
+
 	if (!self.speed)
 		self.speed = 500;
 };
@@ -1450,12 +1664,9 @@ void() trigger_monsterjump_touch =
 	other.flags(-)FL_ONGROUND;
 
 	other.velocity_z = self.height;
-	
 	if (self.spawnflags & JUMP_CHANGEANGLE && other.flags & FL_MONSTER)	//ws: turn monster to face direction of jump
-	{
 		other.angles_y = self.angles_y;
-	}
-
+	
 	if(self.wait==-1)
 		self.touch=SUB_Null;
 
@@ -1464,10 +1675,23 @@ void() trigger_monsterjump_touch =
 		other.think=other.th_jump;
 		thinktime other : 0;
 	}
+
+	if(other.classname=="monster_yakman"||other.classname=="monster_mezzoman")
+		other.touch=impact_touch_hurt_no_push;
+
+	if(world.spawnflags&MISSIONPACK)
+		SUB_UseTargets();
 };
 
-/*QUAKED trigger_monsterjump (.5 .5 .5) ?
+void trigger_monsterjump_activate ()
+{
+	self.touch = trigger_monsterjump_touch;
+}
+
+/*QUAKED trigger_monsterjump (.5 .5 .5) ? ? ACTIVATE
 Walking monsters that touch this will jump in the direction of the trigger's angle
+ACTIVATE - Trigger must be activated to be used
+
 "speed" default to 200, the speed thrown forward
 "height" default to 200, the speed thrown upwards
 */
@@ -1480,7 +1704,15 @@ void() trigger_monsterjump =
 	if (self.angles == '0 0 0')
 		self.angles = '0 360 0';
 	InitTrigger ();
-	self.touch = trigger_monsterjump_touch;
+	if(world.spawnflags&MISSIONPACK)
+	{
+		if(!self.spawnflags&4)
+			self.touch = trigger_monsterjump_touch;
+		else
+			self.use = trigger_monsterjump_activate;
+	}
+	else
+		self.touch = trigger_monsterjump_touch;
 };
 
 /*
@@ -1648,30 +1880,58 @@ void() trigger_crosslevel_target =
 	self.flags(+)FL_ARCHIVE_OVERRIDE;
 };
 
-/*QUAK-ED trigger_deathtouch (.5 .5 .5)
+/*QUAKED trigger_deathtouch (.5 .5 .5) ? no_touch player_only gib INACTIVE
 
 Kills anything that has a matching targetname and touches it.
+no_touch - Will not kill thing that touches it.
+any_player - Will kill any player (no target needed)
+gib - will gib object if it can be
+If you target it, it will, when used, search for all entities with a matching targetname and kill them all
 
 th_die = Set this if you want the object to have a specific death, defaults to SUB_Remove.
-
 If it is SUB_Remove, it will execute the th_die of the object, if it has one.
 If the object doesn't have a th_die, but it has health, it will execute chunk_death.
 If it doesn't have health, it will just be removed.
 
 FIXME: Solid_bsp's don't seem to touch this
 */
-/*
 void trigger_deathtouch_touch (void)
 {
-	if(other.targetname!=self.target)
+//	dprint("touching\n");
+	if(self.inactive)
 		return;
 
-	other.targetname="";//so i don't keep on killing it
+	if(self.spawnflags&2)
+	{
+//		dprint("any_player\n");
+		if(other.classname!="player")
+			return;
+//		else
+//			dprint("player touched\n");
+	}
+	else if(other.targetname!=self.target)
+		return;
+	else
+		other.targetname="";//so I don't keep on killing it
 
+	if(other.flags2&FL2_DEADMEAT)
+		return;
+
+	other.flags2(+)FL2_DEADMEAT;
+
+	if(self.spawnflags&4)
+		other.health = -99;
+	else
+		other.health = 0;
+
+//	dprint("starting death\n");
 	if(self.th_die)
 		other.think=self.th_die;
 	else if(other.th_die)
+	{
 		other.think=other.th_die;
+//		dprint("player going to die\n");
+	}
 	else if(other.health)
 		other.think=chunk_death;
 	else
@@ -1679,12 +1939,80 @@ void trigger_deathtouch_touch (void)
 	thinktime other : 0.05;
 }
 
+void trigger_deathtouch_use (void)
+{
+entity killent;
+	if(self.inactive)
+		return;
+
+	if(self.spawnflags&2)
+	{
+		killent=find(world,classname,"player");
+		while(killent)
+		{
+			killent.flags2(+)FL2_DEADMEAT;
+			if(self.spawnflags&4)
+				killent.health = -99;
+			else
+				killent.health = 0;
+
+			if(self.th_die)
+				other.think=self.th_die;
+			else if(other.th_die)
+				other.think=other.th_die;
+			else if(other.health)
+				other.think=chunk_death;
+			else
+				other.think=SUB_Remove;
+			thinktime other : 0.05;
+			killent=find(world,classname,"player");
+			if(killent.flags2&FL2_DEADMEAT)
+				killent=world;
+		}
+	}
+	else
+	{
+		killent=find(world,targetname,self.target);
+		while(killent)
+		{
+			other.targetname="";//so I don't keep on killing it
+			killent.flags2(+)FL2_DEADMEAT;
+			if(self.spawnflags&4)
+				killent.health = -99;
+			else
+				killent.health = 0;
+			if(self.th_die)
+				other.think=self.th_die;
+			else if(other.th_die)
+				other.think=other.th_die;
+			else if(other.health)
+				other.think=chunk_death;
+			else
+				other.think=SUB_Remove;
+			thinktime other : 0.05;
+			killent=find(world,targetname,self.target);
+			if(killent.flags2&FL2_DEADMEAT)
+				killent=world;
+		}
+	}
+}
+
 void trigger_deathtouch (void)
 {
+	if(!self.target&&!self.spawnflags&2)
+	{
+//		dprint("Trigger_deathtouch has no target!\n");
+		remove(self);
+		return;
+	}
 	InitTrigger ();
-	self.touch = trigger_deathtouch_touch;
+
+	if(self.targetname)
+		self.use = trigger_deathtouch_use;
+
+	if(!self.spawnflags&1)
+		self.touch = trigger_deathtouch_touch;
 }
-*/
 
 void GetPuzzle(entity item, entity person)
 {
@@ -1708,21 +2036,27 @@ void GetPuzzle(entity item, entity person)
 		dprint("No room for puzzle piece!\n");
 }
 
+/*
 void GetPuzzle2(entity item, entity person, string which)
 {
 	item.puzzle_id = which;
 }
-
+*/
 void puzzle_touch(void)
 {
-	local entity	stemp;
-	local float	amount;
+float	amount;
 
 	if (other.classname != "player")
+	{
+//		dprint("not player\n");
 		return;
+	}
 
 	if (other.health <= 0)  // Dead players can't pick stuff up
+	{
+//		dprint("no health\n");
 		return;
+	}
 
 	if (other.puzzle_inv1 == self.puzzle_id ||
 		other.puzzle_inv2 == self.puzzle_id ||
@@ -1732,7 +2066,10 @@ void puzzle_touch(void)
 		other.puzzle_inv6 == self.puzzle_id ||
 		other.puzzle_inv7 == self.puzzle_id ||
 		other.puzzle_inv8 == self.puzzle_id)
+	{
+//		dprint("already have me\n");
 		return;
+	}
 
 	amount = random();
 	if (amount < 0.5)
@@ -1759,12 +2096,12 @@ void puzzle_touch(void)
 	self.solid = SOLID_NOT;
 	self.model = string_null;
 
-/*	if (coop)
+	if (coop)
 	{
 		self.mdl = self.model;
 		thinktime self : 60;
 		self.think = SUB_regen;
-	}*/
+	}
 
 	activator = other;
 	SUB_UseTargets();				// fire all targets / killtargets
@@ -1809,7 +2146,7 @@ void puzzle_use(void)
 	}
 }
 
-/*QUAKED puzzle_piece (1 .6 0) (-8 -8 -28) (8 8 8) SPAWN FLOATING AUTO_GET
+/*QUAKED puzzle_piece (1 .6 0) (-8 -8 -28) (8 8 8) SPAWN FLOATING AUTO_GET STICKHERE
 Puzzle Piece
 -------------------------FIELDS-------------------------
 puzzle_id: the number that identifies the piece
@@ -1840,14 +2177,50 @@ void puzzle_piece(void)
 		self.hull=HULL_POINT;
 		self.solid = SOLID_BBOX;
 		self.touch = puzzle_touch;
-		self.think=StartItem;
-		thinktime self : 0;
+		if(!self.spawnflags&8)
+		{
+			self.think=StartItem;
+			thinktime self : 0;
+		}
 	}
 	if(self.spawnflags&2)
 		self.spawnflags=1;
 
 	if ((self.puzzle_id == "glass") || (self.puzzle_id == "lens"))
 		self.drawflags (+) DRF_TRANSLUCENT;
+
+//	if (self.puzzle_id=="orb2")
+//		self.drawflags (+) MLS_POWERMODE;
+}
+
+void DropPuzzlePiece(void)
+{
+entity newpuzz;
+	newpuzz=spawn();
+	setpuzzlemodel(newpuzz,self.puzzle_id);
+	newpuzz.noise = "items/artpkup.wav";
+
+	setsize(newpuzz,'0 0 0','0 0 0');
+	newpuzz.hull=HULL_POINT;
+	newpuzz.solid = SOLID_BBOX;
+	newpuzz.touch = puzzle_touch;
+	newpuzz.think=StartItem;
+	newpuzz.netname=self.puzzle_piece_1;
+	thinktime newpuzz : 0;
+
+	if ((self.puzzle_id == "glass") || (self.puzzle_id == "lens"))
+		newpuzz.drawflags (+) DRF_TRANSLUCENT; 
+
+	setorigin(newpuzz,self.origin+'0 0 1'*self.maxs_z);
+	newpuzz.classname="puzzle_piece";
+	newpuzz.puzzle_id=self.puzzle_id;
+	self.puzzle_id="";
+}
+
+void MonsterPrecachePuzzlePiece ()
+{
+	precache_sound("items/artpkup.wav");
+	precache_puzzle_model(self.puzzle_id);
 }
 
 void puzzle_static_use(void)
@@ -1884,7 +2257,7 @@ void puzzle_static_piece(void)
 	precache_puzzle_model(self.puzzle_id);
 	setmodel(self, self.model);
 	self.solid = SOLID_NOT;
-	self.movetype = MOVETYPE_NONE;
+	self.movetype = MOVETYPE_NOCLIP;
 	setsize (self, '0 0 0', '0 0 0');
 
 	self.use = puzzle_static_use;
@@ -1962,7 +2335,7 @@ float fire_range;
 			}
 		}
 	}
-	else
+	else if(self.goalentity.last_attack+1<time)
 	{
 		org=self.enemy.origin+self.enemy.proj_ofs;
 		dir=normalize(v_forward);
@@ -2041,7 +2414,6 @@ void() trigger_control =
 /*QUAK-ED trigger_no_friction (.5 .5 .5)
 Takes FL_ONGROUND flag off anything
 */
-/*
 void trigger_no_fric_touch (void)
 {
 	other.flags(-)FL_ONGROUND;
@@ -2052,7 +2424,6 @@ void trigger_no_friction (void)
 	InitTrigger();
 	self.touch = trigger_no_fric_touch;
 }
-*/
 
 /*QUAKED trigger_attack (.5 .5 .5) ?
 Checks to see if a player touching it has tried to fire.
@@ -2061,6 +2432,10 @@ void trigger_attack_touch (void)
 {
 	if(other.classname!="player")
 		return;
+
+	if(self.failchance)
+		if(random()*100<self.failchance)
+			return;
 
 	if(other.last_attack+0.3>=time)
 	{
@@ -2098,6 +2473,216 @@ void trigger_message_transfer ()
 	InitTrigger();
 	self.use=trigger_message_transfer_use;
 }
+
+/*QUAKED trigger_sound_distance (.5 .5 .5) ?
+Changes the max distance at which sounds are cut off- default is 800 (so you can set it back to the default)
+===================
+FEILDS
+.noise = distance from the player at which to not play a sound
+default = 800
+*/
+void trigger_sound_distance ()
+{
+	if(!self.noise)
+		self.noise="800";
+	cvar_set("sv_sound_distance",self.noise);
+}
+
+
+void objective_use(void)
+{
+	updateInfoPlaque(self.frags, self.spawnflags);
+
+	self.think = SUB_Remove;
+	thinktime self : 0.1;
+}
+
+/*QUAKED trigger_objective (1 .6 0) (-8 -8 -8) (8 8 8) force_on force_off
+Trigger Objective
+-------------------------FIELDS-------------------------
+spawnflags: FORCE_ON  - on no matter what
+			FORCE_OFF - off no matter what
+
+frags: the index to the text to be added to the info plaque
+--------------------------------------------------------
+*/
+void trigger_objective(void)
+{
+	self.use = objective_use;
+}
+
+void ani_event_use(void)
+{
+	entity found;
+	
+	found = find(world, target, self.target);
+	if (!found) dprint("TRIGGER_ANI_EVENT: Unable to find target\n");
+
+	while (found)
+	{
+//		dprint("Found it\n");
+
+		if (self.spawnflags & 1) 
+		{
+//			dprint("Setting animation to ON\n");
+			found.frame = 1;
+		}
+
+		if (self.spawnflags & 2)
+		{
+			found.effects (+) EF_TEX_STOPF;
+		}
+		
+		if (self.spawnflags & 4)
+		{
+//			dprint("Setting animation to STOP LAST\n");
+			found.effects (+) EF_TEX_STOPL;
+		}
+
+		found = find(found, targetname, self.target);
+	}
+
+	if (!(self.spawnflags & 16))
+	{
+		self.think = SUB_Remove;
+		thinktime self : 0.1;
+	}
+}
+
+/*QUAKED trigger_ani_event (1 .6 0) (-8 -8 -8) (8 8 8) start stop_first stop_last no_remove
+Trigger Animation event
+-------------------------FIELDS-------------------------
+targetname: the entity to be affected
+
+start = start the texture amimating
+stop_first = stop on the first frame of animation
+stop_last = stop on the last frame of animation
+no_remove = do not remove the trigger when done
+--------------------------------------------------------*/
+void trigger_ani_event(void)
+{
+	self.use = ani_event_use;
+}
+
+
+void trigger_stop_use ()
+{
+entity found;
+	if(self.inactive)
+		return;
+
+	if(self.nextthink==-1)
+		return;
+
+	found=find(world,targetname,self.target);
+	while(found)
+	{
+		found.velocity='0 0 0';
+		found.avelocity='0 0 0';
+		found.nextthink=-1;
+
+		stopSound(found, 0);
+
+		if (found.classname == "func_train_mp")
+		{
+			if(found.level)
+				sound (found, CHAN_VOICE, found.noise, 1, ATTN_NONE);
+			else
+				sound (found, CHAN_VOICE, found.noise, 1, ATTN_NORM);
+		}
+
+		found=find(found,targetname,self.target);
+	}
+
+	if(self.wait==-1)
+		self.nextthink=-1;
+	else if(self.wait>0)
+		thinktime self : self.wait;
+	else
+		thinktime self : 999999999999;
+}
+
+void trigger_stop_touch ()
+{
+	if(other.classname!="player")
+		return;
+
+	trigger_stop_use();
+}
+
+/*QUAKED trigger_stop (.5 .5 .5) (-8 -8 -8) (8 8 8) notouch
+Stops its target that is moving or rotating
+This will trigger only once until triggered again unless you give it a wait.
+*/
+void trigger_stop(void)
+{
+	InitTrigger();
+	self.use=trigger_stop_use;
+	if(!self.spawnflags&1)
+		self.touch=trigger_stop_touch;
+}
+
+
+void hub_intermission_use(void)
+{
+	entity search;
+
+	nextmap = self.map;
+	nextstartspot = self.target;
+
+	intermission_running = 1;
+
+	intermission_exittime = time + 2;
+
+	//Remove cross-level trigger server flags for next hub
+	serverflags(-)(SFL_CROSS_TRIGGER_1|
+				SFL_CROSS_TRIGGER_2|
+				SFL_CROSS_TRIGGER_3|
+				SFL_CROSS_TRIGGER_4|
+				SFL_CROSS_TRIGGER_5|
+				SFL_CROSS_TRIGGER_6|
+				SFL_CROSS_TRIGGER_7|
+				SFL_CROSS_TRIGGER_8);
+
+	search=find(world,classname,"player");
+	while(search)
+	{//Take away all their goodies
+		search.puzzle_inv1 = string_null;
+		search.puzzle_inv2 = string_null;
+		search.puzzle_inv3 = string_null;
+		search.puzzle_inv4 = string_null;
+		search.puzzle_inv5 = string_null;
+		search.puzzle_inv6 = string_null;
+		search.puzzle_inv7 = string_null;
+		search.puzzle_inv8 = string_null;
+		search=find(search,classname,"player");
+	}
+
+	WriteByte (MSG_ALL, SVC_INTERMISSION);
+	WriteByte (MSG_ALL, 11);
+
+	FreezeAllEntities();
+}
+
+/*QUAKED trigger_hub_intermission (.5 .5 .5) (-8 -8 -8) (8 8 8)
+Triggers the background and text to come up when going into the
+Tibet hub for the first time
+
+map = map to go to
+target = the next start spot
+*/
+void trigger_hub_intermission(void)
+{
+	self.use = hub_intermission_use;
+}
+
+/*	trigger_reflect
+Brush entity that reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with func_wall to block movement and un-reflectable attacks like lightning beams.
+Don't killtarget this entity - just target it to remove it.
+Speed: Modifier to missile's original speed. Less than 1 is recommended so the player has a better chance of dodging reflected missiles.
+Spawnflags: Deactivated (8) to start deactivated and activate when used. Targetting it after this will remove it like normal.
+Issues: Behaves oddly with thrown Warhammer; doesn't account for Tornado
+*/
 
 void reflect_touch ()
 {
@@ -2150,14 +2735,6 @@ void reflect_remove ()
 	remove(self.goalentity);
 	remove(self);
 }
-
-/*	trigger_reflect
-Brush entity that reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with func_wall to block movement and un-reflectable attacks like lightning beams.
-Don't killtarget this entity - just target it to remove it.
-Speed: Modifier to missile's original speed. Less than 1 is recommended so the player has a better chance of dodging reflected missiles.
-Spawnflags: Deactivated (8) to start deactivated and activate when used. Targetting it after this will remove it like normal.
-Issues: Behaves oddly with thrown Warhammer; doesn't account for Tornado
-*/
 
 void trigger_reflect ()
 {

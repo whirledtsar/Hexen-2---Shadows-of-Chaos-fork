@@ -1,7 +1,6 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/h2/spawn.hc,v 1.2 2007-02-07 16:57:10 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/portals/spawn.hc,v 1.2 2007-02-07 16:59:37 sezero Exp $
  */
-
 float ENT_WORLD					= 0;
 float ENT_CHAIR					= 1;
 float ENT_BARSTOOL				= 2;
@@ -78,6 +77,27 @@ float ENT_PLANT_GENERIC			= 72;
 float ENT_PLANT_MESO			= 73;
 float ENT_PLANT_ROME			= 74;
 float ENT_FANGEL_HEAD			= 75;
+float ENT_CANDLE				= 76;
+float ENT_SKELETON				= 77;
+float ENT_STALAG1				= 78;
+float ENT_STALAG2				= 79;
+float ENT_SNOW_CORNER			= 80;
+float ENT_SNOW_PILE				= 81;
+float ENT_SNOW_WALL				= 82;
+float ENT_CH_KITE				= 83;
+float ENT_CH_HANG				= 84;
+float ENT_BUDDHA				= 85;
+float ENT_SKELTHRN				= 86;
+float ENT_DEMSTAT				= 87;
+float ENT_SHIVA					= 88;
+float ENT_BOTD					= 89;
+float ENT_SAMURAI				= 90;
+float ENT_DRAGLION				= 91;
+
+//float ENT_LASTENT				= 91;
+
+
+
 
 float SPAWNVALU_SIZE	= 6;	// Number of fields for each entity in entity_spawnvalues array
 
@@ -87,8 +107,8 @@ float SOLIDTYPE_OFS		= 3;
 float THINGTYPE_OFS		= 4;
 float DAMAGETYPE_OFS	= 5;
 
-
-float entity_spawnvalues[456] =
+			//SPAWNVALU_SIZE * ENT_LASTENT
+float entity_spawnvalues[552] =//6 per entity
 {  // Health    Mass    Movetype         Solid    Thingtype        DamageType
 		25,		3,		0,				0,				2,				1,	// ENT_WORLD		
 		25,		3,	   13,				3,				2,				1,	// ENT_CHAIR
@@ -151,12 +171,12 @@ float entity_spawnvalues[456] =
 	   100,	   10,	    5,				3,			    4,				1,	// ENT_FANGEL
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_ATHENA
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_NEPTUNE
-	    50,	    0,	    0,				3,			    1,				1,	// ENT_BONEPILE
+	    50,	    0,	    0,				3,			    24,				1,	// ENT_BONEPILE
 		25,	   10,		4,				3,				2,				1,  // ENT_CHEST3
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_CAESAR
 	     0,	    0,	    4,				0,			    1,				0,	// ENT_TELEPORT
 	   200,	 9999,	    0,				3,			    1,				1,	// ENT_STATUE_SNAKE_COIL
-	    10,	    3,	    0,				3,			    6,				1,	// ENT_SKULL
+	    10,	    3,	    0,				3,			    24,				1,	// ENT_SKULL
 	    50,	    8,	    4,				3,			    2,				1,	// ENT_PEW
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_OLMEC
 	   200,	    0,	    0,				3,			    1,				1,	// ENT_STATUE_MARS
@@ -165,14 +185,31 @@ float entity_spawnvalues[456] =
 	    10,	 9999,	    0,				3,				7,				1,	// ENT_PLANT_GENERIC
 	    10,	   20,	    4,				3,				6,				1,	// ENT_PLANT_MESO
 	    10,	   50,	    4,				3,				6,				1,	// ENT_PLANT_ROME
-	    10,	    3,	   10,				3,			    4,				1	// ENT_FANGEL_HEAD	 
-}; 
+	    10,	    3,	   10,				3,			    4,				1,	// ENT_FANGEL_HEAD
+	    10,	  100,	    4,				3,				6,				1,	// ENT_CANDLE
+	    20,	  200,	    4,				2,			   24,				1,	// ENT_SKELETON
+	    20,	   50,	    4,				2,			   16,				1,	// ENT_STALAG1
+	    40,	  100,	    4,				2,			   16,				1,	// ENT_STALAG2
+	     0,	  100,	    0,				0,			   16,				0,	// ENT_SNOW_CORNER
+	     0,	  100,	    0,				0,			   16,				0,	// ENT_SNOW_PILE
+	     0,	  100,	    0,				0,			   16,				0,	// ENT_SNOW_WALL
+		25,	    8,	    0,				3,			   10,				1,	// ENT_CH_KITE
+		25,		8,	    0,				3,			    2,				1,	// ENT_CH_HANG
+	  9999,	  100,	    4,				3,			    2,				1,	// ENT_BUDDHA
+		 0,	  100,	    0,				3,			    2,				0,	// ENT_SKELTHRN
+	   100,	    0,	    0,				3,			    1,				1,	// ENT_DEMSTAT
+	   100,	    0,	    0,				3,			    1,				0,	// ENT_SHIVA
+		20,		0,		0,				3,				1,				1,	// ENT_BOTD
+	   100,	    0,	    0,				3,			    1,				1,	// ENT_SAMURAI
+	   100,	  200,	    0,				3,			    1,				1	// ENT_DRAGLION
+};//Health    Mass    Movetype         Solid    Thingtype        DamageType
 
 
 float BOX_SIZE	= 2;	// Number of fields for each entity in entity_box array
 float BMAX_OFS	= 1;
 
-vector entity_box[152] =
+		//BOX_SIZE* ENT_LASTENT
+vector entity_box[184] =
 {   // Min             Maxs
 	'   0    0    0',	'  0   0   0',			// ENT_WORLD
 	' -10  -10    0',	' 10  10  40',			// ENT_CHAIR
@@ -249,7 +286,23 @@ vector entity_box[152] =
 	' -10  -10    0',	' 10  10  20',			// ENT_PLANT_GENERIC
 	' -10  -10    0',	' 10  10  40',			// ENT_PLANT_MESO
 	' -24  -24    0',	' 24  24  90',			// ENT_PLANT_ROME
-	'  -8   -8    0',	'  8   8  16'			// ENT_FANGEL_SKULL
+	'  -8   -8    0',	'  8   8  16',			// ENT_FANGEL_SKULL
+	'  -8   -8    0',	'  8   8  16',			// ENT_CANDLE
+	' -37  -12    0',	' 37  12  11',			// ENT_SKELETON
+	' -10  -10  -17',	' 10  10  17',			// ENT_STALAG1
+	' -24  -24   21',	' 24  24  21',			// ENT_STALAG2
+	' -41  -55   0',	' 41  55  65',			// ENT_SNOW_CORNER
+	' -52  -52   0',	' 52  52  16',			// ENT_SNOW_PILE
+	' -83  -83   0',	' 83  83  45',			// ENT_SNOW_WALL
+	' -22  -22   -120',	' 22  22  0',			// ENT_CH_KITE
+	' -48  -48   -66',	' 48  48  0',			// ENT_CH_HANG
+	' -48  -48   -66',	' 48  48  0',			// ENT_BUDDHA
+	' -33  -33   0',	' 33  33  5',			// ENT_SKELTHRN
+	' -64  -64   0',	' 64  64  102',			// ENT_DEMSTAT
+	' -16  -16   0',	' 16  16  72',			// ENT_SHIVA
+	' -10  -10   0',	' 10  10  4',			// ENT_BOTD
+	' -25  -25   0',	' 25  25  106',			// ENT_SAMURAI
+	' -25  -25   0',	' 25  25  62'			// ENT_DRAGLION
 };
 
 void(vector org) spawn_tfog;
@@ -297,6 +350,9 @@ void CreateEntityNew(entity subject,float entity_id,string modelname,void() deat
 	if (!subject.health)
 		subject.health = entity_spawnvalues[index1];
  
+	if(!subject.max_health)
+		subject.max_health=subject.health;
+	
 	if (!subject.mass)
 	{
 		mass_flag = 0;
