@@ -5,6 +5,7 @@
 void precache_spider ();
 void precache_scorpion ();
 void precache_mummy ();
+void precache_knight();
 
 // called by worldspawn
 void() W_Precache =
@@ -33,6 +34,7 @@ void() W_Precache =
 	//ws: precache monsters used by sickle monster summoning function
 	precache_scorpion();
 	precache_spider();
+	precache_knight();
 };
 
 
@@ -811,11 +813,12 @@ void Precache_wav (void)
 	precache_sound ("necro/bonenhit.wav");
 	precache_sound ("necro/attack1.wav");
 	precache_sound ("necro/bonenwal.wav");
-	
-	precache_sound ("necro/hum1.wav");
+	//SoC
+	precache_sound ("necro/attack1.wav");	//magic mis altfire
+	/*precache_sound ("necro/hum1.wav");
 	precache_sound ("necro/hum2.wav");
-	precache_sound ("necro/hum3.wav");
-	precache_sound ("necro/bonethit.wav");
+	precache_sound ("necro/hum3.wav");*/
+	precache_sound ("necro/bonethit.wav");	//tomed shard ball
 	
 	//Raven Staff
 	precache_sound ("raven/ravengo.wav");
