@@ -1133,8 +1133,8 @@
 @PointClass base(Monster) size(-40 -40 0, 40 40 64) model({ "path": ":models/scorpion.mdl", "skin": 0 }) = monster_scorpion_yellow : "Yellow scorpion" []
 @PointClass base(Monster) size(-40 -40 0, 40 40 64) model({ "path": ":models/scorpion.mdl", "skin": 1 }) = monster_scorpion_black : "Black scorpion" []
 
-@PointClass base(Monster) model(":models/skullwiz.mdl")  size(-24 -24 0, 24 24 64) = monster_skull_wizard : "Skull wizard" []
-@PointClass base(monster_skull_wizard) = monster_skull_wizard_lord : "Skull wizard lord" []
+@PointClass base(Monster) model(":models/skullwiz.mdl") size(-24 -24 0, 24 24 64) = monster_skull_wizard : "Skull wizard" []
+@PointClass base(monster_skull_wizard) model(":models/skullwiz.mdl") size(-24 -24 0, 24 24 64) = monster_skull_wizard_lord : "Skull wizard lord" []
 
 @BaseClass base(Monster) model(":models/spider.mdl") = Spider
 [
@@ -1593,7 +1593,13 @@
 // Entities!
 //
 
-@PointClass base(Appearflags) = sound_ambient_custom : "Ambient sound (custom)"
+@PointClass base(Appearflags,Targetname) = custom_music_player : "Triggered music changer"
+[
+	netname(string) : "Music filename, including subfolder."
+	delay(integer) : "Delay" : 0
+]
+
+@PointClass base(Appearflags) = custom_sound_ambient : "Ambient sound (custom)"
 [
 	netname(string) : "Sound filename, including subfolder. If no delay is supplied, it will loop continuously"
 	flags(integer) : "Random delay minimum" : 0
@@ -1622,7 +1628,7 @@
 	]
 ]
 
-@PointClass base(Appearflags, Targetname) size(-10 -10 -8, 10 10 8) = sound_maker_custom : "Triggerable sound (custom)"
+@PointClass base(Appearflags, Targetname) size(-10 -10 -8, 10 10 8) = custom_sound_maker : "Triggerable sound (custom)"
 [
 	netname(string) : "Sound filename, including subfolder"
 	delay(integer) : "Delay"
@@ -1747,6 +1753,7 @@
 		8 : "Deactivated" : 0
 		64 : "light toggle" : 0
 		128 : "light start low" : 0
+		65536 : "Monster & player touch" : 0
 	]
 ]
 
