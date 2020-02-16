@@ -199,7 +199,20 @@ void() func_plat =
 		self.noise = "plats/chainplt1.wav";
 		self.noise1 = "plats/chainplt2.wav";
 	}
-
+	
+	else if (self.soundtype == 3)
+	{
+		precache_sound ("plats/platslid.wav");
+		precache_sound ("plats/platstp.wav");
+		self.noise = "plats/platslid.wav";
+		self.noise1 = "plats/platstp.wav";
+	}
+	
+	else if (self.soundtype < 0)
+	{
+		self.noise = self.noise1 = "misc/null.wav";
+		precache_sound ("misc/null.wav");
+	}
 
 	self.mangle = self.angles;
 	self.angles = '0 0 0';
