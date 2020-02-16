@@ -174,6 +174,11 @@ float 	ldmg;
 		
 	org1=self.origin+self.proj_ofs;
 	org2=self.enemy.origin;
+	
+	if (!self.t_length)	//default melee range
+		dist=60;
+	else				//ws: custom melee range
+		dist=self.t_length;
 
 	if(vlen(org2-org1)>60)
 		return;
