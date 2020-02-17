@@ -92,10 +92,10 @@ Changes
 
 	Changes to the SoC mod
 -Various balance tweaks & bugfixes
+-Corpses fading out can be toggled by typing "impulse 46" in console
+-Monster respawning can be toggled with "impulse 45". Corpse fading needs to be enabled for it to work
+-Random monster variations can be toggled with "impulse 47". This will take effect on the next map
 -All classes receive mana & health upon leveling up (only the amount added to their maximum pool)
--Corpses fading out can be disabled by typing "impulse 46" in console (re-enter it to re-enable); gibs always fade out in coop
--Monster respawning is disabled by default; to enable, use "impulse 45"
--Random monster variations are also disabled; to enable, use "impulse 47"
 -Glyph artifact has a small delay between firing (length depends on class)
 -All melee attacks knock enemies back
 -Most explosions have dynamic light effects
