@@ -563,7 +563,7 @@ float	SFL_CROSS_TRIGGER_7	= 16384;
 float	SFL_CROSS_TRIGGER_8	= 32768;
 
 float	SFL_CROSS_TRIGGERS	= 65280;
-float attck_cnt;
+//float attck_cnt;
 
 float WF_NORMAL_ADVANCE = 0;		// States when using advanceweaponframe
 float WF_CYCLE_STARTED = 1;
@@ -652,3 +652,7 @@ float MAX_POLY = 1;
 float MAX_SUMMON = 1;
 float MAX_TOME = 2;
 float MAX_URN = 2;
+
+float PARM_RESPAWN = 1;
+float PARM_FADE = 2;
+float PARM_BUFF = 4;

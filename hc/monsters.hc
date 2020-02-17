@@ -344,6 +344,7 @@ void() swimmonster_start =
 };
 */
 
+//Game of Tomes monster buffing system
 void ApplyMonsterBuffEffect(entity monst)
 {
 	if (monst.bufftype & BUFFTYPE_LEADER)
@@ -496,10 +497,8 @@ float BUFF_LEADER_CHANCE = 2; //3
 float BUFF_SPECTRE_CHANCE = 6;
 void ApplyMonsterBuff(entity monst, float canBeLeader)
 {
-	if (!monsterbuffing)
-	{
+	if (!CheckCfgParm(PARM_BUFF))
 		return;
-	}
 	
 	float randmin, randval;
 	

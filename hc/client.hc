@@ -612,6 +612,8 @@ entity spot;
 		self.items(-)IT_WEAPON4|IT_WEAPON3|IT_WEAPON4_1|IT_WEAPON4_2|IT_WEAPON2;
 		self.skin=0;
 	}
+	else if (self.state)	//ws: config parm flags system
+		parm16 = self.state;
 //	else if(self.sv_flags)
 //		serverflags=self.sv_flags;
 
@@ -825,9 +827,11 @@ entity spot;
 		PutClientInServer();
 		return;
 	}
+	
+	parm16 = self.state;	//ws: config parm flags system
 
 	// Need to reset these because they could still point to entities in the previous map
-	self.enemy = self.groundentity = self.chain = self.goalentity = self.dmg_inflictor = 
+	self.enemy = self.groundentity = self.chain = self.goalentity = self.dmg_inflictor = self.ladder =
 		self.owner = world;
 
 //RESET TIMERS:
@@ -1539,11 +1543,11 @@ void() PlayerPreThink =
 		else
 			self.weaponmodel="";
 	}
-
+/*
 	makevectors (self.v_angle);		// is this still used
 
 	self.friction=0;   // If in entity FRICTION_TOUCH will reset this
-
+*/
 	CheckRules ();
 	CheckRings ();
 	CheckAbilities ();
@@ -2797,3 +2801,25 @@ string deathstring, deathstring2,iclass;
 	}
 };
 
+float CheckCfgParm (float parm)	//returns value of config flag
+{
+	if (parm16&parm)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+float SetCfgParm (float parm)	//reverses config flag and returns true if enabled, false if disabled
+{
+float retval;
+	if (self.state&parm) {
+		self.state=self.state-parm;
+		retval=FALSE;
+	}
+	else {
+		self.state=self.state+parm;
+		retval=TRUE;
+	}
+	parm16=self.state;
+	return retval;
+}
