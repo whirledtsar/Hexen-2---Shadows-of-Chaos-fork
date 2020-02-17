@@ -131,7 +131,3 @@ float framecount;
 float skill;
 
 float wp_deselect;  // A flag showing a weapon is being deselected ignore impulse 10
-
-float respawning;
-float corpsefading;
-float monsterbuffing;
