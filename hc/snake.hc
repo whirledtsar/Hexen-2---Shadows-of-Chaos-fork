@@ -507,5 +507,6 @@ void() monster_snake =
 	self.th_die = chunk_death;
 	self.thingtype = THINGTYPE_BROWNSTONE;
 	self.monsterclass = CLASS_BOSS;
+	self.preventrespawn=TRUE;
 };
 

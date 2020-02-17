@@ -983,26 +983,8 @@ void monster_mummy_lord (void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
-	{
-		precache_model2("models/mummy.mdl");
-		precache_model2("models/larm.mdl");
-		precache_model2("models/leg.mdl");
-		precache_model2("models/mumshot.mdl");
-		precache_model2("models/muhead.mdl");
-
-		precache_sound2 ("mummy/sight2.wav");
-		precache_sound2 ("mummy/die2.wav");
-		precache_sound2 ("mummy/mislfire.wav");
-		precache_sound2 ("mummy/limbloss.wav");
-		precache_sound2 ("mummy/moan2.wav");
-		precache_sound2 ("mummy/pain2.wav");
-		precache_sound2 ("mummy/crawl.wav");
-		precache_sound2 ("mummy/slide.wav");
-		precache_sound2 ("mummy/step.wav");
-		precache_sound2 ("mummy/tap.wav");
-		precache_sound2 ("mummy/bite.wav");
-	}
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+		precache_mummy();
 
 	CreateEntityNew(self,ENT_MUMMY,"models/mummy.mdl",mummy_die);
 

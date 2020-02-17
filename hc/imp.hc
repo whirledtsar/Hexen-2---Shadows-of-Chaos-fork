@@ -1490,7 +1490,7 @@ void init_imp (float which_skin)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model ("models/imp.mdl");
 		precache_model ("models/h_imp.mdl");//empty for now

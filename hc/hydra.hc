@@ -755,8 +755,11 @@ void init_hydra(void)
 
 	self.monster_stage = HYDRA_STAGE_WAIT;
 
-	precache_model ("models/hydra.mdl");
-	precache_model ("models/spit.mdl");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model ("models/hydra.mdl");
+		precache_model ("models/spit.mdl");
+	}
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_SWIM;
@@ -813,14 +816,16 @@ NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, play_dead, no
 void monster_hydra(void)
 {
 	init_hydra();
-
-	precache_sound("hydra/pain.wav");
-	precache_sound("hydra/die.wav");
-	precache_sound("hydra/open.wav");
-	precache_sound("hydra/turn-s.wav");
-	precache_sound("hydra/turn-b.wav");
-	precache_sound("hydra/swim.wav");
-	precache_sound("hydra/tent.wav");
-	precache_sound("hydra/spit.wav");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_sound("hydra/pain.wav");
+		precache_sound("hydra/die.wav");
+		precache_sound("hydra/open.wav");
+		precache_sound("hydra/turn-s.wav");
+		precache_sound("hydra/turn-b.wav");
+		precache_sound("hydra/swim.wav");
+		precache_sound("hydra/tent.wav");
+		precache_sound("hydra/spit.wav");
+	}
 }
 

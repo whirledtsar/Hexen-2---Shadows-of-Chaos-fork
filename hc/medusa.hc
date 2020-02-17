@@ -903,7 +903,7 @@ void monster_medusa_green (void)
 		return;
 	}
 
-	if (!self.flags2&FL_SUMMONED)
+	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/medusa.mdl");
 		precache_model2("models/medusa2.mdl");
