@@ -288,7 +288,7 @@ void SpiderInit(float type)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED)
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_spider();
 
 	setmodel(self, "models/spider.mdl");
