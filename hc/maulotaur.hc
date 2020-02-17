@@ -24,6 +24,7 @@ void precache_maulotaur()
 {
 	precache_model("models/maultaur.mdl");
 	precache_model("models/drgnball.mdl");
+	precache_model("models/mumshot.mdl");
 	
 	precache_sound("golem/slide.wav");
 	precache_sound("maul/act.wav");
@@ -35,6 +36,7 @@ void precache_maulotaur()
 	precache_sound("mummy/tap.wav");	//hammer hits ground
 	precache_sound("pest/snort.wav");	//idle sound
 	precache_sound("yakman/hoof.wav");
+	precache_sound("mummy/mislfire.wav");	//floor flame atk
 	precache_sound("weapons/expsmall.wav");	//fireball hit
 	precache_sound("weapons/fbfire.wav");	//fire fireballs
 	precache_sound("weapons/vorpblst.wav");	//charge hit
