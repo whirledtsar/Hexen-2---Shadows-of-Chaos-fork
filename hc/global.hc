@@ -75,7 +75,7 @@ entity msg_entity;
 // Set by OP_CSTATE ([++ $s..$e], [-- $s..$e]).
 float cycle_wrapped;
 
-float crouch_cnt;
+float crouch_cnt;	//unused?
 
 float modelindex_assassin;
 float modelindex_crusader;
@@ -116,9 +116,6 @@ string string_null;
 
 // Function launch_spike() sets this after spawning it.
 entity newmis;
-
-//test blood
-entity bloodpool;
 
 // The entity that activated a trigger or brush.
 entity activator;
