@@ -97,23 +97,15 @@ void monster_fallen_angel (void);
 		self.think = monster_mummy;
 	}
 	else if (self.classname == "monster_werejaguar")
-	{
 		self.think = monster_werejaguar;
-	}
 	else if (self.classname == "monster_mezzoman")
-	{
 		self.think = monster_mezzoman;
-	}
 	else if (self.classname == "monster_werepanther")
 		self.think = monster_werepanther;
 	else if (self.classname == "monster_medusa")
-	{
 		self.think = monster_medusa;
-	}
 	else if (self.classname == "monster_fallen_angel")
-	{
 		self.think = monster_fallen_angel;
-	}
 	else if (self.classname == "monster_fallen_angel_lord")
 	{
 		self.classname = "monster_fallen_angel";
@@ -133,15 +125,17 @@ void monster_fallen_angel (void);
 	CreateRedCloud (self.origin + '0 0 40','0 0 0',HX_FRAME_TIME);
  }
 
-float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
-float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
+//float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
+//float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
+float WANDERING_MONSTER_TIME_MIN = 1; //2 minutes
+float WANDERING_MONSTER_TIME_MAX = 3; //11 minutes
 
 void MarkForRespawn (void)
-{
+{	dprint ("markin\n");
 	entity newmis;
 	float timelimit;
 	
-	if (self.classname != "player" && !self.preventrespawn && respawning) //do not respawn players or summoned monsters
+	if (self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -178,11 +172,10 @@ void corpseblink (void)
 
 	if (self.scale < 0.10)
 	{
-		MarkForRespawn();
-	}
-	else
-	{
-		remove(self);
+		if (CheckCfgParm(PARM_RESPAWN))
+			MarkForRespawn();
+		else
+			remove(self);
 	}
 }
 
@@ -219,7 +212,7 @@ void () CorpseThink =
 
 	if (self.watertype==CONTENT_LAVA)	// Corpse fell in lava
 		T_Damage(self,self,self,self.health);
-	else if (corpsefading && self.lifetime < time)			// Time is up, begone with you
+	else if (CheckCfgParm(PARM_FADE) && self.lifetime < time)			// Time is up, begone with you
 		init_corpseblink();
 };
 
@@ -258,7 +251,7 @@ vector newmaxs;
 		setsize (self, self.mins,newmaxs);
 	else
 		//setsize (self, '-13 -28 -14', '10 3 -9'); //resize the dk berserker because i fucked up his origin and im too lazy to fix it. Also wtf are you doing using HexenC? It's 2017 nerd, go use UE4
-		setsize (self, '-26 -28 -14', '88 28 -9'); //it was still messed up. 2017 eh? -ws
+		setsize (self, '-26 -28 -14', '88 28 -9'); //ws: it was still messed up. 2017 eh?
 	if(self.flags&FL_ONGROUND)
 		self.velocity='0 0 0';
     self.flags(-)FL_MONSTER;
@@ -281,7 +274,7 @@ vector newmaxs;
     }
     else 
 	{
-		self.lifetime = time + random(60,70); // disappear after 70 seconds - CORPSE TIMER
+		self.lifetime = time + random(20,30);
 		self.think=CorpseThink;
 		thinktime self : 0;
 		//return;

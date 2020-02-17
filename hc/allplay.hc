@@ -240,8 +240,10 @@ void PlayerDead ()
 void ThrowGib (string gibname, float dm)
 {
 entity new;
+float fade;
+	fade = CheckCfgParm(PARM_FADE);
 	//ws: corpses fading can be toggled by console command (impulse 46)
-	if (corpsefading)
+	if (fade)
 		new = spawn_temp();
 	else
 		new = spawn();
@@ -256,7 +258,7 @@ entity new;
 	new.avelocity_y = random(600);
 	new.avelocity_z = random(600);
 	new.scale=random(.5,.9);
-	if (corpsefading || coop || deathmatch) {
+	if (fade || coop || deathmatch) {
 		new.think = SUB_Remove;
 		thinktime new : random(20,10);
 	}
@@ -409,6 +411,7 @@ vector org;
 	self.think=PlayerDead;
 	thinktime self : 1;
 }
+
 
 void PlayerUnCrouching ()
 {
