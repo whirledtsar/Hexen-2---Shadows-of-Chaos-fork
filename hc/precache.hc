@@ -1312,6 +1312,11 @@ void precache_mummy ()
 	precache_sound2 ("mummy/tap.wav");
 	precache_sound2 ("mummy/bite.wav");
 	precache_sound2 ("mummy/fire.wav");
+	
+	precache_sound2 ("mummy/sight2.wav");
+	precache_sound2 ("mummy/die2.wav");
+	precache_sound2 ("mummy/moan2.wav");
+	precache_sound2 ("mummy/pain2.wav");
 }
 
 void precache_spider ()
