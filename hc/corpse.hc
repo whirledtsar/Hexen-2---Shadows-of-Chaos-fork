@@ -125,10 +125,8 @@ void monster_fallen_angel (void);
 	CreateRedCloud (self.origin + '0 0 40','0 0 0',HX_FRAME_TIME);
  }
 
-//float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
-//float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
-float WANDERING_MONSTER_TIME_MIN = 1; //2 minutes
-float WANDERING_MONSTER_TIME_MAX = 3; //11 minutes
+float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
+float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
 
 void MarkForRespawn (void)
 {	dprint ("markin\n");
