@@ -137,6 +137,8 @@ void() CB_BoltStick=
 
 void() CB_BoltHit=
 {
+	if (pointcontents(self.origin)==CONTENT_SKY)
+		remove(self);
 	if(other==self.owner||(other.owner==self.owner&&other.classname==self.classname))
 	    return;
 
@@ -294,26 +296,6 @@ void CB_Color_BoltHit(void)
 	remove(self);
 }
 
-void ArrowFlyThink (void)
-{
-	if(self.lifetime<time&&self.mins=='0 0 0')
-	{
-		self.takedamage=DAMAGE_YES;
-//		setsize(self,'-3 -3 -2','3 3 2');
-	}
-	self.angles=vectoangles(self.velocity);
-	self.think=ArrowFlyThink;
-	thinktime self : 0.05;
-}
-
-/*void ArrowSound (void)
-{
-	//attn_static instead?
-//	sound(self,CHAN_BODY,"assassin/arrowfly.wav",1,ATTN_NORM);
-	self.think=ArrowFlyThink;
-	thinktime self : 0;
-}*/
-
 void FlamingArrowThink (void)
 {
 float waterornot;
@@ -326,6 +308,26 @@ float waterornot;
 	}
 	AdvanceFrame(0,9);
 	thinktime self : HX_FRAME_TIME;
+}
+/*
+void ArrowFlyThink (void)
+{
+	if(self.lifetime<time&&self.mins=='0 0 0')
+	{
+		self.takedamage=DAMAGE_YES;
+//		setsize(self,'-3 -3 -2','3 3 2');
+	}
+	self.angles=vectoangles(self.velocity);
+	self.think=ArrowFlyThink;
+	thinktime self : 0.05;
+}
+
+void ArrowSound (void)
+{
+	//attn_static instead?
+//	sound(self,CHAN_BODY,"assassin/arrowfly.wav",1,ATTN_NORM);
+	self.think=ArrowFlyThink;
+	thinktime self : 0;
 }
 
 void ArrowThink (void)
@@ -341,7 +343,7 @@ vector dir;
 	else
 		self.think=FlamingArrowThink;
 	thinktime self : 0;
-}
+}*/
 
 void(float offset, float arrowtype, float vel) FireCB_Bolt =
 {
