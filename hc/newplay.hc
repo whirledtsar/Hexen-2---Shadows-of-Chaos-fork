@@ -419,8 +419,12 @@ void Pal_Change_Weapon (void)
 		self.th_missile=pal_purifier_fire;
 	else if(self.weapon==IT_WEAPON2)
 		self.th_missile=pal_vorpal_fire;
-	else
+	else if(self.weapon==IT_WEAPON3)
 		self.th_missile=pal_axe_fire;
+	else if(self.weapon==IT_WEAPON5)
+		self.th_missile=pal_gauntlet_fire;
+	else
+		self.th_missile=pal_gauntlet_fire;
 }
 
 void Cru_Change_Weapon (void)
@@ -431,8 +435,12 @@ void Cru_Change_Weapon (void)
 		self.th_missile=Cru_Ice_Fire;
 	else if(self.weapon==IT_WEAPON3)
 		self.th_missile=Cru_Met_Attack;
-	else
+	else if(self.weapon==IT_WEAPON4)
 		self.th_missile=Cru_Sun_Fire;
+	else if(self.weapon==IT_WEAPON5)
+		self.th_missile=Cru_Wham_Fire;
+	else
+		self.th_missile=Cru_Wham_Fire;
 }
 
 void Nec_Change_Weapon (void)
@@ -443,8 +451,12 @@ void Nec_Change_Weapon (void)
 		self.th_missile=setstaff_decide_attack;
 	else if(self.weapon==IT_WEAPON2)
 		self.th_missile=Nec_Mis_Attack;
-	else
+	else if(self.weapon==IT_WEAPON3)
 		self.th_missile=Nec_Bon_Attack;
+	else if(self.weapon==IT_WEAPON5)
+		self.th_missile=sickle_decide_attack;
+	else
+		self.th_missile=sickle_decide_attack;
 }
 
 void Ass_Change_Weapon (void)
@@ -455,6 +467,10 @@ void Ass_Change_Weapon (void)
 		self.th_missile=crossbow_fire;
 	if(self.weapon==IT_WEAPON3)
 		self.th_missile=grenade_throw;
+	else if(self.weapon==IT_WEAPON1)
+		self.th_missile=Ass_Pdgr_Fire;
+	else if(self.weapon==IT_WEAPON5)
+		self.th_missile=Ass_Pdgr_Fire;
 	else
 		self.th_missile=Ass_Pdgr_Fire;
 }
@@ -575,6 +591,10 @@ float weapmod, startframe,endframe,framestate;
 
 	if(self.act_state<ACT_JUMP||(self.playerclass==CLASS_NECROMANCER&&self.act_state<=ACT_JUMP))
 	{
+		if(self.weapon==IT_WEAPON6)
+			weapmod=5;
+		if(self.weapon==IT_WEAPON5)
+			weapmod=4;
 		if(self.weapon==IT_WEAPON4)
 			weapmod=3;
 		if(self.weapon==IT_WEAPON3)

@@ -279,9 +279,11 @@ float IT_WEAPON1					= 4096;
 float IT_WEAPON2					= 1;
 float IT_WEAPON3					= 2;
 float IT_WEAPON4					= 4;
-float IT_TESTWEAP					= 8;
-float IT_WEAPON4_1					= 16;		// First half of weapon
-float IT_WEAPON4_2					= 32;		// Second half of weapon
+float IT_WEAPON5					= 8;
+float IT_WEAPON6					= 16;
+float IT_TESTWEAP					= 32;
+float IT_WEAPON4_1					= 64;		// First half of weapon
+float IT_WEAPON4_2					= 128;		// Second half of weapon
 
 
 // paladin weapons

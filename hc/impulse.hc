@@ -21,6 +21,10 @@ void restore_weapon ()
 			self.weaponmodel = "models/axe.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/purifier.mdl";
+		else if (self.weapon == IT_WEAPON5)
+			self.weaponmodel = "models/gauntlet.mdl";
+		else if (self.weapon == IT_WEAPON6)
+			self.weaponmodel = "models/gauntlet.mdl";
 	}
 	else if (self.playerclass==CLASS_CRUSADER)
 	{
@@ -32,6 +36,10 @@ void restore_weapon ()
 			self.weaponmodel = "models/meteor.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/sunstaff.mdl";
+		else if (self.weapon == IT_WEAPON5)
+			self.weaponmodel = "models/warhamer.mdl";
+		else if (self.weapon == IT_WEAPON6)
+			self.weaponmodel = "models/warhamer.mdl";
 	}
 	else if (self.playerclass==CLASS_NECROMANCER)
 	{
@@ -43,6 +51,10 @@ void restore_weapon ()
 			self.weaponmodel = "models/sickle.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/ravenstf.mdl";
+		else if (self.weapon == IT_WEAPON5)
+			self.weaponmodel = "models/sickle.mdl";
+		else if (self.weapon == IT_WEAPON6)
+			self.weaponmodel = "models/sickle.mdl";
 	}
 	else if (self.playerclass==CLASS_ASSASSIN)
 	{
@@ -54,6 +66,10 @@ void restore_weapon ()
 			self.weaponmodel = "models/v_assgr.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/scarabst.mdl";
+		else if (self.weapon == IT_WEAPON5)
+			self.weaponmodel = "models/punchdgr.mdl";
+		else if (self.weapon == IT_WEAPON6)
+			self.weaponmodel = "models/punchdgr.mdl";
 	}
 }
 
@@ -570,7 +586,7 @@ void() ImpulseCommands =
 		self.impulse=0;
 		return;
 	}
-	else if (self.impulse >= 1 && self.impulse <= 4)
+	else if (self.impulse >= 1 && self.impulse <= 6)
 		W_ChangeWeapon ();
 	else if ((self.impulse == 10) && (wp_deselect == 0))
 		CycleWeaponCommand ();
