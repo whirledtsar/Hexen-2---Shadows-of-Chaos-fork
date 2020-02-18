@@ -305,7 +305,7 @@ void W_SetCurrentAmmo (void)
 	wp_deselect = 0;
 
 	self.button0=FALSE;
-	attck_cnt=0;
+	//attck_cnt=0;
 
 	if (self.oldweapon==self.weapon)		// Until we get multi skinned weapons
 		return;
@@ -1348,7 +1348,7 @@ void W_SetCurrentWeapon (void)
 		return;
 
 	self.button0=FALSE;
-	attck_cnt=0;
+	//attck_cnt=0;
 
 	if (self.oldweapon==self.weapon)		// Until we get multi skinned weapons
 		return;
