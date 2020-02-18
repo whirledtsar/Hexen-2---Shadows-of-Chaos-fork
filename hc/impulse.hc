@@ -586,42 +586,24 @@ void() ImpulseCommands =
 		DropInventoryItem();
 	else if (self.impulse == 45)
 	{
-		if (respawning)
-		{
-			respawning=FALSE;
-			sprint (self, "Monster respawning disabled\n");
-		}
-		else
-		{
-			respawning=TRUE;
+		if (SetCfgParm(PARM_RESPAWN))
 			sprint (self, "Monster respawning enabled\n");
-		}
+		else 
+			sprint (self, "Monster respawning disabled\n");
 	}
 	else if (self.impulse == 46)
 	{
-		if (corpsefading)
-		{
-			corpsefading=FALSE;
-			sprint (self, "Corpse fading disabled\n");
-		}
-		else
-		{
-			corpsefading=TRUE;
+		if (SetCfgParm(PARM_FADE))
 			sprint (self, "Corpse fading enabled\n");
-		}
+		else 
+			sprint (self, "Corpse fading disabled\n");
 	}
 	else if (self.impulse == 47)
 	{
-		if (monsterbuffing)
-		{
-			monsterbuffing=FALSE;
-			sprint (self, "Random monster variations disabled\n");
-		}
-		else
-		{
-			monsterbuffing=TRUE;
+		if (SetCfgParm(PARM_BUFF))
 			sprint (self, "Random monster variations enabled\n");
-		}
+		else
+			sprint (self, "Random monster variations disabled\n");
 	}
 /*	else if (self.impulse == 99)
 	{	// RJ's test impulse
