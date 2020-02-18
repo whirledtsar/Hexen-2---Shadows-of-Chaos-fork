@@ -377,14 +377,17 @@ void() monster_wendigo =
 		remove(self);
 		return;
 	}
-	precache_model ("models/wendigo.mdl");
-	precache_model ("models/IceDeath.mdl");
-	precache_model ("models/proj_wend.mdl");
-	
-	precache_sound ("wendigo/attack.wav");
-	precache_sound ("wendigo/icehit.wav");
-	precache_sound ("wendigo/idle.wav");
-	precache_sound ("crusader/icewall.wav");
+	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model ("models/wendigo.mdl");
+		precache_model ("models/IceDeath.mdl");
+		precache_model ("models/proj_wend.mdl");
+
+		precache_sound ("wendigo/attack.wav");
+		precache_sound ("wendigo/icehit.wav");
+		precache_sound ("wendigo/idle.wav");
+		precache_sound ("crusader/icewall.wav");
+	}
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
