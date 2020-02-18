@@ -706,3 +706,8 @@ float MAX_POLY = 1;
 float MAX_SUMMON = 1;
 float MAX_TOME = 2;
 float MAX_URN = 2;
+
+//ws: Config flags system
+float PARM_RESPAWN = 1;
+float PARM_FADE = 2;
+float PARM_BUFF = 4; 
