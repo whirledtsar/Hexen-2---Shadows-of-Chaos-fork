@@ -76,7 +76,7 @@ entity msg_entity;
 // Set by OP_CSTATE ([++ $s..$e], [-- $s..$e]).
 float cycle_wrapped;
 
-float crouch_cnt;
+float crouch_cnt;	//unused?
 
 /*
 float modelindex_assassin;
@@ -131,7 +131,3 @@ float framecount;
 float skill;
 
 float wp_deselect;  // A flag showing a weapon is being deselected ignore impulse 10
-
-float respawning;
-float corpsefading;
-float monsterbuffing;

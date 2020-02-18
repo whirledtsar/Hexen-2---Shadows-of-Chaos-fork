@@ -206,9 +206,12 @@ void corpseblink (void)
 	self.scale -= 0.10;
 
 	if (self.scale < 0.10)
-		MarkForRespawn();
-	else
-		remove(self);
+	{
+		if (CheckCfgParm(PARM_RESPAWN))
+			MarkForRespawn();
+		else
+			remove(self);
+	}
 }
 
 void init_corpseblink (void)
@@ -244,7 +247,7 @@ void () CorpseThink =
 
 	if (self.watertype==CONTENT_LAVA)	// Corpse fell in lava
 		T_Damage(self,self,self,self.health);
-	else if (corpsefading && self.lifetime < time)			// Time is up, begone with you
+	else if (CheckCfgParm(PARM_FADE) && self.lifetime < time)			// Time is up, begone with you
 		init_corpseblink();
 };
 
