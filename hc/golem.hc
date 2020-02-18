@@ -134,7 +134,7 @@ void monster_golem_stone(void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN))
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model3("models/golem_s.mdl");
 		
@@ -188,7 +188,7 @@ void monster_golem_iron(void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN))
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/golem_i.mdl");
 
@@ -252,7 +252,7 @@ void monster_golem_bronze(void)
 
 	self.cnt = 0;
 	
-	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN))
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/golem_b.mdl");
 
@@ -306,7 +306,7 @@ void monster_golem_crystal(void)
 		return;
 	}
 
-	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN))
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model3("models/golem_s.mdl");
 		precache_sound3("golem/stnpain.wav");
@@ -356,7 +356,7 @@ void GolemInit(void)
 	self.th_walk = GolemWalk;
 	self.th_run = GolemRun;
 	self.th_die = GolemDie;
-	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN))
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_sound3("golem/awaken.wav");
 		precache_sound3("golem/step.wav");
