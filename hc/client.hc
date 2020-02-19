@@ -612,11 +612,9 @@ entity spot;
 		self.items(-)IT_WEAPON4|IT_WEAPON3|IT_WEAPON4_1|IT_WEAPON4_2|IT_WEAPON2;
 		self.skin=0;
 	}
-	else if (self.state)	//ws: config parm flags system
-		parm16 = self.state;
 //	else if(self.sv_flags)
 //		serverflags=self.sv_flags;
-
+	parm16 = self.state;	//ws: config parm flags system
 
 	self.classname = "player";
 	self.takedamage = DAMAGE_YES;
