@@ -129,11 +129,11 @@ float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
 float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
 
 void MarkForRespawn (void)
-{	dprint ("markin\n");
+{
 	entity newmis;
 	float timelimit;
 	
-	if (self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
+	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -169,12 +169,7 @@ void corpseblink (void)
 	self.scale -= 0.10;
 
 	if (self.scale < 0.10)
-	{
-		if (CheckCfgParm(PARM_RESPAWN))
-			MarkForRespawn();
-		else
-			remove(self);
-	}
+		MarkForRespawn();
 }
 
 void init_corpseblink (void)
