@@ -673,8 +673,9 @@ entity spot;
 	self.plaqueflg = 0;
 	self.artifact_active(-)ARTFLAG_FROZEN|ARTFLAG_STONED;
 
-	self.whiptime = 0;
-	self.glyph_finished = 0;
+	self.whiptime =
+	self.movetime = 	/*timer for blood footsteps sound effect*/
+	self.glyph_finished = 0; /*delay between glyph uses*/
 	
 	if(self.newclass)
 	{

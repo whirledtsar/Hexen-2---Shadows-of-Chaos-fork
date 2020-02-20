@@ -614,9 +614,13 @@ void Precache_wav (void)
 	precache_sound ("fx/clothbrk.wav");		// Cloth breaking (rug)
 	precache_sound ("fx/thngland.wav");		// landing thud
 	precache_sound ("misc/null.wav");		// null sound to stop other sounds from playing
-	
+//SoC
 	precache_sound ("ambience/water1.wav");
 	precache_sound ("fx/lava2.wav");
+	precache_sound ("fx/blood.wav");		//hexen
+	precache_sound ("fx/fleshdrop1.wav");	//heretic2
+	precache_sound ("fx/fleshdrop2.wav");	//heretic2
+	precache_sound ("fx/fleshdrop3.wav");	//heretic2
 
 //ITEMS and ARTIFACTS
 	precache_sound ("weapons/ammopkup.wav");// Backpack pick up
