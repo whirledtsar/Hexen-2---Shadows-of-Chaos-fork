@@ -709,8 +709,7 @@ void chunk_death (void)
 	SUB_UseTargets();
 	self.target = self.targetname;
 
-	if (self.thingtype==THINGTYPE_FLESH || //most monsters are flesh
-	   ((self.thingtype==THINGTYPE_GREYSTONE || self.thingtype==THINGTYPE_METAL) && self.flags&FL_MONSTER))//golems
+	if (self.solid!=SOLID_BSP)
 	{
 		//set up respawn time
 		self.think = MarkForRespawn;
