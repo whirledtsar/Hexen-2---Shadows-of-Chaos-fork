@@ -170,9 +170,9 @@ void monster_golem_stone(void)
 	self.th_pain = GolemSPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	self.init_exp_val = self.experience_value;
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);  
+	self.buff=2;
+	walkmonster_start();
 }
 
 //==========================================================================
@@ -232,9 +232,9 @@ void monster_golem_iron(void)
 	self.th_pain = GolemIPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	self.init_exp_val = self.experience_value;
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);  
+	self.buff=2;
+	walkmonster_start();
 }
 
 //==========================================================================
@@ -294,9 +294,9 @@ void monster_golem_bronze(void)
 	self.th_pain = GolemBPain;
 	self.view_ofs = self.proj_ofs='0 0 115';
 	self.init_exp_val = self.experience_value;
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);
+	self.buff=2;
+	walkmonster_start();
 }
 
 //==========================================================================

@@ -1633,15 +1633,15 @@ void init_imp (float which_skin)
 		self.max_health=self.health;
 	self.init_exp_val = self.experience_value;
 	
+	if (self.classname!="gargoyle")
+		self.buff=1;
+	
 	if(self.enemy)
 		self.th_run();
 	else if(self.wait!=-1)
 		impmonster_start();
 	else
 		self.frame = $impwat1;
-	
-	if (self.classname!="gargoyle")
-		ApplyMonsterBuff(self, FALSE);
 }
 
 /*QUAKED monster_imp_ice (1 0.3 0) (-16 -16 0) (16 16 55) STAND HOVER x x gargoyle x FROZEN
