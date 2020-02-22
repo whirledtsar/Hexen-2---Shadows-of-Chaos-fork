@@ -705,6 +705,7 @@ float pclass;
 //	else if(self.sv_flags)
 //		serverflags=self.sv_flags;
 	parm16 = self.state;	//ws: config parm flags system
+	client_ready = TRUE;	//ws: monsters check this to know when to check client config parm flags
 
 	self.classname = "player";
 	self.takedamage = DAMAGE_YES;
@@ -768,7 +769,8 @@ float pclass;
 	self.friction=self.gravity=self.standard_grav = 1;
 	self.artifact_active(-)ARTFLAG_FROZEN|ARTFLAG_STONED;
 
-	self.whiptime = 0;
+	self.whiptime = 
+	self.movetime =
 	self.glyph_finished = 0;
 	
 	/*	if(spot.playerclass)  
@@ -986,6 +988,9 @@ entity spot;
 		PutClientInServer();
 		return;
 	}
+	
+	parm16 = self.state;	//ws: config parm flags system
+	client_ready = TRUE;	//ws: monsters check this to know when to check client config parm flags
 
 	// Need to reset these because they could still point to entities in the previous map
 	self.enemy = self.groundentity = self.chain = self.goalentity = self.dmg_inflictor = self.ladder =
@@ -997,6 +1002,7 @@ entity spot;
 		self.items(-)IT_WEAPON4|IT_WEAPON2|IT_WEAPON3|IT_WEAPON4_1|IT_WEAPON4_2;
 		self.skin=0;
 	}
+	
 //	else if(self.sv_flags)
 //		serverflags=self.sv_flags;
 
@@ -1004,7 +1010,6 @@ entity spot;
 	self.viewentity=self;
 	self.wallspot='0 0 0';
 	self.deathtype="";
-	self.glyph_finished =
 	self.act_state =
 	self.onfire=
 	self.healthtime=
@@ -1052,6 +1057,8 @@ entity spot;
 	self.camptime+= TimeDiff;
 	self.last_attack= self.attack_finished=0;
 	
+	self.glyph_finished =
+	self.movetime =
 	self.whiptime = 0;
 
 	self.light_level = 128;		// So the assassin doesn't go invisible coming out of the teleporter

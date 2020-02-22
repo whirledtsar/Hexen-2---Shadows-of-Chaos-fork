@@ -605,6 +605,26 @@ void() ImpulseCommands =
 		else
 			sprint (self, "Random monster variations disabled\n");
 	}
+	else if (self.impulse == 48)
+	{
+	string respawning, fade, buff;
+		if (CheckCfgParm(PARM_RESPAWN))
+			respawning="on";
+		else
+			respawning="off";
+		if (CheckCfgParm(PARM_FADE))
+			fade="on";
+		else
+			fade="off";
+		if (CheckCfgParm(PARM_BUFF))
+			buff="on";
+		else
+			buff="off";
+		
+		sprint (self, "Monster respawning is "); sprint(self, respawning); sprint(self, ". type Impulse 45 to toggle\n");
+		sprint (self, "Corpse fading is "); sprint(self, fade); sprint(self, ". type Impulse 46 to toggle\n");
+		sprint (self, "Random monster variants is "); sprint(self, buff); sprint(self, ". type Impulse 47 to toggle\n");
+	}
 /*	else if (self.impulse == 99)
 	{	// RJ's test impulse
 		search = nextent(world);
