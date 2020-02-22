@@ -641,7 +641,7 @@ void BloodSplat(void)
 	else
 		setmodel(splat,"models/bloodpool.mdl");
 	//setsize(splat,'0 0 0','0 0 0');
-	setsize(splat,'-24 -24 0','24 24 12');
+	setsize(splat,'-24 -24 0','24 24 1');
 	setorigin(splat,trace_endpos + '0 0 0.1');	//0.5
 }
 
