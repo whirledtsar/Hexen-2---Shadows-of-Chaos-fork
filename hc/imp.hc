@@ -1481,6 +1481,11 @@ void impmonster_start_go ()
 
 void impmonster_start ()
 {
+	if(self.spawnflags&SPAWNIN) {
+		monster_dormant();
+		return;
+	}
+	
 	thinktime self : random(0.5);
 
 	self.think = impmonster_start_go;
