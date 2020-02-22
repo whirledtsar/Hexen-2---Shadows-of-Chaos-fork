@@ -440,6 +440,8 @@ void yakman_die2 () [++ $death1 .. $death25]
 	if (self.health < -40)
 	{
 		chunk_death();
+		ThrowGib ("models/blood.mdl", self.health);
+		ThrowGib ("models/blood.mdl", self.health);
 		return;
 	}
 	else if(self.frame==$death15)
