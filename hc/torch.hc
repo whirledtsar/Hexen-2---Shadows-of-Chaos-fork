@@ -291,6 +291,45 @@ void light_burner (void)
 	makestatic (self.movechain);
 }
 
+/*QUAKED light_chan (0 1 0) (-7 -7 -15) (7 7 31) START_LOW
+Default light value is 300
+
+.health = If you give the torch health, it can be shot out.  It will automatically select it's second skin (the beat-up torch look)
+You must give it a targetname too, just any junk targetname will do like "junk"
+----------------------------------
+If triggered, will toggle between lightvalue1 and lightvalue2
+"lightvalue1" (default 0) 
+"lightvalue2" (default 11, equivalent to 300 brightness)
+"abslight" You can give it explicit lighting so it doesn't glow (0 to 2.5)
+Two values the light will fade-toggle between, 0 is black, 25 is brightest, 11 is equivalent to a value of 300.
+.fadespeed (default 1) = How many seconds it will take to complete the desired lighting change
+The light will start on at a default of the higher light value unless you turn on the startlow flag.
+START_LOW = will make the light start at the lower of the lightvalues you specify (default uses brighter)
+
+NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS NEED THIS INFO
+--------------------------------------------------------
+*/
+
+void light_chan (void)
+{
+	precache_model("models/chan.mdl");
+	self.drawflags(+)MLS_ABSLIGHT;
+	if(!self.abslight)
+		self.abslight = .75;
+
+	setmodel (self,"models/chan.mdl");
+	self.weaponmodel = "models/chan.mdl";	//FIXME: Flame On!
+	
+	self.frame = 1 + (self.t_width-1)*2;
+
+	self.thingtype	= THINGTYPE_GREYSTONE;
+	setsize(self, '-6 -6 -8','6 6 8');
+
+	FireAmbient();
+	Init_Torch();
+	self.solid=SOLID_BBOX;
+}
+
 /*QUAKED light_lantern (0 1 0) (-11 -11 -41) (11 11 5) START_LOW
 A castle lantern that hangs on the wall
 Default light value is 300
