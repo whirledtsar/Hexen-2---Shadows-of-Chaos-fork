@@ -161,9 +161,8 @@ void monster_golem_stone(void)
 	self.th_pain = GolemSPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	
+	self.buff=2;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, TRUE);
 }
 
 //==========================================================================
@@ -213,9 +212,9 @@ void monster_golem_iron(void)
 	self.th_melee = GolemIMeleeDecide;
 	self.th_pain = GolemIPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);
+	self.buff=2;
+	walkmonster_start();
 }
 
 void() bgolem_create =
@@ -279,9 +278,8 @@ void monster_golem_bronze(void)
 	self.th_pain = GolemBPain;
 	self.view_ofs = self.proj_ofs='0 0 115';
 	
+	self.buff=2;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, TRUE);
 }
 
 //==========================================================================
