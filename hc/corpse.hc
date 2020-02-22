@@ -170,7 +170,7 @@ void MarkForRespawn (void)
 	entity newmis;
 	float timelimit;
 	
-	if (self.classname != "player" && !self.preventrespawn && respawning) //do not respawn players or summoned monsters
+	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -205,12 +205,8 @@ void corpseblink (void)
 	thinktime self : 0.1;
 	self.scale -= 0.10;
 
-	if (self.scale < 0.10)
-	{
-		if (CheckCfgParm(PARM_RESPAWN))
-			MarkForRespawn();
-		else
-			remove(self);
+	if (self.scale < 0.10) {
+		MarkForRespawn();
 	}
 }
 
