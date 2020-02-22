@@ -497,7 +497,7 @@ float BUFF_LEADER_CHANCE = 2; //3
 float BUFF_SPECTRE_CHANCE = 6;
 void ApplyMonsterBuff(entity monst, float canBeLeader)
 {
-	if (!CheckCfgParm(PARM_BUFF))
+	if (!monst.buff || !CheckCfgParm(PARM_BUFF))
 		return;
 	
 	float randmin, randval;
@@ -526,7 +526,7 @@ void ApplyMonsterBuff(entity monst, float canBeLeader)
 	}
 	
 	//make second check. There is a small chance that a monster can be a large leader!
-	if (canBeLeader)
+	if (canBeLeader==2)
 	{
 		randval = random(randmin / 2, BUFF_RANDMAX);
 		if (randval > BUFF_RANDMAX - BUFF_LEADER_CHANCE)
