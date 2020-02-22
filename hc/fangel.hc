@@ -519,7 +519,6 @@ void() fangel_deathframes =
 	if(self.health<=-40)
 	{
 		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/bloodpool.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		stopSound(self,CHAN_WEAPON);//cut off wings sound
 		chunk_death();
