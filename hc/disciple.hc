@@ -1,7 +1,7 @@
 /*
 ==============================================================================
 
-death_knight
+Disciple
 
 ==============================================================================
 */
@@ -320,6 +320,6 @@ void() monster_disciple =
 	self.th_pain = bishop_pain;
 	self.th_die = bishop_die;
 	
+	self.buff=2;
 	flymonster_start();
-	ApplyMonsterBuff(self, TRUE);
 };
