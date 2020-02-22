@@ -3,6 +3,7 @@
  */
 void(entity etemp, entity stemp, entity stemp, float dmg) T_Damage;
 void() CheckMonsterBuff;
+void(entity monst, float canBeLeader) ApplyMonsterBuff;
 /*
 
 .enemy
