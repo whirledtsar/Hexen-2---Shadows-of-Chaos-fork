@@ -971,8 +971,9 @@ void monster_mummy (void)
 	self.max_health=self.health;
 	self.experience_value = 200;
 	self.init_exp_val = self.experience_value;
+	
+	self.buff=2;
 	walkmonster_start();
-	ApplyMonsterBuff(self, TRUE);
 }
 
 /*QUAKED monster_mummy_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT
@@ -1038,7 +1039,8 @@ void monster_mummy_lord (void)
 	self.yaw_speed = 10;
 	self.experience_value = 300;
 	self.init_exp_val = self.experience_value;
+	
+	self.buff=2;
 	walkmonster_start();
-	ApplyMonsterBuff(self, TRUE);
 }
 
