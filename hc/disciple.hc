@@ -116,10 +116,6 @@ void()	bishop_atk15=[	22,		bishop_atk16	] {ai_charge(0);};
 void()	bishop_atk16=[	23,		bishop_atk17	] {ai_charge(0);};
 void()	bishop_atk17=[	24,		bishop_run1	] {ai_charge(0);};
 
-//void()	bishop_atk9	=[	$attack9,		bishop_atk10	] {};
-//void()	bishop_atk10	=[	$attack10,		bishop_atk11	] {};
-//void()	bishop_atk11	=[	$attack11,		bishop_run1	] {};
-
 //===========================================================================
 
 void()	bishop_pain1	=[	25,	bishop_pain2	] {self.drawflags(-)DRF_TRANSLUCENT;};
@@ -216,9 +212,6 @@ void() bspike_touch =
 		T_Damage (other, self, self.owner, 7);
 		remove(self);
 	}
-	
-	
-
 };
 
 void(vector org, vector dir) launch_bspike =
@@ -328,4 +321,5 @@ void() monster_disciple =
 	self.th_die = bishop_die;
 	
 	flymonster_start();
+	ApplyMonsterBuff(self, TRUE);
 };
