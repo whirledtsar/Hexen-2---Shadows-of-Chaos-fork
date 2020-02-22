@@ -822,6 +822,8 @@ void monster_archer ()
 
 	self.hull=HULL_PLAYER;
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, FALSE);
 }
 
 /*QUAKED monster_archer_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
@@ -883,6 +885,8 @@ void monster_archer_lord ()
 
 	self.init_exp_val = self.experience_value;
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 /*QUAKED monster_archer_ice (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
