@@ -378,31 +378,14 @@ float fade;
 		new.scale = random(.6, 1.2);
 		new.frame = 0;
 	}
-	else if (new.model == "models/bloodpool.mdl" || new.model == "models/bloodpool2.mdl" || new.model == "models/bloodpool3.mdl" || new.model == "models/bloodpool_ice.mdl")
+	else if (new.model == "models/bloodpool_ice.mdl")
 	{
 		new.avelocity = 0;
 		new.gravity = 17;
 		
-		if (new.model != "models/bloodpool_ice.mdl")
-		{
-			new.classname = "bloodsplat";
-			new.solid = SOLID_TRIGGER;
-			new.touch = blood_step;
-			setsize(new,'-24 -24 0','24 24 12');
-		}
-		else
-			setsize(new, '0 0 0' , '0 0 0');
+		new.drawflags (+) DRF_TRANSLUCENT;
+		new.scale = random(0.3,0.7);
 		
-		if (self.netname == "spider")
-		{
-			setmodel (new, "models/bloodpool_green.mdl");
-			new.scale = 0.5;
-		}
-		if (new.model == "models/bloodpool_ice.mdl")
-		{
-			new.drawflags (+) DRF_TRANSLUCENT;
-			new.scale = random(0.3,0.7);
-		}
 		if (self.netname == "yakman")
 			new.scale = 1.3;
 		else if (self.netname == "maulotaur")
@@ -540,7 +523,7 @@ void GibPlayer ()
 	//ThrowGib ("models/flesh1.mdl", self.health);
 	ThrowGib ("models/flesh2.mdl", self.health);
 	ThrowGib ("models/flesh3.mdl", self.health);
-	BloodSplat();
+	BloodSplat(rint(random(0,2)));
 
 	self.deadflag = DEAD_DEAD;
 

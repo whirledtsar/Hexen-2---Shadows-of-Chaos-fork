@@ -277,7 +277,6 @@ void() archer_die =
 	// check for gib
 	if (self.health < -30)
 	{
-		ThrowGib ("models/bloodpool.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib("models/blood.mdl", self.health);
 		ThrowGib("models/blood.mdl", self.health);
@@ -285,7 +284,7 @@ void() archer_die =
 		//BloodSplat();
 		//ThrowGib (self.headmodel, self.health);
 		chunk_death();
-		return;
+		remove(self);	//return;
 	}
 	else if (self.decap>0 && random()<0.5)	//ws: only sharp weapons will decapitate; see damage.hc
 	{

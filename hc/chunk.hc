@@ -569,7 +569,24 @@ void TinySplat (vector location)
 }
 */
 
-void blood_step ()
+float BLOOD_SMALL = 0;
+float BLOOD_MED = 1;
+float BLOOD_LARGE = 2;
+float BLOOD_GREEN = 3;
+
+float bloodsplat_radius[4] =
+{
+	16, 24, 40, 8
+};
+
+string bloodsplat_mdl[4] =
+{
+	"models/bloodpool.mdl", "models/bloodpool2.mdl", "models/bloodpool3.mdl", "models/bloodpool_green.mdl"
+};
+
+void(vector slope, entity forwhom) pitch_roll_for_slope;
+
+void bloodpool_step ()
 {	//ws: play bloody step/squish sound when walking over blood
 	if (other.classname != "player")
 		return;
@@ -583,7 +600,7 @@ void blood_step ()
 	if (other.velocity_x==0 && other.velocity_y==0)
 	{
 		if (other.velocity_z>=0)
-			return;		//if still or jumping up
+			return;
 	}
 	
 	local string bloodsound[3] =
@@ -592,36 +609,55 @@ void blood_step ()
 	};
 	
 	sound (self, CHAN_BODY, bloodsound[rint(random(0,2))], random(0.5,0.8), ATTN_IDLE);
-	other.movetime=time+0.6;
+	other.movetime=time+0.5;
+	self.scale-=0.025;
+	if (self.scale<=0)
+		remove(self);
 }
 
-void BloodSplat(void)
+float bloodpool_check(float type)
 {
 	vector holdplane,location;
 	float length;
-	entity splat;
 	
 	location = self.origin;
-	length = 64;
+	length = bloodsplat_radius[type];
 	makevectors (self.angles);
-
-	traceline (location + v_up*8 + v_right * length + v_forward * length,location - v_up*32 + v_right * length + v_forward * length, TRUE, self);
+	
+	traceline (location + v_up*8 + v_right * 8 + v_forward * 8,location - v_up*32 + v_right * 8 + v_forward * 8, TRUE, self);
 	holdplane = trace_plane_normal;
 	if(trace_fraction==1)	// Nothing below victim
-		return;
+		return FALSE;
 
 	traceline (location + v_up*8 - v_right * length + v_forward * length,location - v_up*32 - v_right * length + v_forward * length, TRUE, self);
 	if ((holdplane != trace_plane_normal) || (trace_fraction==1))
-		return;
+		return FALSE;
 
 	traceline (location + v_up*8 + v_right * length - v_forward * length,location - v_up*32 + v_right * length - v_forward * length, TRUE, self);
 	if ((holdplane != trace_plane_normal) || (trace_fraction==1))
-		return;
+		return FALSE;
 
 	traceline (location + v_up*8 - v_right * length - v_forward * length,location - v_up*32 - v_right * length - v_forward * length, TRUE, self);
 	if ((holdplane != trace_plane_normal) || (trace_fraction==1))
-		return;
+		return FALSE;
+	
+	return TRUE;
+}
 
+void BloodSplat(float type)
+{
+entity splat;
+	
+	if (!bloodpool_check(type))
+	{	//try smaller splats if bigger splat wont fit
+		if (type==BLOOD_LARGE)
+			BloodSplat(rint(random(BLOOD_SMALL,BLOOD_MED)));
+		else if (type==BLOOD_MED)
+			BloodSplat(BLOOD_SMALL);
+		else
+			return;
+	}
+	dprint("splattin\n");
 	traceline (self.origin + v_up*8,self.origin - v_up*32, TRUE, self);
 
 	splat=spawn();
@@ -629,19 +665,26 @@ void BloodSplat(void)
 	splat.classname="bloodsplat";
 	splat.movetype=MOVETYPE_NONE;
 	splat.solid=SOLID_TRIGGER;		//SOLID_NOT
-	splat.scale=random(0.75, 0.9);
-	splat.touch=blood_step;
+	splat.drawflags=SCALE_ORIGIN_BOTTOM+SCALE_TYPE_XYONLY;
+	if (self.netname == "spider")
+		splat.scale = 0.5;
+	else if (self.netname == "yakman")
+		splat.scale = 1.3;
+	else if (self.netname == "maulotaur")
+		splat.scale = random(1.4,1.6);
+	else if (self.scale)
+		splat.scale = self.scale;
+	else
+		splat.scale = random(0.75, 0.9);
+	splat.angles_y+=random(360);
+	splat.touch=bloodpool_step;
 	if (CheckCfgParm(PARM_FADE)) {
 		splat.think=SUB_Remove;
 		thinktime splat : random(40,30);
 	}
 	
-	if (random(100) > 60)
-		setmodel(splat,"models/bloodpool3.mdl");
-	else
-		setmodel(splat,"models/bloodpool.mdl");
-	//setsize(splat,'0 0 0','0 0 0');
-	setsize(splat,'-24 -24 0','24 24 1');
+	setmodel (splat, bloodsplat_mdl[type]);
+	setsize(splat,'0 0 0','0 0 0');
 	setorigin(splat,trace_endpos + '0 0 0.1');	//0.5
 }
 
@@ -695,14 +738,14 @@ void chunk_death (void)
 		deathsound="fx/clothbrk.wav";
 	else if (self.thingtype==THINGTYPE_FLESH)
 	{
-		if ((random(100) < 40) && (self.netname != "spider"))
-			BloodSplat();
-		if (random(100) < 50)
-			ThrowGib("models/bloodpool2.mdl", self.health);
+		if (self.netname == "spider")
+			BloodSplat(BLOOD_GREEN);
+		else if (random(100) < 25)
+			BloodSplat(BLOOD_LARGE);
+		else if (random(100) < 50)
+			BloodSplat(BLOOD_MED);
 		else
-			ThrowGib("models/bloodpool.mdl", self.health);
-		if (random(100) < 30)
-			ThrowGib("models/bloodpool3.mdl", self.health);
+			BloodSplat(BLOOD_SMALL);
 		
 		if (self.headmodel)
 			ThrowGib (self.headmodel, self.health);
