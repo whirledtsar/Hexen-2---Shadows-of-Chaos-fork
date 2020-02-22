@@ -1634,9 +1634,9 @@ void() monster_werejaguar =
 	self.frame=$stand1;
 
 	self.init_exp_val = self.experience_value;
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);
+	self.buff=2;
+	walkmonster_start();
 };
 
 void monster_mezzoman (void)
