@@ -579,10 +579,10 @@ entity splat;
 	splat.drawflags=SCALE_ORIGIN_BOTTOM;
 	if (self.netname == "spider")
 		splat.scale = 0.5;
-	if (self.netname == "yakman")
+	else if (self.netname == "yakman")
 		splat.scale = 1.3;
 	else if (self.netname == "maulotaur")
-		splat.scale = 1.6;
+		splat.scale = random(1.4,1.6);
 	else if (self.scale)
 		splat.scale = self.scale;
 	else
