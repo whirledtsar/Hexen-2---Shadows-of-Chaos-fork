@@ -350,8 +350,6 @@ void FireHomingMissile (float offset, float seeking)
 
 	if(seeking)
 	{		
-		
-
 		newmis.enemy=self.enemy;
 		newmis.classname = "bishop star";
 		newmis.turn_time=12;
@@ -423,4 +421,5 @@ void() monster_bishop =
 	self.th_die = dark_bishop_die;
 	
 	flymonster_start ();
+	ApplyMonsterBuff(self, TRUE);
 };
