@@ -455,7 +455,6 @@ void yakman_die () [++ $howl1 .. $howl12]
 		chunk_death();
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/bloodpool.mdl", self.health);
 		return;
 	}
 	if(cycle_wrapped)
