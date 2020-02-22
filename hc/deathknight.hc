@@ -176,7 +176,6 @@ void() death_knight_die =
 	{
 		sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);
 		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/bloodpool.mdl", self.health);
 		//ThrowGib ("models/flesh2.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);

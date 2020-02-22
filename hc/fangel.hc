@@ -521,7 +521,6 @@ void() fangel_deathframes =
 	if(self.health<=-40)
 	{
 		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/bloodpool.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		chunk_death();
 		return;
