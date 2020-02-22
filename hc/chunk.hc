@@ -588,7 +588,6 @@ entity splat;
 	else
 		splat.scale = random(0.75, 0.9);
 	splat.angles_y+=random(360);
-	splat.angles_x+=random(360);
 	splat.touch=blood_step;
 	if (CheckCfgParm(PARM_FADE)) {
 		splat.think=SUB_Remove;
@@ -598,11 +597,6 @@ entity splat;
 	setmodel (splat, bloodsplat_mdl[type]);
 	setsize(splat,'0 0 0','0 0 0');
 	setorigin(splat,trace_endpos + '0 0 0.1');	//0.5
-	
-	entity oself; oself = self;
-	self = splat;
-	pitch_roll_for_slope(trace_plane_normal);
-	self = oself;
 }
 
 void() archer_gibs;
