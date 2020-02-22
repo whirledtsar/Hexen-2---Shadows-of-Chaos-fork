@@ -616,6 +616,13 @@ The monster is staying in one place for a while, with slight angle turns
 */
 void() ai_stand =
 {
+	//ws: monsters are spawned before player, so they cant check client's config flags immediately (as they arent initialized). instead, check once player is ready (global var client_ready).
+	if (!self.state && client_ready) {
+		self.state = TRUE;	//dont check again
+		if (CheckCfgParm(PARM_BUFF) && self.buff)
+			ApplyMonsterBuff(self, self.buff);
+	}
+	
 	sdprint("Summon monster standing", FALSE);
 	MonsterCheckContents();
 	
@@ -738,6 +745,10 @@ float() CheckAnyAttack =
 {
 	if (!enemy_vis)
 		return FALSE;
+	
+	//leaders can deflect attacks
+	if (self.bufftype & BUFFTYPE_LEADER)
+		LeaderRepulse();
 
 	if(self.classname=="monster_eidolon")
 		if(self.goalentity==self.controller)
