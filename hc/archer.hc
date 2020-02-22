@@ -827,9 +827,8 @@ void monster_archer ()
 
 	self.hull=HULL_PLAYER;
 	
+	self.buff=1;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, FALSE);
 }
 
 /*QUAKED monster_archer_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
@@ -876,11 +875,9 @@ void monster_archer_lord ()
 	}
 
 	if(!self.experience_value)
-		self.experience_value = 50;
-		//self.experience_value = 200;
+		self.experience_value = 50;	//200
 	if(!self.health)
-		self.health = 160;
-		//self.health = 325;
+		self.health = 160;	//325
 	//ws - reduced health to 2x normal
 
 	CreateEntityNew(self,ENT_ARCHER,"models/archer.mdl",archer_die);
@@ -909,9 +906,8 @@ void monster_archer_lord ()
 
 	self.init_exp_val = self.experience_value;
 	
+	self.buff=2;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, TRUE);
 }
 
 
