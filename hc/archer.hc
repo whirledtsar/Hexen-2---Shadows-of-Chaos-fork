@@ -821,9 +821,9 @@ void monster_archer ()
 	self.view_ofs = '0 0 40';
 
 	self.hull=HULL_PLAYER;
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, FALSE);
+	self.buff=1;
+	walkmonster_start();
 }
 
 /*QUAKED monster_archer_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
@@ -884,9 +884,9 @@ void monster_archer_lord ()
 	self.view_ofs = '0 0 40';
 
 	self.init_exp_val = self.experience_value;
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);
+	self.buff=2;
+	walkmonster_start();
 }
 
 /*QUAKED monster_archer_ice (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP x DORMANT NO_DROP FROZEN
