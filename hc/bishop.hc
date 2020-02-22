@@ -423,4 +423,5 @@ void() monster_bishop =
 	self.th_die = dark_bishop_die;
 	
 	flymonster_start ();
+	ApplyMonsterBuff(self, TRUE);
 };

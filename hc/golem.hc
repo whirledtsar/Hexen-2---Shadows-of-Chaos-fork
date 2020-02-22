@@ -171,6 +171,8 @@ void monster_golem_stone(void)
 	self.view_ofs = self.proj_ofs='0 0 64';
 	self.init_exp_val = self.experience_value;
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);  
 }
 
 //==========================================================================
@@ -231,6 +233,8 @@ void monster_golem_iron(void)
 	self.view_ofs = self.proj_ofs='0 0 64';
 	self.init_exp_val = self.experience_value;
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);  
 }
 
 //==========================================================================
@@ -291,7 +295,8 @@ void monster_golem_bronze(void)
 	self.view_ofs = self.proj_ofs='0 0 115';
 	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	ApplyMonsterBuff(self, TRUE);  
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 //==========================================================================

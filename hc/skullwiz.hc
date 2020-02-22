@@ -895,7 +895,7 @@ void skullwiz_blink(void) [++ $sktele2..$sktele30]
 		
 		//temporarily remove monster effects
 		// Must happen before teleport in order to not break the SCALE_TYPE_MASKOUT effect
-		//RemoveMonsterBuffEffect(self);
+		RemoveMonsterBuffEffect(self);
 
 		//self.drawflags = (self.drawflags & SCALE_TYPE_MASKOUT) | SCALE_TYPE_XYONLY;
 		//replacing explicite flags with adding/removing Teleport related flags
@@ -1154,7 +1154,8 @@ void monster_skull_wizard (void)
 	self.init_exp_val = self.experience_value;
 
 	walkmonster_start();
-	//ApplyMonsterBuff(self, TRUE);
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 /*QUAKED monster_skull_wizard_lord (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
@@ -1188,6 +1189,7 @@ void monster_skull_wizard_lord (void)
 	self.scale = 1.20;
 	self.init_exp_val = self.experience_value;
 	walkmonster_start();
-	//ApplyMonsterBuff(self, TRUE);
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
