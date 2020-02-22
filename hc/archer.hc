@@ -277,7 +277,6 @@ void() archer_die =
 	// check for gib
 	if (self.health < -30)
 	{
-		ThrowGib ("models/bloodpool.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib("models/blood.mdl", self.health);
 		ThrowGib("models/blood.mdl", self.health);
