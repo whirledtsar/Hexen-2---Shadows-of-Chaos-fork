@@ -25,6 +25,7 @@ void() W_Precache =
 	precache_model ("models/proj_lt.mdl");
 	
 	//ws: precache monsters used by sickle monster summoning function
+	precache_sound("skullwiz/gate.wav");
 	precache_scorpion();
 	precache_spider();
 	precache_knight();
