@@ -532,13 +532,13 @@ void BloodSplat(void)
 		return;
 
 	traceline (self.origin + v_up*8,self.origin - v_up*32, TRUE, self);
-
-    splat=spawn();
-    splat.owner=self;
-    splat.classname="bloodsplat";
-    splat.movetype=MOVETYPE_NONE;
-    splat.solid=SOLID_TRIGGER;		//SOLID_NOT
-    splat.scale=random(0.75, 0.9);
+	
+	splat=spawn();
+	splat.owner=self;
+	splat.classname="bloodsplat";
+	splat.movetype=MOVETYPE_NONE;
+	splat.solid=SOLID_TRIGGER;		//SOLID_NOT
+	splat.scale=random(0.75, 0.9);
 	splat.touch=blood_step;
 	if (CheckCfgParm(PARM_FADE)) {
 		splat.think=SUB_Remove;
@@ -549,9 +549,9 @@ void BloodSplat(void)
 		setmodel(splat,"models/bloodpool3.mdl");
 	else
 		setmodel(splat,"models/bloodpool.mdl");
-    //setsize(splat,'0 0 0','0 0 0');
-	setsize(splat,'-24 -24 0','24 24 12');
-    setorigin(splat,trace_endpos + '0 0 0.1');
+	//setsize(splat,'0 0 0','0 0 0');
+	setsize(splat,'-24 -24 0','24 24 1');
+	setorigin(splat,trace_endpos + '0 0 0.1');
 }
 
 void() archer_gibs;
