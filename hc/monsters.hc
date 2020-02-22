@@ -628,7 +628,7 @@ float BUFF_LEADER_CHANCE = 2; //3
 float BUFF_SPECTRE_CHANCE = 6;
 void ApplyMonsterBuff(entity monst, float canBeLeader)
 {
-	if (!self.buff || !CheckCfgParm(PARM_BUFF))
+	if (!monst.buff || !CheckCfgParm(PARM_BUFF))
 		return;
 	
 	float randmin, randval;
