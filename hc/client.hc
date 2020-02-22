@@ -615,6 +615,7 @@ entity spot;
 //	else if(self.sv_flags)
 //		serverflags=self.sv_flags;
 	parm16 = self.state;	//ws: config parm flags system
+	client_ready = TRUE;	//ws: monsters check this to know when to check client config parm flags
 
 	self.classname = "player";
 	self.takedamage = DAMAGE_YES;
@@ -828,6 +829,7 @@ entity spot;
 	}
 	
 	parm16 = self.state;	//ws: config parm flags system
+	client_ready = TRUE;	//ws: monsters check this to know when to check client config parm flags
 
 	// Need to reset these because they could still point to entities in the previous map
 	self.enemy = self.groundentity = self.chain = self.goalentity = self.dmg_inflictor = self.ladder =

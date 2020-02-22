@@ -2,6 +2,7 @@
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/ai.hc,v 1.7 2007-02-07 16:56:54 sezero Exp $
  */
 void(entity etemp, entity stemp, entity stemp, float dmg) T_Damage;
+void() CheckMonsterBuff;
 /*
 
 .enemy
@@ -517,6 +518,8 @@ The monster is walking it's beat
 */
 void(float dist) ai_walk =
 {
+	CheckMonsterBuff();
+	
 	MonsterCheckContents();
 
 	movedist = dist;
@@ -539,6 +542,7 @@ The monster is staying in one place for a while, with slight angle turns
 void() ai_stand =
 {
 	sdprint("Summon monster standing", FALSE);
+	CheckMonsterBuff();
 	MonsterCheckContents();
 	
 	sdprint("Summon monster contents are ok", FALSE);
@@ -652,18 +656,16 @@ void LeaderRepulse (void)
 }
 
 float() CheckAnyAttack =
-{
-	//leaders can deflect attacks
-	if (self.bufftype & BUFFTYPE_LEADER)
-	{
-		LeaderRepulse();
-	}
-	
+{	
 	if (self.model=="models/medusa.mdl"||self.model=="models/medusa2.mdl")
 			return(MedusaCheckAttack ());
 
 	if (!enemy_vis)
 		return FALSE;
+	
+	//leaders can deflect attacks
+	if (self.bufftype & BUFFTYPE_LEADER)
+		LeaderRepulse();
 
 	//if (self.model=="models/archer.mdl")
 		//return(ArcherCheckAttack ());
@@ -734,7 +736,7 @@ The monster has an enemy it is trying to kill
 void(float dist) ai_run =
 {
 	sdprint("Doing AI run... ", FALSE);
-	
+	CheckMonsterBuff();
 	MonsterCheckContents();
 	
 	movedist = dist;
@@ -937,4 +939,17 @@ void ChangePitch (void)
 	
 	current_pitch = anglemod (current_pitch + move);
 	self.angles_x = current_pitch;
+}
+
+void CheckMonsterBuff ()
+{
+	/*ws: monsters are spawned before player, so they cant check client's config flags immediately (as they arent initialized).
+	instead, use ai_run, ai_walk, & ai_stand to check once player is ready (indicated by global var client_ready, set in client.hc). */
+	if (!self.state && client_ready) {
+		self.state = TRUE;	//dont check again
+		if (CheckCfgParm(PARM_BUFF) && self.buff)
+			ApplyMonsterBuff(self, self.buff);
+	}
+	
+	return;
 }

@@ -1541,10 +1541,9 @@ void() monster_werejaguar =
 	setsize (self, '-16 -16 0', '16 16 56');
 
 	self.frame=$stand1;
-
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);
+	self.buff=2;
+	walkmonster_start();
 };
 
 void monster_mezzoman (void)

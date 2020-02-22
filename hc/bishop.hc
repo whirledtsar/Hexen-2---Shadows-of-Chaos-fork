@@ -420,6 +420,6 @@ void() monster_bishop =
 	self.th_pain = dark_bishop_pain;
 	self.th_die = dark_bishop_die;
 	
+	self.buff=2;
 	flymonster_start ();
-	ApplyMonsterBuff(self, TRUE);
 };
