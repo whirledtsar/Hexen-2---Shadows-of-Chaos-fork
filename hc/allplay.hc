@@ -383,6 +383,16 @@ float fade;
 		new.avelocity = 0;
 		new.gravity = 17;
 		
+		if (new.model != "models/bloodpool_ice.mdl")
+		{
+			new.classname = "bloodsplat";
+			new.solid = SOLID_TRIGGER;
+			new.touch = blood_step;
+			setsize(new,'-24 -24 0','24 24 12');
+		}
+		else
+			setsize(new, '0 0 0' , '0 0 0');
+		
 		if (self.netname == "spider")
 		{
 			setmodel (new, "models/bloodpool_green.mdl");
@@ -395,6 +405,8 @@ float fade;
 		}
 		if (self.netname == "yakman")
 			new.scale = 1.3;
+		else if (self.netname == "maulotaur")
+			new.scale = 1.6;
 		
 		setsize(new, '0 0 0' , '0 0 0');
 	}
