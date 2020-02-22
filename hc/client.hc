@@ -846,7 +846,6 @@ entity spot;
 	self.viewentity=self;
 	self.wallspot='0 0 0';
 	self.deathtype="";
-	self.glyph_finished =
 	self.act_state =
 	self.onfire=
 	self.healthtime=
@@ -890,7 +889,9 @@ entity spot;
 	self.camptime+= TimeDiff;
 	self.last_attack= self.attack_finished=0;
 	
-	self.whiptime = 0;
+	self.whiptime =
+	self.movetime = 	/*timer for blood footsteps sound effect*/
+	self.glyph_finished = 0; /*delay between glyph uses*/
 
 	self.light_level = 128;		// So the assassin doesn't go invisible coming out of the teleporter
 
