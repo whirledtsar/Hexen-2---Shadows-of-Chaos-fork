@@ -18,6 +18,28 @@ float AFRIT_DODGESPEED = 6;
 void() AfritCheckDodge;
 void() afrit_wake1;
 
+void afrit_raise()
+{
+float state;
+	state = RewindFrame(13,0);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "afrit/death.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
+
 void() AfritEffects
 {
 entity new;
@@ -437,6 +459,9 @@ void() monster_afrit =
 	}
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_afrit();
+	
+	if (self.flags2&FL_SUMMONED || self.flags2&FL2_RESPAWN)
+		self.spawnflags(-)AFRIT_COCOON;
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
@@ -473,6 +498,9 @@ void() monster_afrit =
 	self.th_missile = afrit_atk1;
 	self.th_pain = afrit_pain;
 	self.th_die = afrit_die;
+	self.th_init = monster_afrit;
+	self.th_raise = afrit_raise;
+	
 	if (self.spawnflags&AFRIT_COCOON)
 		self.th_stand = afrit_sit1;
 	else	
