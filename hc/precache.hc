@@ -1208,6 +1208,20 @@ void precache_archer()
 	precache_sound ("archer/draw.wav");
 }
 
+void precache_archerlord()
+{
+	precache_model("models/archerdecap_lord.mdl");
+	
+	precache_sound ("archer/growl2.wav");
+	precache_sound ("archer/growl3.wav");
+	precache_sound ("archer/growl4.wav");
+	precache_sound ("archer/pain2.wav");
+	precache_sound ("archer/sight2.wav");
+	precache_sound ("archer/death2.wav");
+	
+	precache_archer();
+}
+
 void precache_bishop()
 {
 	precache_model ("models/bishop.mdl");
