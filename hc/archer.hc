@@ -783,9 +783,7 @@ void monster_archer ()
 		self.init_org=self.origin;
 	}*/
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-	{
 		precache_archer();
-	}
 
 	if(!self.health)
 		self.health = 80;
@@ -855,29 +853,13 @@ void monster_archer_lord ()
 		self.init_org=self.origin;
 	}*/
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-	{
-		precache_model("models/archer.mdl");
-		precache_model("models/archerhd.mdl");
-
-		precache_model("models/gspark.spr");
-
-		precache_sound ("archer/arrowg.wav");
-		precache_sound ("archer/arrowr.wav");
-
-		precache_sound ("archer/growl2.wav");
-		precache_sound ("archer/growl3.wav");
-		precache_sound ("archer/growl4.wav");
-		precache_sound ("archer/pain2.wav");
-		precache_sound ("archer/sight2.wav");
-		precache_sound ("archer/death2.wav");
-		precache_sound ("archer/draw.wav");
-	}
+		precache_archerlord();
 
 	if(!self.experience_value)
-		self.experience_value = 50;	//200
+		self.experience_value = 100;	//200
 	if(!self.health)
-		self.health = 160;	//325
-	//ws - reduced health to 2x normal
+		self.health = 240;	//325
+	//ws - reduced health to 3x normal
 
 	CreateEntityNew(self,ENT_ARCHER,"models/archer.mdl",archer_die);
 
