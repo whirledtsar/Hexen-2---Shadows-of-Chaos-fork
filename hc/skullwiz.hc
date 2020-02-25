@@ -1152,10 +1152,9 @@ void monster_skull_wizard (void)
 	self.experience_value = 90;
 	self.monsterclass = CLASS_GRUNT;
 	self.init_exp_val = self.experience_value;
-
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);
+	self.buff=2;
+	walkmonster_start();
 }
 
 /*QUAKED monster_skull_wizard_lord (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
@@ -1188,8 +1187,8 @@ void monster_skull_wizard_lord (void)
 	self.skin = 1;
 	self.scale = 1.20;
 	self.init_exp_val = self.experience_value;
-	walkmonster_start();
 	
-	ApplyMonsterBuff(self, TRUE);
+	self.buff=1;
+	walkmonster_start();
 }
 
