@@ -137,6 +137,28 @@ float imp_fly_amounts[20] =
 	-0.4
 };
 
+void imp_raise()
+{
+float state;
+	state = RewindFrame($death14,$death1);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "imp/die.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
+
 void imp_drop (void)
 {
 	self.attack_state=AS_STRAIGHT;
@@ -1586,6 +1608,7 @@ void init_imp (float which_skin)
 		self.th_pain = imp_pain;
 		self.th_missile = imp_enter_swoop;
 		self.th_melee = imp_attack;
+		self.th_raise=imp_raise;
 	}
 
 	self.yaw_speed=8;
@@ -1619,10 +1642,8 @@ void init_imp (float which_skin)
 	else
 	{
 		self.flags (+) FL_MONSTER | FL_FLY;
-	}
-	
-	if (self.classname!="gargoyle")
 		self.buff=1;
+	}
 	
 	if(self.enemy)
 		self.th_run();
@@ -1644,6 +1665,8 @@ wait = if you give it a -1, the gargoyle will not come alive, it's just a decora
 */
 void monster_imp_ice ()
 {
+	if(!self.th_init)
+		self.th_init=monster_imp_ice;
 	init_imp(1);
 }
 
@@ -1658,6 +1681,8 @@ wait = if you give it a -1, the gargoyle will not come alive, it's just a decora
 */
 void monster_imp_fire ()
 {
+	if(!self.th_init)
+		self.th_init=monster_imp_fire;
 	init_imp(0);
 }
 
