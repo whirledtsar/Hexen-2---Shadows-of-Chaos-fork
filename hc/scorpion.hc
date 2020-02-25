@@ -107,7 +107,7 @@ float ScorpionStandFrames[6] =
 void scorpion_raise()
 {
 float state;
-	state = RewindFrame($SCDead21,$SCDead21);
+	state = RewindFrame($SCDead21,$SCDead1);
 	
 	self.think = self.th_raise;
 	
