@@ -335,9 +335,9 @@ void bone_turret_think ()
 		self.attack_finished = time+random(0.75,1.25);
 	}
 	
-	if (self.scale < 0.4) {
+	if (self.scale < 0.5) {
 		sound(self,CHAN_BODY,"necro/bonethit.wav",1,0.5);
-		vector randomvec,upordown;
+		vector randomvec;
 		randomvec=randomv('-10 -10 -10','10 10 10');
 		starteffect(CE_GHOST, self.origin-self.movedir*8+randomvec,'0 0 30'+randomvec, 0.1);
 		particle4(self.origin,50,random(368,384),PARTICLETYPE_GRAV,10);
@@ -482,11 +482,11 @@ void bone_fire(float ball, float tome, vector ofs)
 		sound(self,CHAN_WEAPON,"necro/bonefpow.wav",1,ATTN_NORM);
 		self.attack_finished=time + 1;
 		//newmis.dmg=random(wismod*2, wismod*2.5);
-		newmis.dmg=20+random(wismod, wismod*1.25);
+		newmis.dmg=20+random(wismod*0.8, wismod*1.2);
 		if (tome)
 		{
 			newmis.dmg = random(wismod*5, wismod*6);
-			newmis.scale = 1.3;
+			newmis.scale = 1.5;
 			self.greenmana-=BONE_TOMED_COST;
 			self.attack_finished=time + 1.3;
 		}
