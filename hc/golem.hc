@@ -1105,7 +1105,7 @@ void GolemBStompEffect(void)
 	MonsterQuake(350);	
 
 	if (dist < 350)
-		T_Damage(self.enemy, self, self, random(50/dist));
+		T_Damage(self.enemy, self, self, 1200/dist);	//vanilla: random(50/dist)
 }
 	
 //==========================================================================
