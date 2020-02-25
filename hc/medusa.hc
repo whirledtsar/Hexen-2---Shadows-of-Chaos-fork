@@ -969,6 +969,7 @@ void monster_medusa_green (void)
 	self.hull=HULL_PLAYER;
 
 	self.init_exp_val = self.experience_value;
+	self.buff=2;
 	walkmonster_start();
 }
 
