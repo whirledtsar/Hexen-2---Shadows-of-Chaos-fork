@@ -11,30 +11,27 @@ $origin 0 0 24
 $base base
 $skin badass3
 
-/*
-
-void() blood_fall1 =[ 0, blood_fall2] {bloodpool.scale = 0;};
-void() blood_fall2 =[ 0, blood_fall3] {setmodel (bloodpool, "models/blood.mdl");bloodpool.scale = .3;};
-void() blood_fall3 =[ 0, blood_fall4] {bloodpool.scale = 0.4;};
-void() blood_fall4 =[ 0, blood_fall5] {bloodpool.scale = 0.5;};
-void() blood_fall5 =[ 0, blood_fall6] {bloodpool.scale = 0.6;};
-void() blood_fall6 =[ 0, blood_fall7] {bloodpool.scale = 0.7;};
-void() blood_fall7 =[ 0, blood_fall8] {bloodpool.scale = 0.8;};
-void() blood_fall8 =[ 0, blood_fall8] {bloodpool.scale = 1.0;bloodpool.think = SUB_Remove; bloodpool.nextthink = time + 15;};
-
-void() blood_fx =
-{	
-	bloodpool = spawn ();
-	bloodpool.owner = self;
-	bloodpool.movetype = MOVETYPE_BOUNCE;
-	bloodpool.origin = self.origin + '0 0 0';
-	setsize (bloodpool, '0 5 1', '5 5 5');
-	bloodpool.think = blood_fall1;
-	bloodpool.nextthink = time + 0.01;
+void death_knight_raise()
+{
+float state;
+	state = RewindFrame(89,69);
 	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "death_knight/kdeath.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
 }
-
-*/
 
 void()	death_knight_stand1	=[	0,	death_knight_stand2	] {ai_stand();};
 void()	death_knight_stand2	=[	1,	death_knight_stand3	] {ai_stand();};
@@ -273,6 +270,9 @@ void() monster_death_knight =
 	self.th_melee = death_knight_atk1;
 	self.th_pain = death_knight_pain;
 	self.th_die = death_knight_die;
+	self.th_raise = death_knight_raise;
+	self.th_init = monster_death_knight;
 	
+	self.buff=1;
 	walkmonster_start ();
 };
