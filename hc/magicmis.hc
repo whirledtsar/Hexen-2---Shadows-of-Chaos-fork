@@ -575,10 +575,9 @@ void  mmis_normal()
 	}
 	
 	self.bluemana-=cost;
-	if (0.6 - self.level*0.05 < 0.2)
-		self.attack_finished=time+0.2;	//vanilla magic missile delay
-	else
-		self.attack_finished = time+(0.6 - self.level*0.05);
+	self.attack_finished = time+(0.625 - self.level*0.025);
+	if (self.attack_finished<time+0.2)	//vanilla magic missile delay
+		self.attack_finished = time+0.2;
 	
 	/*if (self.level < 2)		//ws: bloodshot's method
 		self.attack_finished=time+0.6;
