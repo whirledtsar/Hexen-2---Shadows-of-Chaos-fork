@@ -1117,7 +1117,7 @@ void eidolon_spell () [++ $spell1 .. $spell20]
 		if(self.veer)
 			EidoPoly();
 		else
-			FireMagicMissile(0);
+			FireMagicMissile(0, FALSE);
 	}
 	if(self.frame==$spell20)
 	{
