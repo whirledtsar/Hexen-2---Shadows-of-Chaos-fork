@@ -606,3 +606,42 @@ void monster_jump ()	//ws: generic think function for monsters in the air due to
 		thinktime self : 0.01;
 	}
 }
+
+void monster_raisedebuff()
+{	//called by risen monsters after initializing their default values but before entering their think states
+	self.buff = 0;		//dont turn into a buffed monster variant
+	self.health *= 0.75;
+	self.experience_value *= 0.75;
+}
+
+void monster_raiseinit(entity corpse)
+{
+	if (!corpse.th_raise || !corpse.th_init)
+		return;
+	
+entity new;		//create new entity to avoid inheriting anything weird from corpse
+	new = spawn();
+	setsize (new, corpse.mins, corpse.maxs);
+	setmodel(new, corpse.model);
+	setorigin(new, corpse.origin);
+	
+	new.frame = corpse.frame;
+	new.scale = corpse.scale;
+	new.drawflags = corpse.drawflags;
+	new.skin = corpse.skin;
+	new.flags2 (+) FL2_RESPAWN;		//dont precache
+	new.enemy = corpse.enemy;
+	new.classname = corpse.classname;
+	new.th_init = corpse.th_init;
+	new.th_raise = corpse.th_raise;
+	new.think = new.th_raise;
+	thinktime new : 0;
+	
+	remove(corpse);
+	/*corpse.buff = 0;					//dont apply monster variation
+	corpse.flags2 (+) FL_SUMMONED;		//dont precache
+	corpse.health = corpse.max_health*0.75;
+	corpse.think = corpse.th_raise;
+	thinktime corpse : 0;*/
+}
+

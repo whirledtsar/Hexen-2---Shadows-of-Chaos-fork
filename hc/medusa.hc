@@ -158,6 +158,28 @@ void()medusa_attack_left;
 void()medusa_attack;
 void(float action)MedusaSelectDir;
 
+void medusa_raise()
+{
+float state;
+	state = RewindFrame($death20,$death01);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "medusa/death.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
+
 void medusa_check_use_model (string modelstring)
 {
 	if(self.model!=modelstring)
@@ -548,8 +570,10 @@ void MedusaHeadDying () [++ 46 .. 105]
 		else if(self.frame==105)
 		{
 			self.skin=1;
-			self.think=init_corpseblink;
-			thinktime self : 5;
+			self.preventrespawn=TRUE;
+			self.think=CorpseThink;
+			/*self.think=init_corpseblink;
+			thinktime self : 5;*/
 		}
 }
 
@@ -948,6 +972,8 @@ void monster_medusa_green (void)
 	self.th_pain=medusa_pain;
 	self.th_missile=medusa_rattle;
 	self.th_melee=medusa_attack;
+	self.th_init=monster_medusa_green;
+	self.th_raise=medusa_raise;
 
 	setmodel (self, "models/medusa.mdl");
 
