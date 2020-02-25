@@ -115,6 +115,28 @@ float RED_ARROW = 1;
 float GOLD_ARROW = 2;
 float BLUE_ARROW = 3;
 
+void archer_raise()
+{
+float state;
+	state = RewindFrame($deathA21,$deathA1);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "archer/death.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
+
 float archer_check_shot(void)
 {
 	vector spot1,spot2;
@@ -777,11 +799,9 @@ void monster_archer ()
 		return;
 	}
 
-	/*if(!self.th_init)
-	{
+	if(!self.th_init)
 		self.th_init=monster_archer;
-		self.init_org=self.origin;
-	}*/
+	
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_archer();
 
@@ -803,6 +823,7 @@ void monster_archer ()
 	self.th_melee = archerdraw;
 	self.th_missile = archerdraw;
 	self.th_pain = archer_pain;
+	self.th_raise = archer_raise;
 	self.decap = 0;
 
 	if(!self.speed)
@@ -847,11 +868,9 @@ void monster_archer_lord ()
 		return;
 	}
 
-	/*if(!self.th_init)
-	{
+	if(!self.th_init)
 		self.th_init=monster_archer_lord;
-		self.init_org=self.origin;
-	}*/
+	
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_archerlord();
 
@@ -870,6 +889,7 @@ void monster_archer_lord ()
 	self.th_melee = archerdraw;
 	self.th_missile = archerdraw;
 	self.th_pain = archer_pain;
+	self.th_raise = archer_raise;
 	self.decap = 0;
 	self.headmodel = "models/archerhd.mdl";
 	if(!self.spawnflags&ARCHER_STUCK)
@@ -905,11 +925,8 @@ Dislikes: Sunshine and happiness
 */
 void monster_archer_ice ()
 {
-	/*if(!self.th_init)
-	{
+	if(!self.th_init)
 		self.th_init=monster_archer_ice;
-		self.init_org=self.origin;
-	}*/
 	self.netname=self.classname;
 	self.classname="monster_archer";
 	monster_archer();
