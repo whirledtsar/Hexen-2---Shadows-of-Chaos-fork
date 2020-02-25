@@ -99,6 +99,28 @@ float SpiderExp[4] =
 
 // CODE --------------------------------------------------------------------
 
+void spider_raise()
+{
+float state;
+	state = RewindFrame($sdeath20,$sdeath1);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "spider/death.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
+
 void monster_spider(void) {}
 
 //==========================================================================
@@ -120,6 +142,8 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_red_large(void)
 {
+	if(!self.th_init)
+		self.th_init=monster_spider_red_large;
 	SpiderInit(SPIDER_RED_LARGE);
 }
 
@@ -142,6 +166,8 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_red_small(void)
 {
+	if(!self.th_init)
+		self.th_init=monster_spider_red_small;
 	SpiderInit(SPIDER_RED_SMALL);
 }
 
@@ -164,6 +190,8 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_yellow_large(void)
 {
+	if(!self.th_init)
+		self.th_init=monster_spider_yellow_large;
 	SpiderInit(SPIDER_YELLOW_LARGE);
 }
 
@@ -185,6 +213,8 @@ IMPORTANT!  Put ONWALL spiders 8 pixels away from the wall you want them to be o
 
 void monster_spider_yellow_small(void)
 {
+	if(!self.th_init)
+		self.th_init=monster_spider_yellow_small;
 	SpiderInit(SPIDER_YELLOW_SMALL);
 }
 
