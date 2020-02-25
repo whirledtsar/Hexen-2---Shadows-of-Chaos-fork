@@ -724,13 +724,13 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float playercontrolled;
 .float whiptime;
 .float killerlevel;	//used to measure player level for respawn strength
-.float bufftype;	 //used for monsters to determine bonus types on spawn
+.float bufftype;	//used for monsters to determine bonus types on spawn
 .float tempscale;
-.float buff;	//1 = can become a buffed variant, 2 = can further become a leader variant
+.float buff;		//1 = can become a buffed variant, 2 = can further become a leader variant
 
 //EXPANSION CODE FOR YAKMAN
-/*.void() th_init;		//used for expansion respawning system
-.vector init_org;*/
+.void() th_init;
+//.vector init_org;	//used for expansion respawning system
 .float init_exp_val;
 
   //extras
