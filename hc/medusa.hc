@@ -574,7 +574,7 @@ void MedusaHeadDying () [++ 46 .. 105]
 			self.flags2 (+) FL_SMALL;
 			self.preventrespawn=TRUE;
 			self.think=CorpseThink;
-			thinktime self : 0
+			thinktime self : 0;
 			/*self.think=init_corpseblink;
 			thinktime self : 5;*/
 		}
