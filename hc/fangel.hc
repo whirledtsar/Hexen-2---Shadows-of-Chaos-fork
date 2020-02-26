@@ -854,6 +854,7 @@ void() init_fangel =
 	self.th_die = fangel_deathframes;
 	self.th_missile = fangel_handframes;
 	self.th_melee = fangel_wingframes;
+	self.th_init = monster_fallen_angel;
 	self.headmodel="models/h_fangel.mdl";
 
 	total_monsters += 1;
