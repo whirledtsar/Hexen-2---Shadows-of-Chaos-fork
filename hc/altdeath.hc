@@ -227,7 +227,12 @@ string type;
 	}
 	if(self.movechain!=world&&!self.movechain.flags&FL_CLIENT)
 		remove(self.movechain);
-	if(self.classname!="player")	
-		remove(self);
+	if(self.classname!="player")
+	{
+		if (CheckCfgParm(PARM_RESPAWN))
+			MarkForRespawn();
+		else
+			remove(self);
+	}
 }
 
