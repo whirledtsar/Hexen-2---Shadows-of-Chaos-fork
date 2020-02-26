@@ -648,7 +648,7 @@ void chunk_death (void)
 		deathsound="fx/clothbrk.wav";
 	else if (self.thingtype==THINGTYPE_FLESH)
 	{
-		if (!self.flags&FL_SWIM)
+		if (!self.flags&FL_SWIM && self.flags&FL_ONGROUND)
 		{
 			if (self.netname == "spider")
 				BloodSplat(BLOOD_GREEN);
