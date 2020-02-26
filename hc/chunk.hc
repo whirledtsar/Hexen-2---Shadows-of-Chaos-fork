@@ -758,7 +758,7 @@ void chunk_death (void)
 	SUB_UseTargets();
 	self.target = self.targetname;
 
-	if (self.solid!=SOLID_BSP)
+	if (self.th_init)
 	{
 		//set up respawn time
 		self.think = MarkForRespawn;
