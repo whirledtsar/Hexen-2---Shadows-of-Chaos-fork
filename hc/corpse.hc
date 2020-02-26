@@ -58,68 +58,7 @@ void monster_fallen_angel (void);
 	//spot is clear, use spot
 	self.origin = spot1;
  
-	if (self.classname == "monster_imp_ice")
-		self.think = monster_imp_ice;
-	else if (self.classname == "monster_imp_fire")
-		self.think = monster_imp_fire;
-	else if (self.classname == "monster_archer")
-		self.think = monster_archer;
-	else if (self.classname == "monster_archer_lord")
-	{
-		self.classname = "monster_archer_lord"; //self.classname = "monster_archer";
-		self.think = monster_archer;
-	}
-	else if (self.classname == "monster_skull_wizard")
-		self.think = monster_skull_wizard;
-	else if (self.classname == "monster_scorpion_black")
-		self.think = monster_scorpion_black;
-	else if (self.classname == "monster_scorpion_yellow")
-		self.think = monster_scorpion_yellow;
-	else if (self.classname == "monster_spider_yellow_large")
-		self.think = monster_spider_yellow_large;
-	else if (self.classname == "monster_spider_yellow_small")
-		self.think = monster_spider_yellow_small;
-	else if (self.classname == "monster_spider_red_large")
-		self.think = monster_spider_red_large;
-	else if (self.classname == "monster_spider_red_small")
-		self.think = monster_spider_red_small;
-	else if (self.classname == "monster_golem_stone")
-		self.think = monster_golem_stone;
-	else if (self.classname == "monster_golem_iron")
-		self.think = monster_golem_iron;
-	else if (self.classname == "monster_golem_bronze")
-		self.think = monster_golem_bronze;
-	else if (self.classname == "monster_mummy")
-		self.think = monster_mummy;
-	else if (self.classname == "monster_mummy_lord")
-	{
-		self.classname = "monster_mummy";
-		self.think = monster_mummy;
-	}
-	else if (self.classname == "monster_werejaguar")
-		self.think = monster_werejaguar;
-	else if (self.classname == "monster_mezzoman")
-		self.think = monster_mezzoman;
-	else if (self.classname == "monster_werepanther")
-		self.think = monster_werepanther;
-	else if (self.classname == "monster_medusa")
-		self.think = monster_medusa;
-	else if (self.classname == "monster_fallen_angel")
-		self.think = monster_fallen_angel;
-	else if (self.classname == "monster_fallen_angel_lord")
-	{
-		self.classname = "monster_fallen_angel";
-		self.think = monster_fallen_angel;
-	}
-	else //not a supported respawn
-	{
-		//Don't respawn bosses
-		//Other monsters not supported: 
-		//		monster_fallen_angel_lord, apocalypse riders, eidelon, etc.
-		remove(self);
-		return;
-	}
-
+	self.think = self.th_init;
 	self.nextthink = time + 0.01;
 	
 	CreateRedCloud (self.origin + '0 0 40','0 0 0',HX_FRAME_TIME);
@@ -133,7 +72,7 @@ void MarkForRespawn (void)
 	entity newmis;
 	float timelimit;
 	
-	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
+	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
