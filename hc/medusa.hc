@@ -570,8 +570,11 @@ void MedusaHeadDying () [++ 46 .. 105]
 		else if(self.frame==105)
 		{
 			self.skin=1;
+			self.lifetime = time+random(20,30);
+			self.flags2 (+) FL_SMALL;
 			self.preventrespawn=TRUE;
 			self.think=CorpseThink;
+			thinktime self : 0
 			/*self.think=init_corpseblink;
 			thinktime self : 5;*/
 		}
