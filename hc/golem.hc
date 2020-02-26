@@ -159,6 +159,7 @@ void monster_golem_stone(void)
 	self.mintel = 4;
 	self.th_melee = GolemSMeleeDecide;
 	self.th_pain = GolemSPain;
+	self.th_init = monster_golem_stone;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	
 	self.buff=2;
@@ -211,6 +212,7 @@ void monster_golem_iron(void)
 	self.experience_value = 200;
 	self.th_melee = GolemIMeleeDecide;
 	self.th_pain = GolemIPain;
+	self.th_init = monster_golem_iron;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	
 	self.buff=2;
@@ -276,6 +278,7 @@ void monster_golem_bronze(void)
 	self.experience_value = 275;
 	self.th_melee = GolemBMeleeDecide;
 	self.th_pain = GolemBPain;
+	self.th_init = monster_golem_bronze;
 	self.view_ofs = self.proj_ofs='0 0 115';
 	
 	self.buff=2;
