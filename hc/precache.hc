@@ -1075,6 +1075,7 @@ void Precache_mdl (void)
 	precache_model ("models/sunstaff.mdl");
 	
 	precache_model ("models/icecloud.spr");
+	precache_model ("models/mumshot.mdl");
 
 //SPECIAL ABILITIES
 	//Necromancer
