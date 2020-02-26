@@ -419,6 +419,8 @@ void() monster_wendigo =
 	self.th_missile = wendigo_atk1;
 	self.th_pain = wendigo_pain;
 	self.th_die = wendigo_die;
+	self.th_init = monster_wendigo;
 	
+	self.buff=1;
 	walkmonster_start ();
 };

@@ -419,6 +419,7 @@ void() monster_bishop =
 	self.th_missile = dark_bishop_atk1;
 	self.th_pain = dark_bishop_pain;
 	self.th_die = dark_bishop_die;
+	self.th_init = monster_bishop;
 	
 	self.buff=2;
 	flymonster_start ();
