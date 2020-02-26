@@ -583,11 +583,10 @@ entity splat;
 		splat.scale = 1.3;
 	else if (self.netname == "maulotaur")
 		splat.scale = random(1.4,1.6);
-	else if (self.scale)
-		splat.scale = self.scale;
+	else if (self.bufftype && self.scale>1)
+		splat.scale = self.scale*random(0.75, 0.9);
 	else
 		splat.scale = random(0.75, 0.9);
-	splat.angles_y+=random(360);
 	splat.touch=blood_step;
 	if (CheckCfgParm(PARM_FADE)) {
 		splat.think=SUB_Remove;
@@ -649,14 +648,19 @@ void chunk_death (void)
 		deathsound="fx/clothbrk.wav";
 	else if (self.thingtype==THINGTYPE_FLESH)
 	{
-		if (self.netname == "spider")
-			BloodSplat(BLOOD_GREEN);
-		else if (random(100) < 25)
-			BloodSplat(BLOOD_LARGE);
-		else if (random(100) < 50)
-			BloodSplat(BLOOD_MED);
-		else
-			BloodSplat(BLOOD_SMALL);
+		if (!self.flags&FL_SWIM)
+		{
+			if (self.netname == "spider")
+				BloodSplat(BLOOD_GREEN);
+			else if (self.flags2&FL_SMALL)
+				BloodSplat(BLOOD_SMALL);
+			else if (random(100) < 25)
+				BloodSplat(BLOOD_LARGE);
+			else if (random(100) < 50)
+				BloodSplat(BLOOD_MED);
+			else
+				BloodSplat(BLOOD_SMALL);
+		}
 		
 		if (self.headmodel)
 			ThrowGib (self.headmodel, self.health);
