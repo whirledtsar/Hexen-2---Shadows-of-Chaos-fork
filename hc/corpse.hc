@@ -1,30 +1,9 @@
 /*
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/corpse.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
  */
- 
-void monster_imp_ice (void);
-void monster_imp_fire (void);
-void monster_archer (void);
-void monster_skull_wizard (void);
-void monster_scorpion_black (void);
-void monster_scorpion_yellow (void);
-void monster_spider_yellow_large (void);
-void monster_spider_yellow_small (void);
-void monster_spider_red_large (void);
-void monster_spider_red_small (void);
-void monster_golem_stone (void);
-void monster_golem_iron (void);
-void monster_golem_bronze (void);
-void monster_mummy (void);
-void monster_mummy_lord (void);
-void monster_werejaguar (void);
-void monster_mezzoman (void);
-void monster_werepanther (void);
-void monster_medusa(void);
-void monster_fallen_angel (void);
 
- void wandering_monster_respawn()
- {
+void wandering_monster_respawn()
+{
 	vector newangle,spot1,spot2;
 	float loop_cnt;
 	
@@ -62,7 +41,7 @@ void monster_fallen_angel (void);
 	self.nextthink = time + 0.01;
 	
 	CreateRedCloud (self.origin + '0 0 40','0 0 0',HX_FRAME_TIME);
- }
+}
 
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
 float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
