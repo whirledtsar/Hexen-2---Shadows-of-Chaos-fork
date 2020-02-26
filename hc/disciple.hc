@@ -282,9 +282,7 @@ void() monster_disciple =
 		return;
 	}
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-	{
 		precache_disciple();
-	}
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
@@ -319,6 +317,7 @@ void() monster_disciple =
 	self.th_missile = bishop_atk1;
 	self.th_pain = bishop_pain;
 	self.th_die = bishop_die;
+	self.th_init = monster_disciple;
 	
 	self.buff=2;
 	flymonster_start();
