@@ -955,6 +955,7 @@ void monster_mummy (void)
 	self.th_melee = mummymelee;
 	self.th_missile = mummymissile;
 	self.th_pain = mummy_pain;
+	self.th_init = monster_mummy;
 	self.parts_gone = MUMMY_NONE;
 	self.skin = 0;
 
@@ -995,6 +996,7 @@ void monster_mummy_lord (void)
 	self.th_melee = mummymelee;
 	self.th_missile = mummylordchoice;
 	self.th_pain = mummy_pain;
+	self.th_init = monster_mummy_lord;
 	self.parts_gone = MUMMY_NONE;
 	self.skin = 1;
 	self.headmodel="models/muhead.mdl";
