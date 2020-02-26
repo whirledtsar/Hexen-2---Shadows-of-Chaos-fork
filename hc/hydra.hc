@@ -784,7 +784,6 @@ void init_hydra(void)
 	self.th_die = do_hydra_die;
 	self.th_missile = do_hydra_spit;
 	self.th_melee = do_hydra_tent;
-	self.th_init=monster_hydra;
 
 	self.takedamage = DAMAGE_YES;
 	self.flags2 (+) FL_ALIVE;
@@ -816,6 +815,7 @@ NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, play_dead, no
 */
 void monster_hydra(void)
 {
+	self.th_init=monster_hydra;
 	init_hydra();
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
