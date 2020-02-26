@@ -104,8 +104,12 @@ void sound_again(void)
 		sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 
 	self.think = sound_again;
-						 
-  
+		 
+  	if (self.flags==0)
+		self.flags=5;
+	if (self.flags2==0)
+		self.flags2=30;
+	
 	thinktime self : random(self.flags,self.flags2);							   
 }
 
