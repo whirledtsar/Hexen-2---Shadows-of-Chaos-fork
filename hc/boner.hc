@@ -320,10 +320,10 @@ void bone_turret_think ()
 	if (random(0,100) < chance)
 	{	//check if its aimed at a wall
 		makevectors(self.angles);
-		traceline(self.origin,self.origin+v_forward*2,TRUE,self);
+		traceline(self.origin,self.origin+v_forward*8,TRUE,self);
 		if (trace_fraction != 1) {
 			self.lefty *= (-1);		//reverse direction
-			self.angles_y+=(20*self.lefty);
+			self.angles_y+=(30*self.lefty);
 		}
 		sound(self,CHAN_WEAPON,"necro/bonefnrm.wav",0.5,ATTN_NORM);
 		bone_turret_fire();
@@ -331,7 +331,7 @@ void bone_turret_think ()
 	
 	particle4(self.origin,30,random(368,384),PARTICLETYPE_GRAV,1);
 	if (self.attack_finished < time) {
-		CreateGreySmoke(self.origin+'0 0 8'*self.scale,'0 0 4', HX_FRAME_TIME*2);
+		CreateGreySmoke(self.origin+'0 0 6'*self.scale,'0 0 4', HX_FRAME_TIME*2);
 		self.attack_finished = time+random(0.75,1.25);
 	}
 	
@@ -360,7 +360,9 @@ void bone_ball_touch ()
 	{
 		sound(self,CHAN_BODY,"necro/bonenwal.wav",1,ATTN_NORM);
 		self.solid = SOLID_PHASE;
-		self.angles = self.velocity = self.avelocity = '0 0 0';
+		self.angles = vectoangles(self.velocity);
+		self.angles_x = self.angles_z = 0;
+		self.velocity = self.avelocity = '0 0 0';
 		self.drawflags(+)MLS_ABSLIGHT;
 		self.drawflags(+)SCALE_ORIGIN_CENTER;
 		self.abslight=0.5;
@@ -376,10 +378,14 @@ void bone_ball_touch ()
 		if (trace_plane_normal == '0 0 0')
 			traceline(org,org+v_up*1,TRUE,self);	//hit ceil?
 		if (trace_plane_normal_z == 1)
-			setorigin (self, self.origin + '0 0 14');	//raise from floor
-		else if (trace_plane_normal_z == (-1)) {
-			setorigin (self, self.origin + '0 0 -14');	//lower from ceil
-		}
+			setorigin (self, self.origin + '0 0 16');	//raise from floor
+		else if (trace_plane_normal_z == (-1))
+			setorigin (self, self.origin + '0 0 -16');	//lower from ceil
+		
+		traceline(self.origin,self.origin+v_forward*2,TRUE,self);
+		if (trace_fraction!=1)
+			setorigin(self, self.origin+v_forward*(-6));	//move away from wall
+		self.angles_y *= (-1);	//point away from wall
 	}
 	else	//explode & remove
 	{
