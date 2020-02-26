@@ -3,15 +3,52 @@ void() check_stand;
 vector undying_mins = '-16 -16 -6';
 vector undying_maxs = '16 16 56';
 
+void undying_fixpos()
+{	//called when they rise from fake death or real death (via resurrection). otherwise they get stuck in ground & cant move
+	setorigin (self, self.origin + '0 0 2');
+	self.movetype = MOVETYPE_TOSS;
+	self.flags (-) FL_ONGROUND;
+	self.velocity = '0 0 -100';
+}
+
+void undying_raise()
+{
+float state;
+	state = RewindFrame(130,90);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "undying/udeath.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		undying_fixpos();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
+
+float undying_headless ()
+{
+	if (self.model == "models/ZombiePal_nohd.mdl")
+		return TRUE;
+		
+	return FALSE;
+}
+
 void undying_standup(void) [++ 131 .. 182]
 {
 	thinktime self : HX_FRAME_TIME;
 	
 	if (self.frame == 132)
 	{
-		//setorigin(self, self.origin + '0 0 1');
-		movestep(0,0,1,FALSE);
-		if (random(100) < 80 && self.model != "models/ZombiePal_nohd.mdl")
+		if (random(100) < 80 && !undying_headless())
 			sound (self, CHAN_VOICE, "undying/usight.wav", 1, ATTN_NORM);
 	}
 		
@@ -40,21 +77,20 @@ void undying_standup(void) [++ 131 .. 182]
 				return;
 			}
 		}
-		//centerprint(find(world, classname, "player"), "not stuck");
 	}
 	
-	if (self.frame >= 140)
+	if (self.frame == 140)
 	{
-		//setorigin(self, self.origin + '0 0 3');
-		//self.flags(-)FL_ONGROUND;
 		setsize (self, undying_mins, undying_maxs);
 		self.solid = SOLID_SLIDEBOX;
 		self.takedamage = DAMAGE_YES;
 		self.th_pain = self.th_save;
+		undying_fixpos();
 	}
 	
 	if (self.frame >= 181)
 	{
+		self.movetype=MOVETYPE_STEP;
 		if (self.enemy)
 			self.think = self.th_run;
 		else
@@ -66,7 +102,6 @@ void() check_stand
 {
 	thinktime self : 2;
 	self.frame = 131;	//rise1
-	setorigin(self, self.origin + '0 0 1');
 	self.think = undying_standup;
 }
 
@@ -96,7 +131,7 @@ void undying_painfall(void) [++ 90 .. 130]
 	
 	if (self.frame == 92)
 	{
-		if (random(100) < 80)
+		if (random(100) < 80 && !undying_headless())
 		{
 			ThrowGib(self.headmodel, self.health);
 			self.headmodel = "";
@@ -112,6 +147,7 @@ void undying_painfall(void) [++ 90 .. 130]
 	{
 		self.solid = SOLID_NOT;
 		setsize (self, '-23 -13 -6', '23 13 6');
+		setorigin (self, self.origin+'0 0 2');
 	}
 	else if (self.frame == 119)	//death31
 		setsize (self, '-16 -16 -6', '16 16 25');
@@ -144,7 +180,7 @@ void undying_pain(void) [++ 90 .. 99]
 	ai_pain(2);
 	self.pain_finished=time+1;
 	
-	if (self.frame == 91 && self.model != "models/ZombiePal_nohd.mdl")
+	if (self.frame == 91 && !undying_headless())
 		sound(self,CHAN_VOICE,"undying/upain.wav",1,ATTN_NORM);
 	
 	if(self.frame >= 99)
@@ -216,12 +252,6 @@ void undying_leap(void) [++ 65 .. 88]
 void()	undying_run1	=[	50,		undying_run2	] {
 	ai_run(self.speed*2);
 	sound (self, CHAN_BODY, "mummy/crawl.wav", 1, ATTN_NORM);
-	if (self.solid != SOLID_SLIDEBOX)
-	{
-		setorigin(self, self.origin + '0 0 3');
-		setsize (self, undying_mins, undying_maxs);
-		self.solid = SOLID_SLIDEBOX;
-	}
 };
 void()	undying_run2	=[	51,		undying_run3	] {ai_run(self.speed*2);};
 void()	undying_run3	=[	52,		undying_run4	] {ai_run(self.speed*2);};
@@ -253,7 +283,7 @@ void undying_dying(void) [++ 90 .. 130]
 	if (self.frame == 91)
 	{
 		starteffect(CE_GHOST, self.origin,'0 0 10', 0.1);
-		if (random(100) < 80 && self.headmodel!="")
+		if (random(100) < 80 && !undying_headless())
 		{
 			ThrowGib(self.headmodel, self.health);
 			self.headmodel = "";
@@ -320,11 +350,6 @@ void monster_undying ()
 		return;
 	}
 	
-	/*if(!self.th_init)
-	{
-		self.th_init=monster_undying;
-		self.init_org=self.origin;
-	}*/
 	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_undying();
 
@@ -340,14 +365,18 @@ void monster_undying ()
 	//self.th_missile = undying_leap;
 	self.th_pain = undying_pain;
 	self.th_die = undying_dying;
+	self.th_init = monster_undying;
+	self.th_raise = undying_raise;
+	
 	self.decap = 0;
 	self.headmodel = "models/ZombiePal_hd.mdl";
 	self.sightsound = "undying/usight.wav";
 	
 	if(!self.speed)
 		self.speed=1.3;
-		
-	setmodel(self, "models/ZombiePal.mdl");
+	
+	if (!undying_headless())
+		setmodel(self, "models/ZombiePal.mdl");
 
 	self.monsterclass = CLASS_GRUNT;
 
