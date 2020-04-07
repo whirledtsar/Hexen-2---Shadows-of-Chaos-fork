@@ -343,7 +343,7 @@ void launch_mumshot2 (void)
 void mummy_die()
 {
 	ThrowGib ("models/blood.mdl", self.health);
-	ThrowGib("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
 	//ThrowGib (self.headmodel, self.health);
 	if (self.classname == "monster_mummy_lord")
 		sound (self, CHAN_VOICE, "mummy/die2.wav", 1, ATTN_NORM);
@@ -352,12 +352,24 @@ void mummy_die()
 
 	chunk_death ();
 
-//	self.nextthink = time + 0.01;
-	thinktime self : .01;
-
-	self.think=SUB_Remove;
+	/*thinktime self : .01;
+	self.think=SUB_Remove;*/
 }
 
+void mummy_limb_init(entity new)
+{
+	new.velocity = VelocityForDamage (40);
+	new.avelocity_x = random()*600;
+	new.avelocity_y = random()*600;
+	new.avelocity_z = random()*600;
+
+	new.movetype = MOVETYPE_BOUNCE;
+	new.solid = SOLID_PHASE;
+	new.flags(-)FL_ONGROUND;
+	new.preventrespawn = TRUE;	//checked by monster summoning function in sickle.hc plus monster respawning functions
+	new.think=MakeSolidCorpse;
+	thinktime new : HX_FRAME_TIME * 10;
+}
 
 void mummy_throw_rightleg()
 {
@@ -367,23 +379,11 @@ void mummy_throw_rightleg()
 	CreateEntityNew(new,ENT_MUMMY_LEG,"models/leg.mdl",SUB_Null);
 	
 	makevectors(self.angles);
-	new.origin = self.origin + v_right * 10 + v_up * 60;
-	new.velocity = VelocityForDamage (40);
-	new.avelocity_x = random()*600;
-	new.avelocity_y = random()*600;
-	new.avelocity_z = random()*600;
-
+	new.origin = self.origin + v_right * 10 + v_up * 15;
+	mummy_limb_init(new);
+	
 	self.parts_gone = MUMMY_LEG;   // So he's missing a leg
 	self.mummy_state = MUMMY_WAVER;
-
-	new.movetype = MOVETYPE_BOUNCE;
-	new.solid = SOLID_PHASE;
-	new.flags(-)FL_ONGROUND;
-	new.preventrespawn = TRUE;	//checked by monster summoning function in sickle.hc
-	new.think=MakeSolidCorpse;
-//	new.nextthink = time + HX_FRAME_TIME * 10;
-	thinktime new : HX_FRAME_TIME * 10;
-
 //	bloodspew_create();
 }
 
@@ -394,19 +394,10 @@ void mummy_throw_rightarm()
 	new = spawn();
 
 	CreateEntityNew(new,ENT_MUMMY_ARM,"models/larm.mdl",SUB_Null);
+	
 	makevectors(self.angles);
 	new.origin = self.origin + v_right * 10 + v_up * 60;
-	new.velocity = VelocityForDamage (40);
-	new.avelocity_x = random()*600;
-	new.avelocity_y = random()*600;
-	new.avelocity_z = random()*600;
-
-	new.movetype = MOVETYPE_BOUNCE;
-	new.solid = SOLID_PHASE;
-	new.flags(-)FL_ONGROUND;
-	new.preventrespawn = TRUE;	//checked by monster summoning function in sickle.hc
-	new.think=MakeSolidCorpse;
-	thinktime new : HX_FRAME_TIME * 10;
+	mummy_limb_init(new);
 
 	self.parts_gone = MUMMY_RARM;   // So he's missing his right arm
 //	bloodspew_create('0 10 40');
@@ -422,19 +413,9 @@ void mummy_throw_leftarm()
 
 	makevectors(self.angles);
 	new.origin = self.origin - v_right * 10 + v_up * 60;
-	new.velocity = VelocityForDamage (40);
-	new.avelocity_x = random()*600;
-	new.avelocity_y = random()*600;
-	new.avelocity_z = random()*600;
-
-	new.movetype = MOVETYPE_BOUNCE;
-	new.solid = SOLID_PHASE;
-	new.flags(-)FL_ONGROUND;
-	new.preventrespawn = TRUE;	//checked by monster summoning function in sickle.hc
+	mummy_limb_init(new);
+	
 	self.parts_gone = MUMMY_LARM;   // So he's missing an arm
-	new.think=MakeSolidCorpse;
-	thinktime new : HX_FRAME_TIME * 10;
-
 //	bloodspew_create('0 -10 40');
 }
 
