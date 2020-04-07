@@ -111,9 +111,12 @@ vector loser_org;
 	if(type=="lightning")
 		spawnshockball((trace_ent.absmax+trace_ent.absmin)*0.5);
 	loser_org=trace_ent.origin;
-    T_Damage (trace_ent, from, from, damage);
-	if(trace_ent.health<=0)
+	if(trace_ent.health-damage<=0) {
 		smolder(loser_org);
+		if (type == "sunbeam")
+			AshSkin(trace_ent);
+	}
+	T_Damage (trace_ent, from, from, damage);
 	if(type=="lightning")
 		sound(trace_ent,CHAN_AUTO,"misc/lighthit.wav",1,ATTN_NORM);
 	else

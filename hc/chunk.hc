@@ -399,7 +399,12 @@ void CreateModelChunks (vector space,float scalemod)
 		chunk.frame=random(2);
 		chunk.drawflags(+)DRF_TRANSLUCENT|MLS_ABSLIGHT;
 		chunk.abslight=0.5;
-		
+	}
+	else if (self.thingtype==THINGTYPE_ASH)
+	{
+		setmodel(chunk,"models/shard.mdl");
+		chunk.skin=2;
+		chunk.frame=rint(random(1,2));
 	}
 	else// if (self.thingtype==THINGTYPE_GREYSTONE)
 	{
@@ -646,6 +651,8 @@ void chunk_death (void)
 		deathsound="fx/bonebrk.wav";
 	else if ((self.thingtype==THINGTYPE_CLOTH) || (self.thingtype==THINGTYPE_REDGLASS))
 		deathsound="fx/clothbrk.wav";
+	else if (self.thingtype==THINGTYPE_ASH)
+		deathsound="misc/bshatter.wav";
 	else if (self.thingtype==THINGTYPE_FLESH)
 	{
 		if (!self.flags&FL_SWIM && self.flags&FL_ONGROUND)
