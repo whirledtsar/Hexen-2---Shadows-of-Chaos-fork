@@ -282,7 +282,7 @@ void archer_dying (void) [++ $deathA1..$deathA22]
 	if (self.health < -80)
 	{
 		chunk_death();
-		remove(self);
+		return;
 	}
 
 	if (cycle_wrapped)
@@ -306,9 +306,6 @@ void() archer_die =
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib("models/blood.mdl", self.health);
 		ThrowGib("models/blood.mdl", self.health);
-		//archer_gibs();
-		//BloodSplat();
-		//ThrowGib (self.headmodel, self.health);
 		chunk_death();
 		return;
 	}
