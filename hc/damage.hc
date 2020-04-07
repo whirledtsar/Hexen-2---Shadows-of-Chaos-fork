@@ -230,20 +230,23 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 				self.decap=2;
 			}
 
-	if(self.skin==GLOBAL_SKIN_STONE||self.frozen>0)
+	if(self.skin==GLOBAL_SKIN_STONE||self.skin==GLOBAL_SKIN_ASH||self.frozen>0)
 	{	//Frozen or stoned
 		if(self.classname!="player")
-			self.th_die=shatter;			
+			self.th_die=shatter;
 		thinktime self : 0;
 		self.attack_finished=time;
 		self.pausetime=time;
 		self.teleport_time=time;
-		//if(self.frozen>0)
-			//self.deathtype="ice shatter";
 		if(self.frozen>0)
 			self.deathtype="ice shatter";
 		else if(self.skin==GLOBAL_SKIN_STONE)
 			self.deathtype="stone crumble";
+		else if(self.skin==GLOBAL_SKIN_ASH)
+		{	//if we havent already initialized as ash statue, do so now
+			if (!self.artifact_active&ARTFLAG_ASH)
+				self.th_die=AshStatueInit;
+		}
 	}
 
 	if (self.classname == "player")
