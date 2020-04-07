@@ -236,6 +236,7 @@ void AshStatueInit ()
 	self.thingtype=THINGTYPE_ASH;
 	self.deathtype="burnt crumble";
 	self.health=random(20,25);
+	self.experience_value = 0;	//already rewarded xp, dont do it again
 	self.mass=self.mass*0.5;
 	if (self.mass<2)
 		self.mass=2;
