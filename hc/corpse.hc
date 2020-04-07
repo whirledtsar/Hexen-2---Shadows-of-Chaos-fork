@@ -10,37 +10,52 @@ void wandering_monster_respawn()
 	//check if anything is in the path of spawning
 	trace_fraction = 0;
 	loop_cnt =0;
-	spot2 = self.origin;
+	spot1 = self.origin;
 	while (trace_fraction < 1)
 	{
 		newangle = self.angles;
-
 		makevectors (newangle);
-		
-		spot1 = spot2;
-		spot2 = spot1 + (v_forward * 60);
-		
-		traceline (spot1, spot2 , FALSE, self);
+		//check in front
+		spot2 = spot1 + (v_forward * 30);
+		traceline (spot1, spot2, FALSE, self);
+		//check behind
+		if (trace_fraction == 1) 	{
+			spot2 = spot1 - (v_forward * 30);
+			traceline (spot1, spot2, FALSE, self);
+		}
+		//check up (origin is on floor)
+		if (trace_fraction == 1) {
+			spot2 = spot1 + (v_up * 60);
+			traceline (spot1, spot2, FALSE, self);
+		}
+		//just in case
+		if (trace_fraction == 1) {
+			self.origin_z += 10;
+			droptofloor();
+			if (!walkmove(0,0, FALSE))
+				trace_fraction = 0;
+		}
 		
 		loop_cnt +=1;
-		dprint("Searching!!\n");
+		dprint("Respawning monster checking area\n");
 
 		if (loop_cnt > 10)   // No endless loops
 		{
 			//if 10 checks happen and no spot is found, try again in 2 seconds
 			self.nextthink = time + 2;
-			dprint("Found nothing!!\n");
+			dprint("Respawning monster inhibited\n");
 			return;
 		}
 	}
 	
 	//spot is clear, use spot
-	self.origin = spot1;
- 
+	dprint("Respawning monster ready to spawn\n");
+	self.origin = spot1 + '0 0 10';	//avoid spawning inhibited by floor
+	
 	self.think = self.th_init;
 	self.nextthink = time + 0.01;
 	
-	CreateRedCloud (self.origin + '0 0 40','0 0 0',HX_FRAME_TIME);
+	CreateRedCloud (spot1 + '0 0 40','0 0 0',HX_FRAME_TIME);
 }
 
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
@@ -70,6 +85,17 @@ void MarkForRespawn (void)
 		newmis.flags2 (+) FL_SUMMONED;
 		newmis.lifetime = time + 900;
 		newmis.classname = self.classname;
+		newmis.th_init = self.th_init;
+		
+		if (self.monsterclass < CLASS_BOSS)	//drop mana on death
+		{
+			float chance;
+			chance = random();
+			if (chance<0.4)
+				newmis.greenmana = 15;
+			else if (chance<0.8)
+				newmis.bluemana = 15;
+		}
 		
 		newmis.think = wandering_monster_respawn;
 		newmis.nextthink = time + timelimit;
