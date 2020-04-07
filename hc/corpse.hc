@@ -166,9 +166,11 @@ vector newmaxs;
 //value set in spawn
 
 	self.target = self.targetname;	//fix by Shanjaq
-    self.th_die = chunk_death;
+ 	self.th_die = chunk_death;
+	if (self.skin==GLOBAL_SKIN_ASH)
+		self.th_die = shatter;
 	//self.touch = obj_push; //Pushable corpses has the side effect of getting the player stuck when ironically it was meant to prevent that
-    self.health = random(10,25);
+	self.health = random(10,25);
 	if (self.mass >= 30 && self.mass <= 100)
 		self.health += (self.mass*0.75);	//ws: increase health for big corpses
 	self.takedamage = DAMAGE_YES;
