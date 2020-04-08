@@ -301,19 +301,12 @@ void() bmis_touch =
 			remove(self);
 		}
 	}
-	
-	
-
 };
 
 
 void FireHomingMissile (float offset, float seeking)
 {
-	//entity star1,star2;
-	//vector spread;
 	v_forward=self.v_angle;
-	
-	
 
 	self.effects(+)EF_MUZZLEFLASH;
 	newmis=spawn();
@@ -325,14 +318,10 @@ void FireHomingMissile (float offset, float seeking)
 	//newmis.drawflags(+)SCALE_ORIGIN_CENTER|MLS_FULLBRIGHT|MLS_CRYSTALGOLEM;//|DRF_TRANSLUCENT;
 	newmis.movetype=MOVETYPE_FLYMISSILE;
 	newmis.solid=SOLID_BBOX;
-	
-	//newmis.th_stand=dark_bishop_fire1;
-	//newmis.th_stand();
 
 	newmis.touch=bmis_touch;
 
 	newmis.speed=500;
-	//spread=normalize(v_right)*(offset*25);
 	//newmis.velocity=normalize(v_forward)*newmis.speed + spread;
 	newmis.velocity = normalize(self.enemy.origin - self.origin);
 	newmis.velocity = newmis.velocity * 50;
@@ -344,14 +333,11 @@ void FireHomingMissile (float offset, float seeking)
 	setmodel(newmis,"models/bishop_proj.mdl");
 	setsize(newmis,'0 0 0','0 0 0');
 
-
 	newmis.scale=.8;
 	setorigin(newmis,self.origin+self.proj_ofs+v_forward*8+v_right*7+'0 0 15');
 
 	if(seeking)
 	{		
-		
-
 		newmis.enemy=self.enemy;
 		newmis.classname = "bishop star";
 		newmis.turn_time=12;
@@ -366,12 +352,6 @@ void FireHomingMissile (float offset, float seeking)
 		newmis.hoverz=TRUE;
 		thinktime newmis : 0.2;
 	}
-	else
-	{
-		newmis.think=chain_remove;
-		thinktime newmis : 3;
-	}
-
 }
 
 /*QUAKED monster_bishop (1 0 0) (-16 -16 -24) (16 16 40) Ambush
@@ -383,7 +363,7 @@ void() monster_bishop =
 		remove(self);
 		return;
 	}
-	if (!self.flags2 & FL_SUMMONED)
+	if (!self.flags2 & FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_bishop();
 	
 	//self.skin = 1;
@@ -395,8 +375,6 @@ void() monster_bishop =
 	setsize (self, '-13 -13 -2', '13 13 45');
 	if(!self.health)
 		self.health = 200;
-	//self.health = 22;
-	//self.scale = 0.9;
 	
 	self.thingtype=THINGTYPE_FLESH;
 	
@@ -421,6 +399,7 @@ void() monster_bishop =
 	self.th_missile = dark_bishop_atk1;
 	self.th_pain = dark_bishop_pain;
 	self.th_die = dark_bishop_die;
+	self.th_init = monster_bishop;
 	
 	self.buff=2;
 	flymonster_start ();
