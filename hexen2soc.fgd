@@ -2200,10 +2200,7 @@
 	[
 		2 : "Start off"
 	]
-	t_length(integer) : "Mist max offset" : 30
-	t_width(integer) : "Mist speed" : 30
-	height(integer) : "Mist speed (Z)" : 6
-	lifespan(integer) : "Mist lifetime" : 2
+	t_width(integer) : "Mist max offset from origin" : 30
 	wait(integer) : "Delay between spawns" : 0.5
 ]
 
@@ -2213,7 +2210,7 @@
 
 @PointClass base(Object) model(":models/treebig.mdl") size(-10 -10 -5, 10 10 40) = obj_treelarge : "Large tree, no collision (can be combined with skip texture brushes or used as background trees" []
 
-@PointClass base(Monster) size(-16 -16 0, 16 16 36) model(":models/afrit.mdl") = monster_afrit : "afrit from hexen 1" [
+@PointClass base(Monster) size(-16 -16 0, 16 16 36) model(":models/afrit.mdl") = monster_afrit : "Afrit from hexen 1" [
 	spawnflags(Flags) =
 	[
 		2 : "Cocoon (place on ground)"
