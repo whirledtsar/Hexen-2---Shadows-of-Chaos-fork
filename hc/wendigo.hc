@@ -335,6 +335,7 @@ void() monster_wendigo =
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
+	self.init_org=self.origin;
 
 	setmodel (self, "models/wendigo.mdl");
 
