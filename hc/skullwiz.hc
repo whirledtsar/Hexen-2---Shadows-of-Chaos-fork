@@ -457,8 +457,9 @@ void skullwiz_summon(void)
 	}
 	self.scale = 0.1;
 
-	setorigin(self,spot2);	
-	//reateWhiteSmoke (self.origin+'0 0 3','0 0 8');
+	setorigin(self,spot2);
+	
+	//CreateWhiteSmoke (self.origin+'0 0 3','0 0 8');
 
 	sound (self, CHAN_VOICE, "skullwiz/gate.wav", 1, ATTN_NORM);
 
@@ -836,18 +837,19 @@ float loop_cnt,forward,dot;
 
 		//forward = random(120,200);
 		//spot2 = spot1 + (v_forward * forward);
-		//traceline (spot1, spot2 + (v_forward * 30) , FALSE, self.enemy);
+		//traceline (spot1, spot2 + (v_forward * 30) , FALSE, self);
 		forward = random((self.size_x + self.size_y),200.00000);
 		spot2 = (spot1 + (v_forward * forward) + (v_up * forward));
-		traceline ( spot1, (spot2 + (v_forward * ((self.size_x + self.size_y) * 0.5))), TRUE, self);	//self.enemy
+		traceline ( spot1, (spot2 + (v_forward * ((self.size_x + self.size_y) * 0.5))), TRUE, self);
 		if (trace_fraction == 1.0) //  Check no one is standing where monster wants to be
 		{
-			traceline ( spot2, (spot2 - (v_up * (forward * 2.00000))), TRUE, self.enemy);
+			traceline ( spot2, (spot2 - (v_up * (forward * 2.00000))), TRUE, self);
 			spot2 = trace_endpos;
 			
    			makevectors (newangle);
 			//tracearea (spot2,spot2 + v_up * 80,'-32 -32 -10','32 32 46',FALSE,self);
-			tracearea ( spot2, (spot2 + (v_up * 80)), self.mins, self.maxs, FALSE, self);	//self.enemy
+			tracearea (spot2, (spot2 + (v_up * 80)), self.orgnl_mins-'8 8 0', self.orgnl_maxs+'8 8 0', FALSE, self);	//self.enemy
+			
 			if ((trace_fraction == 1.0) && (!trace_allsolid)) // Check there is a floor at the new spot
 			{
 				spot3 = spot2 + (v_up * -4);
@@ -857,26 +859,31 @@ float loop_cnt,forward,dot;
 				{
 					trace_fraction = 0;   // So it will loop
 				}
-				else 
+				else
 				{
    					makevectors (newangle);
-					traceline (spot1, spot2, FALSE, self.enemy);
+					traceline (spot1, spot2, FALSE, self);
 
 					if (trace_fraction == 1.0)
 					{
-						setsize(self, '-24 -24 0', '24 24 64');
-						self.hull = 2;
+						setsize (self, self.orgnl_mins, self.orgnl_maxs);
 						self.solid = SOLID_SLIDEBOX;
 						setorigin(self,spot2);
-
+						droptofloor();	//ws: dont float above ground? not sure if this is effective
+						
 						if (walkmove(self.angles_y, .05, TRUE))		// You have to move it a little bit to make it solid
-							trace_fraction = 1;   // So it will end loop					
+						{
+							trace_fraction = 1;   // So it will end loop
+						}
 						else
-							trace_fraction = 0;   // So it will loop					
+						{
+							trace_fraction = 0;   // So it will loop
+							self.solid = SOLID_NOT;		//ws: Unset solid to prevent player from getting stuck
+						}
 					}
 					else
 					{
-						trace_fraction = 0;   // So it will loop					
+						trace_fraction = 0;   // So it will loop
 					}
 				}
 			}
@@ -1185,6 +1192,8 @@ void skullwizard_init(void)
 	self.th_die = skullwiz_die;
 
 	setsize(self, '-24 -24 0', '24 24 64');
+	self.orgnl_mins = self.mins;
+	self.orgnl_maxs = self.maxs;
 	self.hull = 2;
 
 	self.flags(+)FL_MONSTER;
@@ -1239,6 +1248,7 @@ void monster_skull_wizard_lord (void)
 	self.monsterclass = CLASS_LEADER;
 	self.skin = 1;
 	self.scale = 1.20;
+	//setsize (self, self.mins*self.scale, self.maxs*self.scale);
 	self.th_init = monster_skull_wizard_lord;
 	
 	self.buff=1;
