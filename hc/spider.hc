@@ -91,7 +91,7 @@ float SpiderHealth[4] =
 
 float SpiderExp[4] =
 {
-	175,	// SPIDER_RED_LARGE
+	150,	// SPIDER_RED_LARGE
 	50,		// SPIDER_RED_SMALL
 	100,	// SPIDER_YELLOW_LARGE
 	25		// SPIDER_YELLOW_SMALL
@@ -100,6 +100,28 @@ float SpiderExp[4] =
 // CODE --------------------------------------------------------------------
 
 //void monster_spider(void) {}
+
+void spider_raise()
+{
+float state;
+	state = RewindFrame($sdeath20,$sdeath1);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "spider/death.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
 
 //==========================================================================
 //
@@ -347,6 +369,7 @@ void SpiderInit(float type)
 	self.th_melee = SpiderMeleeBegin;
 	self.th_missile = SpiderJumpBegin;
 	self.th_pain = SpiderPain;
+	self.th_raise = spider_raise;
 
 	self.flags (+) FL_MONSTER;
 
