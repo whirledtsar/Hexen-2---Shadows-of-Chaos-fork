@@ -119,12 +119,8 @@ void()	death_knight_pain11	=[	67,	death_knight_run1	] {};
 
 void(entity attacker, float damage)	death_knight_pain =
 {
-	local float r;
-
 	if (self.pain_finished > time)
 		return;
-
-	r = random();
 	
 	sound (self, CHAN_VOICE, "death_knight/khurt.wav", 1, ATTN_NORM);
 	ThrowGib ("models/blood.mdl", self.health);
@@ -238,6 +234,7 @@ void() monster_death_knight =
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
+	self.init_org=self.origin;
 
 	setmodel (self, "models/footsoldier.mdl");
 
