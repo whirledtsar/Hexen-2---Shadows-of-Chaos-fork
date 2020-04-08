@@ -83,8 +83,66 @@ void skullwiz_blink(void);
 void skullwiz_push (void);
 void skullwiz_missile_init (void);
 
+void monster_raiseinit (entity corpse);
+
 float SKULLBOOK  =0;
 float SKULLHEAD  =1;
+
+entity skullwiz_findcorpse ()
+{
+entity corpse;
+	corpse = findradius(self.origin, 288);
+	while(corpse)
+	{
+		if (corpse.th_raise && corpse.th_init && corpse.think == CorpseThink && !corpse.preventrespawn) {
+			if (corpse.classname!="monster_undying" && corpse.decap)
+				return world;	//dont revive decapitated corpses besides undying
+			
+			return corpse;
+		}
+		corpse = corpse.chain;
+	}
+	return world;
+}
+
+void skullwiz_raise(void)
+{
+entity risen;
+	risen = skullwiz_findcorpse();
+	if (risen==world)
+		return;
+		
+	risen.enemy = self.enemy;
+	risen.controller = self;
+	monster_raiseinit(risen);
+}
+
+void skullwiz_raiseinit (void) [++ $skgate1..$skgate30]
+{
+	self.think = skullwiz_raiseinit;
+	
+	if (self.frame == $skgate2) {
+		entity ring;
+		ring = spawn();
+		setorigin (ring, self.origin);
+		ring.owner = self;
+		ring.lifetime = time + .8;
+		setmodel(ring, "models/proj_ringshock.mdl");
+		ring.think = shockwave;
+		thinktime ring : .1;
+		
+		sound (ring, CHAN_BODY, "skullwiz/gate.wav", 1, ATTN_NORM);
+	}
+
+	if (self.frame >= $skgate10 && self.frame <= $skgate23) {
+		skullwiz_raise();
+	}
+
+	if (cycle_wrapped) {
+		self.glyph_finished=time+5;		//dont raise corpses again until this timer is up
+		skullwiz_run();
+	}
+}
 
 float() SkullFacingIdeal =
 {
@@ -539,7 +597,7 @@ void SkullMissile_Twist2(void)
 	{
 		sound (self, CHAN_BODY, "skullwiz/scream2.wav", 1, ATTN_NORM);
 		self.scream_time = time + random(.50,1);
-	}	
+	}
 	
 	if (self.owner.bufftype & BUFFTYPE_LEADER)
 		HomeThink();
@@ -679,7 +737,9 @@ void skullwiz_missile (void) [++ $skspel2..$skspel30]
   -----------------------------------------*/
 void skullwiz_missile_init (void) [++ $skredi1..$skredi12]
 {
-
+	if (self.classname=="monster_skull_wizard_lord" && skullwiz_findcorpse()!=world)
+		skullwiz_raiseinit();
+	
 	self.frame += 2;
 
 	if (cycle_wrapped)
@@ -1018,6 +1078,12 @@ void skullwiz_run (void) [++ $skwalk1..$skwalk24]
 		else
 			sound (self, CHAN_VOICE, "skullwiz/growl2.wav", 1, ATTN_NORM);
 	}
+	
+	if (self.classname=="monster_skull_wizard_lord" && time>self.glyph_finished)
+	{	//ws: lord wizards can revive dead bodies
+		if (skullwiz_findcorpse()!=world)
+			skullwiz_raiseinit();
+	}
 
 	delta = self.enemy.origin - self.origin;
 	if (vlen(delta) < 80)		// Too close so don't ignore enemy
@@ -1163,10 +1229,10 @@ void monster_skull_wizard (void)
 		self.health = 150;
 	if(!self.max_health)
 		self.max_health=self.health;
-	self.experience_value = 90;
+	self.experience_value = 100;
 	self.monsterclass = CLASS_GRUNT;
 	self.init_exp_val = self.experience_value;
-	
+
 	self.buff=2;
 	walkmonster_start();
 }
@@ -1196,7 +1262,7 @@ void monster_skull_wizard_lord (void)
 		self.health = 600;
 	if(!self.max_health)
 		self.max_health=self.health;
-	self.experience_value = 325;
+	self.experience_value = 300;
 	self.monsterclass = CLASS_LEADER;
 	self.skin = 1;
 	self.scale = 1.20;
