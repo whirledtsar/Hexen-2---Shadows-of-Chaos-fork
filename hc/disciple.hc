@@ -27,7 +27,6 @@ void()	bishop_dsprite10	=[	9,	bishop_dsprite11	] {};
 void()	bishop_dsprite11	=[	10,	bishop_dsprite12	] {};
 void()	bishop_dsprite12	=[	11,	bishop_dsprite12	] {remove(self);};
 
-
 void()	bishop_float1	=[	0,	bishop_float2	] {ai_stand();};
 void()	bishop_float2	=[	1,	bishop_float3	] {ai_stand();};
 void()	bishop_float3	=[	2,	bishop_float4	] {ai_stand();};
@@ -174,7 +173,7 @@ void()	bishop_die11=[	46,	bishop_die12] {};
 void()	bishop_die12=[	47,	bishop_die13] {};
 void()	bishop_die13=[	48,	bishop_die14] {};
 void()	bishop_die14=[	49,	bishop_die15] {};
-void()	bishop_die15=[	50,	bishop_die15] {ThrowGib ("models/bloodpool.mdl", self.health);discip_fx();chunk_death();sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);ThrowGib ("models/blood.mdl", self.health);ThrowGib ("models/blood.mdl", self.health);};
+void()	bishop_die15=[	50,	bishop_die15] {discip_fx();chunk_death();sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);ThrowGib ("models/blood.mdl", self.health);ThrowGib ("models/blood.mdl", self.health);};
 
 
 void() bishop_die =
@@ -285,9 +284,7 @@ void() monster_disciple =
 		return;
 	}
 	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-	{
 		precache_disciple();
-	}
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
@@ -322,6 +319,7 @@ void() monster_disciple =
 	self.th_missile = bishop_atk1;
 	self.th_pain = bishop_pain;
 	self.th_die = bishop_die;
+	self.th_init = monster_disciple;
 	
 	self.buff=2;
 	flymonster_start();

@@ -104,6 +104,28 @@ float ScorpionStandFrames[6] =
 
 // CODE --------------------------------------------------------------------
 
+void scorpion_raise()
+{
+float state;
+	state = RewindFrame($SCDead21,$SCDead1);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "scorpion/death.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
+
 //==========================================================================
 //
 // monster_scorpion_yellow
@@ -217,6 +239,7 @@ void ScorpionInit(float type)
 	self.th_melee = ScorpionMeleeDecide;
 	self.th_pain = ScorpionPainDecide;
 	self.th_die = ScorpionDieInit;
+	self.th_raise = scorpion_raise;
 
 	self.view_ofs = '0 0 12';
 
@@ -226,8 +249,9 @@ void ScorpionInit(float type)
 		self.skin = 1;
 	}
 	self.init_exp_val = self.experience_value;
+	
+	self.buff=1;
 	walkmonster_start();
-	ApplyMonsterBuff(self, FALSE);
 }
 
 //==========================================================================

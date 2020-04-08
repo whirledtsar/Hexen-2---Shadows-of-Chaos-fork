@@ -14,9 +14,33 @@ $skin badass3
 float AFRIT_COCOON = 2;
 
 float AFRIT_DODGESPEED = 6;
+float AFRIT_STAGE_CHARGE = 1;
+float AFRIT_STAGE_SLIDE = 2;
 
 void() AfritCheckDodge;
 void() afrit_wake1;
+
+void afrit_raise()
+{
+float state;
+	state = RewindFrame(13,0);
+	
+	self.think = self.th_raise;
+	
+	if (state==AF_BEGINNING) {
+		sound (self, CHAN_VOICE, "afrit/death.wav", 1, ATTN_NORM);
+	}
+	if (state==AF_END) {
+		self.th_init();
+		monster_raisedebuff();
+		if (self.enemy!=world)
+			self.think=self.th_run;
+		else
+			self.think=self.th_stand;
+	}
+	
+	thinktime self : HX_FRAME_TIME;
+}
 
 void() AfritEffects
 {
@@ -65,7 +89,6 @@ void() ABallTouch
 	//T_RadiusDamage(self,self.owner,self.dmg / 2,other);
 	starteffect(CE_SM_EXPLOSION,self.origin-self.movedir*8,0.05);
 	remove(self);
-
 }
 
 void(vector offset) AfritFire =
@@ -160,17 +183,18 @@ void()	afrit_hover20	=[	54,		afrit_hover1	] {ai_stand();}; //3);};
 
 //AFRIT DODGE
 
-void afrit_slide (float dir)	//1 for right, -1 for left
+void afrit_slide (void)	//1 for right, -1 for left
 {
-	if (!walkmove (self.ideal_yaw + (90*dir), AFRIT_DODGESPEED + self.weaponframe_cnt, FALSE))
-		self.think=self.th_run;
+	if (!walkmove (self.ideal_yaw + (90*self.lefty), AFRIT_DODGESPEED + self.weaponframe_cnt, FALSE))
+		if (self.attack_state != AS_FERRY)
+			self.think=self.th_run;
 	
 	self.weaponframe_cnt*=1.75;
 	if(random()<0.1) {
 		CreateWhiteSmoke(self.origin-v_right*(10),'0 0 8',HX_FRAME_TIME * 2); }
 } 
 
-void()	afrit_dodge1	=[	16,		afrit_dodge2	] {afrit_slide(1);};
+/*void()	afrit_dodge1	=[	16,		afrit_dodge2	] {afrit_slide(1);};
 void()	afrit_dodge2	=[	17,		afrit_dodge3	] {afrit_slide(1);};
 void()	afrit_dodge3	=[	16,		afrit_dodge4	] {afrit_slide(1);AfritEffects();};
 void()	afrit_dodge4	=[	17,		afrit_dodge5	] {afrit_slide(1);};
@@ -184,7 +208,15 @@ void()	afrit_dodgel3	=[	16,		afrit_dodgel4	] {afrit_slide(-1);};
 void()	afrit_dodgel4	=[	17,		afrit_dodgel5	] {afrit_slide(-1);AfritEffects();};
 void()	afrit_dodgel5	=[	16,		afrit_dodgel6	] {afrit_slide(-1);};
 void()	afrit_dodgel6	=[	17,		afrit_dodgel7	] {afrit_slide(-1);};
-void()	afrit_dodgel7	=[	16,		afrit_fly1	] {afrit_slide(-1);};
+void()	afrit_dodgel7	=[	16,		afrit_fly1	] {afrit_slide(-1);};*/
+
+void()	afrit_dodge1	=[	16,		afrit_dodge2	] {afrit_slide();};
+void()	afrit_dodge2	=[	17,		afrit_dodge3	] {afrit_slide();};
+void()	afrit_dodge3	=[	16,		afrit_dodge4	] {afrit_slide();AfritEffects();};
+void()	afrit_dodge4	=[	17,		afrit_dodge5	] {afrit_slide();};
+void()	afrit_dodge5	=[	16,		afrit_dodge6	] {afrit_slide();};
+void()	afrit_dodge6	=[	17,		afrit_dodge7	] {afrit_slide();};
+void()	afrit_dodge7	=[	16,		afrit_fly1	] {afrit_slide(); AfritEffects();};
 
 void()	afrit_glide1	=[	35,		afrit_glide2	] {
 if (random() < 0.02)
@@ -249,34 +281,54 @@ void()	afrit_fly18	=[	52,		afrit_fly19	] {AfritCheckDodge(); ai_run(3); particle
 void()	afrit_fly19	=[	53,		afrit_fly20	] {AfritCheckDodge(); ai_run(3); AfritEffects();};
 void()	afrit_fly20	=[	54,		afrit_fly1	] {AfritCheckDodge(); ai_run(3);};
 
+void afrit_charge ()
+{
+	ai_face();
+	if (self.monster_stage != AFRIT_STAGE_CHARGE)
+		return;
+	
+	self.weaponframe_cnt+=0.5;
+	ai_charge(self.weaponframe_cnt);
+}
+
+void afrit_atk_slide ()
+{
+	ai_face();
+	if (self.monster_stage != AFRIT_STAGE_SLIDE)
+		return;
+	
+	afrit_slide();
+}
 
 void()	afrit_atk1	=[	14,		afrit_atk2	] {
-AfritCheckDodge(); 
-ai_charge(0);};
-void()	afrit_atk2	=[	15,		afrit_atk3	] {ai_charge(0);};
-void()	afrit_atk3	=[	16,		afrit_atk4	] {ai_charge(0);};
-void()	afrit_atk4	=[	17,		afrit_atk5	] {ai_charge(0);AfritEffects();};
-void()	afrit_atk5	=[	18,		afrit_atk6	] {ai_charge(3);};
-void()	afrit_atk6	=[	19,		afrit_atk7	] {ai_charge(1);};
-void()	afrit_atk7	=[	20,		afrit_atk8	] {ai_charge(1);};
-void()	afrit_atk8	=[	21,		afrit_atk9	] {ai_charge(1);AfritEffects();};
-void()	afrit_atk9	=[	22,		afrit_atk10	] {ai_charge(1);};
-void()	afrit_atk10	=[	23,		afrit_atk11	] {ai_charge(3);};
-void()	afrit_atk11	=[	24,		afrit_atk12	] {ai_charge(0);AfritFire(0);particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_atk12	=[	25,		afrit_atk13] {ai_charge(1);AfritEffects();};
-void()	afrit_atk13=[	26,		afrit_atk14	] {ai_charge(0);};
-void()	afrit_atk14=[	27,		afrit_atk15	] {ai_charge(0);AfritFire(0);};
-void()	afrit_atk15=[	28,		afrit_atk16	] {ai_charge(0);};
-void()	afrit_atk16=[	29,		afrit_atk17	] {ai_charge(0);AfritEffects();};
-void()	afrit_atk17=[	30,		afrit_atk18	] {ai_charge(0);AfritFire(0);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_atk18=[	31,		afrit_atk19	] {ai_charge(0);};
-void()	afrit_atk19=[	32,		afrit_atk20	] {ai_charge(0);AfritCheckDodge();};
-void()	afrit_atk20=[	33,		afrit_atk21	] {ai_charge(0);AfritCheckDodge();};
-void()	afrit_atk21=[	34,		afrit_fly1	] {ai_charge(0);AfritEffects();AfritCheckDodge();};
+	self.weaponframe_cnt = 0.25;
+	self.attack_state = AS_FERRY;
+	if (random() < (0.3+(skill*0.1)) )
+		self.monster_stage = AFRIT_STAGE_SLIDE;
+	else
+		self.monster_stage = AFRIT_STAGE_CHARGE;
+};
+void()	afrit_atk2	=[	15,		afrit_atk3	] {ai_face(); };
+void()	afrit_atk3	=[	16,		afrit_atk4	] {afrit_charge(); };
+void()	afrit_atk4	=[	17,		afrit_atk5	] {afrit_charge(); AfritEffects();};
+void()	afrit_atk5	=[	18,		afrit_atk6	] {afrit_charge(); };
+void()	afrit_atk6	=[	19,		afrit_atk7	] {afrit_charge(); };
+void()	afrit_atk7	=[	20,		afrit_atk8	] {afrit_charge(); };
+void()	afrit_atk8	=[	21,		afrit_atk9	] {afrit_charge(); AfritEffects();};
+void()	afrit_atk9	=[	22,		afrit_atk10	] {afrit_charge(); afrit_atk_slide(); };
+void()	afrit_atk10	=[	23,		afrit_atk11	] {afrit_atk_slide(); };
+void()	afrit_atk11	=[	24,		afrit_atk12	] {afrit_atk_slide();  AfritFire(0); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10); CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_atk12	=[	25,		afrit_atk13] {afrit_atk_slide(); AfritEffects();};
+void()	afrit_atk13=[	26,		afrit_atk14	] {afrit_atk_slide(); };
+void()	afrit_atk14=[	27,		afrit_atk15	] {afrit_atk_slide(); AfritFire(0);};
+void()	afrit_atk15=[	28,		afrit_atk16	] {afrit_atk_slide(); };
+void()	afrit_atk16=[	29,		afrit_atk17	] {afrit_atk_slide(); AfritEffects();};
+void()	afrit_atk17=[	30,		afrit_atk18	] {afrit_atk_slide(); AfritFire(0);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_atk18=[	31,		afrit_atk19	] {ai_face(); };
+void()	afrit_atk19=[	32,		afrit_atk20	] {ai_face(); AfritCheckDodge();};
+void()	afrit_atk20=[	33,		afrit_atk21	] {AfritCheckDodge();};
+void()	afrit_atk21=[	34,		afrit_fly1	] {AfritEffects(); AfritCheckDodge();};
 
-//void()	afrit_atk9	=[	$attack9,		afrit_atk10	] {};
-//void()	afrit_atk10	=[	$attack10,		afrit_atk11	] {};
-//void()	afrit_atk11	=[	$attack11,		afrit_run1	] {};
 
 //===========================================================================
 
@@ -379,18 +431,20 @@ void AfritCheckDodge ()
 	{
 		direction = check_heading_left_or_right(enemy_proj);	//1=left, -1=right, 0 for neither
 		if (direction<0)
-			afrit_dodge1();		//dprint("Afrit sees projectile to its right\n");
+			self.lefty=1;		//dprint("Afrit sees projectile to its right\n");
 		else if (direction>0)
-			afrit_dodgel1();	//dprint("Afrit sees projectile to its left\n");
+			self.lefty=(-1);	//dprint("Afrit sees projectile to its left\n");
 		else if (random()<0.5)	//strafe randomly if projectile is heading straight at it
-			afrit_dodge1();
+			self.lefty=1;
 		else
-			afrit_dodgel1();
+			self.lefty=(-1);
 	}
 	else if (random()<0.5)
-		afrit_dodge1();
+		self.lefty=1;		//afrit_dodge1();
 	else
-		afrit_dodgel1();
+		self.lefty=(-1);	//afrit_dodgel1();
+	
+	afrit_dodge1();
 }
 
 void() afrit_gibs =
@@ -422,8 +476,6 @@ void() afrit_die =
 	else
 		sound (self, CHAN_VOICE, "afrit/death.wav", 1, ATTN_NORM);
 	afrit_die1 ();
-	//if (self.frame == 87)
-		
 };
 
 /*QUAKED monster_afrit (1 0 0) (-16 -16 -24) (16 16 40) Ambush
@@ -437,6 +489,9 @@ void() monster_afrit =
 	}
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_afrit();
+		
+	if (self.flags2&FL_SUMMONED || self.flags2&FL2_RESPAWN)
+		self.spawnflags(-)AFRIT_COCOON;
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
@@ -473,6 +528,9 @@ void() monster_afrit =
 	self.th_missile = afrit_atk1;
 	self.th_pain = afrit_pain;
 	self.th_die = afrit_die;
+	self.th_init = monster_afrit;
+	self.th_raise = afrit_raise;
+	
 	if (self.spawnflags&AFRIT_COCOON)
 		self.th_stand = afrit_sit1;
 	else	

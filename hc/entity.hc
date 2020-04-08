@@ -787,6 +787,8 @@ entity	sight_entity;	//So monsters wake up other monsters
 .string waketarget;		//monsters use self.waketarget upon sighting player
 .string sightsound;
 .float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
+.void() th_raise;		//monster revival system
 
-.float onladder;		//rubicon 2 / arcane dimensions ladder system
+//rubicon 2 / arcane dimensions ladder system
+.float onladder;
 .entity ladder;

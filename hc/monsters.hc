@@ -737,3 +737,56 @@ void monster_jump ()	//ws: generic think function for monsters in the air due to
 		thinktime self : 0.01;
 	}
 }
+
+void monster_raisedebuff()
+{	//called by risen monsters after initializing their default values but before entering their think states
+	self.buff = 0;		//dont turn into a buffed monster variant
+	self.health *= 0.75;
+	self.experience_value *= 0.75;
+}
+
+void monster_raisecheck ()
+{
+entity stuck, stuckent;
+	stuck = findradius(self.origin, 64);
+	while (stuck)
+	{
+		if (stuck.health && (stuck.solid!=SOLID_PHASE && stuck.solid!=SOLID_NOT))
+			stuckent = stuck;
+		stuck = stuck.chain;
+	}
+	if (stuckent)
+		thinktime self : 0.1;
+	else
+	{
+		self.think = self.th_raise;
+		thinktime self : 0;
+	}
+}
+
+void monster_raiseinit(entity corpse)
+{
+	if (!corpse.th_raise || !corpse.th_init)
+		return;
+	
+entity new;		//create new entity to avoid inheriting anything weird from corpse
+	new = spawn();
+	setsize (new, corpse.mins, corpse.maxs);
+	setmodel(new, corpse.model);
+	setorigin(new, corpse.origin);
+	
+	new.frame = corpse.frame;
+	new.scale = corpse.scale;
+	new.drawflags = corpse.drawflags;
+	new.skin = corpse.skin;
+	new.flags2 (+) FL2_RESPAWN;		//dont precache
+	new.enemy = corpse.enemy;
+	new.classname = corpse.classname;
+	new.th_init = corpse.th_init;
+	new.th_raise = corpse.th_raise;
+	new.think = monster_raisecheck;
+	thinktime new : 0;
+	
+	remove(corpse);
+}
+
