@@ -363,12 +363,15 @@ void() monster_bishop =
 		remove(self);
 		return;
 	}
+	
 	if (!self.flags2 & FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_bishop();
 	
 	//self.skin = 1;
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
+	
+	self.init_org=self.origin;
 
 	setmodel (self, "models/bishop.mdl");
 
