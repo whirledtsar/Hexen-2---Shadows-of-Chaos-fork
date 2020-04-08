@@ -1,166 +1,62 @@
 /*
  * $Header: /cvsroot/uhexen2/gamecode/hc/portals/corpse.hc,v 1.2 2007-02-07 16:59:30 sezero Exp $
  */
-void monster_imp_ice (void);
-void monster_imp_fire (void);
-void monster_archer (void);
-void monster_skull_wizard (void);
-void monster_scorpion_black (void);
-void monster_scorpion_yellow (void);
-void monster_spider_yellow_large (void);
-void monster_spider_yellow_small (void);
-void monster_spider_red_large (void);
-void monster_spider_red_small (void);
-void monster_golem_stone (void);
-void monster_golem_iron (void);
-void monster_golem_bronze (void);
-void monster_mummy (void);
-void monster_mummy_lord (void);
-void monster_werejaguar (void);
-void monster_mezzoman (void);
-void monster_werepanther (void);
-void monster_medusa(void);
-void monster_fallen_angel (void);
 
- void wandering_monster_respawn()
- {
+void wandering_monster_respawn()
+{
 	vector newangle,spot1,spot2;
 	float loop_cnt;
 	
 	//check if anything is in the path of spawning
 	trace_fraction = 0;
 	loop_cnt =0;
-	spot2 = self.origin;
+	spot1 = self.origin;
 	while (trace_fraction < 1)
 	{
 		newangle = self.angles;
-
 		makevectors (newangle);
-		
-		spot1 = spot2;
-		spot2 = spot1 + (v_forward * 60);
-		
-		traceline (spot1, spot2 , FALSE, self);
+		//check in front
+		spot2 = spot1 + (v_forward * 30);
+		traceline (spot1, spot2, FALSE, self);
+		//check behind
+		if (trace_fraction == 1) 	{
+			spot2 = spot1 - (v_forward * 30);
+			traceline (spot1, spot2, FALSE, self);
+		}
+		//check up (origin is on floor)
+		if (trace_fraction == 1) {
+			spot2 = spot1 + (v_up * 60);
+			traceline (spot1, spot2, FALSE, self);
+		}
+		//just in case
+		if (trace_fraction == 1) {
+			self.origin_z += 10;
+			droptofloor();
+			if (!walkmove(0,0, FALSE))
+				trace_fraction = 0;
+		}
 		
 		loop_cnt +=1;
-		dprint("Searching!!\n");
+		dprint("Respawning monster checking area\n");
 
 		if (loop_cnt > 10)   // No endless loops
 		{
 			//if 10 checks happen and no spot is found, try again in 2 seconds
 			self.nextthink = time + 2;
-			dprint("Found nothing!!\n");
+			dprint("Respawning monster inhibited\n");
 			return;
 		}
 	}
 	
 	//spot is clear, use spot
-	self.origin = spot1;
- 
-	if (self.classname == "monster_imp_ice")
-	{
-		self.think = monster_imp_ice;
-	}
-	else if (self.classname == "monster_imp_fire")
-	{
-		self.think = monster_imp_fire;
-	}
-	else if (self.classname == "monster_archer")
-	{
-		self.think = monster_archer;
-	}
-	else if (self.classname == "monster_archer_lord")
-	{
-		self.classname = "monster_archer_lord"; //self.classname = "monster_archer";
-		self.think = monster_archer;
-	}
-	else if (self.classname == "monster_skull_wizard")
-	{
-		self.think = monster_skull_wizard;
-	}
-	else if (self.classname == "monster_scorpion_black")
-	{
-		self.think = monster_scorpion_black;
-	}
-	else if (self.classname == "monster_scorpion_yellow")
-	{
-		self.think = monster_scorpion_yellow;
-	}
-	else if (self.classname == "monster_spider_yellow_large")
-	{
-		self.think = monster_spider_yellow_large;
-	}
-	else if (self.classname == "monster_spider_yellow_small")
-	{
-		self.think = monster_spider_yellow_small;
-	}
-	else if (self.classname == "monster_spider_red_large")
-	{
-		self.think = monster_spider_red_large;
-	}
-	else if (self.classname == "monster_spider_red_small")
-	{
-		self.think = monster_spider_red_small;
-	}
-	else if (self.classname == "monster_golem_stone")
-	{
-		self.think = monster_golem_stone;
-	}
-	else if (self.classname == "monster_golem_iron")
-	{
-		self.think = monster_golem_iron;
-	}
-	else if (self.classname == "monster_golem_bronze")
-	{
-		self.think = monster_golem_bronze;
-	}
-	else if (self.classname == "monster_mummy")
-	{
-		self.think = monster_mummy;
-	}
-	else if (self.classname == "monster_mummy_lord")
-	{
-		self.classname = "monster_mummy";
-		self.think = monster_mummy;
-	}
-	else if (self.classname == "monster_werejaguar")
-	{
-		self.think = monster_werejaguar;
-	}
-	else if (self.classname == "monster_mezzoman")
-	{
-		self.think = monster_mezzoman;
-	}
-	else if (self.classname == "monster_werepanther")
-	{
-		self.think = monster_werepanther;
-	}
-	else if (self.classname == "monster_medusa")
-	{
-		self.think = monster_medusa;
-	}
-	else if (self.classname == "monster_fallen_angel")
-	{
-		self.think = monster_fallen_angel;
-	}
-	else if (self.classname == "monster_fallen_angel_lord")
-	{
-		self.classname = "monster_fallen_angel";
-		self.think = monster_fallen_angel;
-	}
-	else //not a supported respawn
-	{
-		//Don't respawn bosses
-		//Other monsters not supported: 
-		//		monster_fallen_angel_lord, apocalypse riders, eidelon, etc.
-		remove(self);
-		return;
-	}
-
+	dprint("Respawning monster ready to spawn\n");
+	self.origin = spot1 + '0 0 10';	//avoid spawning inhibited by floor
+	
+	self.think = self.th_init;
 	self.nextthink = time + 0.01;
 	
-	CreateRedCloud (self.origin + '0 0 40','0 0 0',HX_FRAME_TIME);
- }
+	CreateRedCloud (spot1 + '0 0 40','0 0 0',HX_FRAME_TIME);
+}
 
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
 float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
@@ -170,7 +66,7 @@ void MarkForRespawn (void)
 	entity newmis;
 	float timelimit;
 	
-	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
+	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -189,6 +85,17 @@ void MarkForRespawn (void)
 		newmis.flags2 (+) FL_SUMMONED;
 		newmis.lifetime = time + 900;
 		newmis.classname = self.classname;
+		newmis.th_init = self.th_init;
+		
+		if (self.monsterclass < CLASS_BOSS)	//drop mana on death
+		{
+			float chance;
+			chance = random();
+			if (chance<0.4)
+				newmis.greenmana = 15;
+			else if (chance<0.8)
+				newmis.bluemana = 15;
+		}
 		
 		newmis.think = wandering_monster_respawn;
 		newmis.nextthink = time + timelimit;
@@ -205,9 +112,8 @@ void corpseblink (void)
 	thinktime self : 0.1;
 	self.scale -= 0.10;
 
-	if (self.scale < 0.10) {
+	if (self.scale < 0.10)
 		MarkForRespawn();
-	}
 }
 
 void init_corpseblink (void)
@@ -259,6 +165,7 @@ vector newmaxs;
 //Won't be necc to pass headmdl once everything has it's .headmodel
 //value set in spawn
 	self.netname="corpse";
+	self.target = self.targetname;	//fix by Shanjaq
     self.th_die = chunk_death;
 	//self.touch = obj_push; //Pushable corpses has the side effect of getting the player stuck when ironically it was meant to prevent that
     self.health = random(10,25);
