@@ -487,11 +487,14 @@ void() monster_afrit =
 		remove(self);
 		return;
 	}
+	
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_afrit();
 		
 	if (self.flags2&FL_SUMMONED || self.flags2&FL2_RESPAWN)
 		self.spawnflags(-)AFRIT_COCOON;
+	
+	self.init_org=self.origin;
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
