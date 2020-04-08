@@ -11,31 +11,6 @@ $origin 0 0 24
 $base base
 $skin badass3
 
-/*
-
-void() blood_fall1 =[ 0, blood_fall2] {bloodpool.scale = 0;};
-void() blood_fall2 =[ 0, blood_fall3] {setmodel (bloodpool, "models/blood.mdl");bloodpool.scale = .3;};
-void() blood_fall3 =[ 0, blood_fall4] {bloodpool.scale = 0.4;};
-void() blood_fall4 =[ 0, blood_fall5] {bloodpool.scale = 0.5;};
-void() blood_fall5 =[ 0, blood_fall6] {bloodpool.scale = 0.6;};
-void() blood_fall6 =[ 0, blood_fall7] {bloodpool.scale = 0.7;};
-void() blood_fall7 =[ 0, blood_fall8] {bloodpool.scale = 0.8;};
-void() blood_fall8 =[ 0, blood_fall8] {bloodpool.scale = 1.0;bloodpool.think = SUB_Remove; bloodpool.nextthink = time + 15;};
-
-void() blood_fx =
-{	
-	bloodpool = spawn ();
-	bloodpool.owner = self;
-	bloodpool.movetype = MOVETYPE_BOUNCE;
-	bloodpool.origin = self.origin + '0 0 0';
-	setsize (bloodpool, '0 5 1', '5 5 5');
-	bloodpool.think = blood_fall1;
-	bloodpool.nextthink = time + 0.01;
-	
-}
-
-*/
-
 void()	wendigo_stand1	=[	0,	wendigo_stand2	] {ai_stand();};
 void()	wendigo_stand2	=[	1,	wendigo_stand3	] {ai_stand();};
 void()	wendigo_stand3	=[	2,	wendigo_stand4	] {ai_stand();};
@@ -245,10 +220,10 @@ void() fire_icespike =
 	do_shard('14 8 0'*self.scale,360 + random()*150, '0 0 0');
 }*/
 
-void()	wendigo_atk1	=[	35,		wendigo_atk2	] {};
-void()	wendigo_atk2	=[	36,		wendigo_atk3	] {};
-void()	wendigo_atk3	=[	37,		wendigo_atk4	] {};
-void()	wendigo_atk4	=[	38,		wendigo_atk5	] {sound(self,CHAN_WEAPON,"wendigo/attack.wav",0.7,ATTN_NORM);};
+void()	wendigo_atk1	=[	35,		wendigo_atk2	] {ai_face();};
+void()	wendigo_atk2	=[	36,		wendigo_atk3	] {ai_face();};
+void()	wendigo_atk3	=[	37,		wendigo_atk4	] {ai_face();};
+void()	wendigo_atk4	=[	38,		wendigo_atk5	] {ai_face(); sound(self,CHAN_WEAPON,"wendigo/attack.wav",0.7,ATTN_NORM);};
 void()	wendigo_atk5	=[	39,		wendigo_atk6	] {ai_charge(3);};
 void()	wendigo_atk6	=[	40,		wendigo_atk7	] {ai_charge(5); ai_melee();};
 void()	wendigo_atk7	=[	41,		wendigo_atk8	] {ai_charge(5); ai_melee();};
@@ -284,12 +259,8 @@ void()	wendigo_pain12	=[	68,	wendigo_run1	] {};
 
 void(entity attacker, float damage)	wendigo_pain =
 {
-	local float r;
-
 	if (self.pain_finished > time)
 		return;
-
-	r = random();
 	
 	sound (self, CHAN_VOICE, "wendigo/idle.wav", 1, ATTN_NORM);
 	wendigo_pain1 ();
@@ -327,45 +298,19 @@ void()	wendigo_die20=[	88,	wendigo_die21] {MakeSolidCorpse();};
 void()	wendigo_die21=[	89,	wendigo_die21] {};
 
 */
-//entity new;
 
 void() wendigo_die =
 {
-	/*ThrowGib ("models/shard.mdl", self.health);
-	ThrowGib ("models/shard.mdl", self.health);
-	ThrowGib ("models/shard.mdl", self.health);
-	ThrowGib ("models/shard.mdl", self.health);*/
-	//self.drawflags(+)DRF_TRANSLUCENT|MLS_CRYSTALGOLEM;
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
-	ThrowGib ("models/shardwend.mdl", self.health);
+	local float i;
+	for (i = 0; i < 19*self.scale; i++) {
+		ThrowGib ("models/shardwend.mdl", self.health);
+	}
 	ThrowGib ("models/bloodpool_ice.mdl", self.health);
-	/*ThrowGib ("models/shardice.mdl", self.health);
-	ThrowGib ("models/shardice.mdl", self.health);*/
-	//ThrowGib ("models/shard.mdl", self.health);
 	sound (self, CHAN_VOICE, "misc/icestatx.wav", 1, ATTN_NORM);
 	//setmodel (self, "models/IceDeath.mdl");
 	setmodel (self, "");
-	//self.skin = 0;
 	wendigo_shatter1();
 	return;
-
 };
 
 /*QUAKED monster_wendigo (1 0 0) (-16 -16 -24) (16 16 40) Ambush
@@ -382,11 +327,10 @@ void() monster_wendigo =
 		precache_model ("models/wendigo.mdl");
 		precache_model ("models/IceDeath.mdl");
 		precache_model ("models/proj_wend.mdl");
-
+		
 		precache_sound ("wendigo/attack.wav");
 		precache_sound ("wendigo/icehit.wav");
 		precache_sound ("wendigo/idle.wav");
-		precache_sound ("crusader/icewall.wav");
 	}
 
 	self.solid = SOLID_SLIDEBOX;
@@ -420,6 +364,8 @@ void() monster_wendigo =
 	self.th_missile = wendigo_atk1;
 	self.th_pain = wendigo_pain;
 	self.th_die = wendigo_die;
+	self.th_init = monster_wendigo;
 	
+	self.buff=1;
 	walkmonster_start ();
 };
