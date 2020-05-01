@@ -115,6 +115,14 @@ vector loser_org;
 //		spawnshockball((trace_ent.absmax+trace_ent.absmin)*0.5);
 		starteffect(CE_LSHOCK,(trace_ent.absmax+trace_ent.absmin)*0.5);
 	loser_org=trace_ent.origin;
+	if(trace_ent.health-damage<=0) {	
+		smolder(loser_org);
+		if (type == "sunbeam")
+			AshSkin(trace_ent);	//ws: this needs to be done before actually doing damage
+	}
+    if (type=="sunbeam" && trace_ent.artifact_active & ARTFLAG_ASH && random()<0.9) {}	//do nothing, so player has a chance to enjoy ash statue :)
+	else
+		T_Damage (trace_ent, from, from, damage);
     T_Damage (trace_ent, from, from, damage);
 	if(trace_ent.health<=0)
 		smolder(loser_org);

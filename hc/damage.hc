@@ -483,10 +483,10 @@ entity oself;
 				self.decap=2;
 			}
 
-	if(self.skin==GLOBAL_SKIN_STONE||self.frozen>0)
+	if(self.skin==GLOBAL_SKIN_STONE||self.skin==GLOBAL_SKIN_ASH||self.frozen>0)
 	{	//Frozen or stoned
 		if(self.classname!="player")
-			self.th_die=shatter;			
+			self.th_die=shatter;
 		thinktime self : 0;
 		self.attack_finished=time;
 		self.pausetime=time;
@@ -495,6 +495,11 @@ entity oself;
 			self.deathtype="ice shatter";
 		else if(self.skin==GLOBAL_SKIN_STONE)
 			self.deathtype="stone crumble";
+		else if(self.skin==GLOBAL_SKIN_ASH)
+		{	//if we havent already initialized as ash statue, do so now
+			if (!self.artifact_active&ARTFLAG_ASH)
+				self.th_die=AshStatueInit;
+		}
 	}
 
 	if (self.classname == "player")
@@ -556,9 +561,9 @@ entity oself;
 				}
 			}
 		}
-		else if(self.classname=="player"&&attacker.classname=="player"&&(coop||teamplay&&attacker.team==self.team))
-			drop_level(attacker,1);	//Killed friend in coop, lose a level
-		
+		//else if(self.classname=="player"&&attacker.classname=="player"&&(coop||teamplay&&attacker.team==self.team))
+			//drop_level(attacker,1);	//Killed friend in coop, lose a level
+		//commented out by Bloodshot
 		else if(attacker.flags&FL_CLIENT&&attacker!=self.controller&&(self.monsterclass<CLASS_BOSS||self.classname=="obj_chaos_orb"))//Bosses award Exp themselves, to all players in coop
 			AwardExperience(attacker,self,self.experience_value+exp_bonus);
 	}
@@ -600,7 +605,7 @@ entity oself;
 	if(oself!=targ)
 	{
 		if(self.classname=="player")
-			PlayerDie();	
+			PlayerDie();
 		else if (self.th_die)
 			self.th_die ();
 

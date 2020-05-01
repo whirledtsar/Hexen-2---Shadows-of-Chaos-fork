@@ -188,7 +188,7 @@ vector newmaxs;
 		setsize (self, self.mins,newmaxs);
 	else
 		//setsize (self, '-13 -28 -14', '10 3 -9'); //resize the dk berserker because i fucked up his origin and im too lazy to fix it. Also wtf are you doing using HexenC? It's 2017 nerd, go use UE4
-		setsize (self, '-26 -28 -14', '88 28 -9'); //it was still messed up. 2017 eh? -ws
+		setsize (self, '-26 -28 -14', '88 28 -9'); //ws: it was still messed up. 2017 eh?
 	if(self.flags&FL_ONGROUND)
 		self.velocity='0 0 0';
     self.flags(-)FL_MONSTER;

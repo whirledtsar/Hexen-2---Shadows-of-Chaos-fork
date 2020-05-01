@@ -238,12 +238,13 @@ float ART_INVISIBILITY				= 8;
 float ARTFLAG_FROZEN				= 128;
 float ARTFLAG_STONED				= 256;
 float ARTFLAG_DIVINE_INTERVENTION	= 512;
+float ARTFLAG_ASH					= 1024;
 
 
 // Gobal skin textures
 float GLOBAL_SKIN_STONE				= 100;
 float GLOBAL_SKIN_ICE				= 101;
-
+float GLOBAL_SKIN_ASH				= 102;
 
 // Player Classes
 float CLASS_NONE					= 0;
@@ -380,6 +381,7 @@ float THINGTYPE_ACID	 		= 21;
 float THINGTYPE_METEOR	 		= 22;
 float THINGTYPE_GREENFLESH 		= 23;
 float THINGTYPE_BONE	 		= 24;
+float THINGTYPE_ASH				= 25;
 
 
 // point content values
@@ -707,7 +709,7 @@ float MAX_SUMMON = 1;
 float MAX_TOME = 2;
 float MAX_URN = 2;
 
-//ws: Config flags system
+//Config flag parm system
 float PARM_RESPAWN = 1;
 float PARM_FADE = 2;
-float PARM_BUFF = 4; 
+float PARM_BUFF = 4;

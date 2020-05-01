@@ -473,13 +473,19 @@ void CreateModelChunks (vector space,float scalemod, float numChunks)
 	else if (self.thingtype==THINGTYPE_ICE)
 	{
 		setmodel(chunk,"models/shard.mdl");
-										   
+		 
 		chunk.skin=0;
-					  
+		
 		chunk.frame=random(2);
 		chunk.drawflags(+)DRF_TRANSLUCENT|MLS_ABSLIGHT;
 		chunk.abslight=0.5;
   
+	}
+	else if (self.thingtype==THINGTYPE_ASH)
+	{
+		setmodel(chunk,"models/shard.mdl");
+		chunk.skin=2;
+		chunk.frame=rint(random(1,2));
 	}
 	else// if (self.thingtype==THINGTYPE_GREYSTONE)
 	{
@@ -576,7 +582,7 @@ float BLOOD_GREEN = 3;
 
 float bloodsplat_radius[4] =
 {
-	16, 24, 40, 8
+	16, 20, 40, 8
 };
 
 string bloodsplat_mdl[4] =
@@ -657,7 +663,7 @@ entity splat;
 		else
 			return;
 	}
-	dprint("splattin\n");
+	
 	traceline (self.origin + v_up*8,self.origin - v_up*32, TRUE, self);
 
 	splat=spawn();
@@ -672,7 +678,7 @@ entity splat;
 		splat.scale = 1.3;
 	else if (self.netname == "maulotaur")
 		splat.scale = random(1.4,1.6);
-	else if (self.scale)
+	else if (self.bufftype && self.scale>1)
 		splat.scale = self.scale;
 	else
 		splat.scale = random(0.75, 0.9);
@@ -738,14 +744,19 @@ void chunk_death (void)
 		deathsound="fx/clothbrk.wav";
 	else if (self.thingtype==THINGTYPE_FLESH)
 	{
-		if (self.netname == "spider")
-			BloodSplat(BLOOD_GREEN);
-		else if (random(100) < 25)
-			BloodSplat(BLOOD_LARGE);
-		else if (random(100) < 50)
-			BloodSplat(BLOOD_MED);
-		else
-			BloodSplat(BLOOD_SMALL);
+		if (!self.flags&FL_SWIM && self.flags&FL_ONGROUND)
+		{
+			if (self.netname == "spider")
+				BloodSplat(BLOOD_GREEN);
+			else if (self.flags2&FL_SMALL)
+				BloodSplat(BLOOD_SMALL);
+			else if (random(100) < 25)
+				BloodSplat(BLOOD_LARGE);
+			else if (random(100) < 50)
+				BloodSplat(BLOOD_MED);
+			else
+				BloodSplat(BLOOD_SMALL);
+		}
 		
 		if (self.headmodel)
 			ThrowGib (self.headmodel, self.health);
@@ -852,8 +863,9 @@ void chunk_death (void)
 	SUB_UseTargets();
 	self.target = self.targetname;	//fix by Shanjaq
 
-	if (self.thingtype==THINGTYPE_FLESH || //most monsters are flesh
-	   ((self.thingtype==THINGTYPE_GREYSTONE || self.thingtype==THINGTYPE_METAL) && self.flags&FL_MONSTER))//golems
+	//if (self.thingtype==THINGTYPE_FLESH || //most monsters are flesh
+	//   ((self.thingtype==THINGTYPE_GREYSTONE || self.thingtype==THINGTYPE_METAL) && self.flags&FL_MONSTER))//golems
+	if (self.solid!=SOLID_BSP)
 	{
 		//set up respawn time
 		self.think = MarkForRespawn;
