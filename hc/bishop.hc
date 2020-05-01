@@ -184,10 +184,6 @@ void()	dark_bishop_atk15=[	22,		dark_bishop_atk16	] {ai_charge(0);};
 void()	dark_bishop_atk16=[	23,		dark_bishop_atk17	] {ai_charge(0);};
 void()	dark_bishop_atk17=[	24,		dark_bishop_run1	] {ai_charge(0);};
 
-//void()	dark_bishop_atk9	=[	$attack9,		dark_bishop_atk10	] {};
-//void()	dark_bishop_atk10	=[	$attack10,		dark_bishop_atk11	] {};
-//void()	dark_bishop_atk11	=[	$attack11,		dark_bishop_run1	] {};
-
 //===========================================================================
 
 void()	dark_bishop_pain1	=[	25,	dark_bishop_pain2	] {};
@@ -228,7 +224,7 @@ void() bishop_fx
 }*/
 
 //===========================================================================
-
+void(vector org) CreateFog;		//objects_new.hc
 
 void()	dark_bishop_die1	=[	36,	dark_bishop_die2	] {self.movetype = MOVETYPE_FLY;};
 void()	dark_bishop_die2	=[	37,	dark_bishop_die3	] {/*setsize (self, '-17 -17 -9', '17 17 2');*/};
@@ -243,24 +239,24 @@ void()	dark_bishop_die10=[	45,	dark_bishop_die11] {};
 void()	dark_bishop_die11=[	46,	dark_bishop_die12] {};
 void()	dark_bishop_die12=[	47,	dark_bishop_die13] {};
 void()	dark_bishop_die13=[	48,	dark_bishop_die14] {};
-void()	dark_bishop_die14=[	49,	dark_bishop_die15] {ThrowGib ("models/fog.spr", self.health);};
-void()	dark_bishop_die15=[	50,	dark_bishop_die15] {ThrowGib ("models/fog.spr", self.health);ThrowGib ("models/fog.spr", self.health);ThrowGib ("models/fog.spr", self.health);CreateGreenSmoke(self.origin,'0 0 0',HX_FRAME_TIME);chunk_death();sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);ThrowGib ("models/blood.mdl", self.health);ThrowGib ("models/blood.mdl", self.health);};
+void()	dark_bishop_die14=[	49,	dark_bishop_die15] {CreateFog(self.origin); };
+void()	dark_bishop_die15=[	50,	dark_bishop_die15] {
+local float i;
+for (i = 0; i <= 4; i++) {
+	CreateFog(self.origin); 
+}
+ThrowGib ("models/blood.mdl", self.health);
+ThrowGib ("models/blood.mdl", self.health);
+CreateGreenSmoke(self.origin,'0 0 0',HX_FRAME_TIME);
+chunk_death();
+sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);
+};
 
 
 void() dark_bishop_die =
 {
-// gib check not needed
-	/*if (self.health < -30)
-	{
-		//sound (self, CHAN_VOICE, "player/gib.wav", 1, ATTN_NORM);
-		chunk_death();
-	}*/
-
-// regular death
 	sound (self, CHAN_VOICE, "bishop/death.wav", 1, ATTN_NORM);
 	dark_bishop_die1 ();
-	//if (self.frame == 87)
-		
 };
 
 void() bmis_touch =
@@ -306,13 +302,12 @@ void() bmis_touch =
 
 void FireHomingMissile (float offset, float seeking)
 {
+	makevectors(self.angles);
 	v_forward=self.v_angle;
 
 	self.effects(+)EF_MUZZLEFLASH;
 	newmis=spawn();
 	newmis.angles = self.v_angle;
-	//particle2(trace_endpos,'-30 -30 50','30 30 100',384,PARTICLETYPE_SPELL,80);
-	//newmis.classname="magic missile";
 	newmis.drawflags = MLS_FULLBRIGHT;
 	newmis.owner=self;
 	//newmis.drawflags(+)SCALE_ORIGIN_CENTER|MLS_FULLBRIGHT|MLS_CRYSTALGOLEM;//|DRF_TRANSLUCENT;
@@ -334,7 +329,7 @@ void FireHomingMissile (float offset, float seeking)
 	setsize(newmis,'0 0 0','0 0 0');
 
 	newmis.scale=.8;
-	setorigin(newmis,self.origin+self.proj_ofs+v_forward*8+v_right*7+'0 0 15');
+	setorigin(newmis,self.origin+self.proj_ofs+v_forward*12+'0 0 18');
 
 	if(seeking)
 	{		
@@ -363,15 +358,13 @@ void() monster_bishop =
 		remove(self);
 		return;
 	}
-	
 	if (!self.flags2 & FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_bishop();
 	
 	//self.skin = 1;
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
-	
-	self.init_org=self.origin;
+	self.init_org = self.origin;
 
 	setmodel (self, "models/bishop.mdl");
 
