@@ -941,6 +941,7 @@
 	[
 		1 : "Start low" : 0
 		2 : "Hurt (PoP)" : 0
+		128 : "Force sound" : 0 : "Emit flame sound (torches don't by default)"
 	]
 	style(choices) : "Style (32-63 for groups)" : 0 =
 	[
@@ -2214,6 +2215,16 @@
 	spawnflags(Flags) =
 	[
 		2 : "Cocoon (place on ground)"
+	]
+]
+
+@PointClass base(Monster) size(-16 -16 0, 16 16 36) model(":models/reiver.mdl") = monster_reiver : "Reiver" [
+	spawnflags(Flags) =
+	[
+		2 : "Buried"
+		16 : "Buried: dormant (only rise when triggered)"
+		262144 : "Stay above player"
+		524288 : "Buried: no earth/dirt FX when rising"
 	]
 ]
 
