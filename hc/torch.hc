@@ -86,8 +86,8 @@ void light_candle (void)
 
 	self.thingtype	= THINGTYPE_GREYSTONE;
 	setsize(self, '-6 -6 -8','6 6 8');
-
-	ambientsound (self.origin, "raven/flame1.wav", 0.1, ATTN_STATIC);
+	
+	FireAmbient();
 	Init_Torch();
 	self.solid=SOLID_BBOX;
 }
@@ -164,9 +164,9 @@ void light_lantern ()
 
 	self.thingtype	= THINGTYPE_METAL;
 	setsize(self, '-11 -11 -41','11 11 5');
-
-	Init_Torch();
+	
 	FireAmbient();
+	Init_Torch();
 }
 
 
@@ -200,7 +200,8 @@ void light_torch_eqypt()
 
 	self.thingtype	= THINGTYPE_WOOD;
 	setsize(self, '-6 -6 -8','6 6 8');
-
+	
+	FireAmbient();
 	Init_Torch();
 }
 
@@ -235,9 +236,9 @@ void light_torch_castle()
 	setsize(self, '-6 -6 -8','6 6 8');
 
 	self.abslight = .75;
-
+	
+	FireAmbient();
 	Init_Torch();
-
 }
 
 
@@ -271,7 +272,8 @@ void light_torch_meso()
 
 	self.thingtype	= THINGTYPE_BROWNSTONE;
 	setsize(self, '-12 -12 -16','12 12 16');
-
+	
+	FireAmbient();
 	Init_Torch();
 }
 
