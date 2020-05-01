@@ -1,12 +1,11 @@
+float MIST_STARTOFF = 2;
 
 float IS_SKELETON = 2;
 
 float PORTAL_CLOSED = 2;
 
 float WATER_OFF = 2;
-
 float WATER_TRANS = 4;
-
 float WATER_FULLBR = 8;
 
 .float modeltype;
@@ -22,7 +21,7 @@ void()	fog_loop8	=[	3,	fog_loop9	] {};
 void()	fog_loop9	=[	4,	fog_loop10	] {};
 void()	fog_loop10	=[	4,	fog_loop1	] {};
 
-void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, self.noise1, 0.75, ATTN_IDLE)};
+void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, self.noise1, 0.75, ATTN_IDLE);};
 void()	fire_burn2	=[	1,	fire_burn3	] {};
 void()	fire_burn3	=[	2,	fire_burn4	] {};
 void()	fire_burn4	=[	3,	fire_burn5	] {};
@@ -36,7 +35,6 @@ void()	fire_burn11	=[	10,	fire_burn12	] {};
 void()	fire_burn12	=[	11,	fire_burn13	] {};
 void()	fire_burn13	=[	12,	fire_burn14	] {};
 void()	fire_burn14	=[	13,	fire_burn1	] {CreateWhiteSmoke(self.origin + '0 0 56','0 0 8',HX_FRAME_TIME * 2);};
-
 
 void()	star_sparkle1	=[	0,	star_sparkle2	] {};
 void()	star_sparkle2	=[	1,	star_sparkle3	] {};
@@ -300,7 +298,7 @@ void() obj_hang_corpse =
 	self.th_pain = corpse_swing1;
 	self.netname="hanged";
 	
-	self.flags (+) FL_MONSTER | FL_FLY;
+	self.flags (+) FL_FLY;
 	
 	object_start();
 };
@@ -325,7 +323,7 @@ void() obj_skeleton_body =
 	//self.th_pain = corpse_swing1;
 	self.netname="skeleton";
 	
-	self.flags (+) FL_MONSTER | FL_FLY;
+	self.flags (+) FL_FLY;
 	
 	object_start();
 };
@@ -338,7 +336,6 @@ void() misc_portal =
 
 	setmodel (self, "models/port.spr");
 	self.th_stand = portal_spin1;
-	//self.flags (+) FL_MONSTER | FL_FLY;
 	self.th_stand();
 	
 	self.netname="portal";
@@ -364,7 +361,7 @@ void() misc_portal_big =
 			self.use = portal_open1;
 	else
 		self.use = portal_close1;
-	self.flags (+) FL_MONSTER | FL_FLY;
+	self.flags (+) FL_FLY;
 	self.th_stand();
 	
 	self.netname="portalbig";
@@ -377,7 +374,7 @@ void() misc_starwall =
 	
 	self.th_stand = star_sparkle1;
 	self.netname="magic barrier";
-	self.flags (+) FL_MONSTER | FL_FLY;
+	self.flags (+) FL_FLY;
 	self.th_stand();
 	if (self.targetname)
 		self.use = SUB_Remove;
@@ -404,10 +401,9 @@ void() misc_waterfall =
 	}	
 	else
 		self.th_stand = water_fall1;
-	//self.think();
+	
 	self.netname="waterfall";
-	self.flags (+) FL_MONSTER | FL_FLY;
-	//self.th_stand();
+	self.flags (+) FL_FLY;
 	
 	if (self.spawnflags & WATER_TRANS)
 		self.drawflags (+) DRF_TRANSLUCENT;
@@ -441,12 +437,9 @@ void fog_float ()
 		thinktime self : HX_FRAME_TIME;
 }
 
-void fog_spawn ()
+void CreateFog (vector org)
 {
 entity new;
-vector org;
-	makevectors(self.angles);
-	org = (self.absmin+self.absmax)*0.5 + normalize(v_forward)*random(self.t_width) + normalize(v_right)*random(self.t_width);
 	new = spawn();
 	setorigin (new, org);
 	setmodel (new, "models/fog.spr");
@@ -455,17 +448,25 @@ vector org;
 	new.movetype = MOVETYPE_FLY;
 	new.solid = SOLID_NOT;
 	new.drawflags(+)DRF_TRANSLUCENT;
-	new.scale=0.2;
 	new.weaponframe_cnt=rint(random(0,4));
-	new.lifetime = time+self.lifespan+random(self.lifespan);
+	new.lifetime = time+random(2,4);
 	new.think = fog_float;
 	thinktime new : 0;
 	
-	new.velocity_x = (random(-self.t_length,self.t_length));
-	new.velocity_y = (random(-self.t_length,self.t_length));
-	new.velocity_z = (random(-self.height,self.height));
+	new.velocity_x = random(-30,30);
+	new.velocity_y = random(-30,30);
+	new.velocity_z = random(-6,8);
+}
+
+void mist_spawn ()
+{
+entity new;
+vector org;
+	makevectors(self.angles);
+	org = (self.absmin+self.absmax)*0.5 + normalize(v_forward)*random(self.t_width) + normalize(v_right)*random(self.t_width);
+	CreateFog(org);
 	
-	self.think = fog_spawn;
+	self.think = mist_spawn;
 	thinktime self : random(self.wait,self.wait*2);
 }
 
@@ -478,7 +479,7 @@ void() misc_mist
 	
 	self.th_stand = fog_loop1;
 	self.netname="fog";
-	self.flags (+) FL_MONSTER | FL_FLY;
+	self.flags (+) FL_FLY;
 	self.th_stand();
 	if (self.targetname)
 		self.use = SUB_Remove;
@@ -488,22 +489,18 @@ void() misc_mistgen
 {
 	precache_model ("models/fog.spr");
 	
-	if (!self.t_length)		//speed
-		self.t_length=30;
 	if (!self.t_width)		//spawning area
 		self.t_width=30;
-	if (!self.height)		//z speed
-		self.height=6;
 	if (!self.lifespan)		//fog lifetime
 		self.lifespan=2;
 	if (!self.wait)
 		self.wait=0.5;		//min delay between fog spawns
-	self.th_stand = fog_spawn;
+	self.th_stand = mist_spawn;
 	self.netname="fog generator";
 	if (self.targetname)
 	{
-		if (self.spawnflags & 2)
-			self.use = fog_spawn;
+		if (self.spawnflags & MIST_STARTOFF)
+			self.use = mist_spawn;
 		else
 		{
 			self.use = SUB_Remove;
@@ -538,11 +535,11 @@ void() light_fire_large
 	precache_model ("models/flammd.spr");
 	setmodel (self, "models/flammd.spr");
 	self.think = fire_burn1;
+	if (self.targetname)
+		self.use = SUB_Remove;
 	if (!self.noise1)
 		self.noise1 = "misc/fburn_bg.wav";
 	precache_sound(self.noise1);
-	if (self.targetname)
-		self.use = SUB_Remove;
 	self.think();
 }
 
@@ -557,7 +554,7 @@ void() light_fire_large
 	
 	self.th_stand = water_fall1;
 	self.netname="river stream";
-	self.flags (+) FL_MONSTER | FL_FLY;
+	self.flags (+) FL_FLY;
 	self.th_stand();
 	
 	if (self.targetname)
