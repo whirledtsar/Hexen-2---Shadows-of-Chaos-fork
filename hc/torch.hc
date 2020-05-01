@@ -123,7 +123,8 @@ void light_torch_eqypt()
 
 	self.thingtype	= THINGTYPE_WOOD;
 	setsize(self, '-6 -6 -8','6 6 8');
-
+	
+	FireAmbient();
 	Init_Torch();
 }
 
@@ -159,8 +160,8 @@ void light_torch_castle()
 
 	self.abslight = .75;
 
+	FireAmbient();
 	Init_Torch();
-
 }
 
 
@@ -194,7 +195,8 @@ void light_torch_meso()
 
 	self.thingtype	= THINGTYPE_BROWNSTONE;
 	setsize(self, '-12 -12 -16','12 12 16');
-
+	
+	FireAmbient();
 	Init_Torch();
 }
 
@@ -230,9 +232,9 @@ void light_torch_rome()
 	setsize(self, '-6 -6 -8','6 6 8');
 
 	self.abslight = .75;
-
+	
+	FireAmbient();
 	Init_Torch();
-
 }
 
 /*QUAKED light_burner (0 1 0) (-16 -18 -52) (16 18 0) START_LOW DAMAGE
@@ -362,9 +364,9 @@ void light_lantern ()
 
 	self.thingtype	= THINGTYPE_METAL;
 	setsize(self, '-11 -11 -41','11 11 5');
-
-	Init_Torch();
+	
 	FireAmbient();
+	Init_Torch();
 }
 
 

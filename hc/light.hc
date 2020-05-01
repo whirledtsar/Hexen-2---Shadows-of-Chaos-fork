@@ -11,6 +11,11 @@ Lights can be toggled/faded, shot out, etc.
 */
 
 float START_LOW		= 1;
+float LIGHT_SOUND	= 4;		//ws: force torches to emit ambient sound
+//float FL2_ONFIRE	= 4194304;	//ws: tracks whether light is toggleable
+
+void() light_stopsound;
+void() light_startsound;
 
 void fire_hurt_field_touch ()
 {
@@ -147,6 +152,16 @@ void lightstyle_change_think()
 void lightstyle_change (entity light_targ)
 {
 //dprint("spawning light changer\n");
+	if (light_targ.spawnflags & LIGHT_SOUND) {
+entity oself;	//ws: this function is called by the trigger, so self is the trigger. switch self to torch and stop our ambient sound, then restore scope.
+		oself = self;
+		self = light_targ;
+		if (self.spawnflags & START_LOW)
+			light_startsound();
+		else
+			light_stopsound();
+		self = oself;
+	}
 	newmis=spawn();
 	newmis.lightvalue1=light_targ.lightvalue1;
 	newmis.lightvalue2=light_targ.lightvalue2;
@@ -158,6 +173,7 @@ void lightstyle_change (entity light_targ)
 
 void torch_death ()
 {
+	light_stopsound();
 	lightstylestatic(self.style,0);
 	stopSound(self,CHAN_BODY);
 	//sound(self,CHAN_BODY, "misc/null.wav", 0.5, ATTN_STATIC);
@@ -228,78 +244,94 @@ void light()
 	}
 }
 
-/*QUAK-ED light_globe (0 1 0) (-8 -8 -8) (8 8 8) START_LOW
-Sphere globe light.
-Default light value is 300
-Default style is 0
-----------------------------------
-If triggered, will toggle between lightvalue1 and lightvalue2
-.lightvalue1 (default 0) 
-.lightvalue2 (default 11, equivalent to 300 brightness)
-Two values the light will fade-toggle between, 0 is black, 25 is brightest, 11 is equivalent to a value of 300.
-.fadespeed (default 1) = How many seconds it will take to complete the desired lighting change
-The light will start on at a default of the higher light value unless you turn on the startlow flag.
-START_LOW = will make the light start at the lower of the lightvalues you specify (default uses brighter)
-
-NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS NEED THIS INFO
-*/
-/*
-void() light_globe =
+void light_sound ()
 {
-	precache_model ("models/s_light.spr");
-	setmodel (self, "models/s_light.spr");
-	if(self.targetname)
-		self.use=torch_use;
-	self.mdl = "models/null.spr";
-	self.weaponmodel = "models/s_light.spr";
-	if(self.style>=32)
-	{
-		if(!self.lightvalue2)
-			self.lightvalue2=11;
-		if(!self.fadespeed)
-			self.fadespeed = 1;
-		initialize_lightstyle();
-		self.think = torch_think;
-		self.nextthink = time+1;
+	if (self.owner == world) {
+		remove(self);
+		return;
 	}
-	else
-	{
-		setmodel(self,self.weaponmodel);
-		if(deathmatch||teamplay)
-			makestatic (self);
-		else
-		{
-			self.solid=SOLID_NOT;
-			self.movetype=MOVETYPE_NONE;
-		}
+	sound(self, CHAN_ITEM, self.owner.noise, self.owner.height, self.owner.lip);
+	self.think = light_sound;
+	thinktime self : self.t_length;
+}
+
+void light_startsound ()
+{
+	if (!self.noise || !self.t_length || !self.flags2 & FL2_ONFIRE)
+		return;
+	
+	entity sound;
+	sound = spawn();
+	self.shield = sound;
+	setorigin (sound, self.origin);
+	sound.owner = self;
+	sound.solid = SOLID_NOT;
+	sound.height = self.height;
+	sound.t_length = self.t_length;
+	sound.think = light_sound;
+	thinktime sound : 0;
+	
+	return;
+}
+
+void light_stopsound ()
+{
+	if (self.flags2 & FL2_ONFIRE && self.shield!=world) {
+		sound(self.shield, CHAN_ITEM, "misc/null.wav", 1, 1);
+		self.shield.think = SUB_Null;
+		remove(self.shield);
 	}
-};
-*/
+	return;
+}
 
 void() FireAmbient =
-{
-//FIXME: remove ambient sound if light is off, start it again if turned back on
-	if (!self.lip || self.lip <=0 || self.lip > ATTN_STATIC)
-		self.lip = ATTN_STATIC;
+{	//FIXME: remove ambient sound if light is off, start it again if turned back on
+	//t_length: exact length of wav file for toggleable looping purposes
+	//height: volume
+	if (!self.spawnflags & LIGHT_SOUND)
+		return;
 	
 	if (self.soundtype == 1) {
-		precache_sound ("misc/fburn_bg.wav");
-		ambientsound (self.origin, "misc/fburn_bg.wav", 1, self.lip);
+		self.noise = "misc/fburn_bg.wav";
+		if (!self.height)
+			self.height = 0.5;
+		self.t_length = 2.43;
 	}
 	else if (self.soundtype == 2) {
-		precache_sound ("misc/fburn_md.wav");
-		ambientsound (self.origin, "misc/fburn_md.wav", 1, self.lip);
+		self.noise = "misc/fburn_md.wav";
+		if (!self.height)
+			self.height = 1;
+		self.t_length = 2.787;
 	}
 	else if (self.soundtype == 3) {
-		precache_sound ("misc/fburn_sm.wav");
-		ambientsound (self.origin, "misc/fburn_sm.wav", 1, self.lip);
+		self.noise = "misc/fburn_sm.wav";
+		if (!self.height)
+			self.height = 1;
+		if (!self.lip)
+			self.lip = ATTN_NORM;
+		self.t_length = 1.812;
 	}
 	else if (self.soundtype == 4)
 		return;
 	else {
-		precache_sound ("raven/flame1.wav");
-		ambientsound (self.origin, "raven/flame1.wav", 0.5, self.lip);
+		self.noise = "raven/flame1.wav";
+		if (!self.height)
+			self.height = 0.5;
+		self.t_length = 3.39;
 	}
+	precache_sound (self.noise);
+	precache_sound ("misc/null.wav");
+	
+	if (!self.lip || self.lip <=0 || self.lip > ATTN_STATIC)
+		self.lip = ATTN_STATIC;
+	
+	if (self.health>=1 || self.targetname!="") {
+		self.flags2 = FL2_ONFIRE;	//flag that indicates this entity has a togglable sound
+		if (!self.spawnflags&START_LOW)
+			light_startsound();
+	}
+	else
+		ambientsound (self.origin, self.noise, self.height, self.lip);
 };
 
 /*QUAK-ED light_torch_small_walltorch (0 .5 0) (-10 -10 -20) (10 10 20) START_LOW HURT
@@ -326,7 +358,8 @@ void() light_torch_small_walltorch =
 		spawn_burnfield(self.origin);
 	else
 		self.dmg=0;
-
+	
+	self.spawnflags (+) LIGHT_SOUND;
 	FireAmbient ();
 	if(self.targetname)
 		self.use=torch_use;
@@ -381,7 +414,8 @@ void() light_flame_large_yellow =
 		spawn_burnfield(self.origin);
 	else
 		self.dmg=0;
-
+	
+	self.spawnflags (+) LIGHT_SOUND;
 	FireAmbient ();
 	if(self.targetname)
 		self.use=torch_use;
@@ -435,7 +469,8 @@ void() light_flame_small_yellow =
 		spawn_burnfield(self.origin);
 	else
 		self.dmg=0;
-
+	
+	self.spawnflags (+) LIGHT_SOUND;
 	FireAmbient ();
 	if(self.targetname)
 		self.use=torch_use;
@@ -467,56 +502,6 @@ void() light_flame_small_yellow =
 		}
 	}
 };
-
-/*QUAK-ED light_flame_small_white (0 1 0) (-10 -10 -40) (10 10 40) START_LOW
-Small white flame ball
-----------------------------------
-If triggered, will toggle between lightvalue1 and lightvalue2
-.lightvalue1 (default 0) 
-.lightvalue2 (default 11, equivalent to 300 brightness)
-Two values the light will fade-toggle between, 0 is black, 25 is brightest, 11 is equivalent to a value of 300.
-.fadespeed (default 1) = How many seconds it will take to complete the desired lighting change
-The light will start on at a default of the higher light value unless you turn on the startlow flag.
-START_LOW = will make the light start at the lower of the lightvalues you specify (default uses brighter)
-
-NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS NEED THIS INFO
-*/
-/*
-void() light_flame_small_white =
-{
-	precache_model ("models/flame2.mdl");
-	FireAmbient ();
-	if(self.targetname)
-		self.use=torch_use;
-
-	self.abslight = .75;
-
-	self.mdl = "models/null.spr";
-	self.weaponmodel = "models/flame2.mdl";
-	if(self.style>=32)
-	{
-		if(!self.lightvalue2)
-			self.lightvalue2=11;
-		if(!self.fadespeed)
-			self.fadespeed = 1;
-		initialize_lightstyle();
-		self.think = torch_think;
-		self.nextthink = time+1;
-	}
-	else
-	{
-		self.drawflags(+)MLS_ABSLIGHT;
-		setmodel(self,self.weaponmodel);
-		if(deathmatch||teamplay)
-			makestatic (self);
-		else
-		{
-			self.solid=SOLID_NOT;
-			self.movetype=MOVETYPE_NONE;
-		}
-	}
-};
-*/
 
 /*QUAKED light_gem (0 1 0) (-8 -8 -8) (8 8 8) START_LOW
 A gem that displays light.
@@ -591,7 +576,8 @@ void() light_newfire =
 		spawn_burnfield(self.origin);
 	else
 		self.dmg=0;
-
+	
+	self.spawnflags (+) LIGHT_SOUND;
 	FireAmbient ();
 	if(self.spawnflags&4)
 		self.drawflags = self.drawflags|SCALE_ORIGIN_BOTTOM;
