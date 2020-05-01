@@ -319,11 +319,16 @@ void bone_turret_think ()
 	
 	if (random(0,100) < chance)
 	{	//check if its aimed at a wall
+		self.angles_x *= (-1);	//because mdl pitch is flipped
 		makevectors(self.angles);
+		self.angles_x *= (-1);	//now reset
 		traceline(self.origin,self.origin+v_forward*8,TRUE,self);
 		if (trace_fraction != 1) {
 			self.lefty *= (-1);		//reverse direction
-			self.angles_y+=(30*self.lefty);
+			if (self.height)
+				self.angles_x+=(30*self.lefty);
+			else
+				self.angles_y+=(30*self.lefty);
 		}
 		sound(self,CHAN_WEAPON,"necro/bonefnrm.wav",0.5,ATTN_NORM);
 		bone_turret_fire();
@@ -337,9 +342,12 @@ void bone_turret_think ()
 	
 	if (self.scale < 0.5) {
 		sound(self,CHAN_BODY,"necro/bonethit.wav",1,0.5);
-		vector randomvec;
+		vector randomvec, vel;
 		randomvec=randomv('-10 -10 -10','10 10 10');
-		starteffect(CE_GHOST, self.origin-self.movedir*8+randomvec,'0 0 30'+randomvec, 0.1);
+		vel = '0 0 30';
+		if (self.height)
+			vel *= (-1);
+		starteffect(CE_GHOST, self.origin+randomvec,vel+randomvec, 0.1);
 		particle4(self.origin,50,random(368,384),PARTICLETYPE_GRAV,10);
 		remove(self);
 	}
@@ -379,8 +387,10 @@ void bone_ball_touch ()
 			traceline(org,org+v_up*1,TRUE,self);	//hit ceil?
 		if (trace_plane_normal_z == 1)
 			setorigin (self, self.origin + '0 0 16');	//raise from floor
-		else if (trace_plane_normal_z == (-1))
+		else if (trace_plane_normal_z == (-1)) {
 			setorigin (self, self.origin + '0 0 -16');	//lower from ceil
+			self.height = TRUE;
+		}
 		
 		traceline(self.origin,self.origin+v_forward*2,TRUE,self);
 		if (trace_fraction!=1)
@@ -524,7 +534,7 @@ void bone_fire(float ball, float tome, vector ofs)
 	}
 }
 
-void  bone_normal()
+void bone_normal()
 {
 	vector dir;
 	
@@ -615,7 +625,7 @@ void boneshard_fire ()
 		if (tome && self.greenmana>=(BONE_NORMAL_COST*2)+BONE_TOMED_COST)
 			bone_fire_once(TRUE);
 	}
-	if(random()<0.7&&self.weaponframe<=$fire6)	//ws: lowered from 0.8
+	if(random()<0.7&&self.weaponframe<=$fire6)	//0.8
 		bone_fire_once(FALSE);
 	
 	if (self.wfs == WF_LAST_FRAME)
