@@ -11,8 +11,8 @@ Lights can be toggled/faded, shot out, etc.
 */
 
 float START_LOW		= 1;
-float LIGHT_SOUND	= 4;	//ws: togglable looping sounds
-//float FL2_ONFIRE
+float LIGHT_SOUND	= 4;		//ws: force torches to emit ambient sound
+//float FL2_ONFIRE	= 4194304;	//ws: tracks whether light is toggleable
 
 void() light_stopsound;
 void() light_startsound;
@@ -41,7 +41,7 @@ void fadelight()
 	//dprint("\n");
 	if(self.count/20>=self.fadespeed)
 	{
-		dprint("light timed out\n");
+		//dprint("light timed out\n");
 		remove(self);
 	}
 	else if((self.cnt<0&&self.light_lev<=self.level)||(self.cnt>0&&self.light_lev>=self.level))
