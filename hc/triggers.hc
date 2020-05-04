@@ -30,7 +30,7 @@ float SPAWNFLAG_REMOVE_PP	= 16;
 float SPAWNFLAG_NO_PP		= 32;
 
 float SPAWNFLAG_ALLTOUCH	= 65536;
-float PUSH_SHEEP			= 64;
+float PUSH_SHEEP			= 64;	//trigger_jump
 float JUMP_CHANGEANGLE		= 8;	//trigger_monsterjump
 
 // the wait time has passed, so set back up for another activation
@@ -967,6 +967,7 @@ void() play_teleport =
 
 void(vector org) spawn_tfog =
 {
+	entity s;
 	s = spawn ();
 	s.origin = org;
 	thinktime s : 0.05;
@@ -2099,6 +2100,14 @@ void trigger_message_transfer ()
 	self.use=trigger_message_transfer_use;
 }
 
+/*	trigger_reflect
+Brush entity that reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with func_wall to block movement and un-reflectable attacks like lightning beams.
+Don't killtarget this entity - just target it to remove it.
+Speed: Modifier to missile's original speed. Less than 1 is recommended so the player has a better chance of dodging reflected missiles.
+Spawnflags: Deactivated (8) to start deactivated and activate when used. Targetting it after this will remove it like normal.
+Issues: Behaves oddly with thrown Warhammer; doesn't account for Tornado
+*/
+
 void reflect_touch ()
 {
 	if (self.inactive || !IsMissile(other) || (other.safe_time && other.safe_time>time))	//IsMissile is in ai.hc
@@ -2150,14 +2159,6 @@ void reflect_remove ()
 	remove(self.goalentity);
 	remove(self);
 }
-
-/*	trigger_reflect
-Brush entity that reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with func_wall to block movement and un-reflectable attacks like lightning beams.
-Don't killtarget this entity - just target it to remove it.
-Speed: Modifier to missile's original speed. Less than 1 is recommended so the player has a better chance of dodging reflected missiles.
-Spawnflags: Deactivated (8) to start deactivated and activate when used. Targetting it after this will remove it like normal.
-Issues: Behaves oddly with thrown Warhammer; doesn't account for Tornado
-*/
 
 void trigger_reflect ()
 {
@@ -2218,13 +2219,13 @@ This entity cannot be damaged and is always touchable once activated
 ======================================================================*/
 
 void trigger_ladder_touch (void)
-{
+{	
 	if (self.inactive) return;
-	if (!activator.flags&FL_CLIENT)	return;
-	if (!activator.health) return;
-	if (activator.waterlevel > 1) return;
-	if (activator.flags&FL_WATERJUMP) return;
-	if (activator.flags2&FL_CHAINED) return;
+	if (!other.flags&FL_CLIENT)	return;
+	if (!other.health) return;
+	if (other.waterlevel > 1) return;
+	if (other.flags&FL_WATERJUMP) return;
+	if (other.flags2&FL_CHAINED) return;
 	
 	if (self.movedir != '0 0 0')
 	{
@@ -2233,11 +2234,11 @@ void trigger_ladder_touch (void)
 			return;		// not facing the right way
 	}
 	
-	activator.onladder = TRUE;
-	activator.ladder = self;
+	other.onladder = TRUE;
+	other.ladder = self;
 }
 
-void trigger_ladder (void)
+void trigger_ladder ()
 {
 	if (!self.speed)
 		self.speed = 160;
@@ -2259,3 +2260,45 @@ void trigger_ladder (void)
 	
 	InitTrigger();
 }
+
+/*	//idea: point entity that, when triggered, transfers its fields to its targets - used to change properties of moving objects
+void trigger_changefields ()
+{
+	entity ent;
+	float i, valid, movercnt;
+	valid = FALSE;
+	i = 0;
+	movercnt = 9;
+	string movers[9] =
+		{"func_crusher", "func_door", "func_door_rotating", "func_door_secret", "func_newplat", "func_plat", "func_rotating", "func_train", "func_train_mp"};
+	for (i = 0; i < movercnt; i++) {
+		string name;
+		name = movers[i];
+		if (ent.classname==name)
+			valid = TRUE;
+	}
+	if (!valid)
+		return;
+	
+	if (self.level)
+		ent.level = self.level;
+	if (self.speed)
+		ent.speed = self.speed;
+	if (self.wait)
+		ent.wait = self.wait;
+	if (ent.classname == "func_door")
+		if (self.angles_y)
+			ent.angles_y = self.angles_y;
+	if (ent.classname == "func_door_rotating")
+		if (self.flags)
+			ent.flags = self.flags;
+	if (ent.classname == "func_rotating" || ent.classname == "func_train" || ent.classname == "func_train_mp")
+		if (self.anglespeed)
+			ent.anglespeed = self.anglespeed;
+}
+
+void trigger_fields_transfer ()
+{
+	self.touch = self.use = trigger_changefields;
+}
+*/
