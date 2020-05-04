@@ -79,7 +79,7 @@ void undying_standup(void) [++ 131 .. 182]
 		}
 	}
 	
-	if (self.frame == 140)
+	if (self.frame == 141)
 	{
 		setsize (self, undying_mins, undying_maxs);
 		self.solid = SOLID_SLIDEBOX;
@@ -118,16 +118,16 @@ void undying_debug(void) [++ 0 .. 182]
 void undying_painfall(void) [++ 90 .. 130]
 {
 	if (self.frame == 130)
-		thinktime self : random(3.75,4.25);
+		thinktime self : random(3.75,4.5-(skill*0.5));
 	else
 		thinktime self : HX_FRAME_TIME;
 	
-	//if (self.frame==90) {
+	if (self.frame<=91) {
 		self.counter = TRUE;	//dont get back up again
 		self.takedamage = DAMAGE_NO;
 		self.th_save = self.th_pain;
 		self.th_pain = SUB_Null;
-	//}
+	}
 	
 	if (self.frame == 92)
 	{
