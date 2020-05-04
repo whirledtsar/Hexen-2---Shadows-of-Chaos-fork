@@ -2144,7 +2144,7 @@
 		1 : "No sound"
 		2 : "Buzzing"
 	]
-	wait(choices) : "Time between strikes" : -1 =
+	wait(choices) : "Time between strikes" : 5 =
 	[
 		-1 : "Once per trigger"
 	]
