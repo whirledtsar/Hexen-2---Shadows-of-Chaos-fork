@@ -941,7 +941,7 @@
 	[
 		1 : "Start low" : 0
 		2 : "Hurt (PoP)" : 0
-		128 : "Force sound" : 0 : "Emit flame sound (torches don't by default)"
+		4 : "Force sound" : 0 : "Emit flame sound (torches don't by default)"
 	]
 	style(choices) : "Style (32-63 for groups)" : 0 =
 	[
@@ -2144,7 +2144,7 @@
 		1 : "No sound"
 		2 : "Buzzing"
 	]
-	wait(choices) : "Time between strikes" : -1 =
+	wait(choices) : "Time between strikes" : 5 =
 	[
 		-1 : "Once per trigger"
 	]
