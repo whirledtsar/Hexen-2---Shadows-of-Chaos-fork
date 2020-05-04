@@ -1370,6 +1370,8 @@ void() WaterMove =
 
 void CheckCrouch (void)
 {
+	if (self.onladder)
+		return;
 	if ((self.crouch_time) && (self.crouch_time < time))  // Time to crouch or uncrouch a little
 	{
 		if (self.hull==HULL_CROUCH) // Player crouching
@@ -1628,10 +1630,17 @@ void() PlayerPreThink =
 	//----------------------------------------------------------------------
 	if (self.onladder) {
 		self.onladder = FALSE;	// Reset ladder touch function
-		if (self.button2) {		// Is jump key being pressed?
+		float crouching;
+		crouching = self.flags2 & FL2_CROUCHED;
+		if (self.button2 || crouching) {		// Is jump key being pressed?
 			// Reset velocity upwards and all sideways movement so that the player stays on the ladder and climbs straight up with very little sidways movement
 			self.velocity = '0 0 0';
-			self.velocity_z = self.ladder.speed;
+			self.velocity_z = self.ladder.speed * self.hasted;
+			if (crouching) {					//ws: if pressing crouch button, move down ladder
+				self.velocity_z *= (-1);
+				if (self.hull=HULL_CROUCH)		//ws: if in actual crouch state, return to normal once on ladder
+					PlayerUnCrouching();
+			}
 			self.gravity = 0.0000001;
 
 			if (self.count < time) {
