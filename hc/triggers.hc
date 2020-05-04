@@ -2797,11 +2797,11 @@ This entity cannot be damaged and is always touchable once activated
 void trigger_ladder_touch (void)
 {
 	if (self.inactive) return;
-	if (!activator.flags&FL_CLIENT)	return;
-	if (!activator.health) return;
-	if (activator.waterlevel > 1) return;
-	if (activator.flags&FL_WATERJUMP) return;
-	if (activator.flags2&FL_CHAINED) return;
+	if (!other.flags&FL_CLIENT)	return;
+	if (!other.health) return;
+	if (other.waterlevel > 1) return;
+	if (other.flags&FL_WATERJUMP) return;
+	if (other.flags2&FL_CHAINED) return;
 	
 	if (self.movedir != '0 0 0')
 	{
@@ -2810,8 +2810,8 @@ void trigger_ladder_touch (void)
 			return;		// not facing the right way
 	}
 	
-	activator.onladder = TRUE;
-	activator.ladder = self;
+	other.onladder = TRUE;
+	other.ladder = self;
 }
 
 void trigger_ladder (void)
