@@ -221,6 +221,7 @@ void(float force_respawn) monster_death_use =
 void() walkmonster_start_go =
 {
 	sdprint("Summon monster start GO", FALSE);
+	
 	if(!self.touch)
 		self.touch=obj_push;
 
@@ -651,17 +652,17 @@ void ApplyMonsterBuff(entity monst, float canBeLeader)
 	
 	randval = random(randmin, BUFF_RANDMAX);
 	if (randval > BUFF_RANDMAX - BUFF_LARGE_CHANCE)
-	{
+	{	dprint ("large monster\n");
 		ApplyLargeMonster(monst);
 		monst.bufftype (+) BUFFTYPE_LARGE;
 	}
 	
 	//make second check. There is a small chance that a monster can be a large leader!
-	if (canBeLeader==2)
+	if (canBeLeader>1)
 	{
 		randval = random(randmin / 2, BUFF_RANDMAX);
 		if (randval > BUFF_RANDMAX - BUFF_LEADER_CHANCE)
-		{
+		{	dprint ("leader monster\n");
 			ApplyLeaderMonster(monst);
 			monst.bufftype (+) BUFFTYPE_LEADER;
 			
@@ -691,6 +692,8 @@ void() monster_spawn =
 	setsize (self, self.orgnl_mins, self.orgnl_maxs);
 	if (!self.spawnflags&SPAWNQUIET)
 		spawn_tfog(self.origin);
+	
+	CheckMonsterBuff();
 	
 	if (self.model=="models/imp.mdl")
 		impmonster_start();
@@ -790,3 +793,15 @@ entity new;		//create new entity to avoid inheriting anything weird from corpse
 	remove(corpse);
 }
 
+void CheckMonsterBuff ()
+{
+	/*ws: monsters are spawned before player, so they cant check client's config flags immediately (as they arent initialized).
+	instead, use ai_run, ai_walk, & ai_stand to check once player is ready (indicated by global var client_ready, set in client.hc). */
+	if (!self.state && client_ready) {
+		self.state = TRUE;	//dont check again
+		if (CheckCfgParm(PARM_BUFF) && self.buff)
+			ApplyMonsterBuff(self, self.buff);
+	}
+	
+	return;
+}

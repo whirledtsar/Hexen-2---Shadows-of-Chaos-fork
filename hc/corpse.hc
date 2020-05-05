@@ -66,7 +66,7 @@ void MarkForRespawn (void)
 	entity newmis;
 	float timelimit;
 	
-	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn) //do not respawn players or summoned monsters
+	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn && !self.playercontrolled) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -194,7 +194,7 @@ vector newmaxs;
     self.flags(-)FL_MONSTER;
 	if (!self.preventrespawn)
 		self.controller = self;
-
+	
 	pitch_roll_for_slope('0 0 0',self);
 
     if ((self.decap)  && (self.classname == "player"))

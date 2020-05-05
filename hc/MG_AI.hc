@@ -126,20 +126,23 @@ float FindMonsterTarget ()
 {
 entity found;
 float okay;
+	sdprint ("Summoned monster started finding monster target", TRUE);
 	if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
 	{
 		self.enemy=self.controller.enemy;
+		sdprint ("Summoned monster's controller has a target", TRUE);
 		return TRUE;
 	}
 
+	sdprint ("Summoned monster's controller has no target... searching", TRUE);
 	okay=FALSE;
 	found=findradius(self.origin,1000);
 	while(found!=world)
 	{
 		if(found!=self)
-			if(found.flags2&FL_ALIVE)
+			if(found.flags2&FL_ALIVE && !(found.artifact_active&ARTFLAG_STONED))	//check if enemy is a dormant gargoyle -ws
 				if(visible(found))
-					if(found!=self.controller)
+					if(found!=self.controller && found!=self.owner)
 						if(found.controller!=self.controller)
 						{
 							if(coop)
@@ -157,6 +160,7 @@ float okay;
 							if(okay)
 							{
 								self.enemy=found;
+								sdprint ("Returning monster target", TRUE);
 								return TRUE;
 							}
 						}
@@ -978,7 +982,6 @@ float dist, bestdist;
 		if (IsMissile(found))	//IsMissile is in ai.hc; covers more entities
 		{
 			if(visible(found))
-					
 			{
 				dist=vlen(found.origin-self.origin);
 				if(dist<bestdist)

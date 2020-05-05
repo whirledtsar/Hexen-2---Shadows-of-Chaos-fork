@@ -234,7 +234,7 @@ void ScorpionInit(float type)
 		self.th_run = ScorpionRunBlack;
 	else 
 		self.th_run = ScorpionRun;
-
+	
 	self.th_jump = monster_jump;	self.jumpframe = $ScPain2;
 	self.th_melee = ScorpionMeleeDecide;
 	self.th_pain = ScorpionPainDecide;
@@ -387,7 +387,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 	}
 	
 	
-	if ((self.enemy.last_attack > time - 1) && (fov(self, self.enemy, 45)))
+	if ((self.enemy != self.controller) && (self.enemy.last_attack > time - 1) && (fov(self, self.enemy, 45)))
 	{
 		if (ScorpionCheckDefense()) 
 		{
@@ -407,7 +407,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 
 	enemy_dist = vlen(self.enemy.origin - self.origin);
 	
-	if (enemy_dist < 120)
+	if (enemy_dist < 120 && (self.enemy != self.controller))
 	{
 		if ((random() < 0.33) && (infront(self.enemy)) && (self.cnt <= time))
 		{
@@ -473,7 +473,7 @@ void ScorpionMelee(float damage)
 	source = self.origin;
 	traceline (source, source + v_forward*60, FALSE, self);
 	if (trace_ent == world)
-		traceline (source + v_up*10, source + v_up*10 + v_forward*60, FALSE, self);  //ws: crouching players are no longer invulnerable
+		traceline (source + v_up*10, source + v_up*24 + v_forward*60, FALSE, self);  //ws: crouching players are no longer invulnerable
 
 	if (trace_ent != self.enemy) return;
 
@@ -765,8 +765,7 @@ void ScorpionDie(void)
 		MakeSolidCorpse();
 		return;
 	}
-
-
+	
 	if(self.health < -30)
 	{
 		chunk_death();

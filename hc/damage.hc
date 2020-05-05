@@ -976,10 +976,9 @@ entity holdent,lastleader,newking;
 	if(targ.flags&FL_MONSTER&&inflictor.flags2&FL2_ADJUST_MON_DAM)
 		damage*=2;//Special- more damage against monsters
 
-	// check for attacker being a player here is necessary
-	// see the "Trigger field" dest2 bug in the union in entity.hc
-	if (attacker.flags&FL_CLIENT && attacker.super_damage)
-		damage += attacker.super_damage * damage;
+	//No longer apply super damage to all attacks (only to melee)
+	//if (attacker.flags&FL_CLIENT && attacker.super_damage)
+		//damage += attacker.super_damage * damage;
 
 	// Calculating Damage to a player
 	if (targ.classname == "player")
@@ -1059,6 +1058,9 @@ entity holdent,lastleader,newking;
 		Killed (targ, attacker,inflictor,total_damage);
 		return;
 	}
+	
+	if (attacker.flags&FL_CLIENT && targ.flags&FL_MONSTER && targ.controller != attacker && targ.health>0)	//ws: when player damages monster, make them his enemy (helps summoned monster AI)
+		attacker.enemy = targ;
 
 // react to the damage
 	oldself = self;

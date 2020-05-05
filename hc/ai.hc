@@ -2,6 +2,7 @@
  * $Header: /cvsroot/uhexen2/gamecode/hc/portals/ai.hc,v 1.4 2007-02-07 16:59:29 sezero Exp $
  */
 void(entity etemp, entity stemp, entity stemp, float dmg) T_Damage;
+void() CheckMonsterBuff;
 /*
 
 .enemy
@@ -31,7 +32,7 @@ walkmove(angle, speed) primitive is all or nothing
 void sdprint (string dmess, float includeEnemy)
 {
 	if(self.playercontrolled)
-	{		
+	{
 		dprint(dmess);
 		if (includeEnemy)
 		{
@@ -423,7 +424,7 @@ float		r;
 			HuntTarget();
 			return TRUE;
 		}
-		return FALSE;
+		//return FALSE;
 	}
 
 	sdprint("Summon monster finding Player target", TRUE);
@@ -440,8 +441,11 @@ float		r;
 			return FALSE;	// current check entity isn't in PVS
 	}
 
-	if(self.classname=="monster_imp_lord"&&client==self.controller)
-		return FALSE;
+	if (self.playercontrolled && client==self.controller)	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
+	{
+		HuntTarget();
+		return TRUE;
+	}
 
 	if (client == self.enemy)
 		return FALSE;
@@ -583,6 +587,8 @@ entity found;
 
 void(float dist) ai_walk =
 {
+	CheckMonsterBuff();
+	
 	MonsterCheckContents();
 
 	movedist = dist;
@@ -593,9 +599,10 @@ void(float dist) ai_walk =
 		if(find_enemy_target())
 			return;
 
+	sdprint("Summon monster contents are ok", FALSE);
 	if (FindTarget (FALSE))
 		return;
-
+	
 	if(!movetogoal(dist))
 	{
 		if(trace_ent.solid==SOLID_BSP&&trace_fraction<1)
@@ -606,7 +613,6 @@ void(float dist) ai_walk =
 	}
 };
 
-
 /*
 =============
 ai_stand
@@ -614,17 +620,19 @@ ai_stand
 The monster is staying in one place for a while, with slight angle turns
 =============
 */
+void ApplyMonsterBuff(entity monst, float canBeLeader);
 void() ai_stand =
 {
-	//ws: monsters are spawned before player, so they cant check client's config flags immediately (as they arent initialized). instead, check once player is ready (global var client_ready).
-	if (!self.state && client_ready) {
-		self.state = TRUE;	//dont check again
-		if (CheckCfgParm(PARM_BUFF) && self.buff)
-			ApplyMonsterBuff(self, self.buff);
-	}
-	
 	sdprint("Summon monster standing", FALSE);
+	
+	CheckMonsterBuff();
+	
 	MonsterCheckContents();
+	
+	sdprint("Summon monster contents are ok", FALSE);
+	if (self.playercontrolled && self.enemy=self.controller)	//ws: if summoned minion and already close to player, dont move further
+			if (range(self.controller)<=RANGE_MELEE && visible(self.controller))
+				return;
 	
 //THE PIT!
 	if(world.model=="maps/monsters.bsp")
@@ -828,6 +836,8 @@ The monster has an enemy it is trying to kill
 
 void(float dist) ai_run =
 {
+	sdprint("Doing AI run... ", FALSE);
+	CheckMonsterBuff();
 	
 	MonsterCheckContents();
 	
@@ -867,6 +877,8 @@ void(float dist) ai_run =
 			return;
 		}
 	}
+	if (self.playercontrolled && self.controller.enemy!=world && self.controller.enemy!=self.enemy)	//summoned monster check if player has acquired enemy
+		FindMonsterTarget();
 
 	self.show_hostile = time + 1;		// wake up other monsters
 
@@ -885,6 +897,7 @@ void(float dist) ai_run =
 	}
 	else
 	{
+		sdprint("Can't see target ", TRUE);
 		if(coop)
 		{
 			if(!FindTarget(TRUE))
@@ -909,6 +922,11 @@ void(float dist) ai_run =
 
 	if(random()<0.5&&(!self.flags&FL_SWIM)&&(!self.flags&FL_FLY)&&(self.spawnflags&JUMP))
 		CheckJump();
+	if (self.playercontrolled)		//ws: if summoned minion and already close to player, dont move further
+		if (self.enemy==self.controller && enemy_vis && range(self.enemy)==RANGE_MELEE) {
+			self.think=self.th_stand;
+			self.th_stand();
+		}
 
 // look for other coop players
 	if (coop && self.search_time < time)
@@ -924,12 +942,14 @@ void(float dist) ai_run =
 	
 	if ((self.attack_state == AS_MISSILE) || (self.attack_state == AS_MELEE))  // turning to attack
 	{
+		sdprint("Turning to attack ", TRUE);
 		if(self.classname!="monster_eidolon")
 			ai_attack_face ();
 		return;
 	}
 
-	if (CheckAnyAttack ()) {
+	if (CheckAnyAttack ())
+	{
 		sdprint("Is allowed to attack ", TRUE);
 		return;					// beginning an attack
 	}

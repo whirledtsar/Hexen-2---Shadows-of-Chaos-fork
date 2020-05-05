@@ -672,14 +672,14 @@ entity splat;
 	splat.movetype=MOVETYPE_NONE;
 	splat.solid=SOLID_TRIGGER;		//SOLID_NOT
 	splat.drawflags=SCALE_ORIGIN_BOTTOM+SCALE_TYPE_XYONLY;
-	if (self.netname == "spider")
+	if (self.model == "models/spider.mdl")
 		splat.scale = 0.5;
 	else if (self.netname == "yakman")
 		splat.scale = 1.3;
 	else if (self.netname == "maulotaur")
 		splat.scale = random(1.4,1.6);
 	else if (self.bufftype && self.scale>1)
-		splat.scale = self.scale;
+		splat.scale = self.scale*random(0.75, 0.9);
 	else
 		splat.scale = random(0.75, 0.9);
 	splat.angles_y+=random(360);
@@ -742,6 +742,8 @@ void chunk_death (void)
 		deathsound="fx/bonebrk.wav";
 	else if ((self.thingtype==THINGTYPE_CLOTH) || (self.thingtype==THINGTYPE_REDGLASS))
 		deathsound="fx/clothbrk.wav";
+	else if (self.thingtype==THINGTYPE_ASH)
+		deathsound="misc/bshatter.wav";
 	else if (self.thingtype==THINGTYPE_FLESH)
 	{
 		if (!self.flags&FL_SWIM && self.flags&FL_ONGROUND)
@@ -758,8 +760,10 @@ void chunk_death (void)
 				BloodSplat(BLOOD_SMALL);
 		}
 		
-		if (self.headmodel)
+		if (self.headmodel) {
 			ThrowGib (self.headmodel, self.health);
+			self.headmodel = "";
+		}
 		if (self.netname == "undying")
 		{
 			ThrowGib ("models/ZombiePal_arm.mdl", self.health);
@@ -851,8 +855,6 @@ void chunk_death (void)
 
 			model_cnt-=1;
 		}
-
-			   
 	}
 	
 	make_chunk_reset();
@@ -862,10 +864,8 @@ void chunk_death (void)
 
 	SUB_UseTargets();
 	self.target = self.targetname;	//fix by Shanjaq
-
-	//if (self.thingtype==THINGTYPE_FLESH || //most monsters are flesh
-	//   ((self.thingtype==THINGTYPE_GREYSTONE || self.thingtype==THINGTYPE_METAL) && self.flags&FL_MONSTER))//golems
-	if (self.solid!=SOLID_BSP)
+	
+	if (self.th_init)
 	{
 		//set up respawn time
 		self.think = MarkForRespawn;
