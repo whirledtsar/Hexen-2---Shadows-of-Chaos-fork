@@ -60,7 +60,7 @@ void ChunkRemove (void)
 
 vector ChunkVelocity (void)
 {
-	local vector v;
+	vector v;
 
 	v_x = 300 * crandom();
 	v_y = 300 * crandom();
@@ -491,16 +491,16 @@ float BLOOD_GREEN = 3;
 float bloodsplat_radius[4] =
 {
 	16, 20, 40, 8
-}
+};
 
 string bloodsplat_mdl[4] =
 {
 	"models/bloodpool.mdl", "models/bloodpool2.mdl", "models/bloodpool3.mdl", "models/bloodpool_green.mdl"
-}
+};
 
 void(vector slope) pitch_roll_for_slope;
 
-void blood_step ()
+void bloodpool_step ()
 {	//ws: play bloody step/squish sound when walking over blood
 	if (other.classname != "player")
 		return;
@@ -525,8 +525,6 @@ void blood_step ()
 	sound (self, CHAN_BODY, bloodsound[rint(random(0,2))], random(0.5,0.8), ATTN_IDLE);
 	other.movetime=time+0.5;
 	self.scale-=0.025;
-	self.angles_x+=random(-1,1);
-	self.angles_y+=random(-1,1);
 	if (self.scale<=0)
 		remove(self);
 }
@@ -567,9 +565,9 @@ entity splat;
 	if (!bloodpool_check(type))
 	{	//try smaller splats if bigger splat wont fit
 		if (type==BLOOD_LARGE)
-			BloodSplat(rint(random(0,1)));
+			BloodSplat(rint(random(BLOOD_SMALL,BLOOD_MED)));
 		else if (type==BLOOD_MED)
-			BloodSplat(0);
+			BloodSplat(BLOOD_SMALL);
 		else
 			return;
 	}
@@ -582,7 +580,7 @@ entity splat;
 	splat.movetype=MOVETYPE_NONE;
 	splat.solid=SOLID_TRIGGER;		//SOLID_NOT
 	splat.drawflags=SCALE_ORIGIN_BOTTOM;
-	if (self.netname == "spider")
+	if (self.model == "models/spider.mdl")
 		splat.scale = 0.5;
 	else if (self.netname == "yakman")
 		splat.scale = 1.3;
@@ -592,7 +590,8 @@ entity splat;
 		splat.scale = self.scale*random(0.75, 0.9);
 	else
 		splat.scale = random(0.75, 0.9);
-	splat.touch=blood_step;
+	splat.angles_y+=random(360);
+	splat.touch=bloodpool_step;
 	if (CheckCfgParm(PARM_FADE)) {
 		splat.think=SUB_Remove;
 		thinktime splat : random(40,30);
@@ -601,6 +600,12 @@ entity splat;
 	setmodel (splat, bloodsplat_mdl[type]);
 	setsize(splat,'0 0 0','0 0 0');
 	setorigin(splat,trace_endpos + '0 0 0.1');	//0.5
+	
+	/*entity oself;
+	oself = self;
+	self = splat;
+	pitch_roll_for_slope('0 0 0');
+	self = oself;*/
 }
 
 void() archer_gibs;
@@ -763,8 +768,8 @@ void chunk_death (void)
 		return;
 
 	SUB_UseTargets();
-	self.target = self.targetname;
-
+	self.target = self.targetname;	//fix by Shanjaq
+	
 	if (self.th_init)
 	{
 		//set up respawn time
@@ -777,7 +782,7 @@ void chunk_death (void)
 	}
 	else
 	{
-		remove(self);		
+		remove(self);
 	}
 }
 

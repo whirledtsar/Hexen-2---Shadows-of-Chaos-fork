@@ -59,7 +59,7 @@ void CorpseThink(void);
 void sickle_ready(void);
 void phase_init(void);
 
-void solid_minion()
+void minion_solid()
 {
 	float dist;
 	dist = vlen(self.enemy.origin - self.controller.origin);
@@ -69,11 +69,11 @@ void solid_minion()
 		remove(self);
 		return;
 	}
-	self.think = solid_minion;
+	self.think = minion_solid;
 	self.nextthink = time + 0.1;
 }
 
-void raise_dead_think()		//FIXME: mummy and werejaguar are very buggy
+void minion_init()
 {
 	float level;
 	
@@ -86,7 +86,7 @@ void raise_dead_think()		//FIXME: mummy and werejaguar are very buggy
 	newmis = spawn();	//create entity that makes the summoned monster solid to the player only if the player is far enough away not to be blocked
 	newmis.enemy = self;
 	newmis.controller = self.controller;
-	newmis.think = solid_minion;
+	newmis.think = minion_solid;
 	newmis.nextthink = time + 1;
 	
 	if (level > 11)
@@ -106,9 +106,10 @@ void raise_dead_think()		//FIXME: mummy and werejaguar are very buggy
 	
 	self.experience_value = 0; //no XP for summoned monsters
 	self.th_die = chunk_death; //summoned monsters explode, don't respawn
+	thinktime self : 0;
 }
 
-void raise_dead(entity body, float intmod, float level)
+void minion_summon(entity body, float intmod, float level)
 {
 	vector newpos, newangles;
 	entity newmis;
@@ -130,9 +131,9 @@ void raise_dead(entity body, float intmod, float level)
 	newmis.angles = newangles;
 	
 	newmis.flags2 (+) FL_SUMMONED;
-	newmis.flags2(+) FL_ALIVE;
+	newmis.flags2 (+) FL_ALIVE;
 	newmis.lifetime = time + (intmod * 2);
-	newmis.think = raise_dead_think;
+	newmis.think = minion_init;
 	newmis.nextthink = time + 0.05;
 	newmis.controller = self;
 	newmis.owner = self;
@@ -269,23 +270,27 @@ void sickle_fire (float altfire)
 		newmis.think = shockwave;
 		thinktime newmis : .1;
 		
+		float minions;
 		entity risen;
-		risen = findradius(self.origin, 370);
+		risen = findradius(self.origin, 360);
 		while(risen)
 		{
 			if ((risen.flags & FL_MONSTER) && risen.health > 0 && risen.team != self.team)
 				self.enemy = risen;
-			if (risen.takedamage && !risen.flags2&FL_ALIVE && risen.think == CorpseThink && !risen.preventrespawn)
+			
+			if (visible(risen) && risen.takedamage && !risen.flags2&FL_ALIVE && risen.think == CorpseThink && !risen.playercontrolled && !risen.preventrespawn)
 			{
-				raise_dead(risen, intmod, self.level);
+				minion_summon(risen, intmod, self.level);
 				CreateRedFlash(risen.origin + '0 0 8');
 				
-				float drain = random(4,6)+(self.level*0.5);
-				SpawnPuff (self.origin + self.proj_ofs, '0 0 0', drain*2, self);
-				T_Damage (self, self, self, drain);
+				minions+=1;
 			}
 			risen = risen.chain;
 		}
+		
+		float drain = random(3,6)+minions+(rint(self.level*0.5));
+		T_Damage (self, world, world, drain);
+		SpawnPuff (self.origin + self.proj_ofs, '0 0 0', drain*2, self);
 	}
 
 	makevectors (self.v_angle);
@@ -389,7 +394,7 @@ void sickle_fire (float altfire)
 		}*/
 		
 		damage_base = WEAPON1_BASE_DAMAGE;	//12
-		damage_mod = strmod;	//~12 to start
+		damage_mod = strmod;				//~12 to start
 		damg = random(damage_mod + damage_base,damage_base);
 		
 		SpawnPuff (org + (v_forward*4), '0 0 0', damg,trace_ent);

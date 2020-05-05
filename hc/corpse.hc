@@ -66,7 +66,7 @@ void MarkForRespawn (void)
 	entity newmis;
 	float timelimit;
 	
-	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn) //do not respawn players or summoned monsters
+	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn && !self.playercontrolled) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -164,15 +164,16 @@ vector newmaxs;
 
 //Won't be necc to pass headmdl once everything has it's .headmodel
 //value set in spawn
-
+	
+	//self.netname = "corpse";		//PoP
 	self.target = self.targetname;	//fix by Shanjaq
- 	self.th_die = chunk_death;
+    self.th_die = chunk_death;
 	if (self.skin==GLOBAL_SKIN_ASH)
 		self.th_die = shatter;
 	//self.touch = obj_push; //Pushable corpses has the side effect of getting the player stuck when ironically it was meant to prevent that
-	self.health = random(10,25);
+    self.health = random(10,25);
 	if (self.mass >= 30 && self.mass <= 100)
-		self.health += (self.mass*0.75);	//ws: increase health for big corpses
+		self.health += (self.mass*0.75);	//ws: increase health for big corpses (yakmen, maulotaurs)
 	self.takedamage = DAMAGE_YES;
 	self.solid = SOLID_PHASE;
 	self.experience_value = 0;

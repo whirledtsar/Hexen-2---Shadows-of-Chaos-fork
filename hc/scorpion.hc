@@ -182,8 +182,9 @@ void ScorpionInit(float type)
 		return;
 	}
 
-	if (!self.flags2 & FL_SUMMONED && !self.flags2&FL2_RESPAWN)
+	if (!self.flags2 & FL_SUMMONED &&!self.flags2&FL2_RESPAWN)
 		precache_scorpion();
+	
 	setmodel(self, "models/scorpion.mdl");
 
 	self.solid = SOLID_SLIDEBOX;
@@ -238,9 +239,8 @@ void ScorpionInit(float type)
 		self.skin = 1;
 	}
 	
+	self.buff=1;
 	walkmonster_start();
-	
-	ApplyMonsterBuff(self, FALSE);
 }
 
 //==========================================================================
@@ -262,6 +262,11 @@ void ScorpionStand(void)
 	ai_stand();
 	if(self.think != ScorpionStand)
 	{ // Wake up
+		/*if (self.playercontrolled && self.enemy=self.controller)	//ws: if summoned minion and already close to player, dont move further
+			if (range(self.controller)<=RANGE_MELEE && visible(self.controller)) {
+				self.think = self.th_stand;
+				return;
+			}*/
 		self.th_save = self.think;
 		self.think = ScorpionWake;
 		//sound(self, CHAN_VOICE, "scorpion/awaken.wav", 1, ATTN_NORM);
@@ -376,7 +381,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 	}
 	
 	
-	if ((self.enemy.last_attack > time - 1) && (fov(self, self.enemy, 45)))
+	if ((self.enemy != self.controller) && (self.enemy.last_attack > time - 1) && (fov(self, self.enemy, 45)))
 	{
 		if (ScorpionCheckDefense()) 
 		{
@@ -396,7 +401,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 
 	enemy_dist = vlen(self.enemy.origin - self.origin);
 	
-	if (enemy_dist < 120)
+	if (enemy_dist < 120 && (self.enemy != self.controller))
 	{
 		if ((random() < 0.33) && (infront(self.enemy)) && (self.cnt <= time))
 		{

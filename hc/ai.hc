@@ -33,7 +33,7 @@ walkmove(angle, speed) primitive is all or nothing
 void sdprint (string dmess, float includeEnemy)
 {
 	if(self.playercontrolled)
-	{		
+	{
 		dprint(dmess);
 		if (includeEnemy)
 		{
@@ -110,6 +110,8 @@ float		r,melee;
 
 	if (self.classname=="monster_mummy")
 		melee = 50;
+	else if (self.classname=="monster_yakman"||self.netname=="golem")//longer reach
+		melee = 150;
 	else
 		melee = 100;
 
@@ -320,8 +322,6 @@ void SightSound (void)
 		sound (self, CHAN_VOICE, self.sightsound, 1, ATTN_NORM);
 }
 
-void() afrit_wake1;
-
 void() FoundTarget =
 {
     if (self.enemy.classname == "player")
@@ -376,9 +376,9 @@ float		r;
 			HuntTarget();
 			return TRUE;
 		}
-		return FALSE;
+		//return FALSE;
 	}
-
+	
 	sdprint("Summon monster finding Player target", TRUE);
 	if (sight_entity_time >= time&&sight_entity!=world)
 	{
@@ -393,6 +393,8 @@ float		r;
 			return FALSE;	// current check entity isn't in PVS
 	}
 
+	//if(self.playercontrolled&&client==self.controller)
+		//return FALSE;
 	if (client == self.enemy)
 		return FALSE;
 
@@ -430,8 +432,8 @@ float		r;
 // got one
 //
 	self.enemy = client;
-
-	if (self.enemy.classname != "player")
+	
+	if (self.enemy.classname != "player" && !self.playercontrolled)
 	{
 		self.enemy = self.enemy.enemy;
 		if (self.enemy.classname != "player")
@@ -505,10 +507,12 @@ ai_painforward
 stagger back a bit
 =============
 */
+/*
 void(float dist) ai_painforward =
 {
 	walkmove (self.ideal_yaw, dist, FALSE);
 };
+*/
 
 /*
 =============
@@ -520,7 +524,6 @@ The monster is walking it's beat
 void(float dist) ai_walk =
 {
 	CheckMonsterBuff();
-	
 	MonsterCheckContents();
 
 	movedist = dist;
@@ -547,6 +550,9 @@ void() ai_stand =
 	MonsterCheckContents();
 	
 	sdprint("Summon monster contents are ok", FALSE);
+	if (self.playercontrolled && self.enemy=self.controller)	//ws: if summoned minion and already close to player, dont move further
+			if (range(self.controller)<=RANGE_MELEE && visible(self.controller))
+				return;
 	if (FindTarget (FALSE))
 		return;
 	
@@ -657,7 +663,7 @@ void LeaderRepulse (void)
 }
 
 float() CheckAnyAttack =
-{	
+{
 	if (self.model=="models/medusa.mdl"||self.model=="models/medusa2.mdl")
 			return(MedusaCheckAttack ());
 
@@ -742,7 +748,7 @@ void(float dist) ai_run =
 	
 	movedist = dist;
 // see if the enemy is dead
-	if (!self.enemy.flags2&FL_ALIVE||self.enemy.classname=="gargoyle"||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
+	if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
 	{
 		sdprint("summoned monster target dead ", TRUE);
 
@@ -773,6 +779,9 @@ void(float dist) ai_run =
 			return;
 		}
 	}
+	
+	if (self.playercontrolled && self.controller.enemy!=world && self.controller.enemy!=self.enemy)	//summoned monster check if player has acquired enemy
+		FindMonsterTarget();
 
 	self.show_hostile = time + 1;		// wake up other monsters
 
@@ -819,6 +828,12 @@ void(float dist) ai_run =
 
 	if(random()<0.5&&(!self.flags&FL_SWIM)&&(!self.flags&FL_FLY)&&(self.spawnflags&JUMP))
 		CheckJump();
+	
+	if (self.playercontrolled)		//ws: if summoned minion and already close to player, dont move further
+		if (self.enemy==self.controller && enemy_vis && range(self.enemy)==RANGE_MELEE) {
+			self.think=self.th_stand;
+			self.th_stand();
+		}
 
 // look for other coop players
 	if (coop && self.search_time < time)
@@ -849,7 +864,7 @@ void(float dist) ai_run =
 		ai_run_slide ();
 		return;
 	}
-		
+	
 // head straight in
 //	if(self.netname=="spider")
 //		check_climb();

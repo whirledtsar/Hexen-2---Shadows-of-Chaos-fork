@@ -115,24 +115,24 @@ float FindMonsterTarget ()
 {
 	entity found;
 	float okay;
-
+	
 	sdprint ("Summoned monster started finding monster target", TRUE);
-    if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&self.controller.enemy.classname!="gargoyle"&&visible(self.controller.enemy))
+    if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
 	{
 		self.enemy=self.controller.enemy;
 		sdprint ("Summoned monster's controller has a target", TRUE);
 		return TRUE;
 	}
-
+	
 	sdprint ("Summoned monster's controller has no target... searching", TRUE);
 	okay=FALSE;
 	found=findradius(self.origin,1000);
 	while(found!=world)
 	{
 		if(found!=self)
-			if(found.flags2&FL_ALIVE&&self.controller.enemy.classname!="gargoyle")	//check if enemy is a dormant gargoyle -ws
+			if(found.flags2&FL_ALIVE && !(found.artifact_active&ARTFLAG_STONED))	//check if enemy is a dormant gargoyle -ws
 				if(visible(found))
-					if(found!=self.controller)
+					if(found!=self.controller && found!=self.owner)
 						if(found.controller!=self.controller)
 						{
 							sdprint ("Summoned monster found a target!", TRUE);
@@ -192,12 +192,22 @@ float jump_height, jumpup, ignore_height;
 
 	spot1_z=0;
 	spot2_z=0;
-	jump_height=16;
+	if(self.model=="models/yakman.mdl")
+	{
+		if(vlen(spot2-spot1)>384)//Yakman can't jump too far
+		{
+//			dprint("too far for yakman to jump\n");
+			return FALSE;
+		}
+		jump_height=12;
+	}
+	else
+		jump_height=16;
 
 	if(pointcontents(spot1+v_forward*24-'0 0 10')!=CONTENT_SOLID)
 		ignore_height=TRUE;
 
-	if(self.classname!="monster_mezzoman"&&!self.spiderType)
+	if(self.classname!="monster_mezzoman"&&!self.spiderType&&self.model!="models/yakman.mdl")
 		if(vlen(spot1-spot2)>256)
 			ignore_height=FALSE;
 
@@ -217,7 +227,7 @@ float jump_height, jumpup, ignore_height;
 //		dprint("can't see goalentity\n");
 		return FALSE;
 	}
-	if(!ignore_height&&self.goalentity.absmin_z+36>=self.absmin_z&&self.think!=SpiderJumpBegin&&self.classname!="monster_mezzoman")
+	if(!ignore_height&&self.goalentity.absmin_z+36>=self.absmin_z&&self.think!=SpiderJumpBegin&&self.classname!="monster_mezzoman"&&self.model!="models/yakman.mdl")
 	{
 //		dprint("not above goalentity, and not spider\n");
 		return FALSE;
@@ -250,7 +260,7 @@ float jump_height, jumpup, ignore_height;
 
 	if(self.think==SpiderJumpBegin)
 		jump_height=vlen((self.goalentity.absmax+self.goalentity.absmin)*0.5-self.origin)/13;
-	else if(self.classname=="monster_mezzoman")
+	else if(self.classname=="monster_mezzoman"||self.model=="models/yakman.mdl")
 		if(self.goalentity.absmin_z>=self.absmin_z+36)
 		{
 			jump_height=vlen((self.goalentity.absmax+self.goalentity.absmin)*0.5-self.origin)/13;
@@ -319,7 +329,10 @@ float jump_height, jumpup, ignore_height;
 			self.velocity=jumpdir*jump_height*10*self.scale;
 			self.velocity_z = jump_height*14*self.scale;
 		}
-		self.flags(-)FL_ONGROUND;
+		if(self.model!="models/yakman.mdl")
+			self.flags(-)FL_ONGROUND;
+		else
+			self.level=TRUE;
 		if(self.th_jump)
 			self.th_jump();
 		else
