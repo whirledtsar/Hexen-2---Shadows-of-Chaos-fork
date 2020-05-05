@@ -153,7 +153,7 @@ vector	spot1, spot2;
 
 	if (trace_fraction == 1)
 	{
-        if(forent.flags&FL_MONSTER)
+		if(forent.flags&FL_MONSTER)
 		{
 			if(visibility_good(targ,0.15 - skill/20))
 				return TRUE;
@@ -290,14 +290,15 @@ void() HuntTarget =
 	sdprint("Hunting target... ", TRUE);
 
 	self.goalentity = self.enemy;
-	if(self.spawnflags&PLAY_DEAD)
+	/*if(self.spawnflags&PLAY_DEAD)
 	{
 //		dprint("getting up!!!\n");
 		self.think=self.th_possum_up;
 		self.spawnflags(-)PLAY_DEAD;
 	}
 	else
-		self.think = self.th_run;
+		self.think = self.th_run;*/
+	self.think = self.th_run;
 //	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
 	self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
 	thinktime self : 0.1;
@@ -324,7 +325,7 @@ void SightSound (void)
 
 void() FoundTarget =
 {
-    if (self.enemy.classname == "player")
+	if (self.enemy.classname == "player")
 	{	// let other monsters see this monster for a while
 		sight_entity = self;
 		sight_entity_time = time + 1;
@@ -557,8 +558,8 @@ void() ai_stand =
 		return;
 	
 	sdprint("Summon monster found target", TRUE);
-	if(self.spawnflags&PLAY_DEAD)
-		return;
+	/*if(self.spawnflags&PLAY_DEAD)
+		return;*/
 
 	if (time > self.pausetime)
 	{

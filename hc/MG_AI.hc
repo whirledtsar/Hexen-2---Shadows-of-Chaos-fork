@@ -377,11 +377,11 @@ void MonsterCheckContents ()
 			vector org;
 			org = self.origin + v_forward*15 + v_right*10;
 			CreateWaterSplash(org);
-			self.flags += FL_WATERJUMP;
+			self.flags (+) FL_WATERJUMP;
 		}
 	}
 	else if (pointcontents(self.origin)!=CONTENT_WATER && self.flags&FL_WATERJUMP && !self.flags&FL_SWIM)
-		self.flags -= FL_WATERJUMP;
+		self.flags (-) FL_WATERJUMP;
 	
 	if(random()>0.3)
 		return;
