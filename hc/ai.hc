@@ -393,12 +393,16 @@ float		r;
 		if (!client)
 			return FALSE;	// current check entity isn't in PVS
 	}
-
-	//if(self.playercontrolled&&client==self.controller)
-		//return FALSE;
+	
+	if (self.playercontrolled && client==self.controller)	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
+	{
+		HuntTarget();
+		return TRUE;
+	}
+	
 	if (client == self.enemy)
 		return FALSE;
-
+	
 	if (client.flags & FL_NOTARGET)
 		return FALSE;
 
@@ -554,6 +558,7 @@ void() ai_stand =
 	if (self.playercontrolled && self.enemy=self.controller)	//ws: if summoned minion and already close to player, dont move further
 			if (range(self.controller)<=RANGE_MELEE && visible(self.controller))
 				return;
+	
 	if (FindTarget (FALSE))
 		return;
 	
@@ -783,7 +788,7 @@ void(float dist) ai_run =
 	
 	if (self.playercontrolled && self.controller.enemy!=world && self.controller.enemy!=self.enemy)	//summoned monster check if player has acquired enemy
 		FindMonsterTarget();
-
+	
 	self.show_hostile = time + 1;		// wake up other monsters
 
 // check knowledge of enemy
@@ -835,7 +840,7 @@ void(float dist) ai_run =
 			self.think=self.th_stand;
 			self.th_stand();
 		}
-
+	
 // look for other coop players
 	if (coop && self.search_time < time)
 	{
@@ -956,17 +961,4 @@ void ChangePitch (void)
 	
 	current_pitch = anglemod (current_pitch + move);
 	self.angles_x = current_pitch;
-}
-
-void CheckMonsterBuff ()
-{
-	/*ws: monsters are spawned before player, so they cant check client's config flags immediately (as they arent initialized).
-	instead, use ai_run, ai_walk, & ai_stand to check once player is ready (indicated by global var client_ready, set in client.hc). */
-	if (!self.state && client_ready) {
-		self.state = TRUE;	//dont check again
-		if (CheckCfgParm(PARM_BUFF) && self.buff)
-			ApplyMonsterBuff(self, self.buff);
-	}
-	
-	return;
 }
