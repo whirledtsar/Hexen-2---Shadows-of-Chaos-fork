@@ -73,9 +73,9 @@ void() multi_trigger =
 
 	activator = self.enemy;
 
-	if (self.experience_value)
+	if (self.experience_value && activator.flags&FL_CLIENT)
 	{
-		AwardExperience(activator,self,0);
+		AwardExperience(activator,self,self.experience_value);	//ws: changes to self.experience_value from 0 (?)
 	}
 
 	self.check_ok=TRUE;
