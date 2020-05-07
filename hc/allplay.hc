@@ -280,7 +280,7 @@ void PlayerDead ()
 	if(self.model!=self.headmodel)
 	{
 		self.angles_x=self.angles_z=0;
-		pitch_roll_for_slope('0 0 0');
+		pitch_roll_for_slope('0 0 0', self);
 	}
 }
 
