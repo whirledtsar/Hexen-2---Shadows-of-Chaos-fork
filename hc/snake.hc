@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/portals/snake.hc,v 1.2 2007-02-07 16:59:36 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/h2/snake.hc,v 1.2 2007-02-07 16:57:10 sezero Exp $
  */
 /*
 ==============================================================================
@@ -230,10 +230,10 @@ void snake_missile_shoot(vector spot1)
 void snake_missile (void)
 {
 	makevectors(self.angles);
-	snake_missile_shoot(self.origin + v_forward*4 + v_right * 38 + v_up * 195);
+	snake_missile_shoot(self.origin + v_forward*4 + v_right * 38 + v_up * self.proj_ofs_z);
 
 	makevectors(self.angles);
-	snake_missile_shoot(self.origin + v_forward*4 + v_right * 57 + v_up * 195);
+	snake_missile_shoot(self.origin + v_forward*4 + v_right * 57 + v_up * self.proj_ofs_z);
 }
 
 void snake_attackleft (void) [++ $spitLF1 .. $spitLF13]
@@ -355,6 +355,8 @@ void snake_wake(void) [++ $wake1 .. $wake19]
 }
 
 
+float float_null;
+
 float snake_look(void)
 {
 	entity client;
@@ -369,6 +371,9 @@ float snake_look(void)
 	{
 		return FALSE;
 	}
+	
+	if (!fov(client, self, 180))	//ws
+		return FALSE;
 
 	if (!visible (client))
 		return FALSE;
@@ -378,6 +383,7 @@ float snake_look(void)
 		self.enemy = client;
 		return TRUE;
 	}
+	
 	return FALSE;
 }
 
@@ -435,7 +441,7 @@ void wake_effect (void)
 	setorigin(newent,self.origin);
 	sound (self, CHAN_BODY, "snake/life.wav", 1, ATTN_NORM);
 
-	if (self.colormap != 0)
+	if (self.colormap != float_null)
 	{
 		CreateGreySmoke(self.origin + '0 0 60','0 0 12',HX_FRAME_TIME * 20);
 		CreateGreySmoke(self.origin + '16 16 55','0 0 12',HX_FRAME_TIME * 20);
@@ -446,7 +452,7 @@ void wake_effect (void)
 		CreateGreySmoke(self.origin + '-64 -64 70','0 0 12',HX_FRAME_TIME * 20);
 
 		self.use = SUB_Null;
-		self.colormap = 0;
+		self.colormap = float_null;
 		self.takedamage = DAMAGE_YES;
 		self.drawflags (+) MLS_ABSLIGHT;
 		self.flags2 (+) FL_ALIVE;
@@ -489,12 +495,14 @@ void() monster_snake =
 	precache_sound2 ("snake/life.wav");
 	precache_sound2 ("fangel/deflect.wav");
 
-	setsize (self, '-80 -80 0', '80 80 200' );
+	setsize (self, '-80 -80 0', '80 80 200');
+	self.proj_ofs = '0 0 190';
 	if (!self.health)
 		self.health = 1200;
 	if (self.scale) {
-		self.mins *= self.scale;
-		self.maxs *= self.scale;
+		self.drawflags (+) SCALE_ORIGIN_BOTTOM;
+		self.proj_ofs_z *= self.scale;
+		ScaleBoundingBox(self.scale, self, TRUE);
 	}
 
 	total_monsters += 1;
@@ -504,7 +512,6 @@ void() monster_snake =
 	self.th_die = chunk_death;
 	self.thingtype = THINGTYPE_BROWNSTONE;
 	self.monsterclass = CLASS_BOSS;
-
-	self.counter = 0;
+	self.preventrespawn=TRUE;
 };
 
