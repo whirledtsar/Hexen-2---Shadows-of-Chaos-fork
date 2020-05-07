@@ -230,10 +230,10 @@ void snake_missile_shoot(vector spot1)
 void snake_missile (void)
 {
 	makevectors(self.angles);
-	snake_missile_shoot(self.origin + v_forward*4 + v_right * 38 + v_up * 195);
+	snake_missile_shoot(self.origin + v_forward*4 + v_right * 38 + v_up * self.proj_ofs_z);
 
 	makevectors(self.angles);
-	snake_missile_shoot(self.origin + v_forward*4 + v_right * 57 + v_up * 195);
+	snake_missile_shoot(self.origin + v_forward*4 + v_right * 57 + v_up * self.proj_ofs_z);
 }
 
 void snake_attackleft (void) [++ $spitLF1 .. $spitLF13]
@@ -371,6 +371,9 @@ float snake_look(void)
 	{
 		return FALSE;
 	}
+	
+	if (!fov(client, self, 180))	//ws
+		return FALSE;
 
 	if (!visible (client))
 		return FALSE;
@@ -492,12 +495,14 @@ void() monster_snake =
 	precache_sound2 ("snake/life.wav");
 	precache_sound2 ("fangel/deflect.wav");
 
-	setsize (self, '-80 -80 0', '80 80 200' );
+	setsize (self, '-80 -80 0', '80 80 200');
+	self.proj_ofs = '0 0 190';
 	if (!self.health)
 		self.health = 1200;
 	if (self.scale) {
-		self.mins *= self.scale;
-		self.maxs *= self.scale;
+		self.drawflags (+) SCALE_ORIGIN_BOTTOM;
+		self.proj_ofs_z *= self.scale;
+		ScaleBoundingBox(self.scale, self, TRUE);
 	}
 
 	total_monsters += 1;
