@@ -617,8 +617,27 @@ void split (void)
 void launch_set (vector dir_mod)
 {
 	self.attack_finished = time + 0.5;
-
-	create_raven_shot1(self.origin + self.proj_ofs + v_forward*14,0.05,split,self.v_angle);
+	
+	//ws: the missile has a very small delay before it splits into 3 (and then a longer delay to split into 5).
+	//if the raven staff is fired in melee range, it explodes before splitting in 3, so most of the potential damage is lost.
+	//so check if there's a monster in front of us, and if so split into 3 immediately (otherwise use original delay).
+float del;
+vector org;
+	makevectors(self.v_angle);
+	org = self.origin + self.proj_ofs + v_forward*14;
+	
+	traceline (org, org+v_forward*60, FALSE, self);
+	if (trace_fraction==0)	//15 right if nothing was hit
+		traceline (org, org+v_right*15+v_forward*60, FALSE, self);
+	if (trace_fraction==0)	//15 left if nothing was hit
+		traceline (org, org-v_right*15+v_forward*60, FALSE, self);
+	
+	if (trace_ent.takedamage)
+		del = 0;
+	else
+		del = 0.05;
+	
+	create_raven_shot1(self.origin + self.proj_ofs + v_forward*14,del,split,self.v_angle);
 }
 
 
