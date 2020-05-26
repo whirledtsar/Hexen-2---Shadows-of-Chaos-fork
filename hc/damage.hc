@@ -829,6 +829,8 @@ vector	inflictor_org, org;
 	inflictor_org = (inflictor.absmin+inflictor.absmax)*0.5;
 	if(inflictor.classname=="circfire")
 		radius=150;
+	else if(inflictor.classname=="timebomb")
+		radius=130;
 	else
 		radius=damage+40;
 	head = findradius(inflictor_org, radius);
