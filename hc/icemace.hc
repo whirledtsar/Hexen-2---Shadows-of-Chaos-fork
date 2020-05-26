@@ -219,7 +219,7 @@ void() FreezeTouch=
 void() snowball =
 {
 	particle2(self.origin,'-2 -2 -2','2 2 2',145,14,5);
-	thinktime self : 0.1;
+	thinktime self : HX_FRAME_TIME*0.25;
 };
 
 void() icestaff_wave;
