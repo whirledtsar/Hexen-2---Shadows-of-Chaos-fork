@@ -871,7 +871,7 @@ void chunk_death (void)
 		self.think = MarkForRespawn;
 		self.nextthink = time + 0.01;
 	}
-	if(self.headmodel!=""&&self.classname!="head")
+	else if(self.headmodel!=""&&self.classname!="head")
 	{
 		ThrowSolidHead (50);
 	}
