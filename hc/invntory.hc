@@ -336,7 +336,7 @@ void TimeBombTouch()
 {
 	if(!other.takedamage)
 		return;
-	//self.dmg/=2;
+	self.dmg/=2;
 	T_Damage(other,self,self.owner,self.dmg);
 	TimeBombBoom();
 }
@@ -350,11 +350,10 @@ void Use_TimeBomb()
 	newmis.owner=self;
 	newmis.classname="timebomb";
 	newmis.solid=SOLID_BBOX;
-	/*if(deathmatch&&!coop)
+	if(deathmatch&&!coop)
 		newmis.dmg=100;
 	else
-		newmis.dmg=75;*/
-	newmis.dmg=100;
+		newmis.dmg=50;	//75
 	newmis.touch=TimeBombTouch;
 	newmis.angles_x=90;
 	newmis.avelocity_y=100;
