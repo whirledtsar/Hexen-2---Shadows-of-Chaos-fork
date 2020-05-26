@@ -215,7 +215,7 @@ void() obj_push;
 
 void AshSkin (entity loser)
 {
-	if (!loser.flags&FL_MONSTER || loser.flags&FL_SWIM || loser.mass>=50)
+	if (!loser.flags&FL_MONSTER || loser.flags&FL_SWIM || loser.mass>=50 || loser.thingtype==THINGTYPE_ICE)
 		return;
 	
 	loser.skin=GLOBAL_SKIN_ASH;
