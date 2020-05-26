@@ -456,7 +456,8 @@ vector spot1, spot2;
 	if (self.frame == $fire2)	// FIRE!!!!
 	{
 		makevectors(self.angles);	
-		spot1 = self.origin + v_forward*4 + v_right * 10 + v_up * 36;
+		//spot1 = self.origin + v_forward*4 + v_right * 10 + v_up * 36;
+		spot1 = self.origin + self.proj_ofs + v_right*10 + v_forward*4;
 		if(self.classname=="monster_archer_lord"||(self.netname=="monster_archer_ice"&&random()<0.3))
 		{
 			tspeed=vlen(self.enemy.velocity);
@@ -838,6 +839,7 @@ void monster_archer ()
 	self.experience_value = self.init_exp_val = 25;
 
 	self.flags (+) FL_MONSTER;
+	self.proj_ofs = '0 0 36';
 	self.view_ofs = '0 0 40';
 
 	self.hull=HULL_PLAYER;
@@ -900,6 +902,7 @@ void monster_archer_lord ()
 
 	self.flags (+) FL_MONSTER;
 	self.yaw_speed = 10;
+	self.proj_ofs = '0 0 36';
 	self.view_ofs = '0 0 40';
 
 	self.init_exp_val = self.experience_value;
