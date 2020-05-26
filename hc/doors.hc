@@ -520,7 +520,7 @@ void door_touch()
 
 	self.owner.attack_finished = time + 2;
 
-	if(self.owner.message != 0 && !deathmatch)
+	if(self.owner.message != 0 && other.flags&FL_CLIENT && !deathmatch)
 	{
 		temp = getstring(self.owner.message);
 		centerprint (other, temp);
