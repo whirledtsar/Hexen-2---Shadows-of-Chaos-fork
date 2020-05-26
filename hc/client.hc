@@ -3204,6 +3204,11 @@ string deathstring, deathstring2,iclass;
 			bprint (" got deep fried in hot oil\n");
 			return;
 		}
+		else if (targ.deathtype == "impaled")
+		{
+			bprint (" has a shiny new hole through their chest\n");
+			return;
+		}
 
 		// hell if I know; he's just dead!!!
 		bprint (STR_CEASEDTOFUNCTION);
