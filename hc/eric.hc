@@ -10,7 +10,7 @@ void fireball_think ()
 {
 	particle4(self.origin,3,random(160,176),PARTICLETYPE_FIREBALL,random(10,20));
 	self.think=fireball_think;
-	thinktime self : 0.1;
+	thinktime self : 0.05;	//0.1
 }
 
 void trap_fireball_use ()
