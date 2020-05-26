@@ -391,7 +391,6 @@ void monster_undying ()
 	self.t_length = 80;		//custom melee range for ai_melee. default is 60
 	//self.view_ofs = '0 0 40';
 	
-	//self.hull=HULL_PLAYER;
 	self.hull = 2;
 	self.solid = SOLID_SLIDEBOX;
 	setsize (self, undying_mins, undying_maxs);
