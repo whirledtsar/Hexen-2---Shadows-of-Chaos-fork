@@ -418,7 +418,7 @@ void AfritCheckDodge ()
 		dodge=TRUE;
 	else if (range(self.enemy)==RANGE_MELEE && self.enemy.last_attack>time-1)
 		dodge=TRUE;
-	else if (random()<0.5)
+	else if (random()<0.33)
 		dodge=TRUE;
 		
 	if (!dodge)
