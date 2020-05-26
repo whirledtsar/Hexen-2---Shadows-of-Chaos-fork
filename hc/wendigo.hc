@@ -348,6 +348,7 @@ void() monster_wendigo =
 	self.netname="wendigo";
 	self.flags (+) FL_MONSTER;
 	self.flags2 (+) FL_ALIVE;
+	self.proj_ofs = '0 0 38';
 	self.yaw_speed = 12;
 	
 	self.monsterclass = CLASS_GRUNT;
