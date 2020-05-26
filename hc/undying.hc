@@ -378,8 +378,6 @@ void monster_undying ()
 	if (!undying_headless())
 		setmodel(self, "models/ZombiePal.mdl");
 
-	self.monsterclass = CLASS_GRUNT;
-
 	self.thingtype=THINGTYPE_FLESH;
 	
 	self.mass = 11;		//ws: increased. 10 seems to be the magic number for when they take impact damage from player running into them
