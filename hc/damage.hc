@@ -1162,12 +1162,10 @@ vector	inflictor_org, org;
 //			other objects with a radius damage death (namely: exploding barrels)
 
 	inflictor_org = (inflictor.absmin+inflictor.absmax)*0.5;
-	if(inflictor.classname=="circfire")
+	if(inflictor.classname=="circfire"||inflictor.classname=="timebomb")
 		radius=150;
 	else if(inflictor.classname=="poison grenade")
 		radius=200;//FIXME- greater distance above...
-	else if(inflictor.classname=="timebomb")
-		radius=130;
 	else
 		radius=damage+40;
 	head = findradius(inflictor_org, radius);
