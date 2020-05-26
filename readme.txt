@@ -95,6 +95,7 @@ Changes
 -Corpses fading out can be toggled by typing "impulse 46" in console
 -Monster respawning can be toggled with "impulse 45". Corpse fading needs to be enabled for it to work
 -Random monster variations can be toggled with "impulse 47". This will take effect on the next map
+-Use "impulse 48" to check the state of these options
 -All classes receive mana & health upon leveling up (only the amount added to their maximum pool)
 -Glyph artifact has a small delay between firing (length depends on class)
 -All melee attacks knock enemies back
@@ -108,9 +109,10 @@ Changes
 -Mummies make a sound and light up when firing arrows
 
 	Mapping features
--Monsters can use "waketarget" field; they will trigger that entity upon sighting the player (eg. waketarget a button to simulate them pressing it); uses "delay" field if non-zero
--All monsters can use the SPAWNIN flag (128) to only spawn in when triggered; use SPAWNQUIET (65536) to spawn without teleport fog/noise
+-monsters can use "waketarget" field; they will trigger that entity upon sighting the player (eg. waketarget a button to simulate them pressing it); uses "delay" field if non-zero
+-all monsters can use the SPAWNIN flag (128) to only spawn in when triggered; use SPAWNQUIET (65536) to spawn without teleport fog/noise
 -Monster spawner func's can spawn more types of monsters (see spawnflags for full list); use SPAWN_SUPER (8388608) to spawn monster's super variant if applicable
+-path corners can also use "waketarget" field; they will trigger entities with matching targetname when a func_train reaches them
 -all flame/torch lights can use the soundtype field to use alternate ambient sounds
 -trigger_relay can have a random delay; minimum and maximum seconds determined by cnt & lifetime fields
  respectively
