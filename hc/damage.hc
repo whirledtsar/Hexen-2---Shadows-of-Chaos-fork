@@ -1166,6 +1166,8 @@ vector	inflictor_org, org;
 		radius=150;
 	else if(inflictor.classname=="poison grenade")
 		radius=200;//FIXME- greater distance above...
+	else if(inflictor.classname=="timebomb")
+		radius=130;
 	else
 		radius=damage+40;
 	head = findradius(inflictor_org, radius);
