@@ -273,6 +273,11 @@ void custom_sound_maker (void)
 	precache_sound (self.netname);
 	self.noise1 = (self.netname);
 	
+	if (self.lip==0)
+		self.lip = ATTN_NORM;
+	else if (self.lip<1)
+		self.lip = ATTN_NONE;
+	
 	if (self.delay) 
 		self.use = sound_maker_wait;
 	else 
@@ -288,6 +293,14 @@ void custom_sound_ambient (void)
 		self.think = sound_again;
 		thinktime self : random(self.flags,self.flags2);
 	}
+	
+	if (self.lip==0)
+		if (!self.think)
+			self.lip = ATTN_STATIC;
+		else
+			self.lip = ATTN_NORM;
+	else if (self.lip<1)
+		self.lip = ATTN_NONE;
 	
 	if (!self.think)
 		ambientsound (self.origin, self.noise1, 1, ATTN_STATIC);
