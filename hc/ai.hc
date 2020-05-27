@@ -428,7 +428,7 @@ float		r;
 	}
 
 	sdprint("Summon monster finding Player target", TRUE);
-	if (sight_entity_time >= time&&sight_entity!=world)
+	if (sight_entity_time >= time&&sight_entity!=world && !(self.spawnflags & 1))
 	{
 		client = sight_entity;
 		if (client.enemy == self.enemy)
