@@ -303,19 +303,19 @@ void custom_sound_ambient (void)
 {
 	precache_sound (self.netname);
 	self.noise1 = (self.netname);
+
+	if (self.flags) {		
+		self.think = sound_again;
+		thinktime self : random(self.flags,self.flags2);
+	}
 	
-	iif (self.lip==0)
+	if (self.lip==0)
 		if (!self.think)
 			self.lip = ATTN_STATIC;
 		else
 			self.lip = ATTN_NORM;
 	else if (self.lip<1)
 		self.lip = ATTN_NONE;
-
-	if (self.flags) {		
-		self.think = sound_again;
-		thinktime self : random(self.flags,self.flags2);
-	}
 	
 	if (!self.think)
 		ambientsound (self.origin, self.noise1, 1, self.lip);
