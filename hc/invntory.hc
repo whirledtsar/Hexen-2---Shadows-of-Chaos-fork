@@ -354,7 +354,7 @@ void Use_TimeBomb()
 	if(deathmatch&&!coop)
 		newmis.dmg=100;
 	else
-		newmis.dmg=50;	//75
+		newmis.dmg=60;	//75
 	newmis.touch=TimeBombTouch;
 	newmis.angles_x=90;
 	newmis.avelocity_y=100;
