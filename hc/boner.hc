@@ -301,19 +301,29 @@ void bone_turret_fire ()
 
 void bone_turret_think ()
 {
-	if (self.owner.level < 20)	//shrinks slower the higher your level
-		self.scale-=(0.02-self.owner.level*0.001);
+	if (self.frame >=12)
+		self.state = TRUE;
+	else if (self.frame<=0)
+		self.state = FALSE;
+	
+	if (self.state)
+		self.frame -=4;
 	else
-		self.scale-=0.005;
+		self.frame += 4;
+	
+	if (self.owner.level < 10)	//shrinks slower the higher your level
+		self.scale-=(0.01-self.owner.level*0.001);
+	else
+		self.scale-=0.0025;
 	
 	if (self.height)
-		self.angles_x+=(10*self.lefty);
+		self.angles_x+=(5*self.lefty);
 	else
-		self.angles_y+=(10*self.lefty);
+		self.angles_y+=(5*self.lefty);
 	
 	local float chance;
 	
-	chance = 35 + self.owner.wisdom;	//50-55 at level 3
+	chance = 15+self.owner.wisdom;	//50-55 at level 3
 	if (chance > 90)
 		chance = 90;
 	
@@ -334,7 +344,7 @@ void bone_turret_think ()
 		bone_turret_fire();
 	}
 	
-	particle4(self.origin,30,random(368,384),PARTICLETYPE_GRAV,1);
+	particle4(self.origin,20,random(368,384),PARTICLETYPE_GRAV,1);
 	if (self.attack_finished < time) {
 		CreateGreySmoke(self.origin+'0 0 6'*self.scale,'0 0 4', HX_FRAME_TIME*2);
 		self.attack_finished = time+random(0.75,1.25);
@@ -352,7 +362,7 @@ void bone_turret_think ()
 		remove(self);
 	}
 	
-	thinktime self : 0.1;
+	thinktime self : 0.05;
 }
 
 void bone_ball_touch ()
@@ -367,12 +377,15 @@ void bone_ball_touch ()
 	if (self.scale > 1)	//begin turret sequence
 	{
 		sound(self,CHAN_BODY,"necro/bonenwal.wav",1,ATTN_NORM);
+		//setmodel(self, "models/boss/bone3.mdl");
+		self.frame = 1;
 		self.solid = SOLID_PHASE;
 		self.angles = vectoangles(self.velocity);
 		self.angles_x = self.angles_z = 0;
 		self.velocity = self.avelocity = '0 0 0';
 		self.drawflags(+)MLS_ABSLIGHT;
 		self.drawflags(+)SCALE_ORIGIN_CENTER;
+		self.drawflags=SCALE_ORIGIN_CENTER|SCALE_TYPE_UNIFORM|MLS_ABSLIGHT;
 		self.abslight=0.5;
 		self.lefty = 1;		//used to reverse direction when aim is blocked by wall
 		self.touch = SUB_Null;
@@ -497,19 +510,23 @@ void bone_fire(float ball, float tome, vector ofs)
 		self.punchangle_x=-2;
 		sound(self,CHAN_WEAPON,"necro/bonefpow.wav",1,ATTN_NORM);
 		self.attack_finished=time + 1;
-		//newmis.dmg=random(wismod*2, wismod*2.5);
-		newmis.dmg=20+random(wismod*0.8, wismod*1.2);
 		if (tome)
 		{
+			setmodel(newmis, "models/boss/bone3.mdl");
 			newmis.dmg = random(wismod*5, wismod*6);
 			newmis.scale = 1.5;
+			
 			self.greenmana-=BONE_TOMED_COST;
 			self.attack_finished=time + 1.3;
+			newmis.angles = vectoangles(newmis.velocity);
+		}
+		else {
+			setmodel(newmis,"models/bonelump.mdl");
+			newmis.dmg=20+random(wismod*0.8, wismod*1.2);	//newmis.dmg=random(wismod*2, wismod*2.5);
+			newmis.avelocity=randomv('777 777 777','-777 -777 -777');
 		}
 		newmis.frags=TRUE;
 		newmis.touch=bone_ball_touch;
-		newmis.avelocity=randomv('777 777 777','-777 -777 -777');
-		setmodel(newmis,"models/bonelump.mdl");
 		setsize(newmis,'0 0 0','0 0 0');
 		
 		self.greenmana-=BONE_BALL_COST;
