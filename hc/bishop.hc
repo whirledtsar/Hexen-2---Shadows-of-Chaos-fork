@@ -11,6 +11,8 @@ $origin 0 0 24
 $base base
 $skin badass3
 
+float BISHOP_BLURSPEED = 15;
+
 void() dark_bishop_dodge1;
 void() dark_bishop_warp1;
 
@@ -27,7 +29,6 @@ void()	dark_bishop_dsprite9		=[	8,	dark_bishop_dsprite10	] {};
 void()	dark_bishop_dsprite10	=[	9,	dark_bishop_dsprite11	] {};
 void()	dark_bishop_dsprite11	=[	10,	dark_bishop_dsprite12	] {};
 void()	dark_bishop_dsprite12	=[	11,	dark_bishop_dsprite12	] {remove(self);};
-
 
 void()	dark_bishop_float1	=[	0,	dark_bishop_float2	] {ai_stand();};
 void()	dark_bishop_float2	=[	1,	dark_bishop_float3	] {ai_stand();};
@@ -100,34 +101,28 @@ vector rollangle;
 void bishop_blur ()
 {
 	self.drawflags(+)DRF_TRANSLUCENT;
-	self.origin = self.origin + v_right*19;
+	
+	if (!walkmove (self.ideal_yaw + (90*self.lefty), BISHOP_BLURSPEED, FALSE)) {
+		self.drawflags(-)DRF_TRANSLUCENT;
+		self.th_pain = self.th_save;
+		self.think=self.th_run;
+	}
+	
 	if(random()<0.2)
 		CreateGreenSmoke(self.origin-v_right*(10-self.cnt/2),'0 0 8',HX_FRAME_TIME * 2);
-} 
-
-void bishop_blur_left ()
-{
-	self.drawflags(+)DRF_TRANSLUCENT;
-	self.origin = self.origin + -v_right*19;
-	if(random()<0.2)
-		CreateGreenSmoke(self.origin-v_right*(10-self.cnt/2),'0 0 8',HX_FRAME_TIME * 2);
-} 
+}
 
 void()	dark_bishop_dodge1	=[	16,		dark_bishop_dodge2	] {
-	sound (self, CHAN_AUTO, "bishop/blur.wav", 1,  ATTN_IDLE);};
+	self.th_save = self.th_pain;
+	self.th_pain = SUB_Null;
+	sound (self, CHAN_AUTO, "bishop/blur.wav", 1,  ATTN_IDLE); };
 void()	dark_bishop_dodge2	=[	17,		dark_bishop_dodge3	] {bishop_blur();};
 void()	dark_bishop_dodge3	=[	16,		dark_bishop_dodge4	] {bishop_blur();};
 void()	dark_bishop_dodge4	=[	17,		dark_bishop_dodge5	] {bishop_blur();};
 void()	dark_bishop_dodge5	=[	16,		dark_bishop_dodge6	] {bishop_blur();};
-void()	dark_bishop_dodge6	=[	17,		dark_bishop_run1	] {bishop_blur();self.drawflags(-)DRF_TRANSLUCENT;};
-
-void()	dark_bishop_dodgel1	=[	16,		dark_bishop_dodgel2	] {
-	sound (self, CHAN_AUTO, "bishop/blur.wav", 1,  ATTN_IDLE);};
-void()	dark_bishop_dodgel2	=[	17,		dark_bishop_dodgel3	] {bishop_blur_left();};
-void()	dark_bishop_dodgel3	=[	16,		dark_bishop_dodgel4	] {bishop_blur_left();};
-void()	dark_bishop_dodgel4	=[	17,		dark_bishop_dodgel5	] {bishop_blur_left();};
-void()	dark_bishop_dodgel5	=[	16,		dark_bishop_dodgel6	] {bishop_blur_left();};
-void()	dark_bishop_dodgel6	=[	17,		dark_bishop_run1	] {bishop_blur_left();self.drawflags(-)DRF_TRANSLUCENT;};
+void()	dark_bishop_dodge6	=[	17,		dark_bishop_run1	] {bishop_blur();
+	self.drawflags(-)DRF_TRANSLUCENT; 
+	self.th_pain = self.th_save; };
 
 void()	dark_bishop_warp1	=[	15,		dark_bishop_warp2	] {self.drawflags(+)DRF_TRANSLUCENT;
 sound(self,CHAN_AUTO,"bishop/blur.wav",1,ATTN_NORM);
@@ -168,7 +163,7 @@ void()	dark_bishop_atk1	=[	11,		dark_bishop_atk2	]
 sound(self,CHAN_AUTO,"bishop/atk.wav",0.7,ATTN_NORM);
 ai_charge(0);};
 void()	dark_bishop_atk2	=[	12,		dark_bishop_atk3	] {ai_charge(0);};
-void()	dark_bishop_atk3	=[	13,		dark_bishop_atk4	] {ai_charge(0);if (random() < 0.2) dark_bishop_dodgel1();};
+void()	dark_bishop_atk3	=[	13,		dark_bishop_atk4	] {ai_charge(0);};
 void()	dark_bishop_atk4	=[	14,		dark_bishop_atk5	] {ai_charge(0);};
 void()	dark_bishop_atk5	=[	15,		dark_bishop_atk6	] {ai_charge(3);};
 void()	dark_bishop_atk6	=[	16,		dark_bishop_atk7	] {ai_charge(1);FireHomingMissile(0,TRUE);};
@@ -186,12 +181,12 @@ void()	dark_bishop_atk17=[	24,		dark_bishop_run1	] {ai_charge(0);};
 
 //===========================================================================
 
-void()	dark_bishop_pain1	=[	25,	dark_bishop_pain2	] {};
-void()	dark_bishop_pain2	=[	26,	dark_bishop_pain3	] {if (random() > 0.4) dark_bishop_dodgel1();};
+void()	dark_bishop_pain1	=[	25,	dark_bishop_pain2	] {self.lefty*=(-1); };
+void()	dark_bishop_pain2	=[	26,	dark_bishop_pain3	] {if (random() > 0.5) dark_bishop_dodge1(); };
 void()	dark_bishop_pain3	=[	27,	dark_bishop_pain4	] {};
 void()	dark_bishop_pain4	=[	28,	dark_bishop_pain5	] {};
 void()	dark_bishop_pain5	=[	29,	dark_bishop_pain6	] {ai_pain(2);};
-void()	dark_bishop_pain6	=[	30,	dark_bishop_pain7	] {if (random() > 0.4) dark_bishop_dodge1(); else dark_bishop_dodgel1();};
+void()	dark_bishop_pain6	=[	30,	dark_bishop_pain7	] {if (random() > 0.5) dark_bishop_dodge1(); };
 void()	dark_bishop_pain7	=[	31,	dark_bishop_pain8	] {};
 void()	dark_bishop_pain8	=[	32,	dark_bishop_pain9	] {};
 void()	dark_bishop_pain9	=[	33,	dark_bishop_pain10	] {};
@@ -340,7 +335,7 @@ void FireHomingMissile (float offset, float seeking)
 		newmis.effects=EF_DIMLIGHT;
 		newmis.frags=TRUE;
 		newmis.veer=60;
-		newmis.homerate=0.03;
+		newmis.homerate=0.05;	//0.03
 		newmis.lifetime=time+5;
 		newmis.th_die=chain_remove;
 		newmis.think=HomeThink;
@@ -376,6 +371,7 @@ void() monster_bishop =
 	self.netname="bishop";
 	self.flags (+) FL_MONSTER;
 	self.flags2 (+) FL_ALIVE;
+	self.lefty = 1;	//-1 for left dodge, 1 for right dodge
 	self.sightsound = "bishop/sight.wav";
 	self.yaw_speed = 14;
 	
