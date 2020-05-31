@@ -958,6 +958,43 @@ void door_sounds(void)
 		self.noise2 = "doors/penswing.wav";
 		self.noise4 = "doors/penstart.wav";
 	}
+	else if (self.soundtype == 10)	// Pully plat
+	{
+		precache_sound ("plats/pulyplt1.wav");
+		precache_sound ("plats/pulyplt2.wav");
+		
+		self.noise1 = "plats/pulyplt2.wav";
+		self.noise2 = "plats/pulyplt1.wav";
+		self.noise4 = "plats/pulyplt1.wav";
+	}
+	else if (self.soundtype == 11)	// Chain plat
+	{
+		precache_sound ("plats/chainplt1.wav");
+		precache_sound ("plats/chainplt2.wav");
+		
+		self.noise1 = "plats/chainplt2.wav";
+		self.noise2 = "plats/chainplt1.wav";
+		self.noise4 = "plats/chainplt1.wav";
+	}
+	else if (self.soundtype == 12)	// Falling architecture
+	{
+		precache_sound ("fx/boldstop.wav");
+		precache_sound ("misc/null.wav");
+		precache_sound ("doors/penswing.wav");
+		
+		self.noise1 = "fx/boldstop.wav";
+		self.noise2 = "doors/penswing.wav";
+		self.noise4 = "misc/null.wav";
+	}
+	else if (self.soundtype == 13)	// Stone plat
+	{
+		precache_sound ("plats/platslid.wav");
+		precache_sound ("plats/platstp.wav");
+		
+		self.noise1 = "plats/platstp.wav";
+		self.noise2 = "plats/platslid.wav";
+		self.noise4 = "plats/platslid.wav";
+	}
 }
 
 
