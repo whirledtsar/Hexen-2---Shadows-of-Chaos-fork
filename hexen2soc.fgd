@@ -69,6 +69,7 @@
 	_dirt(integer) : "Dirt mapping (override)"
 	_minlight(integer) : "Min light for all surface"
 	_mincolor(string) : "Min light color R G B"
+	_phong(integer) : "Phong"
 	_shadow(choices) : "Shadows" = [
 		0 : "Do Nothing"
 		1 : "Cast shadows"
@@ -120,6 +121,7 @@
 	cnt_polymorph(integer) : "Ovinimancer"
 	cnt_cubeofforce(integer) : "Force cube"
 	cnt_invincibility(integer) : "Invincibility"
+	spawn_health(integer) : "Crystal vial"
 ]
 
 //
@@ -761,7 +763,7 @@
 	abslight(integer) : "Absolute light value"
 ]
 
-@SolidClass base(Appearflags, Targetname) = func_wall : "Wall"
+@SolidClass base(Appearflags, Targetname, FuncLighting) = func_wall : "Wall"
 [
         spawnflags(Flags) =
 	[
@@ -1946,6 +1948,7 @@
 
 @SolidClass base(Appearflags, Targetname) = trigger_monsterjump : "Monster jumper"
 [
+	angle(integer) : "Angle of movement" : 0
 	spawnflags(Flags) =
 	[
 		1 : "Deactivated (PoP)" : 0
@@ -1989,6 +1992,13 @@
 @SolidClass base(Trigger, Puzzles, trigger_multiple) = trigger_once : "Single trigger"
 [
 	experience_value(integer) : "Experience awarded" : 0
+	soundtype(choices) : "Sounds" : 0 =
+	[
+		0 : "No sound"
+		1 : "Secret"
+		2 : "Bell"
+		3 : "Large switch"
+	]
 ]
 
 @SolidClass base(Appearflags, Targetname) = trigger_push : "Push"
@@ -2257,3 +2267,16 @@
 @SolidClass base(FuncLighting)= func_group : "Group brush" [
 	_phong(integer) : "Phong"
 ]
+
+@PointClass base(Appearflags, Targetname, Target) = trigger_hub_intermission : "Trigger hub intermission (PoP)"
+[
+	delay(integer) : "Minimum duration" : 2
+	level(integer) : "Intermission #" : 11
+	map(string) : "Next map"
+	spawnflags(Flags) =
+	[
+		1 : "Keep puzzle items" : 0
+		2 : "Keep cross level triggers" : 0
+	]
+]
+
