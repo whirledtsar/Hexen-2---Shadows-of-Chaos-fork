@@ -2216,6 +2216,22 @@
 		4 : "Translucent"
 		8 : "Fullbright" 
 	]
+	modeltype(choices) : "Wide or skinny" : 0 =
+	[
+		0 : "Wide"
+		1 : "Skinny"
+	]
+	skin(choices) : "Skin" : 0 =
+	[
+		0 : "Water (dark)"
+		1 : "Lava"
+		2 : "Sludge"
+		3 : ""
+		4 : ""
+		5 : "Water (light)"
+		6 : "Water (alt)"
+	]
+	wait(integer) : "Animation speed" : 0.05
 ]
 
 @PointClass base(Object) model(":models/portal.mdl") = misc_portal_big : "Large Portal Effect, for use with teleporters/level exits a la Hexen 1" []
