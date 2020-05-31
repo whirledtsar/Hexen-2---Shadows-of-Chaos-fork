@@ -421,20 +421,6 @@ void() misc_waterfall =
 	}
 	
 	self.th_stand ();
-	//else if (self.targetname && watcount == 1)
-	//{
-		//watcount = 0;
-		//self.use = water_start1;
-	//}
-}
-	
-void fog_float ()
-{
-	self.frame=self.weaponframe_cnt;
-	if (self.lifetime<time || self.velocity=='0 0 0')
-		remove(self);
-	else
-		thinktime self : HX_FRAME_TIME;
 }
 
 void CreateFog (vector org)
@@ -448,10 +434,9 @@ entity new;
 	new.movetype = MOVETYPE_FLY;
 	new.solid = SOLID_NOT;
 	new.drawflags(+)DRF_TRANSLUCENT;
-	new.weaponframe_cnt=rint(random(0,4));
-	new.lifetime = time+random(2,4);
-	new.think = fog_float;
-	thinktime new : 0;
+	new.frame=rint(random(0,4));
+	new.think = SUB_Remove;
+	thinktime new : random(1.5,3.5);
 	
 	new.velocity_x = random(-30,30);
 	new.velocity_y = random(-30,30);
@@ -459,11 +444,16 @@ entity new;
 }
 
 void mist_spawn ()
-{
-entity new;
+{;
 vector org;
 	makevectors(self.angles);
-	org = (self.absmin+self.absmax)*0.5 + normalize(v_forward)*random(self.t_width) + normalize(v_right)*random(self.t_width);
+	org = (self.absmin+self.absmax)*0.5;
+	if (random()<0.5)
+		self.lefty*=(-1);
+	org += (self.lefty * v_forward*random(self.t_width));
+	if (random()<0.5)
+		self.lefty*=(-1);
+	org += (self.lefty * v_right*random(self.t_width));
 	CreateFog(org);
 	
 	self.think = mist_spawn;
@@ -491,12 +481,13 @@ void() misc_mistgen
 	
 	if (!self.t_width)		//spawning area
 		self.t_width=30;
-	if (!self.lifespan)		//fog lifetime
-		self.lifespan=2;
 	if (!self.wait)
-		self.wait=0.5;		//min delay between fog spawns
+		self.wait=0.25;		//min delay between fog spawns
+	self.lefty = 1;
+	
 	self.th_stand = mist_spawn;
-	self.netname="fog generator";
+	self.netname = "fog generator";
+	
 	if (self.targetname)
 	{
 		if (self.spawnflags & MIST_STARTOFF)
