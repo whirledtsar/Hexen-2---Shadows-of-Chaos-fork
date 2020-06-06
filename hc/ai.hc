@@ -555,7 +555,7 @@ void() ai_stand =
 	MonsterCheckContents();
 	
 	sdprint("Summon monster contents are ok", FALSE);
-	if (self.playercontrolled && self.enemy=self.controller)	//ws: if summoned minion and already close to player, dont move further
+	if (self.playercontrolled && self.enemy==self.controller)	//ws: if summoned minion and already close to player, dont move further
 			if (range(self.controller)<=RANGE_MELEE && visible(self.controller))
 				return;
 	
