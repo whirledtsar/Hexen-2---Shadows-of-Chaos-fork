@@ -35,6 +35,12 @@ local entity	temp;
 		self.th_stand ();
 		return;
 	}
+	else if (self.flags&FL_MONSTER && other.wait>0) {	//ws: monsters will idle at path corners for the corner's wait value
+		self.pausetime = time + other.wait;
+		self.think = self.th_stand;
+		self.th_stand ();
+		return;
+	}
 };
 
 /*
