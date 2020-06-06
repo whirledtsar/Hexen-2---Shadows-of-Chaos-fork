@@ -30,7 +30,7 @@ void()	wendigo_stand16	=[	15,	wendigo_stand17	] {ai_stand();};
 void()	wendigo_stand17	=[	16,	wendigo_stand1	] {ai_stand();};
 
 void()	wendigo_walk1	=[	17,		wendigo_walk2	] {
-if (random() < 0.2)
+if (random() < 0.05)
 	sound (self, CHAN_VOICE, "wendigo/idle.wav", 1,  ATTN_IDLE);
 ai_walk(3);};
 void()	wendigo_walk2	=[	18,		wendigo_walk3	] {ai_walk(2);};
@@ -43,7 +43,7 @@ void()	wendigo_walk8	=[	24,		wendigo_walk9	] {ai_walk(4);};
 void()	wendigo_walk9	=[	25,		wendigo_walk10	] {ai_walk(3);};
 void()	wendigo_walk10	=[	26,	wendigo_walk11	] {ai_walk(3);};
 void()	wendigo_walk11	=[	27,	wendigo_walk12	] {ai_walk(2);};
-void()	wendigo_walk12	=[	28,	wendigo_walk11	] {ai_walk(3);};
+void()	wendigo_walk12	=[	28,	wendigo_walk1	] {ai_walk(3);};
 
 
 void()	wendigo_run1	=[	17,		wendigo_run2	] {ai_run(4);};
@@ -110,7 +110,6 @@ void()	wendigo_shatter20	=[	19,	wendigo_shatter21	] {};
 void()	wendigo_shatter21	=[	20,	wendigo_shatter22	] {};
 void()	wendigo_shatter22	=[	21,	wendigo_shatter23	] {};
 void()	wendigo_shatter23	=[	22,	wendigo_shatter23	] {remove(self);};
-
 
 
 void(vector dir) FireIceSpike =
