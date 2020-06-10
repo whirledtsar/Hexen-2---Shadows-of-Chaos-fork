@@ -67,6 +67,7 @@ $frame skwait1      skwait2      skwait10     skwait11     skwait12
 $frame skwait13     skwait14     skwait15     skwait16     skwait17     
 $frame skwait18     skwait19     skwait20     skwait21     skwait22     
 $frame skwait23     skwait24     skwait25     skwait26     
+  
 
 //
 $frame skwalk1      skwalk2      skwalk3      skwalk4      skwalk5      
@@ -267,9 +268,16 @@ void spider_spawn (float spawn_side)
 	newmis.think = skullwiz_summon;
 	newmis.origin = self.origin;
 	newmis.controller = self;
+	newmis.owner = self;		//ws: temporary - let spider phase thru dead wizards
 	newmis.preventrespawn = TRUE;
 
 	newmis.angles = self.angles;
+	
+	entity check = spawn();		//ws: create entity that checks if spider is out of corpse's range and make them solid if so
+	check.enemy = newmis;
+	check.controller = self;
+	check.think = minion_solid;
+	thinktime check : HX_FRAME_TIME;
 }
 
 
@@ -512,9 +520,9 @@ void skullwiz_pain_anim () [++ $skpain1 .. $skpain12]
 		else
 			sound (self, CHAN_BODY, "skullwiz/pain2.wav", 1, ATTN_NORM);
 	}
-
-	if (self.frame < $skpain11)
-		self.frame += 1;
+	//ws: frame advance is handled automatically by the function, so the following skipped most frames (including the frame with pain sound)
+	//if (self.frame < $skpain11)
+		//self.frame += 1;
 
 	if (self.frame>=$skpain12)
 	{
@@ -529,7 +537,7 @@ void skullwiz_pain_anim () [++ $skpain1 .. $skpain12]
 
 void skullwiz_pain (entity attacker, float damg)
 {
-	if (self.pain_finished > time||random(self.health)>damg)
+	if (self.pain_finished > time||random(self.health*0.75)>damg)	//ws: pain chance increased slightly
 		return;
 
 	skullwiz_pain_anim();
@@ -838,17 +846,17 @@ float loop_cnt,forward,dot;
 		//forward = random(120,200);
 		//spot2 = spot1 + (v_forward * forward);
 		//traceline (spot1, spot2 + (v_forward * 30) , FALSE, self);
-		forward = random((self.size_x + self.size_y),200.00000);
+		forward = random((self.size_x + self.size_y),200);
 		spot2 = (spot1 + (v_forward * forward) + (v_up * forward));
-		traceline ( spot1, (spot2 + (v_forward * ((self.size_x + self.size_y) * 0.5))), TRUE, self);
+		traceline (spot1, (spot2 + (v_forward * ((self.size_x + self.size_y) * 0.5))), TRUE, self);
 		if (trace_fraction == 1.0) //  Check no one is standing where monster wants to be
 		{
-			traceline ( spot2, (spot2 - (v_up * (forward * 2.00000))), TRUE, self);
+			traceline (spot2, (spot2 - (v_up * (forward * 2))), TRUE, self);
 			spot2 = trace_endpos;
 			
    			makevectors (newangle);
 			//tracearea (spot2,spot2 + v_up * 80,'-32 -32 -10','32 32 46',FALSE,self);
-			tracearea (spot2, (spot2 + (v_up * 80)), self.orgnl_mins-'8 8 0', self.orgnl_maxs+'8 8 0', FALSE, self);	//self.enemy
+			tracearea (spot2, (spot2 + (v_up * 80)), self.orgnl_mins*1.25, self.orgnl_maxs*1.25, FALSE, self);	//self.enemy
 			
 			if ((trace_fraction == 1.0) && (!trace_allsolid)) // Check there is a floor at the new spot
 			{
@@ -869,7 +877,6 @@ float loop_cnt,forward,dot;
 						setsize (self, self.orgnl_mins, self.orgnl_maxs);
 						self.solid = SOLID_SLIDEBOX;
 						setorigin(self,spot2);
-						droptofloor();	//ws: dont float above ground? not sure if this is effective
 						
 						if (walkmove(self.angles_y, .05, TRUE))		// You have to move it a little bit to make it solid
 						{
@@ -906,7 +913,7 @@ float loop_cnt,forward,dot;
 		}
 
 	} while (trace_fraction != 1.0);
-
+	
 	self.think=skullwiz_blinkin1;
 	self.nextthink = time;	
 	sound (self, CHAN_VOICE, "skullwiz/blinkin.wav", 1, ATTN_NORM);
@@ -1132,8 +1139,20 @@ void skullwiz_walk (void) [++ $skwalk1..$skwalk24]
 /*-----------------------------------------
 	skullwiz_stand - standing and waiting
   -----------------------------------------*/
-void skullwiz_stand (void) [++ $skwait1..$skwait26]
-{
+void skullwiz_stand (void) //[++ $skwait1..$skwait26]
+{	//ws: vanilla idle anim is choppy, so changed
+	if (self.lefty) {
+		if (RewindFrame (124, 111) == AF_END)
+			self.lefty = FALSE;
+	}
+	else {
+		if (AdvanceFrame (111, 124) == AF_END)
+			self.lefty = TRUE;
+	}
+	
+	self.think = skullwiz_stand;
+	thinktime self : HX_FRAME_TIME+random(0,HX_FRAME_TIME);
+	
 	if (random() < .5)
 		ai_stand();
 }
