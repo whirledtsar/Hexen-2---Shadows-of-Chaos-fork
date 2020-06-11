@@ -1002,8 +1002,7 @@
 @PointClass base(Lights, Lightdmg) model(":models/flame1.mdl") size(-10 -10 -40, 10 10 40) = light_flame_large_yellow : "Flame large yellow"[]
 @PointClass base(Lights) model(":models/flame2.mdl") size(-10 -10 -12, 12 12 18) = light_flame_small_white : "Flame small white"[]
 @PointClass base(Lights, Lightdmg) model(":models/flame2.mdl") size(-10 -10 -12, 12 12 18) = light_flame_small_yellow : "Flame small yellow"[]
-@PointClass base(Lights, Angles) size(-8 -8 -8, 8 8 8) = light_gem : "Gem light" []
-@PointClass base(Lights) size(-8 -8 -8, 8 8 8) = light_globe : "Globe" []
+@PointClass base(Lights, Angles) model(":models/gemlight.mdl") size(-8 -8 -8, 8 8 8) = light_gem : "Gem light" []
 @PointClass base(Lights) model(":models/cflmtrch.mdl") size(-8 -8 -8, 8 8 8) = light_torch_castle : "Castle torch" []
 @PointClass base(Lights) model(":models/egtorch.mdl")  = light_torch_eqypt : "Egyptian torch" []	//yes, "eqypt" is correct...
 @PointClass base(Lights) model(":models/mflmtrch.mdl") = light_torch_meso : "Meso torch" []
@@ -1132,7 +1131,7 @@
 
 @PointClass base(monster_imp_fire) = monster_imp_lord : "Lord imp" []
 
-@PointClass base(Monster) = monster_medusa_green : "Green medusa" []
+@PointClass base(Monster) model(":models/medusa.mdl") = monster_medusa_green : "Green medusa" []
 @PointClass base(monster_medusa_green) = monster_medusa_red : "Red medusa" []
 
 @PointClass base(Monster) model(":models/mummy.mdl") size(-16 -16 0, 16 16 55) = monster_mummy : "Mummy" []
@@ -2215,6 +2214,8 @@
 		2 : "Start off"
 		4 : "Translucent"
 		8 : "Fullbright" 
+		16 : "Scale horizontally"
+		32 : "Scale vertically"
 	]
 	modeltype(choices) : "Wide or skinny" : 0 =
 	[
@@ -2230,6 +2231,7 @@
 		4 : ""
 		5 : "Water (light)"
 		6 : "Water (alt)"
+		7 : "Water (alt, light)"
 	]
 	wait(integer) : "Animation speed" : 0.05
 ]
