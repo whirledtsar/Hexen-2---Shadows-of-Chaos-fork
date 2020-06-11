@@ -144,6 +144,7 @@ stats.hc
 
 //new additions
 maulotaur.hc
+reiver.hc
 deathknight.hc
 disciple.hc
 bishop.hc
@@ -151,3 +152,4 @@ afrit.hc
 wendigo.hc
 undying.hc
 objects_new.hc
+triggers_new.hc
