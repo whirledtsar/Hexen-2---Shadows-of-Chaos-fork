@@ -458,8 +458,8 @@ void skullwiz_summon(void)
 	}
 	self.scale = 0.1;
 
-	setorigin(self,spot2);	
-	//reateWhiteSmoke (self.origin+'0 0 3','0 0 8');
+	setorigin(self,spot2);
+	//CreateWhiteSmoke (self.origin+'0 0 3','0 0 8');
 
 	sound (self, CHAN_VOICE, "skullwiz/gate.wav", 1, ATTN_NORM);
 
@@ -468,7 +468,7 @@ void skullwiz_summon(void)
 
 void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 {
-
+	thinktime self : HX_FRAME_TIME*0.5;	//ws: speed up animation
 	if (self.frame == $skgate2)   // Gate in the creatures
 		sound (self, CHAN_VOICE, "skullwiz/gatespk.wav", 1, ATTN_NORM);
 
@@ -515,9 +515,9 @@ void skullwiz_pain_anim () [++ $skpain1 .. $skpain12]
 		else
 			sound (self, CHAN_BODY, "skullwiz/pain2.wav", 1, ATTN_NORM);
 	}
-
-	if (self.frame < $skpain11)
-		self.frame += 1;
+	//ws: frame advance is handled automatically by the function, so the following skips most frames (including the frame with pain sound)
+	//if (self.frame < $skpain11)
+		//self.frame += 1;
 
 	if (self.frame>=$skpain12)
 	{
@@ -532,7 +532,7 @@ void skullwiz_pain_anim () [++ $skpain1 .. $skpain12]
 
 void skullwiz_pain (entity attacker, float damg)
 {
-	if (self.pain_finished > time||random(self.health)>damg)
+	if (self.pain_finished > time||random(self.health*0.75)>damg)	//ws: pain chance increased slightly
 		return;
 
 	skullwiz_pain_anim();
@@ -615,7 +615,7 @@ void SkullMissile_Twist(void)
 	{
 		sound (self, CHAN_BODY, "skullwiz/scream.wav", 1, ATTN_NORM);
 		self.scream_time = time + random(.50,1);
-	}	
+	}
 	if (self.owner.bufftype & BUFFTYPE_LEADER)
 		HomeThink();
 }
@@ -776,7 +776,8 @@ void skullwiz_blinkin(void)
 		//restore monster effects
 		ApplyMonsterBuffEffect(self);
 		
-		self.counter = time+1;	//ws: dont teleport again immediately, give player a little time to retaliate
+		self.counter = time+1;			/ws: dont teleport again immediately, give player a little time to retaliate
+		self.glyph_finished = time+1;	//also dont immediately revive corpses
 		
 		skullwiz_run();
 	}
@@ -837,17 +838,17 @@ float loop_cnt,forward,dot;
 		//forward = random(120,200);
 		//spot2 = spot1 + (v_forward * forward);
 		//traceline (spot1, spot2 + (v_forward * 30) , FALSE, self);
-		forward = random((self.size_x + self.size_y),200.00000);
+		forward = random((self.size_x + self.size_y),200);
 		spot2 = (spot1 + (v_forward * forward) + (v_up * forward));
-		traceline ( spot1, (spot2 + (v_forward * ((self.size_x + self.size_y) * 0.5))), TRUE, self);
+		traceline (spot1, (spot2 + (v_forward * ((self.size_x + self.size_y) * 0.5))), TRUE, self);
 		if (trace_fraction == 1.0) //  Check no one is standing where monster wants to be
 		{
-			traceline ( spot2, (spot2 - (v_up * (forward * 2.00000))), TRUE, self);
+			traceline (spot2, (spot2 - (v_up * (forward * 2))), TRUE, self);
 			spot2 = trace_endpos;
 			
    			makevectors (newangle);
 			//tracearea (spot2,spot2 + v_up * 80,'-32 -32 -10','32 32 46',FALSE,self);
-			tracearea (spot2, (spot2 + (v_up * 80)), self.orgnl_mins-'8 8 0', self.orgnl_maxs+'8 8 0', FALSE, self);	//self.enemy
+			tracearea (spot2, (spot2 + (v_up * 80)), self.orgnl_mins*1.25, self.orgnl_maxs*1.25, FALSE, self);	//self.enemy
 			
 			if ((trace_fraction == 1.0) && (!trace_allsolid)) // Check there is a floor at the new spot
 			{
@@ -868,7 +869,6 @@ float loop_cnt,forward,dot;
 						setsize (self, self.orgnl_mins, self.orgnl_maxs);
 						self.solid = SOLID_SLIDEBOX;
 						setorigin(self,spot2);
-						droptofloor();	//ws: dont float above ground? not sure if this is effective
 						
 						if (walkmove(self.angles_y, .05, TRUE))		// You have to move it a little bit to make it solid
 						{
@@ -905,7 +905,7 @@ float loop_cnt,forward,dot;
 		}
 
 	} while (trace_fraction != 1.0);
-
+	
 	self.think=skullwiz_blinkin1;
 	self.nextthink = time;	
 	sound (self, CHAN_VOICE, "skullwiz/blinkin.wav", 1, ATTN_NORM);
@@ -1134,8 +1134,20 @@ void skullwiz_walk (void) [++ $skwalk1..$skwalk24]
 /*-----------------------------------------
 	skullwiz_stand - standing and waiting
   -----------------------------------------*/
-void skullwiz_stand (void) [++ $skwait1..$skwait26]
-{
+void skullwiz_stand (void) //[++ $skwait1..$skwait26]
+{	//ws: vanilla idle anim is choppy, so changed
+	if (self.lefty) {
+		if (RewindFrame (124, 111) == AF_END)
+			self.lefty = FALSE;
+	}
+	else {
+		if (AdvanceFrame (111, 124) == AF_END)
+			self.lefty = TRUE;
+	}
+	
+	self.think = skullwiz_stand;
+	thinktime self : HX_FRAME_TIME+random(0,HX_FRAME_TIME);
+	
 	if (random() < .5)
 		ai_stand();
 }
@@ -1143,7 +1155,7 @@ void skullwiz_stand (void) [++ $skwait1..$skwait26]
 
 void skullwizard_init(void)
 {
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model4("models/skullwiz.mdl");//converted for MP
 		precache_model("models/skulbook.mdl");
@@ -1201,6 +1213,7 @@ void skullwizard_init(void)
 	self.flags(+)FL_MONSTER;
 	self.yaw_speed = 10;
 
+	self.counter = 0;	//counter for when to teleport
 }
 
 
