@@ -1922,7 +1922,7 @@ void() control_return =
 {	
 	if(self.goalentity.classname!="catapult")
 	{
-		self.goalentity.oldthink=SUB_Null;
+		//self.goalentity.oldthink=SUB_Null;
 		self.goalentity.think=reset_mangle;
 		thinktime self.goalentity : 0;
 	}
