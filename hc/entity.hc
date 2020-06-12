@@ -576,7 +576,7 @@ void end_sys_fields;
 .float healthtime;
 
 // Subs
-.void() think1;
+//.void() think1;	//was only used by ravenstaff ravens
 .vector finaldest, finalangle;
 
 // For counting triggers
@@ -701,7 +701,7 @@ void end_sys_fields;
 .float check_ok;			//For trigger check, instead of re-using aflag
 .entity check_chain;		//for trigger_check, keeps track of it's targetted entities
 
-.void() th_spawn;			//Monster function you spawned with
+//.void() th_spawn;			//Monster function you spawned with		//only utilized by unused sheep function, now commented out
 .float freeze_time;
 .float level_frags;
 .float visibility;
