@@ -94,9 +94,14 @@
 	]
 ]
 
-@baseclass = Targetname [ targetname(target_source) : "Name" ]
-@baseclass = Target [ target(target_destination) : "Target" killtarget(target_destination) : "KillTarget" ]
-
+@baseclass = Targetname [
+	targetname(target_source) : "Name"
+	targetid(integer) : "ID for trigger_random"
+]
+@baseclass = Target [
+	target(target_destination) : "Target"
+	killtarget(target_destination) : "KillTarget"
+]
 @baseclass = Angles [
 	//angles_x(integer) : "Angles X"
 	//angles_Y(integer) : "Angles Y"
@@ -156,7 +161,7 @@
 @PointClass base(Artifact) model(":models/a_mboost.mdl") = art_manaboost : "Mana Boost" []
 @PointClass base(Artifact) model(":models/a_poly.mdl") = art_polymorph : "Polymorph" []
 @PointClass base(Artifact) model(":models/a_summon.mdl") = art_summon : "Summoning" []
-@PointClass base(Artifact) model(":models/a_shboost.mdl") = art_SuperHBoost : "Super Health Boost" []
+@PointClass base(Artifact) model(":models/a_shbost.mdl") = art_SuperHBoost : "Super Health Boost" []
 @PointClass base(Artifact) = art_sword_and_crown : "Sword and Crown" []
 @PointClass base(Artifact) model(":models/a_telprt.mdl") = art_teleport : "Teleport" []
 @PointClass base(Artifact) model(":models/a_tome.mdl") = art_tomeofpower : "Tome of Power" []
@@ -903,25 +908,7 @@
 	]
 ]
 
-@PointClass base(Appearflags, Targetname) size(-8 -8 -20, 8 8 45) = item_spawner : "Item spawner"
-[
-	bluemana(integer) : "Blue mana"
-	greenmana(integer) : "Green mana"
-	cnt_torch(integer) : "Torch"
-	cnt_h_boost(integer) : "Quartz flask"
-	cnt_sh_boost(integer) : "Mystic urn"
-	cnt_mana_boost(integer) : "Krater of might"
-	cnt_teleport(integer) : "Chaos device"
-	cnt_tome(integer) : "Tome of power"
-	cnt_summon(integer) : "Stone of summoning"
-	cnt_invisibility(integer) : "Invisibility"
-	cnt_glyph(integer) : "Glyph of ancients"
-	cnt_haste(integer) : "Boots of speed"
-	cnt_blast(integer) : "Disc of repulsion"
-	cnt_polymorph(integer) : "Ovinimancer"
-	cnt_cubeofforce(integer) : "Force cube"
-	cnt_invincibility(integer) : "Invincibility"	
-]
+@PointClass base(Appearflags, Targetname, Spawn) size(-8 -8 -20, 8 8 45) = item_spawner : "Item spawner" []
 
 //
 // Lights!
@@ -1263,7 +1250,7 @@
 	abslight(integer) : "Absolute light value"
 ]
 
-@BaseClass base(Object) model(":models/barrel.mdl") size(-13 -13 0, 13 13 36) = Barrels
+@BaseClass base(Object, Spawn) model(":models/barrel.mdl") size(-13 -13 0, 13 13 36) = Barrels
 [
 	spawnflags(Flags) =
 	[
@@ -1275,23 +1262,6 @@
 ]
 @PointClass base(Barrels) = obj_barrel : "Barrel"
 [
-	health(integer) : "Health" : 25
-	bluemana(integer) : "Blue mana"
-	greenmana(integer) : "Green mana"
-	cnt_torch(integer) : "Torch"
-	cnt_h_boost(integer) : "Quartz flask"
-	cnt_sh_boost(integer) : "Mystic urn"
-	cnt_mana_boost(integer) : "Krater of might"
-	cnt_teleport(integer) : "Chaos device"
-	cnt_tome(integer) : "Tome of power"
-	cnt_summon(integer) : "Stone of summoning"
-	cnt_invisibility(integer) : "Invisibility"
-	cnt_glyph(integer) : "Glyph of ancients"
-	cnt_haste(integer) : "Boots of speed"
-	cnt_blast(integer) : "Disc of repulsion"
-	cnt_polymorph(integer) : "Ovinimancer"
-	cnt_cubeofforce(integer) : "Force cube"
-	cnt_invincibility(integer) : "Invincibility"
 ]
 @PointClass base(Barrels) = obj_barrel_exploding : "Barrel exploding" []
 @PointClass base(Barrels) = obj_barrel_indestructible : "Barrel indestructible" []
@@ -1893,23 +1863,26 @@
 	map(string) : "Map"
 ]
 
-@SolidClass base(Appearflags, Targetname) = trigger_hurt : "Hurt brush" [
+@SolidClass base(Appearflags, Targetname, Target) = trigger_hurt : "Hurt brush
+If it has a target, it will act like a relay and hurt that target when triggered."
+[
 	spawnflags(Flags) =
 	[
-                1 : "Player only (PoP)" : 0
-                2 : "Monster only (PoP)" : 0
-                8 : "Deactivated (PoP)" : 0
+		1 : "Player only (PoP)" : 0
+		2 : "Monster only (PoP)" : 0
+		8 : "Deactivated (PoP)" : 0
 	]
-	deathtype(choices) : "Death type" =
+	deathtype(choices) : "Death message" =
 	[
 		"chopped" : "Pendulum"
 		"falling" : "Fall damage"
+		"impaled" : "Impaled"
 		"oil" : "Boiling oil"
 		"zap" : "Electrocution"
 	]
 	dmg(integer) : "Damage" : 5
-	level(integer) : "Minimum health (PoP)"
-	wait(integer) : "Delay between damage(PoP)" : 1
+	level(integer) : "Minimum health"
+	wait(integer) : "Delay between damage" : 1
 ]
 
 @PointClass base(Appearflags, Targetname, Target) size(-8 -8 -8, 8 8 8) = trigger_interval : "Interval trigger"
@@ -2036,11 +2009,6 @@
 	[
 		8 : "Deactivated" : 0 : "Trigger to activate, trigger again to remove if needed"
 	]
-]
-
-@SolidClass base(Trigger, Puzzles) = trigger_kill : "Kill trigger. Kills its target, using a specific function if set, their default death function if applicable, chunk death if possible, or simple instant removal otherwise."
-[
-	th_die(string) : "Specific death function"
 ]
 
 @PointClass base(Appearflags, Targetname, Target) size(-8 -8 -8, 8 8 8) = trigger_relay : "Relay"
@@ -2197,6 +2165,12 @@
 @PointClass base(wp_weapon2) model(":models/w_l41_c1.mdl") = wp_weapon4_head : "Weapon 4 head" []
 @PointClass base(wp_weapon2) model(":models/w_l42_c1.mdl") = wp_weapon4_staff : "Weapon 4 staff" []
 
+@SolidClass base(FuncLighting,Appearflags) = func_detail : "Detail brush" []
+@SolidClass base(FuncLighting,Appearflags) = func_detail_fence : "Detail Fence brush" []
+@SolidClass base(FuncLighting,Appearflags,targetname) = func_detail_wall : "Detail Wall brush" []
+@SolidClass base(FuncLighting,Appearflags)= func_detail_illusionary : "Detail Illusionary brush" []
+@SolidClass base(FuncLighting)= func_group : "Group brush" []
+
 @PointClass base(Object) model(":models/hangskel.mdl") size(-10 -10 -5, 10 10 40) = obj_hang_corpse : "Hanging corpse, assassin and skeleton variants" [
 	spawnflags(Flags) =
 	[
@@ -2278,15 +2252,7 @@
 @PointClass base(Appearflags, Targetname, Target) size(-10 -10 0, 10 10 12) model(":models/misc_mum.mdl") = obj_mummy : "Decorative mummy; use invisible breakable_brush's for collision"
 []
 
-@SolidClass base(FuncLighting,Appearflags) = func_detail : "Detail brush" []
-@SolidClass base(FuncLighting,Appearflags) = func_detail_fence : "Detail Fence brush" []
-@SolidClass base(FuncLighting,Appearflags,targetname) = func_detail_wall : "Detail Wall brush" []
-@SolidClass base(FuncLighting,Appearflags)= func_detail_illusionary : "Detail Illusionary brush" []
-@SolidClass base(FuncLighting)= func_group : "Group brush" [
-	_phong(integer) : "Phong"
-]
-
-@PointClass base(Appearflags, Targetname, Target) = trigger_hub_intermission : "Trigger hub intermission (PoP)"
+@PointClass base(Appearflags, Targetname, Target) = trigger_hub_intermission : "Trigger hub intermission"
 [
 	delay(integer) : "Minimum duration" : 2
 	level(integer) : "Intermission #" : 11
@@ -2298,3 +2264,23 @@
 	]
 ]
 
+@PointClass base(Appearflags, Targetname, Target) = trigger_random : "
+AKA teh penguin of d00m. When triggered, it uses an entity out of a numerical range of entities.
+The first possible target is determined by its .flags, and the last by its .flags2.
+Entities to be used are identified by their .targetid, rather than .targetname. Use integer values because decimals will be rounded.
+If there are id's missing from its range, it will automatically recalculate so that its range is full of valid entities. Check spawnflag 4 if this isn't desired. Since the process re-assigns id's, it would break any entity used by a separate trigger_random's.
+If you want entity with an id to behave like it's targetted (eg. a door not to spawn a trigger field), then give it a junk targetname such as 'null'.
+It also uses its targets/killtargets when triggered (only once if spawnflag 1 is checked).
+Will be deactivated after being used .count times if set.
+This trigger reserves the targetname 'trigger_random_target'. If you give an entity that targetname, expect bad things."
+[
+	flags(integer) : "Lowest target ID" : 0
+	flags2(integer) : "Highest target ID" : 0
+	count(integer) : "Number of uses before deactivating" : 0
+	spawnflags(flags) =
+	[
+		1 : "Only use target/killtarget once"
+		2 : "Only use any random id once"
+		4 : "Don't reorganize range if an id in range has no matching entities. Only useful if an entity is used by multiple trigger_random's"
+	]
+]
