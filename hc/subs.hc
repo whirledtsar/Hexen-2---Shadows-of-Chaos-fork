@@ -469,20 +469,6 @@ string s;
 				self.count = self.frags;
 				self.items = 0;
 			}
-			else if (other.classname == "trigger_kill")
-			{	//ws: code adapted from commented-out entity trigger_deathtouch
-				if(other.th_die)
-					self.think=other.th_die;
-				else if (self.classname=="breakable_brush")
-					self.use();
-				else if(self.th_die)
-					self.think=self.th_die;
-				else if(self.health)
-					self.think=chunk_death;
-				else
-					self.think=SUB_Remove;
-				thinktime self : 0.05;
-			}
 			else if (self.use != SUB_Null&&!self.inactive)
 			{	//Else here because above trigger types should not use it's target
 				if (self.use)
