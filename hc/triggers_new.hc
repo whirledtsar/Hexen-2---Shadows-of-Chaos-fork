@@ -243,3 +243,168 @@ void trigger_hub_intermission(void)
 	self.use = hub_intermission_use;
 }
 
+/*
+	~trigger_random~
+AKA teh penguin of d00m. When triggered, it uses an entity out of a numerical range of entities.
+The first possible target is determined by its .flags, and the last by its .flags2.
+Entities to be used are identified by their .targetid, rather than .targetname. Use integer values because decimals will be rounded.
+If there are id's missing from its range, it will automatically recalculate so that its range is full of valid entities. Check spawnflag 4 if this isn't desired. Since the process re-assigns id's, it would break any entity used by a separate trigger_random's.
+If you want entity with an id to behave like it's targetted (eg. a door not to spawn a trigger field), then give it a junk targetname such as "null".
+It also uses its targets/killtargets when triggered (only once if spawnflag 1 is checked).
+Will be deactivated after being used .count times if set.
+This trigger reserves the targetname "trigger_random_target". If you give an entity that targetname, expect bad things.
+
+count: maximum uses
+flags: minimum target id
+flags2: maximum target id
+spawnflags:	1 (RANDOM_SINGLETRIG): Only use target/killtarget once
+		2 (RANDOM_NOREPEAT) : Only use any random id once
+		4 (RANDOM_IGNOREMISSING) : Don't reorganize range if an id in range has no matching entities
+*/
+
+void trigger_random_reorder (float id)
+{
+entity found, first;
+float valid;
+	if (id>self.flags2 || id<self.flags)
+		return;
+	
+	if (id<self.flags2)		//not last in range, so decrement greater id's
+	{
+		found = nextent(world);
+		while (found)
+		{
+			if (found.targetid > id && found.targetid <= self.flags2)
+			{
+				if (!valid) {
+					first = found;	//found first relevant entity in list
+					valid = TRUE;
+				}
+				dprint("Trigger_random: Decremented id ");dprint(ftos(found.targetid));dprint("\n");
+				found.targetid -= 1;
+			}
+			found=nextent(found);
+		}
+	}
+	
+	found = nextent(first);		//we know none of the entities before first are relevant, so start search there
+	while (found)
+	{
+		if (found.targetid == id) {
+			dprint("Trigger_random: reset id ");dprint(ftos(id));dprint("\n");
+			found.targetid = 0;
+		}
+		found=nextent(found);
+	}
+	
+	self.flags2 -= 1;				//lower random range for next use
+	if (self.flags2<self.flags) {	//we've used everything in our range so remove
+		remove(self);
+		return;
+	}
+}
+
+void trigger_random_use ()
+{
+entity found;
+float r, valid;
+	r = random(self.flags, self.flags2+1);
+	if (r>self.flags2)
+		r = self.flags2;
+	else if (r<self.flags)
+		r = self.flags;
+	r = rint(r);
+	
+	found = nextent(world);					//search entire list of entities in world
+	while (found)
+	{
+		if (found.targetid == r)
+		{
+			string otarg = self.target;
+			string oname = found.targetname;
+			found.targetname = "trigger_random_target";
+			self.target = found.targetname;	//trigger temporarily targets the entity whose id matches our random selection
+			SUB_UseTargets();				//use them
+			self.target = otarg;			//done using them so reset our target and the matching id's targetname
+			found.targetname = oname;
+			
+			valid = TRUE;
+		}
+		found=nextent(found);
+	}
+	
+	if (!valid)		//we couldnt find a matching id, so retry
+	{
+		if (!self.spawnflags&RANDOM_IGNOREMISSING)
+			trigger_random_reorder (r);
+		trigger_random_use();
+		return;
+	}
+	
+	if (self.spawnflags&RANDOM_NOREPEAT)
+		trigger_random_reorder (r);		//we don't want to use an id again, so reorganize our range
+	
+	SUB_UseTargets();									//use our actual targets & killtargets
+	if (self.spawnflags&RANDOM_SINGLETRIG)				//dont use non-random targets again if spawnflagged
+		self.target = self.killtarget = string_null;	//uninitiated string, because "" results in disaster for reasons unknown to my ignorant self
+	
+	if (self.count)
+		++self.counter;
+	if (self.counter>self.count) {
+		remove(self);
+		return;
+	}
+}
+
+void trigger_random_check ()
+{
+entity found;
+float valid, i;
+	
+	self.think = SUB_Null;
+	thinktime self : -1;
+	
+	if (!self.flags || !self.flags2) {
+		dprint("*\n*Error: trigger_random with missing min or max*\n");
+		remove(self);
+		return;
+	}
+	else {
+		if (self.flags>self.flags2) {
+			dprint("*\n*Error: trigger_random min greater than max*\n");
+			self.flags = self.flags2;
+		}
+		if (self.flags2<self.flags) {
+			dprint("*\n*Error: trigger_random max less than min*\n");
+			self.flags2 = self.flags;
+		}
+	}
+	
+	for (i = self.flags; i <= self.flags2; i++)
+	{	dprint("*\n*Trigger_random: checking id ");dprint(ftos(i));dprint("*\n");
+		found = nextent(world);
+		while (found)
+		{
+			if (found.targetid == i) {
+				valid = TRUE;
+				found = world;	//end this while loop
+			}
+			else
+				found=nextent(found);
+		}
+		if (!valid && !self.spawnflags&RANDOM_IGNOREMISSING) {
+			dprint("*\n*Trigger_random: found missing id ");dprint(ftos(i));dprint("*\n");
+			trigger_random_reorder (i);		//found id without a match, so reorganize our range
+		}
+		valid = FALSE;
+	}
+	
+	return;
+}
+
+void trigger_random ()
+{
+	self.think = trigger_random_check;
+	thinktime self : 0.1;	//slight delay to make sure all entities are spawned before checking their id's
+	self.use = trigger_random_use;
+}
