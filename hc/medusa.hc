@@ -718,18 +718,18 @@ void medusa_pain (entity attacker,float total_damage)
 void()medusa_look_left = [++ $looklf1 .. $looklf29]
 {
 	medusa_check_use_model("models/medusa.mdl");
-	if(self.oldthink==self.th_run)
+	if(self.th_save==self.th_run)
 		ai_run(self.speed);
 	else
 	{
-		if(self.oldthink==self.th_stand)
+		if(self.th_save==self.th_stand)
 			ai_stand();
-		else if(self.oldthink==self.th_walk)
+		else if(self.th_save==self.th_walk)
 			ai_walk(5);
 	}
 	if(cycle_wrapped)
 	{
-		self.think=self.oldthink;
+		self.think=self.th_save;
 		if(self.think!=self.th_run)
 			if(random()<0.2)
 				self.think=medusa_look_right;
@@ -740,18 +740,18 @@ void()medusa_look_left = [++ $looklf1 .. $looklf29]
 void()medusa_look_right = [++ $lookrt1 .. $lookrt29]
 {
 	medusa_check_use_model("models/medusa.mdl");
-	if(self.oldthink==self.th_run)
+	if(self.th_save==self.th_run)
 		ai_run(self.speed);
 	else
 	{
-		if(self.oldthink==self.th_stand)
+		if(self.th_save==self.th_stand)
 			ai_stand();
-		else if(self.oldthink==self.th_walk)
+		else if(self.th_save==self.th_walk)
 			ai_walk(5);
 	}
 	if(cycle_wrapped)
 	{
-		self.think=self.oldthink;
+		self.think=self.th_save;
 		if(self.think!=self.th_run)
 			if(random()<0.2)
 				self.think=medusa_look_left;
@@ -857,7 +857,7 @@ void medusa_hunt () [++ $medusa1 .. $medusa29]
 				MedusaSelectDir(MEDUSA_RATTLE);
 			else
 			{
-				self.oldthink=self.th_run;
+				self.th_save=self.th_run;
 				MedusaSelectDir(MEDUSA_LOOK);
 			}
 }
@@ -874,7 +874,7 @@ void medusa_walk () [++ $medusa1 .. $medusa29]
 	{
 		if(random()<0.3)
 		{
-			self.oldthink=self.th_walk;
+			self.th_save=self.th_walk;
 			if(random()<0.5)
 			{
 				thinktime self : 0;
@@ -899,7 +899,7 @@ void medusa_stand () [++$stand1..$stand29]
 	ai_stand();
 	if(random()<0.1)
 	{
-		self.oldthink=self.th_stand;
+		self.th_save=self.th_stand;
 		if(random()<0.5)
 		{
 			thinktime self : 0;
@@ -973,7 +973,7 @@ void monster_medusa_green (void)
 	self.yaw_speed = 5;
 	self.classname="monster_medusa";
 	if(!self.health)
-		self.health = 700;
+		self.health = 600;	//700
 	if(!self.max_health)
 		self.max_health=self.health;
 	self.experience_value = 500;

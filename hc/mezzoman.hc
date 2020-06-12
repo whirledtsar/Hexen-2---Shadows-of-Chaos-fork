@@ -927,7 +927,7 @@ void mezzo_pain (entity attacker, float damage)
 		{
 			if(random()<0.5)
 			{
-				self.oldthink=self.th_run;
+				self.th_save=self.th_run;
 				self.think=mezzo_roar;
 				self.speed=15;
 				self.yaw_speed=20;
@@ -1165,7 +1165,7 @@ void mezzo_block_wait ()
 	if(self.shield)
 		if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
 		{
-			self.shield.oldthink=self.shield.think;
+			self.shield.th_save=self.shield.think;
 			self.shield.think=SUB_Remove;
 			thinktime self.shield : 0.2;
 		}
@@ -1175,7 +1175,7 @@ void mezzo_block_wait ()
 		if(self.shield)
 			if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
 			{
-				self.shield.think=self.shield.oldthink;
+				self.shield.think=self.shield.th_save;
 				thinktime self.shield : 0;
 			}
 //	else
@@ -1257,7 +1257,7 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 			self.takedamage=DAMAGE_YES;
 		self.last_attack=time+3;
 		thinktime self : 0;
-		self.think=self.oldthink;
+		self.think=self.th_save;
 	}
 	else if(self.frame==$roar1)
 	{
@@ -1307,7 +1307,7 @@ void mezzo_run_think ()
 		self.monster_awake=FALSE;
 		if(visible(self.enemy)&&infront(self.enemy))
 		{
-			self.oldthink=self.th_stand;
+			self.th_save=self.th_stand;
 			self.think=mezzo_roar;
 		}
 		else
@@ -1380,7 +1380,7 @@ void mezzo_run () [++ $run6 .. $run22]
 	if(!self.monster_awake)
 		if(range(self.enemy)>RANGE_NEAR&&random()>0.3)
 		{
-			self.oldthink=self.th_run;
+			self.th_save=self.th_run;
 			self.think=mezzo_roar;
 			thinktime self : 0;
 			return;
