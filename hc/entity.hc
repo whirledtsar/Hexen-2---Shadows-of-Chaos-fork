@@ -653,7 +653,6 @@ void end_sys_fields;
 .entity shield;
 .float frozen;		//Can't be a flag, is a counter
 .float oldskin;
-.void() oldthink;
 .void() th_weapon;
 .float decap;		//To know if was beheaded, not a flag, set to 2 if
 					//head should explode
