@@ -87,7 +87,7 @@ void raven_bounce(void)
 	self.think = raven_flap;
 	self.nextthink = time + HX_FRAME_TIME;
 
-	self.think1 = raven_track_init;
+	self.th_save = raven_track_init;
 	self.next_action = time + HX_FRAME_TIME * random(1,3);
 
 	self.touch = raven_touch;
@@ -147,8 +147,8 @@ void raven_search(void)
 				if (trace_fraction == 1.0)
 				{
 					self.enemy = victim;
-					self.think1 = raven_track;
-					self.think1 = raven_track_init;
+					self.th_save = raven_track;
+					self.th_save = raven_track_init;
 					self.next_action = time + .1;
 					self.searchtime = 0;
 					return;
@@ -158,7 +158,7 @@ void raven_search(void)
 		victim = victim.chain;
 	}
 
-	self.think1 = raven_search;
+	self.th_save = raven_search;
 	self.next_action = time + HX_FRAME_TIME * 3;
 
 	if (self.searchtime == 0)  // Done only on birth of raven
@@ -205,7 +205,7 @@ void raven_track (void)
 			self.velocity = self.velocity * self.speed;
 			self.angles = vectoangles(self.velocity);
 
-			self.think1 = raven_track;
+			self.th_save = raven_track;
 			self.next_action = time + HX_FRAME_TIME * 3;
 
 			self.think = raven_flap;
@@ -261,7 +261,7 @@ void raven_flap(void)
 
 	if (self.next_action < time)
 	{
-		self.think = self.think1;
+		self.think = self.th_save;
 		self.nextthink = time;
 	}
 	else
@@ -326,8 +326,8 @@ void create_raven(void)
 		missile.nextthink = time + HX_FRAME_TIME;
 		missile.think = raven_flap;
 		missile.next_action = time + .01;
-		missile.think1 = raven_track;
-		missile.think1 = raven_track_init;
+		missile.th_save = raven_track;
+		missile.th_save = raven_track_init;
 	}
 	else
 	{
@@ -347,8 +347,8 @@ void create_raven(void)
 			missile.think = raven_flap;
 
 			missile.next_action = time + .01;
-			missile.think1 = raven_track;
-			missile.think1 = raven_track_init;
+			missile.th_save = raven_track;
+			missile.th_save = raven_track_init;
 		}
 		else
 		{
