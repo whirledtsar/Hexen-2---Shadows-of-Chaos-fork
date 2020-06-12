@@ -319,7 +319,7 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 	else if(self.target)
 		SUB_UseTargets();
 
-	self.th_stand=self.th_walk=self.th_run=self.th_pain=self.oldthink=self.think=self.th_melee=self.th_missile=SUB_Null;
+	self.th_stand=self.th_walk=self.th_run=self.th_pain=self.storethink=self.think=self.th_melee=self.th_missile=SUB_Null;
 	
 	if(pointcontents(self.origin+self.view_ofs)==CONTENT_WATER)
 		DeathBubbles(20);
