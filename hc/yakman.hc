@@ -1040,7 +1040,7 @@ void yakman_howl () [++ $howl1 .. $howl36]
 	{
 		self.last_attack=time+3;
 		thinktime self : 0;
-		self.think=self.oldthink;
+		self.think=self.th_save;
 	}
 	else if(self.frame==$howl1)
 	{
@@ -1066,7 +1066,7 @@ void yakman_run () [++ $walk1 .. $walk24]
 		if(visible(self.enemy)&&infront(self.enemy))
 		{
 			self.enemy=world;
-			self.oldthink=self.th_run;
+			self.th_save=self.th_run;
 			self.think=yakman_howl;
 		}
 		thinktime self : 0;

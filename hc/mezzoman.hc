@@ -906,7 +906,7 @@ void mezzo_pain (entity attacker, float damage)
 		{
 			if(random()<0.5)
 			{
-				self.oldthink=self.th_run;
+				self.th_save=self.th_run;
 				self.think=mezzo_roar;
 				self.speed=15;
 				self.yaw_speed=20;
@@ -925,7 +925,7 @@ void mezzo_pain (entity attacker, float damage)
 		{
 			if(self.enemy!=world&&self.enemy!=attacker)
 				self.oldenemy=self.enemy;
-			if (!attacker.flags&FL_NOTARGET && attacker!=self.owner && attacker!=self.controller)	//ws: accomadate for summoned mezzomen
+			if (!attacker.flags&FL_NOTARGET && attacker!=self.owner && attacker!=self.controller)
 				self.enemy=attacker;
 		}
 		self.pain_finished=time+1+self.skin;
@@ -946,11 +946,21 @@ void mezzo_land () [++ $jump13 .. $jump22]
 	else if(self.frame==$jump13)
 		sound(self,CHAN_BODY,"player/land.wav",1,ATTN_NORM);
 }
-//FIXME: sometimes gets stuck in air - that is bad!
+
 void mezzo_in_air ()
 {
 	//dprint("in air\n");
 	self.frame=$jump12;
+	
+	if(!self.flags&FL_ONGROUND)
+	{
+		if(random()<0.1)
+		{
+			tracearea(self.origin,self.origin + '0 0 -1',self.mins,self.maxs,FALSE,self);
+			if(trace_fraction<1&&(trace_ent.solid==SOLID_BBOX||trace_ent.solid==SOLID_SLIDEBOX))
+				self.flags(+)FL_ONGROUND;
+		}
+	}
 	if(self.flags&FL_ONGROUND)
 	{
 		thinktime self : 0;
@@ -960,7 +970,8 @@ void mezzo_in_air ()
 	{
 		if(self.velocity=='0 0 0') {
 			self.flags(+)FL_ONGROUND;	//ws: prevent mezzomen from getting stuck in this function if they land on irregular geometry
-			self.velocity='0 0 -60'; }
+			self.velocity='0 0 -60';
+		}
 		self.think=mezzo_in_air;
 		if(vlen(self.velocity)>300)
 		{
@@ -1130,7 +1141,7 @@ void mezzo_block_wait ()
 	if(self.shield)
 		if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
 		{
-			self.shield.oldthink=self.shield.think;
+			self.shield.th_save=self.shield.think;
 			self.shield.think=SUB_Remove;
 			thinktime self.shield : 0.2;
 		}
@@ -1140,7 +1151,7 @@ void mezzo_block_wait ()
 		if(self.shield)
 			if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
 			{
-				self.shield.think=self.shield.oldthink;
+				self.shield.think=self.shield.th_save;
 				thinktime self.shield : 0;
 			}
 //	else
@@ -1217,7 +1228,7 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 			self.takedamage=DAMAGE_YES;
 		self.last_attack=time+3;
 		thinktime self : 0;
-		self.think=self.oldthink;
+		self.think=self.th_save;
 	}
 	else if(self.frame==$roar1)
 	{
@@ -1231,7 +1242,7 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 		thinktime self : HX_FRAME_TIME*0.5;		//ws: speed up animation
 	}
 	else if(self.frame==$roar19)
-		thinktime self : 1.25;		//2
+		thinktime self : 1;		//2
 
 	if(self.takedamage)
 		mezzo_check_defense();
@@ -1267,7 +1278,7 @@ void mezzo_run_think ()
 		self.monster_awake=FALSE;
 		if(visible(self.enemy)&&infront(self.enemy))
 		{
-			self.oldthink=self.th_stand;
+			self.th_save=self.th_stand;
 			self.think=mezzo_roar;
 		}
 		else
@@ -1340,7 +1351,7 @@ void mezzo_run () [++ $run6 .. $run22]
 	if(!self.monster_awake)
 		if(range(self.enemy)>RANGE_NEAR&&random()>0.3)
 		{
-			self.oldthink=self.th_run;
+			self.th_save=self.th_run;
 			self.think=mezzo_roar;
 			thinktime self : 0;
 			return;
@@ -1382,7 +1393,7 @@ void mezzo_twirl() [++ $twirl1 .. $twirl10]
 	}
 	else if(self.frame==$twirl1)
 	{
-		sound(self,CHAN_WEAPON,"weapons/vorpswng.wav",0.7,ATTN_NORM);
+		sound(self,CHAN_WEAPON,"weapons/vorpswng.wav",0.7,ATTN_IDLE);	//ATTN_NORM
 		if(random()<0.5)
 			mezzo_idle_sound();
 	}
@@ -1496,8 +1507,10 @@ void() monster_werejaguar =
       remove(self);
       return;
    }
+	
 	if (!self.th_init)
 		self.th_init = monster_werejaguar;
+	
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_werejaguar();
 	
