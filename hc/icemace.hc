@@ -106,10 +106,10 @@ entity oself;
 		loser.o_angle=loser.mins;
 		loser.v_angle=loser.maxs;
 		loser.enemy=forwhom;
-        loser.oldthink=loser.think;
-        loser.think=IceCubeThink;
-        thinktime loser : 0;
-        loser.touch=SUB_Null;
+		//loser.oldthink=loser.think;
+		loser.think=IceCubeThink;
+		thinktime loser : 0;
+		loser.touch=SUB_Null;
 		loser.th_pain=SUB_Null;
 		loser.wait = time + 3;
 		if(loser.angles_x==0&&loser.angles_z==0)
