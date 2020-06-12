@@ -576,7 +576,7 @@ void end_sys_fields;
 .float healthtime;
 
 // Subs
-//.void() think1;	//was only used by ravenstaff ravens
+.void() think1;
 .vector finaldest, finalangle;
 
 // For counting triggers
