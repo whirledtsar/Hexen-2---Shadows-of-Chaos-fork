@@ -1342,9 +1342,10 @@ float damage;
 			damage = other.health - self.level;
 		else
 			damage = self.dmg;
-		T_Damage (other, self, self, damage);
-		if (self.deathtype)
+		if (self.deathtype && other.health-damage<=0)
 			other.deathtype = self.deathtype;
+		T_Damage (other, self, self, damage);
+		
 		if(self.wait)
 		{
 			self.solid = SOLID_NOT;
@@ -1355,6 +1356,24 @@ float damage;
 
 	return;
 };
+
+void hurt_use ()
+{
+entity targ, save;
+	while (1) {
+		targ = find (targ, targetname, self.target);
+		if (!targ)
+			return;
+		
+		save = other;
+		other = targ;
+		if (other.health || other.th_die)
+			hurt_touch();
+		else
+			remove(other);
+		other = save;
+	}
+}
 
 /*QUAKED trigger_hurt (.5 .5 .5) PLAYER_ONLY MONSTER_ONLY x INACTIVE
 Any object touching this will be hurt
@@ -1368,12 +1387,15 @@ Any object touching this will be hurt
 */
 void() trigger_hurt =
 {
-	InitTrigger ();
-	self.touch = hurt_touch;
+	if (self.target)
+		self.use = hurt_use;
+	else {
+		InitTrigger ();
+		self.touch = hurt_touch;
+	}
 	if (!self.dmg)
 		self.dmg = 1000;
 };
-
 //============================================================================
 
 //============================================================================
