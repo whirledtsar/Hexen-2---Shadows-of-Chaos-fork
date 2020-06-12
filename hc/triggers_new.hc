@@ -74,21 +74,6 @@ void trigger_reflect ()
 	self.pain_finished = time;		//delay between making reflection noise
 }
 
-/*	trigger_kill
-Kills anything it targets. Can use most normal trigger fields & spawnflags.
-
-th_die = Set this if you want the object to have a specific death, defaults to SUB_Remove.
-
-If it is SUB_Remove, it will execute the th_die of the object, if it has one.
-If the object doesn't have a th_die, but it has health, it will execute chunk_death.
-If it doesn't have health, it will just be removed.
-*/
-
-void trigger_kill (void)
-{	//functionality handled in SUB_UseTargets (subs.hc)
-	trigger_once();
-}
-
 /*======================================================================
  Player ladder (originally from Rubicon2 codebase by JohnFitz)
  - This is a very simple system, jump to attach to the ladder brush
