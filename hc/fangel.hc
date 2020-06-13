@@ -87,6 +87,7 @@ void() fangel_blockframes;
 void fangel_handframes (void);
 void fangel_wingframes (void);
 void fangel_flyframes (void);
+void fangel_painframes (void);
 
 // Constants
 float fangel_attack_speed = 11;
@@ -101,15 +102,22 @@ float dot;
 	if(range(self.enemy)<=RANGE_MELEE)
 		return FALSE;
 	
-	if ( (self.think==fangel_wingframes || self.think==fangel_handframes) && random()<0.9 )
+	if (self.think == fangel_painframes)
+		return FALSE;
+	else if ( (self.think==fangel_wingframes || self.think==fangel_handframes) && random()<0.75 )
 		return FALSE;	//ws: not likely to block if in attack state
 
 	if(fov(self,self.enemy,30)&&self.enemy.last_attack+0.75>time)
 	{
-		self.th_save = self.think;
-		self.fangel_Count = 0;
-		fangel_blockframes();
-		return TRUE;
+		if ( !(self.enemy.playerclass != CLASS_SUCCUBUS && self.enemy.weapon == IT_WEAPON1 && range(self.enemy)>RANGE_NEAR) )
+		{	//if enemy is punching air or fighting something else in melee, dont block
+			self.th_save = self.think;
+			if (self.think == fangel_painframes)
+				self.th_save = fangel_flyframes;
+			self.fangel_Count = 0;
+			fangel_blockframes();
+			return TRUE;
+		}
 	}
 
 	if(random()>0.4 + skill/10 + self.skin/10)
@@ -118,8 +126,9 @@ float dot;
 	item = findradius(self.origin, 256);
 	while (item)
 	{
-		if (item.owner.classname == "player" && (item.movetype == MOVETYPE_FLYMISSILE ||
-			item.movetype == MOVETYPE_BOUNCEMISSILE || item.movetype==MOVETYPE_BOUNCE))
+		/*if (item.owner.classname == "player" && (item.movetype == MOVETYPE_FLYMISSILE ||
+			item.movetype == MOVETYPE_BOUNCEMISSILE || item.movetype==MOVETYPE_BOUNCE))*/
+		if (IsMissile(item) && IsEnemyOwned(item))
 		{
 			vec = normalize(self.origin - item.origin + self.view_ofs);
 			realVec = normalize(item.velocity);
@@ -127,6 +136,8 @@ float dot;
 			if (dot >= 0.4) 
 			{
 				self.th_save = self.think;
+				if (self.think == fangel_painframes)
+					self.th_save = fangel_flyframes;
 				self.fangel_Count = 0;
 				fangel_blockframes();
 				return TRUE;
@@ -134,6 +145,7 @@ float dot;
 		}
 		item = item.chain;
 	}
+	
 	return FALSE;
 };
 
@@ -223,6 +235,7 @@ void() fangel_init =
 //	dprint(self.enemy.classname);
 //	dprint("- Found enemy\n");
 	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
+	self.th_stand = fangel_flyframes;
 	self.think=self.th_stand;
 	thinktime self : random(.1,.6);
 	self.count = 0;
@@ -249,9 +262,9 @@ void fangel_wait (void)
 	{
 		self.t_width=time+7;
 		if(self.skin)
-			sound(self,CHAN_AUTO,"fangel/ambi2.wav",random(0.5,1),ATTN_NORM);
+			sound(self,CHAN_AUTO,"fangel/ambi2.wav",random(0.75,1),ATTN_NORM);
 		else
-			sound(self,CHAN_AUTO,"fangel/ambi1.wav",random(0.5,1),ATTN_NORM);
+			sound(self,CHAN_AUTO,"fangel/ambi1.wav",random(0.75,1),ATTN_NORM);
 	}
 }
 
@@ -411,8 +424,8 @@ void () fangel_hand_fire =
 
 	sound (self, CHAN_WEAPON, "fangel/hand.wav", 1, ATTN_NORM);
 
-	do_faSpell('10 -4 8',400);
-	do_faSpell('10 -4 8',300);
+	do_faSpell('10 -4 8',600);	//ws: increased both by 200
+	do_faSpell('10 -4 8',500);
 };
 
 void () fangel_wing_fire =
@@ -493,7 +506,7 @@ float chance;
 		chance = random();
 
 		if (chance < .1)
-			self.think = self.th_save; 
+			self.think = self.th_save;
 		else if (chance < .60)
 			self.think = fangel_handframes;  // Come back fighting
 		else
@@ -502,13 +515,14 @@ float chance;
 	else if (RetVal == AF_NORMAL)
 	{
 		if (self.frame == $fblock13) 
-			self.fangel_Count = 40;
+			self.fangel_Count = 30;		//40
 	}
 
 	if (self.frame == $fblock9)
 	{
 		self.takedamage = DAMAGE_NO;
 		spawn_reflect();
+		stopSound(self,CHAN_WEAPON);//cut off wings sound
 	}
 };
 
@@ -670,13 +684,76 @@ void() fangel_painframes =
 
 		chance = random();
 		if (chance < .33)
-			self.think = self.th_save; 
+			self.think = self.th_save;
 		else if (chance < .66)
 			self.think = fangel_handframes;  // Come back fighting
 		else
 			self.think = fangel_wingframes;  // Come back fighting
 
 		self.frame = self.fangel_SaveFrame;
+	}
+};
+
+void() fangel_prepare_beam =
+{	//ws: hitting the player instantly for the attack's duration felt cheap. so instead, find the player's position beforehand and aim beam there.
+vector org;
+	if (!visible(self.enemy)) {
+		self.finaldest = self.wallspot;		//if we cant see enemy, aim at last spot we saw them in
+		return;
+	}
+	/*if (self.shoot_cnt) {	//while firing, dont track enemy perfectly but move beam in their last known direction
+		local float dir;
+		if (vlen(self.enemy.velocity)<200)
+			return;
+		dir = check_heading_left_or_right(self.enemy);	//1 for right, -1 for left, 0 otherwise
+		if (heading(self, self.enemy, 0.8))	{	dprint("heading\n");
+			makevectors(self.movedir);
+			self.finaldest = self.finaldest + v_forward*20;
+		}
+		else if (dir != 0) {if (dir<0)dprint("left\n"); else dprint("right\n");
+			makevectors(self.movedir);
+			self.finaldest = self.finaldest + v_right*10*dir;
+		}
+		return;
+	}*/
+	if (self.shoot_cnt) {	//while firing, aim beam in the direction player was heading before firing
+		self.finaldest = self.finaldest + self.movedir*12;
+		return;
+	}
+	
+	org=self.origin-'0 0 5';
+	traceline(org,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
+	if (trace_fraction==1)
+		self.finaldest = trace_endpos;
+	else if (trace_ent.thingtype >= THINGTYPE_WEBS) {	//if webs/glass in the way, try to shoot through them
+		traceline(trace_endpos,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
+		if (trace_fraction==1)
+			self.finaldest = trace_endpos;
+	}
+	
+	if (!self.shoot_cnt) {	//if we arent firing yet, save player's direction
+		local vector vec = normalize(self.enemy.velocity);
+		local float dir;
+		
+		if (vlen(self.enemy.velocity)<200) {
+			self.movedir = '0 0 0';
+			return;
+		}
+		if (heading(self, self.enemy, 0.8))	{	dprint("heading\n");
+			makevectors(vec);
+			self.movedir = v_forward;
+			return;
+		}
+		dir = check_heading_left_or_right(self.enemy);	//1 for right, -1 for left, 0 otherwise
+		if (dir != 0) {if(dir<0) dprint("left\n"); else dprint("right\n");
+			makevectors(vec);
+			self.movedir = v_right*(dir);
+		}
+		else {	//likely moving backwards
+			makevectors(vec);
+			self.movedir = (-v_forward);
+		}
+		return;
 	}
 };
 
@@ -726,41 +803,41 @@ void() fangel_wingframes =
 		}
 		else
 		{
+			fangel_prepare_beam();
+			if (self.frame == $fwing20)
+				sound(self, CHAN_ITEM, "golem/gbfire.wav", 1, ATTN_NORM);
 			if (self.frame == $fwing21) 
 			{
-				if (self.shoot_cnt < 10)
+				if (self.shoot_cnt < 20)
 				{
-				vector org;
-					org=self.origin-'0 0 5';
-					traceline(org,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
-					if (trace_fraction==1)
-					{
-						self.effects(+)EF_MUZZLEFLASH;
-						WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-						WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
-						WriteEntity (MSG_BROADCAST, self);				//owner
-						WriteByte (MSG_BROADCAST, 0);					//tag + flags
-						WriteByte (MSG_BROADCAST, 1);					//time
-						WriteByte (MSG_BROADCAST, rint(random(0,4)));			//color
+				vector org1,org2;
+					makevectors(self.angles);
+					org1 = self.origin-'0 0 5'+v_forward*10;
+					org2 = self.finaldest;
+					self.effects(+)EF_MUZZLEFLASH;
+					WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+					WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
+					WriteEntity (MSG_BROADCAST, self);				//owner
+					WriteByte (MSG_BROADCAST, 0);					//tag + flags
+					WriteByte (MSG_BROADCAST, 1);					//time
+					WriteByte (MSG_BROADCAST, rint(random(0,4)));			//color
 
-						WriteCoord (MSG_BROADCAST, org_x);
-						WriteCoord (MSG_BROADCAST, org_y);
-						WriteCoord (MSG_BROADCAST, org_z);
+					WriteCoord (MSG_BROADCAST, org1_x);
+					WriteCoord (MSG_BROADCAST, org1_y);
+					WriteCoord (MSG_BROADCAST, org1_z);
 
-						WriteCoord (MSG_BROADCAST, trace_endpos_x);
-						WriteCoord (MSG_BROADCAST, trace_endpos_y);
-						WriteCoord (MSG_BROADCAST, trace_endpos_z);
+					WriteCoord (MSG_BROADCAST, org2_x);
+					WriteCoord (MSG_BROADCAST, org2_y);
+					WriteCoord (MSG_BROADCAST, org2_z);
 
-						LightningDamage (self.origin, trace_endpos, self, 3,"sunbeam");
+					LightningDamage (self.origin, org2, self, 3,"sunbeam");
 
-						self.frame -= 1;
-						self.shoot_cnt += 1;
-					}
+					self.frame -= 1;
+					self.shoot_cnt += 1;
 					self.frame = $fwing20;
 				}
 				else
 					self.shoot_cnt =0;
-			
 			}
 			else
 				fangel_prepare_attack();
@@ -769,20 +846,11 @@ void() fangel_wingframes =
 };
 
 void(entity attacker, float damage) fangel_pain =
-{	//ws: increase pain chance
-	//if (random(self.health*0.5) > damage||self.pain_finished>time)
-	//	return;		// didn't flinch
-	if (self.pain_finished>time)
+{	//ws: decreased damage requirement
+	if (random(self.health*0.1) > damage || self.pain_finished>time)
 		return;		// didn't flinch
 	
-	float dopain;
-	dopain = FALSE;	dopain = TRUE;
-
-	self.pain_finished=time + 1 + self.skin;
-	ThrowGib ("models/blood.mdl", self.health);
-	if (self.health < 50)
-		self.drawflags (-) DRF_TRANSLUCENT|MLS_POWERMODE;
-	
+	/*
 	if (self.frame >= $ffly11 && self.frame <= $ffly28)
 	{
 		if (self.classname == "monster_fallen_angel")
@@ -794,35 +862,23 @@ void(entity attacker, float damage) fangel_pain =
 		// didn't want to use self.think just in case we just began to attack
 		self.th_save = fangel_flyframes;
 		fangel_painframes();
-	}
-	/*if (self.frame >= $ffly1 && self.frame <= $ffly30)
-	{	dprint("fly pain\n");
-		dopain = TRUE;
-		// didn't want to use self.think just in case we just began to attack
-		self.th_save = fangel_flyframes;
-	}
-	else if (self.frame >= $fmove1 && self.frame <= $fmove20)
-	{	dprint("move pain\n");
-		dopain = TRUE;
-		// didn't want to use self.think just in case we just began to attack
-		self.th_save = fangel_flyframes;
-	}
-	else if (self.frame >= $fwing1 && self.frame <= $fwing30)
-	{	dprint("wing pain\n");
-		dopain = TRUE;
-		// didn't want to use self.think just in case we just began to attack
-		self.th_save = fangel_wingframes;
-	}
-	if (dopain)
+	}*/
+	if (self.think == fangel_flyframes)
 	{
 		if (self.classname == "monster_fallen_angel")
 			sound (self, CHAN_WEAPON, "fangel/pain.wav", 1, ATTN_NORM);
 		else
 			sound (self, CHAN_WEAPON, "fangel/pain2.wav", 1, ATTN_NORM);
-		self.th_save = fangel_flyframes;
+		self.pain_finished=time + 1 + self.skin;
+		ThrowGib ("models/blood.mdl", self.health);
+		if (self.health < 50)
+			self.drawflags (-) DRF_TRANSLUCENT|MLS_POWERMODE;
+
 		self.fangel_SaveFrame = self.frame;
+		// didn't want to use self.think just in case we just began to attack
+		self.th_save = fangel_flyframes;
 		fangel_painframes();
-	}*/
+	}
 };
 
 
@@ -836,7 +892,7 @@ void() init_fangel =
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 	{
 		precache_model4 ("models/fangel.mdl");//converted for MP
 		precache_model2 ("models/faspell.mdl");
@@ -847,6 +903,8 @@ void() init_fangel =
 		precache_sound2("fangel/deflect.wav");
 		precache_sound2("fangel/hand.wav");
 		precache_sound2("fangel/wing.wav");
+		precache_sound("mezzo/reflect.wav");	//ws: bouncing missiles
+		precache_sound("golem/gbfire.wav");
 	}
 
 	if (self.classname == "monster_fallen_angel")
@@ -869,22 +927,14 @@ void() init_fangel =
 
 	self.hull = HULL_SCORPION;//HULL_BIG;
 	if (self.classname == "monster_fallen_angel")
-	{
-		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-			precache_sound2("fangel/ambi1.wav");
 		self.skin = 0;
-	}
 	else
-	{
-		if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-			precache_sound2("fangel/ambi2.wav");
 		self.skin = 1;
-	}
 
 	if(!self.max_health)
 		self.max_health=self.health;
 
-	self.th_stand = fangel_flyframes;
+	self.th_stand = fangel_wait;	//fangel_flyframes;
 	self.th_walk = fangel_flyframes;
 	self.th_run = fangel_flyframes;
 	self.th_pain = fangel_pain;
@@ -892,27 +942,19 @@ void() init_fangel =
 	self.th_missile = fangel_handframes;
 	self.th_melee = fangel_wingframes;
 	self.headmodel="models/h_fangel.mdl";
-
-	total_monsters += 1;
-
+	
 	self.ideal_yaw = self.angles * '0 1 0';
 	self.yaw_speed = fangel_move_speed;
 	self.view_ofs = '0 0 -5';
-	self.use = monster_use;
 	self.mintel = 3;
-
-	self.flags (+) FL_FLY | FL_MONSTER;
-	self.flags2 (+) FL_ALIVE;
 
 	if (self.classname == "monster_fallen_angel_lord")
 		self.drawflags (+) DRF_TRANSLUCENT;
 
 	self.init_exp_val = self.experience_value;
-	self.pausetime = 99999999;
 	self.frame=$fhand1;
-	self.think=fangel_wait;
-	thinktime self : 0;
-//	self.th_stand ();
+	
+	flymonster_start();
 };
 
 
@@ -930,14 +972,14 @@ void() monster_fallen_angel =
 		self.th_init=monster_fallen_angel;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 	{
 		precache_sound2("fangel/death.wav");
 		precache_sound2("fangel/pain.wav");
+		precache_sound2("fangel/ambi1.wav");
 	}
 
 	init_fangel();
-	ApplyMonsterBuff(self, FALSE);
 };
 
 /*QUAKED monster_fallen_angel_lord (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP x DORMANT
@@ -954,10 +996,11 @@ void() monster_fallen_angel_lord =
 		self.th_init=monster_fallen_angel_lord;
 		self.init_org=self.origin;
 	}
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 	{
 		precache_sound2("fangel/death2.wav");
 		precache_sound2("fangel/pain2.wav");
+		precache_sound2("fangel/ambi2.wav");
 	}
 
 	init_fangel();
