@@ -167,15 +167,9 @@ void undying_pain(void) [++ 90 .. 99]
 	else if (self.pain_finished>time)
 		self.th_run();
 	
-	thinktime self : HX_FRAME_TIME;
-	
-	if (self.frame == 91)
-	{
-		ThrowGib ("models/blood.mdl", self.health);
-	
-		if (random(100) < 30)
-			return;
-	}
+	ThrowGib ("models/blood.mdl", self.health);
+	if (random() < 0.3)
+		return;
 	
 	ai_pain(2);
 	self.pain_finished=time+1;
@@ -185,6 +179,8 @@ void undying_pain(void) [++ 90 .. 99]
 	
 	if(self.frame >= 99)
 		self.think = self.th_run;
+	
+	thinktime self : HX_FRAME_TIME;
 }
 
 void undying_attack(void) [++ 65 .. 88]
@@ -352,6 +348,8 @@ void monster_undying ()
 	
 	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_undying();
+	
+	self.init_org = self.origin;
 
 	if(!self.experience_value)
 		self.experience_value = 40;
