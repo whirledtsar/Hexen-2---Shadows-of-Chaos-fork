@@ -22,7 +22,6 @@ $frame SPELL01      SPELL02      SPELL03      SPELL04      SPELL05
 $frame SPELL06      SPELL07      SPELL08      SPELL09      
 
 
-
 void() faSpellTouch =
 {
 float	damg;
@@ -45,8 +44,8 @@ float	damg;
 
 	sound (self, CHAN_WEAPON, "weapons/explode.wav", 1, ATTN_NORM);
 
-	self.origin = self.origin - 8*normalize(self.velocity);
-	CreateRedSpark(self.origin);
+	//self.origin = self.origin - 8*normalize(self.velocity);
+	CreateRedSpark(self.origin-'0 0 15');
 	remove(self);
 };
 
@@ -97,14 +96,11 @@ void() faspell_frames =
 		remove(self);
 };
 
-
-
-
-
 void(vector offset, float set_speed) do_faSpell =
 {
 entity missile;
-vector vec;
+vector vec, dest;
+float tspeed;
 
 	self.last_attack=time;
 	missile = spawn ();
@@ -122,8 +118,17 @@ vector vec;
 
 	makevectors (self.angles);
 	setorigin (missile, self.origin + v_factor(offset));
+	//lead shot
+	tspeed=vlen(self.enemy.velocity);
+	if(tspeed>100) {
+		dest = extrapolate_pos_for_speed(missile.origin,500,self.enemy,0);	//dont use set_speed because the 2 missiles have different speeds
+		if (dest=='0 0 0') 
+			dest = self.enemy.origin+self.enemy.proj_ofs;
+	}
+	else
+		dest = self.enemy.origin+self.enemy.proj_ofs;
 
-    vec = self.enemy.origin - missile.origin + self.enemy.proj_ofs;
+    vec = dest - missile.origin;
 	vec = normalize(vec);
 
 	missile.velocity = (vec+aim_adjust(self.enemy))*set_speed;
