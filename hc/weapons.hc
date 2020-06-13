@@ -98,12 +98,12 @@ void() T_PhaseMissileTouch =
 	if ((self.enemy == other) && (other != world))  // Can't hit same enemy twice in a row but you can hit world twice
 		return;
 
-	if ((self.classname == "axeblade") || (self.classname == "powerupaxeblade"))
+	if (self.netname=="axeblade")
 	{
-		self.cnt +=1;
+		//self.cnt +=1;
 		self.velocity = self.velocity * 0.75;
 		self.angles = vectoangles(self.velocity);
-		sound (self, CHAN_WEAPON, "paladin/axric1.wav", 1, ATTN_NORM);
+		//sound (self, CHAN_WEAPON, "paladin/axric1.wav", 1, ATTN_NORM);
 		if (self.goalentity)
 		{
 			if (self.goalentity.classname=="ax_tail")
@@ -113,6 +113,8 @@ void() T_PhaseMissileTouch =
 			}
 		}
 	}
+	
+	self.cnt +=1;
 
 	if (pointcontents(self.origin) == CONTENT_SKY)
 	{
@@ -126,21 +128,15 @@ void() T_PhaseMissileTouch =
 
 	if (other.health)	// Hit something that can be hurt
 	{
-		damg = random(30,50);
-		T_Damage (other, self, self.owner, damg );
+		T_Damage (other, self, self.owner, self.dmg);
 		self.counter -=1;
 		self.enemy = other;
 	}
 	else
 	{
 		self.enemy = other;
-		if (self.cnt <4)	// Bounce three times then die
-		{
-			if (self.classname == "powerupaxeblade")
-				CreateBSpark (self.origin - '0 0 30');
-			else
-				CreateSpark (self.origin - '0 0 30');
-		}
+		if (self.cnt < self.hoverz)	//hit wall, so create appropriate effect
+			self.blocked();
 		else
 			self.counter = 0;
 	}	
@@ -151,19 +147,14 @@ void() T_PhaseMissileTouch =
 
 	if ((other.health) || (self.counter < 1))
 	{
-		sound (self, CHAN_WEAPON, "weapons/explode.wav", 1, ATTN_NORM);
-
-		if (self.classname == "powerupaxeblade")
-			CreateBlueExplosion (self.origin);
-		else
-			starteffect(CE_SM_EXPLOSION , self.origin);
+		self.th_die();
 	}
 	else
-		sound (self, CHAN_WEAPON, "paladin/axric1.wav", 1, ATTN_IDLE);
+		sound (self, CHAN_WEAPON, self.sightsound, 1, ATTN_IDLE);
 
 	if (self.counter < 1)
 	{
-		if ((self.classname == "axeblade") || (self.classname == "powerupaxeblade"))
+		if (self.netname=="axeblade")
 			remove(self.goalentity); // Remove tail
 
 		stopSound(self,CHAN_VOICE);
