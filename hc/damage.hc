@@ -210,7 +210,7 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 	//ws: disc of repulsion no longer decapitates
 	if(inflictor.classname!="blast" && self.model!="models/sheep.mdl"&&self.deathtype!="teledeath"&&self.deathtype!="teledeath2"&&self.deathtype!="teledeath3"&&self.deathtype != "teledeath4" )
 		if
-		(inflictor.classname=="ax_blade"||
+		(inflictor.netname=="axeblade"||
 			(inflictor.classname=="player"&&
 				(
 					(attacker.playerclass==CLASS_ASSASSIN&&attacker.weapon==IT_WEAPON1)||

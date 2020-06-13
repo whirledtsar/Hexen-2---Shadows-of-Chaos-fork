@@ -287,22 +287,22 @@ float fade;
 		new.avelocity_z = 10;
 		new.scale=.8;
 	}
-	else if (new.model == "models/ZombiePal_hd.mdl" || new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/h_imp.mdl")
+	else if (new.model == "models/h_fangel.mdl" || new.model == "models/ZombiePal_hd.mdl" || new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/h_imp.mdl")
 	{
 		new.avelocity_x = 20;
 		new.avelocity_y = -70;
 		new.avelocity_z = 10;
-		new.angles_y = random(0,360);
+		new.angles_y = random(300);
 		new.scale=1.13;
-		if (self.classname == "monster_archer_lord" || self.classname == "monster_imp_ice")
+		if (self.classname == "monster_archer_lord" || self.classname == "monster_fallen_angel_lord" || self.classname == "monster_imp_ice")
 			new.skin = 1;
 	}
 	else if (new.model == "models/impwing.mdl" || new.model == "models/afritwing.mdl" || new.model == "models/impwing_ice.mdl")
 	{
-		new.avelocity_x = random(20);
-		new.avelocity_y = random(-70);
-		new.avelocity_z = random(10);
-		new.angles_y = random(0,360);
+		new.avelocity_x = 20;
+		new.avelocity_y = -70;
+		new.avelocity_z = 10;
+		new.angles_y = random(300);
 		new.scale=1.13;
 	}
 	else if (new.model == "models/archerleg.mdl" || new.model == "models/footsoldierleg.mdl" || new.model == "models/footsoldierarm.mdl")
@@ -310,7 +310,7 @@ float fade;
 		new.avelocity_x = 3;
 		new.avelocity_y = 100;
 		new.avelocity_z = 80;
-		new.angles_y = random(0,360);
+		new.angles_y = random(300);
 		new.scale=.9;
 	}
 	else if (new.model == "models/blood.mdl")
