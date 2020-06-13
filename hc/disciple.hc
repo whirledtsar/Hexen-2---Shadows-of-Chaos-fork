@@ -306,7 +306,7 @@ void() monster_disciple =
 	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
-		self.experience_value = 60;
+		self.experience_value = 140;
 	if(!self.mass)
 		self.mass = 15;		//self.mass = 80;
 
