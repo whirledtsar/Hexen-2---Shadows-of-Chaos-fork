@@ -207,12 +207,12 @@ void ScorpionInit(float type)
 	if(type == SCORPION_YELLOW)
 	{
 		self.health = 100;
-		self.experience_value = 50;
+		self.experience_value = 60;
 	}
 	else
 	{
 		self.health = 200;
-		self.experience_value = 120;
+		self.experience_value = 150;
 	}
 
 	self.takedamage = DAMAGE_YES;
