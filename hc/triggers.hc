@@ -30,8 +30,6 @@ float SPAWNFLAG_REMOVE_PP	= 16;
 float SPAWNFLAG_NO_PP		= 32;
 
 float SPAWNFLAG_ALLTOUCH	= 65536;
-float PUSH_SHEEP			= 64;	//trigger_jump
-float JUMP_CHANGEANGLE		= 8;	//trigger_monsterjump
 
 // the wait time has passed, so set back up for another activation
 void() multi_wait =
@@ -1401,6 +1399,7 @@ void() trigger_hurt =
 //============================================================================
 
 float PUSH_ONCE = 1;
+float PUSH_SHEEP = 64;
 
 void trigger_push_gone (void)
 {
@@ -1420,7 +1419,7 @@ void() trigger_push_touch =
 		}
 		if ((other.classname == "player") && (other.flags & FL_ONGROUND))
 		{
-			sound (other, CHAN_AUTO, "ambience/windpush.wav", 1, ATTN_NORM);
+			sound (other, CHAN_AUTO, self.noise1, 1, ATTN_NORM);
 			other.flags (-) FL_ONGROUND;
 		}
 	}
@@ -1443,7 +1442,8 @@ If you target it, it removes itself when trigger is set off.
 void() trigger_push =
 {
 	InitTrigger ();
-	precache_sound ("ambience/windpush.wav");
+	if (!self.noise1)
+		self.noise1="ambience/windpush.wav";
 	self.touch = trigger_push_touch;
 	self.use = trigger_push_gone;
 	if (!self.speed)
@@ -1452,6 +1452,8 @@ void() trigger_push =
 
 
 //============================================================================
+
+float JUMP_CHANGEANGLE		= 16;
 
 void() trigger_monsterjump_touch =
 {
