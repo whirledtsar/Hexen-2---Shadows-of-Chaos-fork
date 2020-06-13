@@ -34,6 +34,24 @@ string AXE_TEXMOD		= "models/axe.mdl";
 
 void() T_PhaseMissileTouch;
 
+void axeblade_exp(void)
+{
+	sound (self, CHAN_WEAPON, "weapons/explode.wav", 1, ATTN_NORM);
+
+	if (self.classname == "powerupaxeblade")
+		CreateBlueExplosion (self.origin);
+	else
+		starteffect(CE_SM_EXPLOSION , self.origin);
+}
+
+void axeblade_hitwall(void)
+{
+	if (self.classname == "powerupaxeblade")
+		CreateBSpark (self.origin - '0 0 30');
+	else
+		CreateSpark (self.origin - '0 0 30');
+}
+
 void axeblade_gone(void)
 {
 	sound (self, CHAN_VOICE, "misc/null.wav", 1, ATTN_NORM);
@@ -89,7 +107,6 @@ void launch_axtail (entity axeblade)
     tail.angles = tail.owner.angles;
 
 	axeblade.goalentity = tail;
-
 }
 
 void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
@@ -103,7 +120,7 @@ void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
 	CreateEntityNew(missile,ENT_AXE_BLADE,"models/axblade.mdl",SUB_Null);
 
 	missile.owner = self;
-	missile.classname = "ax_blade";
+	missile.netname = "axeblade";
 		
 	// set missile speed	
 	makevectors (self.v_angle + dir_mod);
@@ -111,13 +128,16 @@ void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
 	missile.velocity = missile.velocity * 900;
 	
 	missile.touch = T_PhaseMissileTouch;
+	missile.th_die = axeblade_exp;	//called by T_PhaseMissileTouch
+	missile.blocked = axeblade_hitwall;
 
 	// Point it in the proper direction
     missile.angles = vectoangles(missile.velocity);
 	missile.angles += angle_mod;
 
 	// set missile duration
-	missile.counter = 4;  // Can hurt two things before disappearing
+	missile.counter = 2;  // Can hurt two things before disappearing
+	missile.hoverz = 4;		// Maximum things (both wall and shootable) to hit before exploding
 	missile.cnt = 0;		// Counts number of times it has hit walls
 	missile.lifetime = time + 2;  // Or lives for 2 seconds and then dies when it hits anything
 
@@ -136,13 +156,12 @@ void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
 		missile.classname = "axeblade";
 	
 	missile.dmg = damg;
-
-	missile.lifetime = time + 2;
+	missile.sightsound = "paladin/axric1.wav";	//used by T_PhaseMissileTouch when reflecting
+	
 	thinktime missile : HX_FRAME_TIME;
 	missile.think = axeblade_run;
 
 	launch_axtail(missile);
-
 }
 
 void axe_melee (float damage_base,float damage_mod,float mode)	//using FireMelee didn't work because it checked whether to use mana after doing damage, so if its victim died it wouldnt recognize it as a valid target and use mana. also it was making the wrong hit sound.
