@@ -516,7 +516,7 @@ void() monster_afrit =
 	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
-		self.experience_value = 20;
+		self.experience_value = 40;
 	if(!self.mass)
 		self.mass = 6;
 	
