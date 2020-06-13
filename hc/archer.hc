@@ -836,7 +836,7 @@ void monster_archer ()
 		self.mintel = 7;
 
 	self.monsterclass = CLASS_GRUNT;
-	self.experience_value = self.init_exp_val = 40;
+	self.experience_value = self.init_exp_val = 50;	//25
 
 	self.flags (+) FL_MONSTER;
 	self.proj_ofs = '0 0 36';
@@ -874,7 +874,7 @@ void monster_archer_lord ()
 		precache_archerlord();
 
 	if(!self.experience_value)
-		self.experience_value = 120;	//200
+		self.experience_value = 150;	//200
 	if(!self.health)
 		self.health = 240;	//325
 	//ws - reduced health to 3x normal
