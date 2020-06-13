@@ -20,8 +20,19 @@ $flags 0
 //
 $frame BLADE        
 
+void() faBladeExp =
+{
+	sound (self, CHAN_WEAPON, "weapons/expsmall.wav", 1, ATTN_NORM);
+	self.origin = self.origin - 8*normalize(self.velocity);
+	CreateGreenSmoke(self.origin, '0 0 8', HX_FRAME_TIME * 4);
+};
 
-void() faBladeTouch =
+void() faBladeHitWall =
+{
+	CreateGreenSpark(self.origin);
+};
+
+/*void() faBladeTouch =
 {
 float	damg;
 
@@ -43,7 +54,7 @@ float	damg;
 	self.origin = self.origin - 8*normalize(self.velocity);
 	CreateGreenSmoke(self.origin, '0 0 8', HX_FRAME_TIME * 4);
 	remove(self);
-};
+};*/
 
 
 // Frame Code
@@ -57,7 +68,13 @@ vector vec;
 
 	missile = spawn ();
 	missile.owner = self;
-	missile.movetype = MOVETYPE_FLYMISSILE;
+	//missile.movetype = MOVETYPE_FLYMISSILE;
+	missile.movetype = MOVETYPE_BOUNCEMISSILE;	//ws: bounce off surfaces
+	missile.counter = 1;
+	missile.hoverz = 2;
+	missile.lifetime = time+10;
+	missile.sightsound = "mezzo/reflect.wav";	//used by T_PhaseMissileTouch when reflecting
+	missile.dmg = random(8,12);
 	missile.solid = SOLID_BBOX;
 	missile.flags = FL_FLY;
 	missile.health = 10;
@@ -77,6 +94,8 @@ vector vec;
 	missile.velocity = (vec+aim_adjust(self.enemy))*set_speed;
 	missile.angles = vectoangles(missile.velocity);
 
-	missile.touch = faBladeTouch;
+	missile.touch = T_PhaseMissileTouch;	//faBladeTouch;
+	missile.th_die = faBladeExp;	//called by T_PhaseMissileTouch
+	missile.blocked = faBladeHitWall;
 };
 
