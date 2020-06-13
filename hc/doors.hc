@@ -178,8 +178,22 @@ void door_go_down();
 void door_go_up();
 
 void door_damage()
-{
-	T_Damage (other, self, self, self.dmg);
+{	//ws: expanded to be consistent with door_blocked and not damage when inactive
+	//T_Damage (other, self, self, self.dmg);
+	if (self.velocity=='0 0 0'&&self.avelocity=='0 0 0')
+		return;
+	if(self.dmg==666)
+	{
+		if(other.classname=="player"&&other.flags2&FL_ALIVE)
+		{
+			other.decap=TRUE;
+			T_Damage (other, self, self, other.health+300);
+		}
+		else
+			T_Damage (other, self, self, other.health+50);
+	}
+	else
+		T_Damage (other, self, self, self.dmg);
 }
 
 void door_blocked()
