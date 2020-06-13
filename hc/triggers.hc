@@ -28,8 +28,6 @@ float SPAWNFLAG_REMOVE_PP	= 16;
 float SPAWNFLAG_NO_PP		= 32;
 
 float SPAWNFLAG_ALLTOUCH	= 65536;
-float PUSH_SHEEP			= 64;	//trigger_jump
-float JUMP_CHANGEANGLE		= 8;	//trigger_monsterjump
 // the wait time has passed, so set back up for another activation
 void() multi_wait =
 {
@@ -1587,6 +1585,8 @@ void() trigger_hurt =
 //============================================================================
 
 float PUSH_ONCE = 1;
+float PUSH_NOPICKUP = 2;
+float PUSH_SHEEP = 64;
 
 void trigger_push_gone (void)
 {
@@ -1595,28 +1595,36 @@ void trigger_push_gone (void)
 
 void() trigger_push_touch =
 {
+	if(self.spawnflags&PUSH_SHEEP && other.model=="models/sheep.mdl")
+		return;
 	if(world.spawnflags&MISSIONPACK)
 	{
 		if(self.inactive)
 			return;
 
-		if(self.spawnflags&2)
+		if(self.spawnflags&PUSH_NOPICKUP)
 			if(other.flags&FL_ONGROUND)
 				return;
 	}
 
 	if (other.movetype&&other.solid!=SOLID_BSP)//health>0?
 	{
-		other.velocity = self.movedir * self.speed;
+		
+		if (world.spawnflags&MISSIONPACK)
+			other.velocity = self.movedir * self.speed;
+		else if(other.flags & FL_ONGROUND) {
+			other.velocity = self.movedir * self.speed;
+			other.velocity_z = 500;		//non-PoP progs behavior
+		}
 		if(other.movedir!='0 0 0')
 			other.movedir=self.movedir;
 		if ((other.classname == "player") && (other.flags & FL_ONGROUND))
 		{
-			sound (other, CHAN_AUTO, "ambience/windpush.wav", 1, ATTN_NORM);//MAKE OPTIONAL
+			sound (other, CHAN_AUTO, self.noise1, 1, ATTN_NORM);
 			other.flags (-) FL_ONGROUND;
 		}
 	}
-
+	
 	if (self.spawnflags & PUSH_ONCE)
 		remove(self);
 };
@@ -1649,7 +1657,11 @@ void() trigger_push =
 
 	InitTrigger ();
 
-	precache_sound ("ambience/windpush.wav");
+	if (!self.noise1)
+		self.noise1="ambience/windpush.wav";
+	precache_sound (self.noise1);
+	self.touch = trigger_push_touch;
+	self.use = trigger_push_gone;
 
 	if(world.spawnflags&MISSIONPACK)
 		if(self.targetname)
@@ -1659,13 +1671,15 @@ void() trigger_push =
 			self.use = trigger_push_gone;
 			self.touch = trigger_push_touch;
 		}
-
+	
 	if (!self.speed)
 		self.speed = 500;
 };
 
 
 //============================================================================
+
+float JUMP_CHANGEANGLE		= 16;
 
 void() trigger_monsterjump_touch =
 {
