@@ -3,7 +3,7 @@ void() check_stand;
 vector undying_mins = '-16 -16 -6';
 vector undying_maxs = '16 16 56';
 
-void undying_fixpos()
+void UnsetFromFloor()
 {	//called when they rise from fake death or real death (via resurrection). otherwise they get stuck in ground & cant move
 	setorigin (self, self.origin + '0 0 2');
 	self.movetype = MOVETYPE_TOSS;
@@ -24,7 +24,7 @@ float state;
 	if (state==AF_END) {
 		self.th_init();
 		monster_raisedebuff();
-		undying_fixpos();
+		UnsetFromFloor();
 		if (self.enemy!=world)
 			self.think=self.th_run;
 		else
@@ -85,7 +85,7 @@ void undying_standup(void) [++ 131 .. 182]
 		self.solid = SOLID_SLIDEBOX;
 		self.takedamage = DAMAGE_YES;
 		self.th_pain = self.th_save;
-		undying_fixpos();
+		UnsetFromFloor();
 	}
 	
 	if (self.frame >= 181)
@@ -354,9 +354,11 @@ void monster_undying ()
 		precache_undying();
 
 	if(!self.experience_value)
-		self.experience_value = 50;
+		self.experience_value = 40;
+	self.init_exp_val = self.experience_value;
 	if(!self.health)
 		self.health = 85;
+	self.max_health = self.health;
 
 	self.th_stand = undying_stand;
 	self.th_walk = undying_walk;
@@ -378,8 +380,6 @@ void monster_undying ()
 	if (!undying_headless())
 		setmodel(self, "models/ZombiePal.mdl");
 
-	self.monsterclass = CLASS_GRUNT;
-
 	self.thingtype=THINGTYPE_FLESH;
 	
 	self.mass = 11;		//ws: increased. 10 seems to be the magic number for when they take impact damage from player running into them
@@ -391,11 +391,11 @@ void monster_undying ()
 	self.t_length = 80;		//custom melee range for ai_melee. default is 60
 	//self.view_ofs = '0 0 40';
 	
+	//self.hull=HULL_PLAYER;
 	self.hull = 2;
 	self.solid = SOLID_SLIDEBOX;
 	setsize (self, undying_mins, undying_maxs);
-
-	self.init_exp_val = self.experience_value;
 	
+	UnsetFromFloor();
 	walkmonster_start();
 }
