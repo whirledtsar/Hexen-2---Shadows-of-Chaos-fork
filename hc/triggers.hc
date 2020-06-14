@@ -1444,6 +1444,7 @@ void() trigger_push =
 	InitTrigger ();
 	if (!self.noise1)
 		self.noise1="ambience/windpush.wav";
+	precache_sound(self.noise1);
 	self.touch = trigger_push_touch;
 	self.use = trigger_push_gone;
 	if (!self.speed)
