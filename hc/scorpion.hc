@@ -489,6 +489,9 @@ void ScorpionMelee(float damage)
 
 void ScorpionMeleeDecide(void)
 {
+	if (!EnemyIsValid(self.enemy))
+		return;
+	
 	float r;
 
 	r = random();
