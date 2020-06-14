@@ -56,6 +56,7 @@ float(float move_speed)eidolon_riderpath_move;
 void() eidolon_guarding;
 void()hive_die;
 float()eidolon_check_attack;
+float(entity ent) EnemyIsValid;
 
 //void()check_climb;
 
@@ -843,8 +844,8 @@ void(float dist) ai_run =
 	
 	movedist = dist;
 // see if the enemy is dead
-	if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
-	{
+	if (!EnemyIsValid(self.enemy))
+	{	sdprint("summoned monster target dead ", TRUE);
 //THE PIT!
 	if(world.model=="maps/monsters.bsp")
 		if(find_enemy_target())
@@ -1043,6 +1044,20 @@ float IsMissile (entity ent)
 	
 	return FALSE;
 }
+
+float EnemyIsValid (entity ent)
+{
+	if (ent==world)								return FALSE;
+	if (!ent.flags2&FL_ALIVE)					return FALSE;
+	if (ent.health<0)							return FALSE;
+	if (ent.artifact_active&ARTFLAG_FROZEN)		return FALSE;
+	if (ent.artifact_active&ARTFLAG_STONED
+		&& self.classname!="monster_medusa")	return FALSE;
+	if (ent.artifact_active&ARTFLAG_ASH)		return FALSE;
+	
+	return TRUE;
+}
+
 //ws: copy of ChangeYaw adapted for pitch. useful for flying & swimming enemies. uses entity's turn_time in place of yaw_speed.
 void ChangePitch (void)
 {
