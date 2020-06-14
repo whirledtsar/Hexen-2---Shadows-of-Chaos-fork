@@ -400,7 +400,11 @@
 		128 : "Y axis" : 0
 	]
 	flags(integer) : "Degrees of rotation"
-	flags2(integer) : "Damage when touched"
+	flags2(choices) : "Damage when touched" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 	puzzle_piece_1(integer) : "Puzzle Piece 1"
 	puzzle_piece_2(integer) : "Puzzle Piece 2"
 	puzzle_piece_3(integer) : "Puzzle Piece 3"
@@ -1924,7 +1928,6 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	spawnflags(Flags) =
 	[
 		1 : "Deactivated (PoP)" : 0
-		4 : "Change monster angle to match trigger" : 0
 	]
 	speed(integer) : "Speed forward" : 200
 	height(integer) : "Speed upwards" : 200
@@ -1978,10 +1981,14 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	spawnflags(Flags) =
 	[
 		1 : "Push once" : 0
+		2 : "Must jump first (PoP)" : 0
+		4 : "" : 0
+		8 : "Deactivated (PoP)" : 0
 		64 : "Ignore sheep" : 0
 	]
 	speed(integer) : "Speed of push"
 	angles(string) : "Angle of push (X Y Z)"
+	noise1(string) : "Custom sound (misc/null.wav for silence)"
 ]
 
 @PointClass base(Appearflags, Targetname, Target) = trigger_quake : "Quake"
