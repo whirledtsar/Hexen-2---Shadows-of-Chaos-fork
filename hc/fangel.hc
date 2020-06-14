@@ -235,8 +235,7 @@ void() fangel_init =
 //	dprint(self.enemy.classname);
 //	dprint("- Found enemy\n");
 	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
-	self.th_stand = fangel_flyframes;
-	self.think=self.th_stand;
+	self.think=self.th_run;
 	thinktime self : random(.1,.6);
 	self.count = 0;
 	self.monster_stage = FANGEL_STAGE_FLY;
@@ -254,9 +253,10 @@ void() fangel_init =
 
 void fangel_wait (void)
 {
+	self.frame = $fhand1;;
 	thinktime self : 0.15;
 	LocateTarget();
-	if(self.enemy) // We found a target
+	if(EnemyIsValid(self.enemy)) // We found a target
 		fangel_init();
 	else if(random(100)<5&&self.t_width<time)
 	{
@@ -625,7 +625,12 @@ void fangel_flyother (void)
 
 void() fangel_flyframes =
 {
-	self.think = fangel_flyframes;
+	if (!EnemyIsValid(self.enemy)) {
+		stopSound(self,CHAN_WEAPON);//cut off wings sound
+		self.think = self.th_stand;
+	}
+	else
+		self.think = fangel_flyframes;
 	thinktime self : HX_FRAME_TIME;
 
 	fangel_check_incoming();
