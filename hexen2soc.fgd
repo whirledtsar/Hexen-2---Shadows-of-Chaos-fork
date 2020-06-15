@@ -945,18 +945,21 @@
 		0 : "Normal"
 		1 : "Soft flicker"
 		6 : "Faster flicker"
+		13 : "Soft flicker alternate"
 
 		4 : "Low falloff"
 
-		5 : "Pulse"
+		5 : "Gentle pulse"
 		2 : "Slow pulse in & out"
 		11 : "Quick pulse in & out"
+		14 : "Slow subtle pulse"
 
 		3 : "Erratic pulse & flicker A"
 		7 : "Erratic pulse & flicker B"
 		8 : "Erratic pulse & flicker C"
 		9 : "Slow blink"
 		10 : "Fluorescent flicker"
+		12 : "Slow fluorescent flicker"
 	]
 	light(integer) : "Brightness" : 300
 	wait(integer) : "Wait" : 1
@@ -983,7 +986,10 @@
 	_anglescale(integer) : "Light angle scale" :  : "Sets a scaling factor for how much influence the angle of incidence of light on a surface has on the brightness of the surface. n must be between 0.0 and 1.0. Smaller values mean less attenuation, with zero meaning that angle of incidence has no effect at all on the brightness. Default 0.5"
 ]
 
-@PointClass base(Lights) size(-8 -8 -8, 8 8 8) = light : "normal light" []
+@PointClass base(Lights) size(-8 -8 -8, 8 8 8) = light : "normal light"
+[
+	mangle(string) : "Angles of spotlight"
+]
 
 @baseclass = Lightdmg
 [
@@ -2288,6 +2294,8 @@ This trigger reserves the targetname 'trigger_random_target'. If you give an ent
 	[
 		1 : "Only use target/killtarget once"
 		2 : "Only use any random id once"
-		4 : "Don't reorganize range if an id in range has no matching entities. Only useful if an entity is used by multiple trigger_random's"
+		4 : "Don't reorganize range if an id in range has no matching entities. Only useful if an entity is used by multiple trigger_random's."
+		8 : ""
+		16 : "After triggering random id, remove all other entities in trigger's range. Possible useage: spawning random monster or activating random trigger and removing the ones not chosen. Implies single-use."
 	]
 ]
