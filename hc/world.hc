@@ -272,7 +272,15 @@ void() worldspawn =
 
 	// 11 SLOW PULSE NOT FADE TO BLACK
 	lightstyle(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
-
+	
+	// 12 Slow fluorescent flicker
+	lightstyle(12, "mmmmmmmmmammammmmmmmmaammmmmmaamammmmmmmmmmaammmmmmmmama");
+	
+	// 13 Soft flicker alternate
+	lightstyle(13, "mmnnommnpmmmqnmmnmonmmpommmnmq");
+	
+	// 14 Slow subtle pulse
+	lightstyle(14, "kkllmmnnoonnmmll");
 
 	// Light styles 25-30 are Model Light Styles
 
