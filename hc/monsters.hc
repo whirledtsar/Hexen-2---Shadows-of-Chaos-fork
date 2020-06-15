@@ -559,7 +559,7 @@ void() monster_spawn =
 	setmodel (self, self.init_model);
 	setsize (self, self.orgnl_mins, self.orgnl_maxs);
 	if (!self.spawnflags&SPAWNQUIET)
-		spawn_tfog(self.origin);
+		GenerateTeleportEffect(self.origin, 0);	//spawn_tfog(self.origin);
 	
 	if (self.model=="models/imp.mdl")
 		impmonster_start();
