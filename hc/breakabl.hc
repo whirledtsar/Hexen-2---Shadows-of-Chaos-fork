@@ -21,14 +21,14 @@ float BREAK_INVISIBLE  = 128;
 
 float (entity e1, entity e2) EntitiesTouching;
 
-float breakhealth[25] = 
+float breakhealth[26] = 
 {
 	0,
 	75,		// THINGTYPE_GREYSTONE
 	50,		// THINGTYPE_WOOD
-	100,	// THINGTYPE_METAL
+	100,		// THINGTYPE_METAL
 	30,		// THINGTYPE_FLESH
-	999,	// THINGTYPE_FIRE
+	999,		// THINGTYPE_FIRE
 	25,		// THINGTYPE_CLAY
 	35,		// THINGTYPE_LEAVES
 	35,		// THINGTYPE_HAY
@@ -48,6 +48,7 @@ float breakhealth[25] =
 	10,		// THINGTYPE_METEOR
 	30,		// THINGTYPE_GREENFLESH
 	40		// THINGTYPE_BONE
+	25		// THINGTYPE_ASH
 };
 
 //============================================================================
