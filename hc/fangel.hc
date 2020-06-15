@@ -104,7 +104,7 @@ float dot;
 	
 	if (self.think == fangel_painframes)
 		return FALSE;
-	else if ( (self.think==fangel_wingframes || self.think==fangel_handframes) && random()<0.75 )
+	else if ( (self.think==fangel_wingframes || self.think==fangel_handframes) && random() < (1-skill*0.1))
 		return FALSE;	//ws: not likely to block if in attack state
 
 	if(fov(self,self.enemy,30)&&self.enemy.last_attack+0.75>time)
@@ -133,7 +133,7 @@ float dot;
 			vec = normalize(self.origin - item.origin + self.view_ofs);
 			realVec = normalize(item.velocity);
 			dot= vec*realVec;
-			if (dot >= 0.4 && random()<0.9) 
+			if (dot >= 0.4) 
 			{
 				self.th_save = self.think;
 				if (self.think == fangel_painframes)
@@ -235,7 +235,9 @@ void() fangel_init =
 //	dprint(self.enemy.classname);
 //	dprint("- Found enemy\n");
 	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
-	self.think=self.th_run;
+	//self.th_stand = fangel_flyframes;
+	//self.think=self.th_stand;
+	self.think = self.th_run;
 	thinktime self : random(.1,.6);
 	self.count = 0;
 	self.monster_stage = FANGEL_STAGE_FLY;
@@ -704,10 +706,15 @@ void() fangel_prepare_beam =
 vector org;
 	if (!visible(self.enemy)) {
 		self.finaldest = self.wallspot;		//if we cant see enemy, aim at last spot we saw them in
-		return;
+		if (!self.shoot_cnt)				//not firing so dont need to do anything else
+			return;
 	}
 	if (self.shoot_cnt) {	//while firing, aim beam in the direction player was heading before firing
-		self.finaldest = self.finaldest + self.movedir*15;
+		self.finaldest = self.finaldest + self.movedir*random(13,17);
+		self.ideal_yaw = vectoyaw(self.finaldest - self.origin);
+		self.yaw_speed = 18;
+		ChangeYaw();			//turn towards angle of beam
+		self.yaw_speed = fangel_move_speed;
 		return;
 	}
 	
@@ -729,19 +736,25 @@ vector org;
 			self.movedir = '0 0 0';
 			return;
 		}
-		if (heading(self, self.enemy, 0.8))	{	dprint("heading\n");
-			makevectors(vec);
-			self.movedir = v_forward;
+		else if (heading(self, self.enemy, 0.8)) {	//does work
+			//dprint("heading\n");
+			//makevectors(vec);
+			//self.movedir = v_forward;		//doesnt work
+			self.movedir = '0 0 0';
 			return;
 		}
+		
 		dir = check_heading_left_or_right(self.enemy);	//1 for right, -1 for left, 0 otherwise
-		if (dir != 0) {if(dir<0) dprint("left\n"); else dprint("right\n");
+		if (dir != 0) {
+			//if(dir<0) dprint("left\n"); else dprint("right\n");
 			makevectors(vec);
-			self.movedir = v_right*(dir);
+			self.movedir = v_right*(-dir);
 		}
 		else {	//likely moving backwards
-			makevectors(vec);
-			self.movedir = (-v_forward);
+			//dprint("backwards\n");
+			//makevectors(vec);
+			//self.movedir = (-v_forward);
+			self.movedir = '0 0 0';
 		}
 		return;
 	}
@@ -879,6 +892,8 @@ void() init_fangel =
 		remove(self);
 		return;
 	}
+	
+	self.init_org = self.origin;
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
