@@ -90,8 +90,7 @@ void undying_standup(void) [++ 131 .. 182]
 	
 	if (self.frame >= 181)
 	{
-		self.movetype=MOVETYPE_STEP;
-		if (self.enemy)
+		if (EnemyIsValid(self.enemy))
 			self.think = self.th_run;
 		else
 			self.think = self.th_stand;
@@ -124,6 +123,7 @@ void undying_painfall(void) [++ 90 .. 130]
 	
 	if (self.frame<=91) {
 		self.counter = TRUE;	//dont get back up again
+		self.movetype = MOVETYPE_STEP;	//dont get pushed around
 		self.takedamage = DAMAGE_NO;
 		self.th_save = self.th_pain;
 		self.th_pain = SUB_Null;
@@ -376,20 +376,19 @@ void monster_undying ()
 	if (!undying_headless())
 		setmodel(self, "models/ZombiePal.mdl");
 
-	self.thingtype=THINGTYPE_FLESH;
-	
-	self.mass = 11;		//ws: increased. 10 seems to be the magic number for when they take impact damage from player running into them
-	
 	self.netname="undying";
 	self.flags (+) FL_MONSTER;
 	self.flags2 (+) FL_ALIVE;
+	self.mass = 11;		//ws: increased. 10 seems to be the magic number for when they take impact damage from player running into them
 	self.yaw_speed = 4;
+	self.thingtype=THINGTYPE_FLESH;
 	self.t_length = 80;		//custom melee range for ai_melee. default is 60
 	//self.view_ofs = '0 0 40';
 	
 	//self.hull=HULL_PLAYER;
 	self.hull = 2;
 	self.solid = SOLID_SLIDEBOX;
+	self.movetype = MOVETYPE_TOSS;
 	setsize (self, undying_mins, undying_maxs);
 	
 	UnsetFromFloor();
