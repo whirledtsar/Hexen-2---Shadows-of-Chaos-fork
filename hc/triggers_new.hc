@@ -1,3 +1,8 @@
+float RANDOM_SINGLETRIG		= 1;
+float RANDOM_NOREPEAT		= 2;
+float RANDOM_IGNOREMISSING	= 4;
+float RANDOM_REMOVELOSER	= 16;
+
 /*	trigger_reflect
 Brush entity that reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with func_wall to block movement and un-reflectable attacks like lightning beams.
 Don't killtarget this entity - just target it to remove it.
@@ -257,9 +262,11 @@ This trigger reserves the targetname "trigger_random_target". If you give an ent
 count: maximum uses
 flags: minimum target id
 flags2: maximum target id
-spawnflags:	1 (RANDOM_SINGLETRIG): Only use target/killtarget once
-		2 (RANDOM_NOREPEAT) : Only use any random id once
-		4 (RANDOM_IGNOREMISSING) : Don't reorganize range if an id in range has no matching entities
+spawnflags: 1 (RANDOM_SINGLETRIG): Only use target/killtarget once
+			2 (RANDOM_NOREPEAT) : Only use any random id once
+			4 (RANDOM_IGNOREMISSING) : Don't reorganize range if an id in range has no matching entities
+			16 (RANDOM_REMOVELOSER) : After triggering random entity, remove all other entities in trigger's range.
+									Possible useage: spawning random monster or activating random trigger and removing the ones not chosen. Implies single-use.
 */
 
 void trigger_random_reorder (float id)
@@ -320,6 +327,9 @@ float r, valid;
 	{
 		if (found.targetid == r)
 		{
+			if (!valid)
+				valid = TRUE;
+			
 			string otarg = self.target;
 			string oname = found.targetname;
 			found.targetname = "trigger_random_target";
@@ -327,8 +337,6 @@ float r, valid;
 			SUB_UseTargets();				//use them
 			self.target = otarg;			//done using them so reset our target and the matching id's targetname
 			found.targetname = oname;
-			
-			valid = TRUE;
 		}
 		found=nextent(found);
 	}
@@ -341,16 +349,32 @@ float r, valid;
 		return;
 	}
 	
-	if (self.spawnflags&RANDOM_NOREPEAT)
+	if (self.spawnflags&RANDOM_REMOVELOSER) {	//after using random id, remove all non-matching entities within our range
+		found = nextent(world);	
+		while (found)
+		{
+			if (found.targetid >= self.flags && found.targetid <= self.flags2 && found.targetid != r)
+			{
+				if (found!=world && !found.flags&FL_CLIENT)	{	//neither should have a targetid in the first place, but just in case...
+					if (found.flags & FL_MONSTER)
+						killed_monsters += 1;
+					remove(found);
+				}
+				dprint(found.classname);
+			}
+			found=nextent(found);
+		}
+	}
+	else if (self.spawnflags&RANDOM_NOREPEAT)
 		trigger_random_reorder (r);		//we don't want to use an id again, so reorganize our range
 	
 	SUB_UseTargets();									//use our actual targets & killtargets
-	if (self.spawnflags&RANDOM_SINGLETRIG)				//dont use non-random targets again if spawnflagged
-		self.target = self.killtarget = string_null;	//uninitiated string, because "" results in disaster for reasons unknown to my ignorant self
+	if (self.spawnflags&RANDOM_SINGLETRIG)				//dont use non-random targets again
+		self.target = self.killtarget = string_null;	//uninitiated string, not ""
 	
 	if (self.count)
 		++self.counter;
-	if (self.counter>self.count) {
+	if (self.counter>=self.count) {
 		remove(self);
 		return;
 	}
@@ -407,4 +431,63 @@ void trigger_random ()
 	self.think = trigger_random_check;
 	thinktime self : 0.1;	//slight delay to make sure all entities are spawned before checking their id's
 	self.use = trigger_random_use;
+	
+	if (self.spawnflags&RANDOM_REMOVELOSER)
+		self.count=1;
+}
+
+//trigger_stop: backport from PoP
+
+void trigger_stop_use ()
+{
+entity found;
+	if(self.inactive)
+		return;
+
+	if(self.nextthink==-1)
+		return;
+
+	found=find(world,targetname,self.target);
+	while(found)
+	{
+		found.velocity='0 0 0';
+		found.avelocity='0 0 0';
+		found.nextthink=-1;
+
+		stopSound(found, 0);
+
+		if (found.classname == "func_train" || found.classname == "func_door_rotating")
+			sound (found, CHAN_VOICE, found.noise1, 1, ATTN_NORM);
+
+		found=find(found,targetname,self.target);
+	}
+
+	if(self.wait==-1)
+		self.nextthink=-1;
+	else if(self.wait>0)
+		thinktime self : self.wait;
+	else
+		thinktime self : 999999999999;
+}
+
+void trigger_stop_touch ()
+{
+	if(other.classname!="player" || self.inactive)
+		return;
+
+	trigger_stop_use();
+}
+
+/*QUAKED trigger_stop (.5 .5 .5) (-8 -8 -8) (8 8 8) notouch
+Stops its target that is moving or rotating
+This will trigger only once until triggered again unless you give it a wait.
+*/
+void trigger_stop(void)
+{
+	InitTrigger();
+	self.use=trigger_stop_use;
+	if(self.spawnflags&8)
+		self.inactive=TRUE;
+	if(!self.spawnflags&1)
+		self.touch=trigger_stop_touch;
 }
