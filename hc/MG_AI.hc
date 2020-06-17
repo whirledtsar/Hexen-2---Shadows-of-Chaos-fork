@@ -130,7 +130,7 @@ float FindMonsterTarget ()
 	while(found!=world)
 	{
 		if(found!=self)
-			if(found.flags2&FL_ALIVE && !(found.artifact_active&ARTFLAG_STONED))	//check if enemy is a dormant gargoyle -ws
+			if(EnemyIsValid(found))
 				if(visible(found))
 					if(found!=self.controller && found!=self.owner)
 						if(found.controller!=self.controller)
