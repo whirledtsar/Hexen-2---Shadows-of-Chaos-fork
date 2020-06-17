@@ -275,30 +275,29 @@ WEAPONS
 ===============================================================================
 */
 
-float MAX_INV = 15;		//ws: changed from 25 because most items actually have a cap of 15 in artifacts.hc
-
 void max_ammo2 (entity AddTo, entity AddFrom)
 {
 	// FIXME: I assume the max will be different between classes and levels
 
 	if (AddTo.cnt_torch + AddFrom.cnt_torch > MAX_INV)
 		AddFrom.cnt_torch = MAX_INV - AddTo.cnt_torch;
-	if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_h_boost + AddFrom.cnt_h_boost > 30)
+	/*if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_h_boost + AddFrom.cnt_h_boost > 30)
 		AddFrom.cnt_h_boost = 30 - AddTo.cnt_h_boost;
-	else if (AddTo.cnt_h_boost + AddFrom.cnt_h_boost > MAX_INV)
-		AddFrom.cnt_h_boost = MAX_INV - AddTo.cnt_h_boost;
+	else */if (AddTo.cnt_h_boost + AddFrom.cnt_h_boost > MAX_FLASK)
+	else if (AddTo.cnt_h_boost + AddFrom.cnt_h_boost > MAX_FLASK)
+		AddFrom.cnt_h_boost = MAX_FLASK - AddTo.cnt_h_boost;
 	if (AddTo.cnt_sh_boost + AddFrom.cnt_sh_boost > 5)
 		AddFrom.cnt_sh_boost = 5 - AddTo.cnt_sh_boost;
-	if (AddTo.cnt_mana_boost + AddFrom.cnt_mana_boost > MAX_INV)
-		AddFrom.cnt_mana_boost = MAX_INV - AddTo.cnt_mana_boost;
+	if (AddTo.cnt_mana_boost + AddFrom.cnt_mana_boost > MAX_KRATER)
+		AddFrom.cnt_mana_boost = MAX_KRATER - AddTo.cnt_mana_boost;
 	if (AddTo.cnt_teleport + AddFrom.cnt_teleport > MAX_INV)
 		AddFrom.cnt_teleport = MAX_INV - AddTo.cnt_teleport;
-	if (AddTo.cnt_tome + AddFrom.cnt_tome > MAX_INV)
-		AddFrom.cnt_tome = MAX_INV - AddTo.cnt_tome;
-	if (AddTo.cnt_summon + AddFrom.cnt_summon > MAX_INV)
-		AddFrom.cnt_summon = MAX_INV - AddTo.cnt_summon;
-	if (AddTo.cnt_invisibility + AddFrom.cnt_invisibility > MAX_INV)
-		AddFrom.cnt_invisibility = MAX_INV - AddTo.cnt_invisibility;
+	if (AddTo.cnt_tome + AddFrom.cnt_tome > MAX_TOME)
+		AddFrom.cnt_tome = MAX_TOME - AddTo.cnt_tome;
+	if (AddTo.cnt_summon + AddFrom.cnt_summon > MAX_SUMMON)
+		AddFrom.cnt_summon = MAX_SUMMON - AddTo.cnt_summon;
+	if (AddTo.cnt_invisibility + AddFrom.cnt_invisibility > MAX_GHOST)
+		AddFrom.cnt_invisibility = MAX_GHOST - AddTo.cnt_invisibility;
 	if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_glyph + AddFrom.cnt_glyph > 50)
 		AddFrom.cnt_glyph = 50 - AddTo.cnt_glyph;
 	else if (AddTo.cnt_glyph + AddFrom.cnt_glyph > MAX_INV)
@@ -307,14 +306,14 @@ void max_ammo2 (entity AddTo, entity AddFrom)
 		AddFrom.cnt_haste = MAX_INV - AddTo.cnt_haste;
 	if (AddTo.cnt_blast + AddFrom.cnt_blast > MAX_INV)
 		AddFrom.cnt_blast = MAX_INV - AddTo.cnt_blast;
-	if (AddTo.cnt_polymorph + AddFrom.cnt_polymorph > MAX_INV)
-		AddFrom.cnt_polymorph = MAX_INV - AddTo.cnt_polymorph;
+	if (AddTo.cnt_polymorph + AddFrom.cnt_polymorph > MAX_POLY)
+		AddFrom.cnt_polymorph = MAX_POLY - AddTo.cnt_polymorph;
 	if (AddTo.cnt_flight + AddFrom.cnt_flight > MAX_INV)
 		AddFrom.cnt_flight = MAX_INV - AddTo.cnt_flight;
-	if (AddTo.cnt_cubeofforce + AddFrom.cnt_cubeofforce > MAX_INV)
-		AddFrom.cnt_cubeofforce = MAX_INV - AddTo.cnt_cubeofforce;
-	if (AddTo.cnt_invincibility + AddFrom.cnt_invincibility > MAX_INV)
-		AddFrom.cnt_invincibility = MAX_INV - AddTo.cnt_invincibility;
+	if (AddTo.cnt_cubeofforce + AddFrom.cnt_cubeofforce > MAX_CUBE)
+		AddFrom.cnt_cubeofforce = MAX_CUBE - AddTo.cnt_cubeofforce;
+	if (AddTo.cnt_invincibility + AddFrom.cnt_invincibility > MAX_ICON)
+		AddFrom.cnt_invincibility = MAX_ICON - AddTo.cnt_invincibility;
 
 	if (AddTo.bluemana + AddFrom.bluemana > AddTo.max_mana)
 		AddFrom.bluemana = AddTo.max_mana - AddTo.bluemana;
