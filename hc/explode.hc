@@ -284,6 +284,7 @@ vector stickdir;
 
 void() Use_Fireball =
 {
+	sound (self,CHAN_VOICE,"fx/glyphuse.wav",1,ATTN_NORM);
 	self.glyph_finished=time + 0.7;//So you can't have a ton of them
 	makevectors(self.v_angle);
 //sound
