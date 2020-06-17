@@ -1454,11 +1454,11 @@ void() trigger_push =
 
 //============================================================================
 
-float JUMP_CHANGEANGLE		= 16;
-
 void() trigger_monsterjump_touch =
 {
 	if ( other.flags & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER )
+		return;
+	if (self.netname && other.classname != self.netname)
 		return;
 
 // set XY even if not on ground, so the jump will clear lips
@@ -1476,11 +1476,6 @@ void() trigger_monsterjump_touch =
 	other.flags(-)FL_ONGROUND;
 
 	other.velocity_z = self.height;
-	
-	if (self.spawnflags & JUMP_CHANGEANGLE && other.flags & FL_MONSTER)	//ws: turn monster to face direction of jump
-	{
-		other.angles_y = self.angles_y;
-	}
 
 	if(self.wait==-1)
 		self.touch=SUB_Null;
