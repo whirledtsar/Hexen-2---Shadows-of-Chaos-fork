@@ -12,6 +12,7 @@ $base base
 $skin badass3
 
 float AFRIT_COCOON = 2;
+float AFRIT_DORMANT = 16;
 
 float AFRIT_DODGESPEED = 6;
 float AFRIT_STAGE_CHARGE = 1;
@@ -19,6 +20,7 @@ float AFRIT_STAGE_SLIDE = 2;
 
 void() AfritCheckDodge;
 void() afrit_wake1;
+void(entity attacker, float damage)	afrit_pain;
 
 void afrit_raise()
 {
@@ -128,6 +130,21 @@ vector vec;
 	sound(self,CHAN_WEAPON,"afrit/atk.wav",0.7,ATTN_NORM);
 };
 
+void afrit_dormant () [++ 78 .. 101]
+{
+	if (self.enemy) {
+		self.think = self.th_run;
+		self.th_run();
+		return;
+	}
+	else
+		self.think = afrit_dormant;
+	thinktime self : HX_FRAME_TIME;
+	//no idle sound intentionally
+	if (self.frame==91)
+		CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);
+}
+
 void()	afrit_sit1	=[	78,		afrit_sit2	] {
 if (random() < 0.02)
 	sound (self, CHAN_VOICE, "afrit/idle.wav", 1,  ATTN_IDLE);
@@ -156,7 +173,6 @@ void()	afrit_sit22	=[	99,		afrit_sit23	] {ai_stand();};
 void()	afrit_sit23	=[	100,		afrit_sit24	] {ai_stand();};
 void()	afrit_sit24	=[	101,		afrit_sit1	] {ai_stand();};
 
-
 void()	afrit_hover1	=[	35,		afrit_hover2	] {
 if (random() < 0.02)
 	sound (self, CHAN_VOICE, "afrit/idle.wav", 1,  ATTN_IDLE);
@@ -183,7 +199,7 @@ void()	afrit_hover20	=[	54,		afrit_hover1	] {ai_stand();}; //3);};
 
 //AFRIT DODGE
 
-void afrit_slide (void)	//1 for right, -1 for left
+void afrit_slide (void)	//self.lefty = 1 for right, -1 for left
 {
 	if (!walkmove (self.ideal_yaw + (90*self.lefty), AFRIT_DODGESPEED + self.weaponframe_cnt, FALSE))
 		if (self.attack_state != AS_FERRY)
@@ -192,23 +208,7 @@ void afrit_slide (void)	//1 for right, -1 for left
 	self.weaponframe_cnt*=1.75;
 	if(random()<0.1) {
 		CreateWhiteSmoke(self.origin-v_right*(10),'0 0 8',HX_FRAME_TIME * 2); }
-} 
-
-/*void()	afrit_dodge1	=[	16,		afrit_dodge2	] {afrit_slide(1);};
-void()	afrit_dodge2	=[	17,		afrit_dodge3	] {afrit_slide(1);};
-void()	afrit_dodge3	=[	16,		afrit_dodge4	] {afrit_slide(1);AfritEffects();};
-void()	afrit_dodge4	=[	17,		afrit_dodge5	] {afrit_slide(1);};
-void()	afrit_dodge5	=[	16,		afrit_dodge6	] {afrit_slide(1);};
-void()	afrit_dodge6	=[	17,		afrit_dodge7	] {afrit_slide(1);};
-void()	afrit_dodge7	=[	16,		afrit_fly1	] {afrit_slide(1); AfritEffects();};
-
-void()	afrit_dodgel1	=[	16,		afrit_dodgel2	] {afrit_slide(-1);AfritEffects();};
-void()	afrit_dodgel2	=[	17,		afrit_dodgel3	] {afrit_slide(-1);};
-void()	afrit_dodgel3	=[	16,		afrit_dodgel4	] {afrit_slide(-1);};
-void()	afrit_dodgel4	=[	17,		afrit_dodgel5	] {afrit_slide(-1);AfritEffects();};
-void()	afrit_dodgel5	=[	16,		afrit_dodgel6	] {afrit_slide(-1);};
-void()	afrit_dodgel6	=[	17,		afrit_dodgel7	] {afrit_slide(-1);};
-void()	afrit_dodgel7	=[	16,		afrit_fly1	] {afrit_slide(-1);};*/
+}
 
 void()	afrit_dodge1	=[	16,		afrit_dodge2	] {afrit_slide();};
 void()	afrit_dodge2	=[	17,		afrit_dodge3	] {afrit_slide();};
@@ -246,6 +246,7 @@ void() afrit_run =
 {
 	if (self.spawnflags & AFRIT_COCOON) {
 		self.spawnflags (-) AFRIT_COCOON;
+		self.th_pain = afrit_pain;
 		self.th_stand = afrit_hover1;
 		self.th_run = afrit_fly1;
 		self.think = afrit_wake1;
@@ -406,7 +407,7 @@ void()	afrit_die14=[	13,	afrit_die14] {MakeSolidCorpse();};
 
 void AfritCheckDodge ()
 {
-	if (self.enemy==world || self.counter>time)
+	if (self.enemy==world || self.counter>time || random()<0.05)
 		return;
 	
 	entity enemy_proj;
@@ -417,8 +418,6 @@ void AfritCheckDodge ()
 	if (IsEnemyOwned(enemy_proj))	//IsEnemyOwned is in ai.hc
 		dodge=TRUE;
 	else if (range(self.enemy)==RANGE_MELEE && self.enemy.last_attack>time-1)
-		dodge=TRUE;
-	else if (random()<0.5)
 		dodge=TRUE;
 		
 	if (!dodge)
@@ -531,9 +530,15 @@ void() monster_afrit =
 	self.th_init = monster_afrit;
 	self.th_raise = afrit_raise;
 	
-	if (self.spawnflags&AFRIT_COCOON)
-		self.th_stand = afrit_sit1;
-	else	
+	if (self.spawnflags&AFRIT_COCOON) {
+		if (self.spawnflags&AFRIT_DORMANT) {
+			self.th_stand = afrit_dormant;
+			self.th_pain = SUB_Null;
+		}
+		else
+			self.th_stand = afrit_sit1;
+	}
+	else
 		self.th_stand = afrit_hover1;
 	
 	flymonster_start ();
