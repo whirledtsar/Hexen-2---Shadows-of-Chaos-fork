@@ -278,16 +278,15 @@ WEAPONS
 void max_ammo2 (entity AddTo, entity AddFrom)
 {
 	// FIXME: I assume the max will be different between classes and levels
-
+	//ws: see constant.hc
 	if (AddTo.cnt_torch + AddFrom.cnt_torch > MAX_INV)
 		AddFrom.cnt_torch = MAX_INV - AddTo.cnt_torch;
 	/*if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_h_boost + AddFrom.cnt_h_boost > 30)
 		AddFrom.cnt_h_boost = 30 - AddTo.cnt_h_boost;
 	else */if (AddTo.cnt_h_boost + AddFrom.cnt_h_boost > MAX_FLASK)
-	else if (AddTo.cnt_h_boost + AddFrom.cnt_h_boost > MAX_FLASK)
 		AddFrom.cnt_h_boost = MAX_FLASK - AddTo.cnt_h_boost;
-	if (AddTo.cnt_sh_boost + AddFrom.cnt_sh_boost > 5)
-		AddFrom.cnt_sh_boost = 5 - AddTo.cnt_sh_boost;
+	if (AddTo.cnt_sh_boost + AddFrom.cnt_sh_boost > MAX_URN)
+		AddFrom.cnt_sh_boost = MAX_URN - AddTo.cnt_sh_boost;
 	if (AddTo.cnt_mana_boost + AddFrom.cnt_mana_boost > MAX_KRATER)
 		AddFrom.cnt_mana_boost = MAX_KRATER - AddTo.cnt_mana_boost;
 	if (AddTo.cnt_teleport + AddFrom.cnt_teleport > MAX_INV)
@@ -298,8 +297,8 @@ void max_ammo2 (entity AddTo, entity AddFrom)
 		AddFrom.cnt_summon = MAX_SUMMON - AddTo.cnt_summon;
 	if (AddTo.cnt_invisibility + AddFrom.cnt_invisibility > MAX_GHOST)
 		AddFrom.cnt_invisibility = MAX_GHOST - AddTo.cnt_invisibility;
-	if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_glyph + AddFrom.cnt_glyph > 50)
-		AddFrom.cnt_glyph = 50 - AddTo.cnt_glyph;
+	if (AddTo.playerclass==CLASS_CRUSADER && AddTo.cnt_glyph + AddFrom.cnt_glyph > 30)
+		AddFrom.cnt_glyph = 30 - AddTo.cnt_glyph;
 	else if (AddTo.cnt_glyph + AddFrom.cnt_glyph > MAX_INV)
 		AddFrom.cnt_glyph = MAX_INV - AddTo.cnt_glyph;
 	if (AddTo.cnt_haste + AddFrom.cnt_haste > MAX_INV)
