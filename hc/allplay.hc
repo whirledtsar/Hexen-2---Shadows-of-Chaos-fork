@@ -241,13 +241,19 @@ void ThrowGib (string gibname, float dm)
 {
 entity new;
 float fade;
+vector org;
 	fade = CheckCfgParm(PARM_FADE);
 	//ws: corpses fading can be toggled by console command (impulse 46)
 	if (fade)
 		new = spawn_temp();
 	else
 		new = spawn();
-	new.origin = (self.absmin+self.absmax)*0.5;
+	//new.origin = (self.absmin+self.absmax)*0.5;
+	org_x = self.absmin_x + random(self.maxs_x - self.mins_x);
+	org_y = self.absmin_y + random(self.maxs_y - self.mins_y);
+	org_z = self.absmax_z - random(self.maxs_z*0.75);	//bias towards maxs so gibs dont spawn in ground
+	setorigin (new, org);
+	
 	setmodel (new, gibname);
 	setsize (new, '0 0 0', '0 0 0');
 	new.velocity = VelocityForDamage (dm);
@@ -257,19 +263,22 @@ float fade;
 	new.avelocity_x = random(600);
 	new.avelocity_y = random(600);
 	new.avelocity_z = random(600);
-	new.scale=random(.5,.9);
+	new.scale=self.scale*random(.5,.9);
+	
 	if (fade || coop || deathmatch) {
 		new.think = SUB_Remove;
 		thinktime new : random(20,10);
 	}
 	else {
-		new.think = makestatic;	//SUB_Null;
-		thinktime new : 0;
+		new.think = SUB_Null;	//makestatic;
+		thinktime new : -1;
 	}
 	new.ltime = time;
 	new.frame = 0;
 	new.flags = 0;
 	
+	if (new.model == self.headmodel && self.headmodel != "" && self.movetype)	//check movetype because corpses are movetype_none
+		setorigin(new, self.origin+self.view_ofs);	//spawn head in logical position
 	if (new.model == "models/shardwend.mdl")
 	{	
 		new.gravity = 0.4;
@@ -280,45 +289,57 @@ float fade;
 		new.velocity_z = (random(100,280));
 		new.origin_z = new.origin_z - 10;
 	}
+	else if (new.model == "models/flesh1.mdl" || new.model == "models/flesh2.mdl")
+		new.scale = self.scale*random(0.7,1);
 	else if (new.model == "models/footsoldierhd.mdl" || new.model == "models/footsoldierhalf.mdl" || new.model == "models/footsoldieraxe.mdl")
 	{
-		new.avelocity_x = 20;
-		new.avelocity_y = -70;
-		new.avelocity_z = 10;
+		new.avelocity_x = 40+random(20);
+		new.avelocity_y = 60+random(20);
+		new.avelocity_z = 40+random(20);
+		new.angles_y = random(360);
+		if (new.model == "models/footsoldieraxe.mdl")
+		{
+			new.avelocity_x = 0;
+			new.avelocity_z = 0;
+		}
 		new.scale=.8;
 	}
 	else if (new.model == "models/h_fangel.mdl" || new.model == "models/ZombiePal_hd.mdl" || new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/h_imp.mdl")
 	{
-		new.avelocity_x = 20;
-		new.avelocity_y = -70;
-		new.avelocity_z = 10;
-		new.angles_y = random(300);
-		new.scale=1.13;
+		new.avelocity_x = 40+random(20);
+		new.avelocity_y = 100+random(20);
+		new.avelocity_z = 40+random(20);
+		new.angles_y = random(360);
+		new.scale=self.scale*1.13;
 		if (self.classname == "monster_archer_lord" || self.classname == "monster_fallen_angel_lord" || self.classname == "monster_imp_ice")
 			new.skin = 1;
 	}
-	else if (new.model == "models/impwing.mdl" || new.model == "models/afritwing.mdl" || new.model == "models/impwing_ice.mdl")
+	else if (new.model == "models/impwing.mdl" || new.model == "models/afritwing.mdl" || new.model == "models/impwing_ice.mdl"
+		|| new.model == "models/ZombiePal_arm.mdl")
 	{
-		new.avelocity_x = 20;
-		new.avelocity_y = -70;
-		new.avelocity_z = 10;
-		new.angles_y = random(300);
-		new.scale=1.13;
+		new.avelocity_x = random(5);
+		new.avelocity_y = 100+random(40);
+		new.avelocity_z = random(5);
+		new.angles_y = random(360);
+		if (new.owner.classname != "monster_undying")
+			new.scale=self.scale*1.13;
 	}
-	else if (new.model == "models/archerleg.mdl" || new.model == "models/footsoldierleg.mdl" || new.model == "models/footsoldierarm.mdl")
+	else if (new.model == "models/archerleg.mdl" || new.model == "models/archerarm.mdl" || new.model == "models/footsoldierleg.mdl" || new.model == "models/footsoldierarm.mdl"
+		|| new.model == "models/ZombiePal_leg.mdl")
 	{
-		new.avelocity_x = 3;
-		new.avelocity_y = 100;
-		new.avelocity_z = 80;
-		new.angles_y = random(300);
-		new.scale=.9;
+		new.avelocity_x = 0;
+		new.avelocity_y = 100+random(40);
+		new.avelocity_z = 100+random(40);
+		if (new.model == "models/archerarm.mdl")
+			new.avelocity_z = random(5);
+		new.angles_y = random(360);
+		if (new.owner.classname != "monster_undying")
+			new.scale=self.scale*.9;
 	}
 	else if (new.model == "models/blood.mdl")
 	{
-		new.avelocity = 0;
 		new.gravity = 1.3;
 		new.origin_z = new.origin_z - 5;
-		//new.avelocity_z = random(600);
 		new.scale = random(.6, 1.2);
 		new.frame = 0;
 	}
@@ -330,11 +351,10 @@ float fade;
 		new.drawflags (+) DRF_TRANSLUCENT;
 		new.scale = random(0.3,0.7);
 		
-		if (self.netname == "yakman")
-			new.scale = 1.3;
-		else if (self.netname == "maulotaur")
-			new.scale = 1.6;
+		if (self.netname == "yakman" || self.netname == "maulotaur")
+			new.scale = self.scale*1.25;
 	}
+	
 	if (new.model == "models/blood.mdl" || new.model == "models/bloodpool_ice.mdl" || new.model == "models/shardwend.mdl")
 	{	//always fade these out regardless of corpse fading setting
 		new.think = ice_melt;	//altdeath.hc
