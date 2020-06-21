@@ -298,6 +298,17 @@ void() archer_gibs =
 	ThrowGib ("models/archerleg.mdl", self.health);
 }
 
+void blood_spew ()
+{
+	setorigin(self, self.owner.origin + self.owner.view_ofs);
+	particle2(self.origin,'-15 -15 60','15 15 100',rint (256 + 16*8 + random(9)),PARTICLETYPE_FASTGRAV,25-self.cnt);
+	self.cnt+=10;
+	thinktime self : HX_FRAME_TIME*0.5;
+	
+	if (time > self.counter || !self.owner)
+		remove(self);
+}
+
 void() archer_die =
 {
 	// check for gib
@@ -309,26 +320,30 @@ void() archer_die =
 		chunk_death();
 		return;
 	}
-	//else if (random(100) < 45)
 	else if (self.decap>0 && random()<0.5)	//ws: only sharp weapons will decapitate; see damage.hc
 	{
-		setmodel (self, "models/archerdecap.mdl");
 		if (self.classname == "monster_archer_lord")
 			setmodel (self, "models/archerdecap_lord.mdl");
 		else if (self.netname == "monster_archer_ice")
 			setmodel (self, "models/archerdecap_ice.mdl");
+		else
+			setmodel (self, "models/archerdecap.mdl");
 		sound(self,CHAN_VOICE,"player/decap2.wav",1,ATTN_NORM);
 		setsize (self, '-16 -16 0', '16 16 56');
-		//self.hull=HULL_PLAYER;
 		ThrowGib ("models/archerhd.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
+		entity new = spawn();
+		new.counter = time+HX_FRAME_TIME;
+		new.owner = self;
+		new.think = blood_spew;
+		thinktime new : 0;
+		//particle2(self.origin+self.view_ofs,'-5 -5 40','5 5 60',rint (256 + 16*8 + random(9)),PARTICLETYPE_FASTGRAV,20);
 		self.headmodel = "";
 	}
 	else
 	{
-		//ThrowGib ("models/flesh2.mdl", self.health);
 		//particleexplosion(self.origin,138,25,50);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
