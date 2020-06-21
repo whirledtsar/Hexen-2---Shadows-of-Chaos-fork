@@ -170,7 +170,7 @@ vector newmaxs;
 	if (self.skin==GLOBAL_SKIN_ASH)
 		self.th_die = shatter;
 	//self.touch = obj_push; //Pushable corpses has the side effect of getting the player stuck when ironically it was meant to prevent that
-    self.health = random(10,25);
+	self.health = random(10,25);
 	if (self.mass >= 30 && self.mass <= 100)
 		self.health += (self.mass*0.5);	//ws: increase health for big corpses (yakmen, maulotaurs)
 	self.takedamage = DAMAGE_YES;
@@ -186,13 +186,13 @@ vector newmaxs;
 	newmaxs=self.maxs;
 	if(newmaxs_z>5)
 		newmaxs_z=5;
-	if (self.classname=="monster_death_knight")
-		setsize (self, self.mins,newmaxs);
-	else if (self.netname == "maulotaur")
+	if (self.netname == "maulotaur")
 		setsize (self, self.mins,newmaxs+'0 0 5');
-	else
+	else if (self.classname=="monster_death_knight")
 		//setsize (self, '-13 -28 -14', '10 3 -9'); //resize the dk berserker because i fucked up his origin and im too lazy to fix it. Also wtf are you doing using HexenC? It's 2017 nerd, go use UE4
 		setsize (self, '-26 -28 -14', '88 28 -9'); //ws: it was still messed up. 2017 eh?
+	else
+		setsize (self, self.mins,newmaxs);
 	if(self.flags&FL_ONGROUND)
 		self.velocity='0 0 0';
     self.flags(-)FL_MONSTER;
