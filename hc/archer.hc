@@ -272,7 +272,6 @@ void archer_arrow_touch(void)
 
 }
 
-
 void archer_dying (void) [++ $deathA1..$deathA22]
 {
 	stopSound(self,CHAN_WEAPON);
@@ -298,25 +297,14 @@ void() archer_gibs =
 	ThrowGib ("models/archerleg.mdl", self.health);
 }
 
-void blood_spew ()
-{
-	setorigin(self, self.owner.origin + self.owner.view_ofs);
-	particle2(self.origin,'-15 -15 60','15 15 100',rint (256 + 16*8 + random(9)),PARTICLETYPE_FASTGRAV,25-self.cnt);
-	self.cnt+=10;
-	thinktime self : HX_FRAME_TIME*0.5;
-	
-	if (time > self.counter || !self.owner)
-		remove(self);
-}
-
 void() archer_die =
 {
 	// check for gib
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
 	if (self.health < -30)
 	{
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib("models/blood.mdl", self.health);
-		ThrowGib("models/blood.mdl", self.health);
 		chunk_death();
 		return;
 	}
@@ -331,23 +319,12 @@ void() archer_die =
 		sound(self,CHAN_VOICE,"player/decap2.wav",1,ATTN_NORM);
 		setsize (self, '-16 -16 0', '16 16 56');
 		ThrowGib ("models/archerhd.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		entity new = spawn();
-		new.counter = time+HX_FRAME_TIME;
-		new.owner = self;
-		new.think = blood_spew;
-		thinktime new : 0;
-		//particle2(self.origin+self.view_ofs,'-5 -5 40','5 5 60',rint (256 + 16*8 + random(9)),PARTICLETYPE_FASTGRAV,20);
 		self.headmodel = "";
+		bloodspew_create (3, 30, self.view_ofs);
 	}
 	else
 	{
 		//particleexplosion(self.origin,138,25,50);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
 		if (self.classname == "monster_archer")
 			sound (self, CHAN_VOICE, "archer/death.wav", 1, ATTN_NORM);
 		else
@@ -892,7 +869,7 @@ void monster_archer_lord ()
 		self.experience_value = 180;	//200
 	if(!self.health)
 		self.health = 240;	//325
-	//ws - reduced health to 3x normal
+	//ws - reduced health to 3x normal archer
 
 	CreateEntityNew(self,ENT_ARCHER,"models/archer.mdl",archer_die);
 
@@ -904,6 +881,7 @@ void monster_archer_lord ()
 	self.th_missile = archerdraw;
 	self.th_pain = archer_pain;
 	self.th_raise = archer_raise;
+	
 	self.decap = 0;
 	self.headmodel = "models/archerhd.mdl";
 	if(!self.spawnflags&ARCHER_STUCK)
@@ -942,6 +920,7 @@ void monster_archer_ice ()
 {
 	if(!self.th_init)
 		self.th_init=monster_archer_ice;
+	
 	self.netname=self.classname;
 	self.classname="monster_archer";
 	monster_archer();
