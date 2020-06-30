@@ -128,6 +128,7 @@ void() T_PhaseMissileTouch =
 
 	if (other.health)	// Hit something that can be hurt
 	{
+		spawn_touchpuff (damg, other);
 		T_Damage (other, self, self.owner, self.dmg);
 		self.counter -=1;
 		self.enemy = other;
