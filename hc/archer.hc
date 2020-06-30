@@ -272,7 +272,6 @@ void archer_arrow_touch(void)
 
 }
 
-
 void archer_dying (void) [++ $deathA1..$deathA22]
 {
 	stopSound(self,CHAN_WEAPON);
@@ -301,38 +300,31 @@ void() archer_gibs =
 void() archer_die =
 {
 	// check for gib
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
 	if (self.health < -30)
 	{
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib("models/blood.mdl", self.health);
-		ThrowGib("models/blood.mdl", self.health);
 		chunk_death();
 		return;
 	}
-	//else if (random(100) < 45)
 	else if (self.decap>0 && random()<0.5)	//ws: only sharp weapons will decapitate; see damage.hc
 	{
-		setmodel (self, "models/archerdecap.mdl");
 		if (self.classname == "monster_archer_lord")
 			setmodel (self, "models/archerdecap_lord.mdl");
 		else if (self.netname == "monster_archer_ice")
 			setmodel (self, "models/archerdecap_ice.mdl");
+		else
+			setmodel (self, "models/archerdecap.mdl");
 		sound(self,CHAN_VOICE,"player/decap2.wav",1,ATTN_NORM);
 		setsize (self, '-16 -16 0', '16 16 56');
-		//self.hull=HULL_PLAYER;
 		ThrowGib ("models/archerhd.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
 		self.headmodel = "";
+		bloodspew_create (3, 30, self.view_ofs);
 	}
 	else
 	{
-		//ThrowGib ("models/flesh2.mdl", self.health);
 		//particleexplosion(self.origin,138,25,50);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
 		if (self.classname == "monster_archer")
 			sound (self, CHAN_VOICE, "archer/death.wav", 1, ATTN_NORM);
 		else
@@ -877,7 +869,7 @@ void monster_archer_lord ()
 		self.experience_value = 180;	//200
 	if(!self.health)
 		self.health = 240;	//325
-	//ws - reduced health to 3x normal
+	//ws - reduced health to 3x normal archer
 
 	CreateEntityNew(self,ENT_ARCHER,"models/archer.mdl",archer_die);
 
@@ -889,6 +881,7 @@ void monster_archer_lord ()
 	self.th_missile = archerdraw;
 	self.th_pain = archer_pain;
 	self.th_raise = archer_raise;
+	
 	self.decap = 0;
 	self.headmodel = "models/archerhd.mdl";
 	if(!self.spawnflags&ARCHER_STUCK)
@@ -927,6 +920,7 @@ void monster_archer_ice ()
 {
 	if(!self.th_init)
 		self.th_init=monster_archer_ice;
+	
 	self.netname=self.classname;
 	self.classname="monster_archer";
 	monster_archer();
