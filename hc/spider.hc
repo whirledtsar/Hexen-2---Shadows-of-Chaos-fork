@@ -92,9 +92,9 @@ float SpiderHealth[4] =
 float SpiderExp[4] =
 {	//ws: decreased because their xp was way higher than archers which makes no sense
 	60,	// SPIDER_RED_LARGE
-	50,		// SPIDER_RED_SMALL
-	40,	// SPIDER_YELLOW_LARGE
-	20		// SPIDER_YELLOW_SMALL
+	40,		// SPIDER_RED_SMALL
+	50,	// SPIDER_YELLOW_LARGE
+	30		// SPIDER_YELLOW_SMALL
 };
 
 // CODE --------------------------------------------------------------------
