@@ -1603,7 +1603,7 @@ void init_imp (float which_skin)
 		{
 			if(!self.health)
 				self.max_health=self.health = 75+self.skin*25;
-			self.experience_value = 100 +self.skin*100;
+			self.experience_value = 150 +self.skin*50;
 			self.mass = 3;
 			self.th_die = imp_die_init;
 		}
