@@ -265,7 +265,9 @@ void()	undying_run14	=[	63,		undying_run1	] {ai_run(self.speed*2);};
 
 void() undying_gibs =
 {
-	ThrowGib ("models/ZombiePal_hd.mdl", self.health);
+	ThrowGib ("models/ZombiePal_arm.mdl", self.health);
+	ThrowGib ("models/ZombiePal_leg.mdl", self.health);
+	//ThrowGib ("models/ZombiePal_hd.mdl", self.health);
 	remove(self);
 }
 
@@ -281,11 +283,12 @@ void undying_dying(void) [++ 90 .. 130]
 		starteffect(CE_GHOST, self.origin,'0 0 10', 0.1);
 		if (random(100) < 80 && !undying_headless())
 		{
+			bloodspew_create (2, 25, self.view_ofs);
 			ThrowGib(self.headmodel, self.health);
 			self.headmodel = "";
 			setmodel(self, "models/ZombiePal_nohd.mdl");
-			sound(self,CHAN_VOICE,"undying/udecap.wav",1,ATTN_NORM);
 			setsize (self, '-23 -13 -6', '23 13 6');
+			sound(self,CHAN_VOICE,"undying/udecap.wav",1,ATTN_NORM);
 		}
 		else
 			sound(self,CHAN_VOICE,"undying/udeath.wav",1,ATTN_NORM);
