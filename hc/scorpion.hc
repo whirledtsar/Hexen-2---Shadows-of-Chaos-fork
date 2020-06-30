@@ -214,13 +214,13 @@ void ScorpionInit(float type)
 	{
 		if(!self.health)
 			self.health = 100;
-		self.experience_value = 60;
+		self.experience_value = 50;
 	}
 	else
 	{
 		if(!self.health)
 			self.health = 200;
-		self.experience_value = 150;
+		self.experience_value = 120;
 	}
 	if(!self.max_health)
 		self.max_health=self.health;
