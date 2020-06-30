@@ -74,3 +74,5 @@ void stats_NewClass(entity e);
 //client.hc
 float(float parm) CheckCfgParm;	//returns value of config flag
 float(float parm) SetCfgParm;	//reverses config flag and returns true if enabled, false if disabled
+
+void() SUB_ResetTarget;

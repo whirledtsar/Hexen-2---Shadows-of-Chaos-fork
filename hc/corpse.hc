@@ -165,8 +165,8 @@ vector newmaxs;
 //Won't be necc to pass headmdl once everything has it's .headmodel
 //value set in spawn
 	//self.netname = "corpse";		//PoP
-	self.target = string_null;	// self.targetname;	//fix by Shanjaq
-    self.th_die = chunk_death;
+	SUB_ResetTarget();
+	self.th_die = chunk_death;
 	if (self.skin==GLOBAL_SKIN_ASH)
 		self.th_die = shatter;
 	//self.touch = obj_push; //Pushable corpses has the side effect of getting the player stuck when ironically it was meant to prevent that
