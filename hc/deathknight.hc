@@ -131,27 +131,24 @@ void(entity attacker, float damage)	death_knight_pain =
 
 //===========================================================================
 
-void()	death_knight_die1	=[	69,	death_knight_die2	] {};
-void()	death_knight_die2	=[	70,	death_knight_die3	] {/*setsize (self, '-17 -17 -9', '17 17 2');*/};
-void()	death_knight_die3	=[	71,	death_knight_die4	] {};
-void()	death_knight_die4	=[	72,	death_knight_die5	] {};
-void()	death_knight_die5	=[	73,	death_knight_die6	] {};
-void()	death_knight_die6	=[	74,	death_knight_die7	] {};
-void()	death_knight_die7	=[	75,	death_knight_die8	] {};
-void()	death_knight_die8	=[	76,	death_knight_die9	] {};
-void()	death_knight_die9	=[	77,	death_knight_die10] {};
-void()	death_knight_die10=[	78,	death_knight_die11] {};
-void()	death_knight_die11=[	79,	death_knight_die12] {};
-void()	death_knight_die12=[	80,	death_knight_die13] {};
-void()	death_knight_die13=[	81,	death_knight_die14] {};
-void()	death_knight_die14=[	82,	death_knight_die15] {};
-void()	death_knight_die15=[	83,	death_knight_die16] {};
-void()	death_knight_die16=[	84,	death_knight_die17] {};
-void()	death_knight_die17=[	85,	death_knight_die18] {};
-void()	death_knight_die18=[	86,	death_knight_die19] {};
-void()	death_knight_die19=[	87,	death_knight_die20] {};
-void()	death_knight_die20=[	88,	death_knight_die21] {MakeSolidCorpse();};
-void()	death_knight_die21=[	89,	death_knight_die21] {};
+void death_knight_dying () [++ 69 .. 88]
+{
+	self.think = death_knight_dying;
+	thinktime self : HX_FRAME_TIME;
+	
+	if (self.frame<86)
+	{	//check for gib
+		if (self.health < -30)
+		{
+			chunk_death();
+			return;
+		}
+	}
+	if (cycle_wrapped) {
+		self.frame = 88;
+		MakeSolidCorpse();
+	}
+}
 
 void() death_knight_gibs =
 {
@@ -165,59 +162,38 @@ void() death_knight_gibs =
 void() death_knight_die =
 {
 // check for gib
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
 	if (self.health < -30)
 	{
 		sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);
-		ThrowGib ("models/blood.mdl", self.health);
-		//ThrowGib ("models/flesh2.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		//ThrowGib (self.headmodel, self.health);
+		
 		chunk_death();
-		remove(self);	//return;
+		return;		//remove(self);
 	}
-
 // regular death
 	sound (self, CHAN_VOICE, "death_knight/kdeath.wav", 1, ATTN_NORM);
-	ThrowGib ("models/flesh2.mdl", self.health);
-	if (self.enemy.playerclass == CLASS_PALADIN && self.enemy.weapon == IT_WEAPON2)
+	if (self.enemy.playerclass == CLASS_PALADIN && self.enemy.weapon == IT_WEAPON2 && random()<0.75)
 	{
-		if (random(100) < 35)
-		{
-			setmodel (self, "models/footsoldiersplit.mdl");
-			sound(self,CHAN_VOICE,"death_knight/kdeath2.wav",1,ATTN_NORM);
-			//setsize (self, '-13 -13 -12', '13 13 35');
-			//setsize (self, '-16 -16 0', '16 16 56');
-			//setsize (self, '-13 -13 -6', '13 13 1');
-			ThrowGib ("models/footsoldierhalf.mdl", self.health);
-			ThrowGib ("models/blood.mdl", self.health);
-			ThrowGib ("models/blood.mdl", self.health);
-			ThrowGib ("models/footsoldieraxe.mdl", self.health);
-			self.headmodel = "";
-			//blood_fx();
-		}
+		setmodel (self, "models/footsoldiersplit.mdl");
+		sound(self,CHAN_VOICE,"death_knight/kdeath2.wav",1,ATTN_NORM);
+		ThrowGib ("models/footsoldierhalf.mdl", self.health);
+		ThrowGib ("models/footsoldieraxe.mdl", self.health);
+		self.headmodel = "";
+		bloodspew_create (3, 60, '0 0 16');
 	}
 	else if (self.decap>0 && random()<0.5)	//ws: only sharp weapons will decapitate; see damage.hc
 	{
 		setmodel (self, "models/footsoldierdecap.mdl");
-		sound(self,CHAN_VOICE,"player/telefrag.wav",1,ATTN_NORM);
-		//setsize (self, '-13 -13 -12', '13 13 35');
-		//setsize (self, '-13 -13 -6', '13 13 1');
-		//setsize (self, '-16 -16 0', '16 16 56');
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
+		sound(self,CHAN_VOICE,"player/decap.wav",1,ATTN_NORM);	//player/telefrag.wav
 		ThrowGib ("models/footsoldierhd.mdl", self.health);
 		self.headmodel = "";
-		//blood_fx();
+		bloodspew_create (2, 25, self.view_ofs);
 	}
-	//else
-	setsize (self, '-13 -13 -6', '13 13 6');
 	sound (self, CHAN_AUTO, "player/megagib.wav", 1, ATTN_NORM);
-	ThrowGib ("models/blood.mdl", self.health);
-	death_knight_die1 ();
-	self.movetype = MOVETYPE_NONE;
-	//if (self.frame == 87)
-		
+	
+	setsize (self, '-13 -13 -6', '13 13 6');
+	death_knight_dying();
 };
 
 /*QUAKED monster_death_knight (1 0 0) (-16 -16 -24) (16 16 40) Ambush

@@ -297,40 +297,31 @@ void() archer_gibs =
 void() archer_die =
 {
 	// check for gib
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
 	if (self.health < -30)
 	{
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib("models/blood.mdl", self.health);
-		ThrowGib("models/blood.mdl", self.health);
-		//archer_gibs();
-		//BloodSplat();
-		//ThrowGib (self.headmodel, self.health);
 		chunk_death();
-		remove(self);	//return;
+		return;
 	}
 	else if (self.decap>0 && random()<0.5)	//ws: only sharp weapons will decapitate; see damage.hc
 	{
-		setmodel (self, "models/archerdecap.mdl");
 		if (self.classname == "monster_archer_lord")
 			setmodel (self, "models/archerdecap_lord.mdl");
 		else if (self.netname == "monster_archer_ice")
 			setmodel (self, "models/archerdecap_ice.mdl");
+		else
+			setmodel (self, "models/archerdecap.mdl");
 		sound(self,CHAN_VOICE,"player/decap2.wav",1,ATTN_NORM);
 		setsize (self, '-16 -16 0', '16 16 56');
-		//self.hull=HULL_PLAYER;
 		ThrowGib ("models/archerhd.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
 		self.headmodel = "";
+		bloodspew_create (3, 30, self.view_ofs);
 	}
 	else
 	{
-		//ThrowGib ("models/flesh2.mdl", self.health);
 		//particleexplosion(self.origin,138,25,50);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
-		ThrowGib ("models/blood.mdl", self.health);
 		if (self.classname == "monster_archer")
 			sound (self, CHAN_VOICE, "archer/death.wav", 1, ATTN_NORM);
 		else
@@ -339,6 +330,7 @@ void() archer_die =
 
 	archer_dying();
 };
+
 
 /*-----------------------------------------
 	archer_pain - flinch in pain
