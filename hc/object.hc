@@ -1733,7 +1733,7 @@ void obj_statue_lion(void)
 	CreateEntityNew(self,ENT_STATUE_LION,"models/lion.mdl",chunk_death);
 
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_statue_athena(0.3 0.1 0.6) (-30 -30 0) (30 30 90)
@@ -1749,7 +1749,7 @@ void obj_statue_athena (void)
 	CreateEntityNew(self,ENT_STATUE_ATHENA,"models/athena.mdl",chunk_death);
 
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-
+	self.use=self.th_die;
 }
 
 
@@ -1766,7 +1766,7 @@ void obj_statue_neptune (void)
 	CreateEntityNew(self,ENT_STATUE_NEPTUNE,"models/neptune.mdl",chunk_death);
 
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_bonepile(0.3 0.1 0.6) (-10 -10 0) (10 10 10)
@@ -1783,8 +1783,6 @@ void obj_bonepile (void)
 	self.use = chunk_death;
 
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-	
-	self.thingtype = THINGTYPE_BONE;
 }
 
 /*QUAKED obj_statue_caesar(0.3 0.1 0.6) (-24 -24 0) (24 24 90)
@@ -1799,7 +1797,7 @@ void obj_statue_caesar (void)
 	CreateEntityNew(self,ENT_STATUE_CAESAR,"models/caesar.mdl",chunk_death);
 
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_statue_snake_coil (0.3 0.1 0.6) (-44 -44 0) (44 44 90)
@@ -1815,7 +1813,7 @@ void obj_statue_snake_coil (void)
 
 	self.scale = .5;
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_skull (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
@@ -1828,8 +1826,7 @@ void obj_skull (void)
 {
 	precache_model("models/skull.mdl");
 	CreateEntityNew(self,ENT_SKULL,"models/skull.mdl",chunk_death);
-	
-	self.thingtype = THINGTYPE_BONE;
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_pew (0.3 0.1 0.6) (-16 -40 0) (16 40 50)
@@ -1842,6 +1839,7 @@ void obj_pew (void)
 {
 	precache_model("models/pew.mdl");
 	CreateEntityNew(self,ENT_PEW,"models/pew.mdl",chunk_death);
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_statue_olmec (0.3 0.1 0.6) (-40 -40 0) (40 40 130)
@@ -1854,6 +1852,7 @@ void obj_statue_olmec (void)
 {
 	precache_model2("models/olmec1.mdl");
 	CreateEntityNew(self,ENT_STATUE_OLMEC,"models/olmec1.mdl",chunk_death);
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_statue_mars (0.3 0.1 0.6) (-30 -30 0) (30 30 80)
@@ -1866,6 +1865,7 @@ void obj_statue_mars (void)
 {
 	precache_model2("models/mars.mdl");
 	CreateEntityNew(self,ENT_STATUE_MARS,"models/mars.mdl",chunk_death);
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_playerhead_paladin (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
@@ -1945,6 +1945,7 @@ void obj_plant_generic (void)
 {
 	precache_model ("models/plantgen.mdl");
 	CreateEntityNew(self,ENT_PLANT_GENERIC,"models/plantgen.mdl",chunk_death);
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_plant_meso (0.3 0.1 0.6) (-10 -10 0) (10 10 40)
@@ -1957,6 +1958,7 @@ void obj_plant_meso (void)
 {
 	precache_model2("models/plantmez.mdl");
 	CreateEntityNew(self,ENT_PLANT_MESO,"models/plantmez.mdl",chunk_death);
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_plant_rome (0.3 0.1 0.6) (-24 -24 0) (24 24 90)
@@ -1969,5 +1971,6 @@ void obj_plant_rome (void)
 {
 	precache_model2("models/plantrom.mdl");
 	CreateEntityNew(self,ENT_PLANT_ROME,"models/plantrom.mdl",chunk_death);
+	self.use=self.th_die;
 }
 
