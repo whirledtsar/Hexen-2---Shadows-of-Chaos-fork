@@ -177,7 +177,7 @@ void() death_knight_die =
 	}
 // regular death
 	sound (self, CHAN_VOICE, "death_knight/kdeath.wav", 1, ATTN_NORM);
-	if (self.enemy.playerclass == CLASS_PALADIN && self.enemy.weapon == IT_WEAPON2 && random()<0.9)
+	if (self.enemy.playerclass == CLASS_PALADIN && self.enemy.weapon == IT_WEAPON2 && random()<0.75)
 	{
 		setmodel (self, "models/footsoldiersplit.mdl");
 		sound(self,CHAN_VOICE,"death_knight/kdeath2.wav",1,ATTN_NORM);
