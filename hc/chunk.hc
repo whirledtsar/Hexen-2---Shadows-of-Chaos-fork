@@ -895,3 +895,29 @@ void chunk_death (void)
 	}
 }
 
+void bloodspew ()
+{
+	if (time > self.lifetime || !self.owner || self.count-self.cnt<0)
+		remove(self);
+	
+	setorigin(self, self.owner.origin + self.view_ofs);
+	particle2(self.origin,'-10 -10 60','10 10 100',rint (256 + 16*8 + random(9)),PARTICLETYPE_FASTGRAV,self.count-self.cnt);
+	//SpawnPuff (self.origin, '0 0 80',self.count-self.cnt,self.owner);
+	self.cnt+=self.scalerate;
+	thinktime self : HX_FRAME_TIME*0.5;
+}
+
+void bloodspew_create (float life, float amt, vector ofs)
+{
+entity new;
+	if (life<1)
+		return;
+	new = spawn();
+	new.lifetime = time+(life*HX_FRAME_TIME*0.5);
+	new.scalerate = (amt-amt*0.1)/life;
+	new.count = amt;
+	new.owner = self;
+	new.view_ofs = ofs;
+	new.think = bloodspew;
+	thinktime new : 0;
+}
