@@ -875,7 +875,7 @@ void chunk_death (void)
 		return;
 
 	SUB_UseTargets();
-	self.target = self.targetname;	//fix by Shanjaq
+	SUB_ResetTarget();
 	
 	if (self.th_init)
 	{

@@ -165,7 +165,7 @@ vector newmaxs;
 //Won't be necc to pass headmdl once everything has it's .headmodel
 //value set in spawn
 	self.netname="corpse";
-	self.target = string_null;	//self.target = self.targetname;	//fix by Shanjaq
+	SUB_ResetTarget();
 	self.th_die = chunk_death;
 	if (self.skin==GLOBAL_SKIN_ASH)
 		self.th_die = shatter;

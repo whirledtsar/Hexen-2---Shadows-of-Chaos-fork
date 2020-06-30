@@ -478,7 +478,7 @@ string s;
 //
 // kill the killtargets
 //
-	if(self.killtarget && self.killtarget!="")
+	if(self.killtarget!="")
 	{
 		t = world;
 		do
@@ -517,7 +517,7 @@ string s;
 // fire targets
 //
 	self.style=0;
-	if (self.target && self.target!="")
+	if (self.target!="")
 	{
 		act = activator;
 		t = world;
@@ -637,4 +637,9 @@ void SUB_UseWakeTargets()
 	self.target = otarget;
 	self.killtarget = okill;
 	self.waketarget = "";	//only use waketarget once!
+}
+
+void SUB_ResetTarget()
+{
+	self.target = "";
 }
