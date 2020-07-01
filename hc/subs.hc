@@ -532,5 +532,5 @@ void SUB_UseWakeTargets()
 
 void SUB_ResetTarget()
 {
-	self.target = "";
+	self.target = self.killtarget = "";
 }
