@@ -1335,17 +1335,17 @@
 [
 	skin(choices) : "Skin" : 0 =
 	[
-		0 : "Generic texture"
-		1 : "Roman texture"
+		0 : "Roman texture"
+		1 : "Generic texture"
 	]
 ]
 @PointClass base(Object, Spawn) model(":models/chest2.mdl") size(-16 -16 0, 16 16 32) = obj_chest2 : "Chest #2"
 [
 	skin(choices) : "Skin" : 0 =
 	[
-		0 : "Generic texture"
-		1 : "Meso texture"
-		2 : "Egypt texture"
+		0 : "Meso texture"
+		1 : "Egypt texture"
+		2 : "Wooden texture"
 	]
 ]
 @PointClass base(Object, Spawn) model(":models/chest3.mdl") size(-16 -16 0, 16 16 32) = obj_chest3 : "Chest #3" []
@@ -1420,7 +1420,13 @@
 @PointClass base(Object) model(":models/tombstn1.mdl") size(-24 -24 0, 24 24 60) = obj_tombstone1 : "Cross tombstone" []
 @PointClass base(Object) model(":models/tombstn2.mdl") size(-16 -16 0, 16 16 40) = obj_tombstone2 : "Rounded tombstone" []
 @PointClass base(Object) model(":models/tree.mdl") size(-42 -42 0, 42 42 160) = obj_tree : "Leaveless tree" []
-@PointClass base(Object) model(":models/tree2.mdl") size(-140 -140 -16, 140 140 220) = obj_tree2 : "Normal tree" []
+@PointClass base(Object) model(":models/tree2.mdl") size(-140 -140 -16, 140 140 220) = obj_tree2 : "Normal tree"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Animated swaying" : 0
+	]
+]
 @PointClass base(Object) model(":models/webs.mdl") size(-25 -25 -25, 25 25 25) = obj_webs : "Spider web"
 [
 	spawnflags(Flags) =
@@ -1868,19 +1874,14 @@
 	th_die(integer) : "Death type"
 ]
 
-@PointClass base(Appearflags, Targetname, Target) = trigger_hub_intermission : "Trigger hub intermission (PoP)"
-[
-	map(string) : "Map"
-]
-
 @SolidClass base(Appearflags, Targetname, Target) = trigger_hurt : "Hurt brush
 If it has a target, it will act like a relay and hurt that target when triggered."
 [
 	spawnflags(Flags) =
 	[
-		1 : "Player only (PoP)" : 0
-		2 : "Monster only (PoP)" : 0
-		8 : "Deactivated (PoP)" : 0
+		1 : "Player only" : 0
+		2 : "Monster only" : 0
+		8 : "Deactivated" : 0
 	]
 	deathtype(choices) : "Death message" =
 	[
@@ -2249,6 +2250,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	spawnflags(Flags) =
 	[
 		2 : "Cocoon (place on ground)"
+		16 : "Cocoon: dormant (don't wake until triggered)"
 	]
 ]
 
@@ -2268,7 +2270,21 @@ If it has a target, it will act like a relay and hurt that target when triggered
 @PointClass base(Appearflags, Targetname, Target) = trigger_hub_intermission : "Trigger hub intermission"
 [
 	delay(integer) : "Minimum duration" : 2
-	level(integer) : "Intermission #" : 11
+	level(choices) : "Intermission #" : 11 =
+	[
+		1 : "Famine"
+		2 : "Death"
+		3 : "Pestilence"
+		4 : "War"
+		5 : "End of demo"
+		6 : "Eidolon"
+		7 : "Eidolon page 2"
+		8 : "Eidolon page 3"
+		9 : "?"
+		10 : "Praevus"
+		11 : "Half PoP"
+		12 : "New game (PoP)"
+	]
 	map(string) : "Next map"
 	spawnflags(Flags) =
 	[
