@@ -111,7 +111,7 @@ void()sheep_pain;
 void()sheep_lookdown;
 void()sheep_look;
 void()sheep_lookup;
-
+/*
 void restore_monster ()
 {
 //SOUND and MODEL
@@ -122,7 +122,7 @@ void restore_monster ()
 	newmis.health=self.max_health;
 	remove(self);
 }
-
+*/
 void sheep_sound (float vol)
 {
 float r;
