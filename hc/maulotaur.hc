@@ -20,7 +20,7 @@ float MAUL_HIT_FORCE = 30;
 float MAUL_CHG_FORCE = 50;
 float MAUL_QUAKE_RANGE = 360;
 
-float MAUL_EYESCLOSED = 1;	//skin
+float MAUL_SKIN_DEAD = 1;	//skin
 
 void precache_maulotaur()
 {
@@ -46,13 +46,10 @@ void precache_maulotaur()
 
 void maul_chargehit (entity victim)
 {
-	if (victim.safe_time>time)
+	if (victim.safe_time>time || !victim.takedamage || victim == world)
 		return;
 	
 	sound (self, CHAN_WEAPON, "weapons/vorpblst.wav", 1, self.lip);	//if (victim.thingtype == THINGTYPE_FLESH)
-	
-	if (!victim.takedamage || victim == world)
-		return;
 	
 	victim.safe_time = time+0.75;
 	if (victim.health - self.dmg*1.5 <= 0)
@@ -165,7 +162,6 @@ void maul_die () [++ $mauldt1 .. $mauldt29]
 {
 	if (cycle_wrapped) {
 		self.frame = $mauldt29;
-		self.skin = MAUL_EYESCLOSED;	
 		MakeSolidCorpse();
 		return;
 	}
@@ -176,14 +172,17 @@ void maul_die () [++ $mauldt1 .. $mauldt29]
 		stopSound(self,CHAN_WEAPON);
 		stopSound(self,CHAN_BODY);
 		sound (self, CHAN_VOICE, "maul/die.wav", 1, self.lip-0.25);
-		//self.takedamage = DAMAGE_NO;	//dont gib during fall animation
+		ThrowGib ("models/blood.mdl", self.health);
+		ThrowGib ("models/blood.mdl", self.health);
+		ThrowGib ("models/blood.mdl", self.health);
 	}
 	else if (self.frame == $mauldt27 && self.flags&FL_ONGROUND)
 		sound (self, CHAN_BODY, "maul/fall.wav", 1, self.lip);
 	
-	if (self.frame <= $mauldt22) {
-		ThrowGib ("models/blood.mdl", self.health);
-	}
+	if (self.frame < $mauldt21)
+		thinktime self : HX_FRAME_TIME*1.5;	//slower animation before he falls
+	else
+		self.skin = MAUL_SKIN_DEAD;
 }
 
 void maul_fballtouch ()
@@ -607,25 +606,21 @@ void monster_maulotaur ()
 		return;
 	}
 	
+	self.init_org = self.origin;
+	
 	if(!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_maulotaur();
-	
-	if (!self.th_init)
-		self.th_init = monster_maulotaur;
-	self.init_org = self.origin;
 	
 	self.aflag = FALSE;	//tracks whether to fire missile during swing animation
 	self.cnt = time;	//tracks last voice sound
 	self.counter = 0;	//tracks when to stop charging
 	self.dmg = 12;		//melee attack damage
 	self.drawflags = SCALE_ORIGIN_BOTTOM;
-	self.flags (+) FL_MONSTER;
-	self.flags2 (+) FL_ALIVE;
 	self.level = 80;	//melee range
 	self.lip = ATTN_NORM;	//sound attenuation
 	self.mass = 50;
 	self.mintel = 10;
-	self.monsterclass = CLASS_HENCHMAN;
+	self.monsterclass = CLASS_LEADER;
 	self.movetype = MOVETYPE_STEP;
 	self.netname = "maulotaur";
 	self.preventrespawn = FALSE;
@@ -637,9 +632,9 @@ void monster_maulotaur ()
 	self.yaw_speed = 15;
 	
 	setmodel (self, "models/maultaur.mdl");
-	setsize (self, '-30 -30 -24', '30 30 88');	//112 tall
+	setsize (self, '-30 -30 0', '30 30 96');
 	self.solid = SOLID_SLIDEBOX;
-	self.hull = HULL_GOLEM;
+	self.hull = HULL_PLAYER;
 	
 	if (self.classname=="monster_maulotaur_lord")
 	{
@@ -650,17 +645,17 @@ void monster_maulotaur ()
 			self.experience_value = 750;
 		if (!self.health)
 			self.health = 2000;
+		//self.hull = HULL_GOLEM;
 		self.level = 100;	//melee range
-		self.lip = 0.5;	//sound attenuation
+		self.lip = 0.5;		//sound attenuation
 		self.mass *= 1.5;
 		self.mintel *= 1.5;
-		self.monsterclass = CLASS_LEADER;
+		self.monsterclass = CLASS_BOSS;
 		self.preventrespawn = TRUE;
 		self.proj_ofs *= 1.5;
 		self.scale = 1.5;
 		self.view_ofs *= 1.5;
 		setsize (self, self.mins*self.scale, self.maxs*self.scale);
-		setsize (self, self.mins+'0 0 16', self.maxs);
 	}
 	else {
 		if (self.experience)
@@ -669,6 +664,7 @@ void monster_maulotaur ()
 			self.experience_value = 300;
 		if (!self.health)
 			self.health = 500;
+		self.buff = 1;
 	}
 	self.max_health = self.health;
 	self.init_exp_val = self.experience_value;
@@ -680,6 +676,7 @@ void monster_maulotaur ()
 	self.th_missile = maul_mis;
 	self.th_pain = maul_pain;
 	self.th_die = maul_die;
+	self.th_init = monster_maulotaur;
 	
 	walkmonster_start();
 }
@@ -691,7 +688,6 @@ void monster_maulotaur ()
 */
 void monster_maulotaur_lord ()
 {
-	self.th_init = monster_maulotaur_lord;
 	monster_maulotaur();
 }
 
