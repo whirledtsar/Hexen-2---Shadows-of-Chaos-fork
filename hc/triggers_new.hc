@@ -85,10 +85,9 @@ void trigger_reflect ()
  - move up down via jumpping (hook in preplayer code)
  - Added multiple climbing sounds (works with player footsound state)
  - Modified to have on/off/toggle state via triggers
- - Downsides to system, there is no abilty to go down a ladder
 
-/*======================================================================
-/*QUAKED trigger_ladder (.5 .5 .5) x x x Deactivated
+======================================================================
+QUAKED trigger_ladder (.5 .5 .5) x x x Deactivated
 Invisible brush based ladder (jump key to climb)
 -------- KEYS --------
 targetname : trigger entity
