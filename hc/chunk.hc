@@ -778,9 +778,9 @@ void chunk_death (void)
 	SUB_UseTargets();
 	SUB_ResetTarget();
 	
-	if (self.th_init)
-	{
-		//set up respawn time
+	if (self.th_init && self.th_init != SUB_Null)
+	{	//set up respawn time
+		self.lifetime = time + random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
 		self.think = MarkForRespawn;
 		self.nextthink = time + 0.01;
 	}
