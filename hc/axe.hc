@@ -175,16 +175,24 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
-	traceline (source, source + v_forward*80, FALSE, self);		//ws: increased range from 64 to 80
+	traceline (source, source + v_forward*80, FALSE, self);		//SoC: increased range from 64 to 80
 	
 	if (trace_fraction == 1.0)
 	{
-		traceline (source, source + v_forward*80 - (v_up * 30), FALSE, self);  // 30 down
+		traceline (source, source + v_forward*80 - (v_up*30), FALSE, self);  // 30 down
 		if (trace_fraction == 1.0)
 		{
-			traceline (source, source + v_forward*80 + v_up * 30, FALSE, self);  // 30 up
+			traceline (source, source + v_forward*80 + v_up*30, FALSE, self);  // 30 up
 			if (trace_fraction == 1.0)
-				return;
+			{
+				traceline (source, source + v_forward*80 + v_right*15, FALSE, self);  // 15 right
+				if (trace_fraction == 1.0)
+				{
+					traceline (source, source + v_forward*80 - v_right*15, FALSE, self);  // 15 left
+					if (trace_fraction == 1.0)
+						return;
+				}
+			}
 		}
 	}
 	
@@ -199,7 +207,7 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 		}
 		
 		if (trace_ent.flags & FL_MONSTER || trace_ent.flags & FL_CLIENT)
-			self.greenmana-=AXE_MELEE_COST*mode;	//mode 0 for no mana, mode 3 for tomed, mode 1 for normal
+			self.greenmana-=AXE_MELEE_COST*mode;	//mode 0 for low power, mode 1 for charged, mode 3 for tomed
 		
 		SpawnPuff (org, '0 0 0', damg,trace_ent);
 		if (trace_ent.flags & FL_ONGROUND)
@@ -214,7 +222,9 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 	else
 	{	// hit wall
 		sound (self, CHAN_WEAPON, "weapons/hitwall.wav", 1, ATTN_NORM);
-		CreateWhiteSmoke(trace_endpos - v_forward*8,'0 0 2',HX_FRAME_TIME);
+		//CreateWhiteSmoke(trace_endpos - v_forward*8,'0 0 2',HX_FRAME_TIME);
+		makevectors(self.angles);
+		CreateSpark (trace_endpos + v_right*16 - v_up*24 - v_forward*8);
 		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
 		WriteCoord (MSG_BROADCAST, org_x);
@@ -241,11 +251,16 @@ void(float rightclick, float tome) axeblade_fire =
 	
 	if (rightclick)
 	{
-		damg = self.weaponframe_cnt*1.5 + strmod;
-		if (tome && self.greenmana >= AXE_MELEE_COST*3)
-			axe_melee (damg*3, 3);
-		else if (self.greenmana >= AXE_MELEE_COST)
-			axe_melee (damg*1.75, 1);
+		damg = strmod;
+		if (self.flags2&FL2_FADE_UP && self.greenmana >= AXE_MELEE_COST)
+			damg+=55;
+		if (tome && self.greenmana >= AXE_MELEE_COST*2)
+			damg*=2;
+		
+		if (tome)
+			axe_melee (damg, 2);
+		if (self.flags2&FL2_FADE_UP)
+			axe_melee (damg, 1);
 		else
 			axe_melee (damg, 0);
 	}
@@ -336,13 +351,14 @@ void axe_b ()
 	{
 		if (self.weaponframe_cnt>=AXE_BUILDUP) {
 			self.punchangle_x=-8;	//downward shake
-			self.weaponframe_cnt=AXE_BUILDUP;
+			self.flags2(+)FL2_FADE_UP;
 		}
 		else
 			self.punchangle_x=-1;
 		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
 		axeblade_fire(TRUE, tome);
 		self.weaponframe_cnt=0;
+		self.flags2(-)FL2_FADE_UP;
 	}
 	else if (self.weaponframe == $1stAxe2 || self.weaponframe == $1stAxe8)
 		++self.weaponframe;		//speed up animation
@@ -351,7 +367,7 @@ void axe_b ()
 }
 
 void axe_a ()	//normal fire
-{	dprint (ftos(self.weaponframe)); dprint ("\n");
+{
 	float tome;
 	tome = self.artifact_active & ART_TOMEOFPOWER;
 	
