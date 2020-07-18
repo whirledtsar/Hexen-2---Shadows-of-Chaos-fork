@@ -470,9 +470,14 @@ void obj_tree2()
 {
 	entity top;
 
-	precache_model("models/tree2.mdl");
-	CreateEntityNew(self,ENT_TREE,"models/tree2.mdl",tree2_death);
-
+	if (self.spawnflags&1)
+		self.mdl = "models/treesway.mdl";
+	else
+		self.mdl = "models/tree2.mdl";
+	
+	precache_model(self.mdl);
+	CreateEntityNew(self,ENT_TREE,self.mdl,tree2_death);
+	
 	if(world.target=="sheep")
 		setsize(self,'-12  -12  -16','12  12 210');
 
@@ -493,7 +498,6 @@ void obj_tree2()
 
 	top.owner = self;
 	self.owner = top;
-
 }
 
 /*QUAKED obj_bench (0.3 0.1 0.6) (-30 -30 0) (30 30 40)
