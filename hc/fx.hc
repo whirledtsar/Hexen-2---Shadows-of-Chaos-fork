@@ -145,6 +145,10 @@ void CreateWaterSplash (vector spot)
 
 }
 
+float AshColor()
+{
+	return 2+rint(random(4));
+}
 
 /*
 ================
@@ -488,4 +492,330 @@ void misc_fountain(void)
 	}
 	self.think = do_fountain;
 	thinktime self : HX_FRAME_TIME;
+}
+
+/*
+	~fx_leaves~
+Brush entity that spawns leaves within its bounds in the direction of its angle, with random variance determined by its veer. Don't killtarget to remove, just use.
+
+angle (0): Angle to spawn
+speed (125): Speed of leaves
+veer (45): Maximum offset from angle (1-360)
+wait (1): Spawns per second. Because each spawner has a limit of 18 active leaves, low values (<0.33) will have erratic results.
+*/
+
+string leaves[3] = {"models/leafchk1.mdl", "models/leafchk2.mdl", "models/leafchk3.mdl"};
+
+void() fx_leaves_remove;
+
+entity leaves_findent ()
+{
+	if (!self.cameramode.state)
+		return self.cameramode;
+	if (!self.catapulter.state)
+		return self.catapulter;
+	if (!self.chain.state)
+		return self.chain;
+	if (!self.check_chain.state)
+		return self.check_chain;
+	if (!self.controller.state)
+		return self.controller;
+	if (!self.dmg_inflictor.state)
+		return self.dmg_inflictor;
+	if (!self.enemy.state)
+		return self.enemy;
+	if (!self.goalentity.state)
+		return self.goalentity;
+	if (!self.groundentity.state)
+		return self.groundentity;
+	if (!self.lockentity.state)
+		return self.lockentity;
+	if (!self.movechain.state)
+		return self.movechain;
+	if (!self.oldenemy.state)
+		return self.oldenemy;
+	if (!self.pathentity.state)
+		return self.pathentity;
+	if (!self.path_current.state)
+		return self.path_current;
+	if (!self.path_last.state)
+		return self.path_last;
+	if (!self.shield.state)
+		return self.shield;
+	if (!self.trigger_field.state)
+		return self.trigger_field;
+	if (!self.viewentity.state)
+		return self.viewentity;
+	
+	return world;
+}
+
+void leaf_reset ()
+{
+	//self.model = "";
+	setmodel(self, "models/null.spr");
+	setsize (self, VEC_ORIGIN, VEC_ORIGIN);
+	
+	self.count = self.frags = 0;
+	self.effects = EF_NODRAW;
+	self.state = FALSE;
+	self.movetype = MOVETYPE_NONE;
+	self.solid = SOLID_NOT;
+	
+	self.think = SUB_Null;
+	thinktime self : 99999999;
+}
+
+void leaf_remove ()
+{	//try not to disappear when player could see
+	self.think = leaf_remove;
+	thinktime self : 0.5;
+	
+	++self.count;
+	if (self.count >= 5)
+		leaf_reset();	//remove(self);
+	
+	if (!checkclient)
+		leaf_reset();	//remove(self);
+}
+
+void leaf_rise ()
+{
+	thinktime self : HX_FRAME_TIME*0.5;
+	
+	setorigin(self, self.origin+'0 0 1');
+	if (pointcontents(self.origin-self.proj_ofs)==CONTENT_EMPTY) {
+		self.think = leaf_remove;
+		thinktime self : random(1,2);
+	}
+}
+
+void leaf_fly ()
+{
+thinktime self : HX_FRAME_TIME;
+	if (self.check_ok < time && (self.angles_x > (90+15) || self.angles_x < (90-15)))	{
+		self.avelocity_x*=(-1);		//rotate in opposite direction so it doesnt just spin 360
+		self.check_ok = time+0.1;	//slight delay so it doesnt immediately reverse again
+	}
+	if (pointcontents(self.origin) == CONTENT_WATER || pointcontents(self.origin) == CONTENT_SLIME) {	//float on water
+		self.movetype = MOVETYPE_NONE;
+		self.velocity = '0 0 0';
+		self.angles_x = 90;
+		self.think = leaf_rise;
+		thinktime self : 0;
+	}
+	else if (pointcontents(self.origin) == CONTENT_LAVA) {
+		CreateGreySmoke(self.origin, '0 0 4', HX_FRAME_TIME);
+		leaf_reset();	//remove(self);
+	}
+}
+
+void leaf_blow ()
+{
+	++self.frags;
+	self.flags (-) FL_ONGROUND;
+	self.gravity = 0.01;
+	self.movetype = MOVETYPE_TOSS;
+	self.speed *= 0.7;
+	setorigin(self, self.origin+'0 0 1');
+	self.movedir_y += 30*crandom();
+	self.movedir_z = random(0.5,2);	//blow slightly upwards
+	makevectors(self.movedir);
+	self.velocity = v_forward * self.speed;
+	
+	self.think = leaf_fly;
+	thinktime self : 0;
+}
+
+void leaf_touch ()
+{
+	if (pointcontents(self.origin) == CONTENT_SKY)
+		leaf_reset();	//remove(self);
+	if (other.classname=="obj_tree2" || other.classname=="tree2top" || other.classname=="obj_bush1")
+		return;
+	
+	if (other && other.solid!=SOLID_BSP)
+		leaf_reset();	//remove(self);
+	
+	setorigin(self, self.origin+self.proj_ofs);
+	self.movetype = MOVETYPE_NONE;
+	self.velocity = '0 0 0';
+	self.angles_x = 90;
+	
+	if (self.frags<=2 && random()<0.75)
+		self.think = leaf_blow;
+	else
+		self.think = leaf_remove;
+	thinktime self : random(1,3);
+}
+
+void leaf_init (entity new)
+{
+float type;
+vector dir, org;
+	type = rint(random(0,2));
+	setmodel (new, leaves[type]);
+	setsize (new, VEC_ORIGIN, VEC_ORIGIN);
+	org_x = random(self.absmin_x, self.absmax_x);
+	org_y = random(self.absmin_y, self.absmax_y);
+	org_z = random(self.absmin_z, self.absmax_z);
+	setorigin(new, org);
+	new.avelocity_x = 25+(self.speed*0.25);
+	new.avelocity_y = (self.speed*0.25);
+	new.effects = 0;	//remove EF_NODRAW
+	new.flags(-)FL_ONGROUND;
+	new.gravity = 0.05;
+	new.movetype = MOVETYPE_TOSS;
+	new.owner = self.owner;
+	new.scale = random(0.7, 1);
+	new.speed = self.speed;
+	new.state = TRUE;
+	new.solid = SOLID_PHASE;
+	new.touch = leaf_touch;
+	new.think = leaf_fly;
+	thinktime new : HX_FRAME_TIME;
+	
+	dir = self.angles;
+	dir_y += self.veer*crandom();
+	makevectors(dir);
+	new.velocity = v_forward * (self.speed*random(0.9,1.1));
+	new.velocity_z = v_forward_z + random(0,10);
+	new.angles = new.movedir = vectoangles(new.velocity);
+	new.angles_x = 90;	//because of how leaf models are oriented
+	if (type==0) {
+		new.angles_y += 90;
+		new.proj_ofs = '0 0 2';
+	}
+	else {
+		new.angles_y += 180;
+		new.proj_ofs = '0 0 5';
+	}
+}
+
+void leaves_generate ()
+{
+entity leaf;
+	
+	if (self.aflag)		//remove self if we have linked tree and it has been destroyed
+		if (!self.owner || self.owner.health<=0)
+			fx_leaves_remove();
+	
+	leaf = leaves_findent();	//spawn();
+	if (leaf)	//create leaf using first empty entity space from our list
+		leaf_init(leaf);
+	
+	thinktime self : self.wait*random(0.8,1.2);
+}
+
+void fx_leaves_init ()
+{	//find nearby foliage to link with (remove self if theyre removed)
+entity found;
+	if (self.target!="") {
+		found = find(world);
+		while (found!=world) {
+			if (found.targetname==self.target) {
+				self.aflag = TRUE;
+				self.owner = found;
+				found = world;	//end loop
+			}
+			else
+				found = found.chain;
+		}
+	}
+	else {
+		found = findradius((self.absmin+self.absmax)*0.5, 192);
+		while (found!=world)
+		{
+			if (found.classname=="obj_tree2" || found.classname=="tree2top") {
+				self.aflag = TRUE;
+				self.owner = found;
+				found = world;
+			}
+			else
+				found = found.chain;
+		}
+	}
+	
+	//spawn 18 possible entities to create leaves with
+	self.cameramode = spawn();
+	self.catapulter = spawn();
+	self.chain = spawn();
+	self.check_chain = spawn();
+	self.controller = spawn();
+	self.dmg_inflictor = spawn();
+	self.enemy = spawn();
+	self.goalentity = spawn();
+	self.groundentity = spawn();
+	self.lockentity = spawn();
+	self.movechain = spawn();
+	self.oldenemy = spawn();
+	self.pathentity = spawn();
+	self.path_current = spawn();
+	self.path_last = spawn();
+	self.shield = spawn();
+	self.trigger_field = spawn();
+	self.viewentity = spawn();
+	
+	self.think = leaves_generate;
+	thinktime self : 0;
+}
+
+void fx_leaves_remove ()
+{
+	if (self.cameramode)
+		remove(self.cameramode);
+	if (self.catapulter)
+		remove(self.catapulter);
+	if (self.chain)
+		remove(self.chain);
+	if (self.check_chain)
+		remove(self.check_chain);
+	if (self.controller)
+		remove(self.controller);
+	if (self.dmg_inflictor)
+		remove(self.dmg_inflictor);
+	if (self.enemy)
+		remove(self.enemy);
+	if (self.goalentity)
+		remove(self.goalentity);
+	if (self.groundentity)
+		remove(self.groundentity);
+	if (self.lockentity)
+		remove(self.lockentity);
+	if (self.movechain)
+		remove(self.movechain);
+	if (self.oldenemy)
+		remove(self.oldenemy);
+	if (self.pathentity)
+		remove(self.pathentity);
+	if (self.path_current)
+		remove(self.path_current);
+	if (self.path_last)
+		remove(self.path_last);
+	if (self.shield)
+		remove(self.shield);
+	if (self.trigger_field)
+		remove(self.trigger_field);
+	if (self.viewentity)
+		remove(self.viewentity);
+	remove(self);
+}
+
+void fx_leaves ()
+{
+	setmodel(self, self.model);       // set size and link into world
+	self.model		= "";
+	self.modelindex = 0;
+	setsize (self, self.mins, self.maxs);
+	
+	self.use = fx_leaves_remove;
+	self.think = fx_leaves_init;
+	thinktime self : 0.1;
+	
+	if (!self.wait)
+		self.wait = 1;
+	if (!self.speed)
+		self.speed = 125;
+	if (self.veer<=0 || self.veer>360)
+		self.veer = 45;
 }

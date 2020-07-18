@@ -462,8 +462,13 @@ void obj_tree2()
 {
 	entity top;
 
-	precache_model("models/tree2.mdl");
-	CreateEntityNew(self,ENT_TREE,"models/tree2.mdl",tree2_death);
+	if (self.spawnflags&1)
+		self.mdl = "models/treesway.mdl";
+	else
+		self.mdl = "models/tree2.mdl";
+	
+	precache_model(self.mdl);
+	CreateEntityNew(self,ENT_TREE,self.mdl,tree2_death);
 
 	top = spawn();
 	top.scale = self.scale;
@@ -475,14 +480,13 @@ void obj_tree2()
 	if (self.scale)		// Move top according to scale
 		top.origin_z += top.scale * 104;
 	else 
-		top.origin_z += 104; 
+		top.origin_z += 104;
 
 	top.health = self.health;
 	top.classname = "tree2top";
 
 	top.owner = self;
 	self.owner = top;
-
 }
 
 /*QUAKED obj_bench (0.3 0.1 0.6) (-30 -30 0) (30 30 40)
