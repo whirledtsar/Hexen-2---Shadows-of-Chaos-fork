@@ -28,7 +28,9 @@ $frame 1stAxe25     1stAxe27
 
 float AXE_THROW_COST		= 4;
 float AXE_THROW_TOMECOST	= 3;
-float AXE_MELEE_COST		= 2;
+float AXE_MELEE_COST		= 3;
+
+float AXE_BUILDUP 			= 15;
 
 string AXE_TEXMOD		= "models/axe.mdl";
 
@@ -107,6 +109,7 @@ void launch_axtail (entity axeblade)
     tail.angles = tail.owner.angles;
 
 	axeblade.goalentity = tail;
+
 }
 
 void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
@@ -164,7 +167,7 @@ void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
 	launch_axtail(missile);
 }
 
-void axe_melee (float damage_base,float damage_mod,float mode)	//ws: using FireMelee didn't work because it checked whether to use mana after doing damage, so if its victim died it wouldnt recognize it as a valid target and use mana. also it was making the wrong hit sound.
+void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because it checked whether to use mana after doing damage, so if its victim died it wouldnt recognize it as a valid target and use mana. also it was making the wrong hit sound.
 {
 	vector	source;
 	vector	org;
@@ -172,21 +175,29 @@ void axe_melee (float damage_base,float damage_mod,float mode)	//ws: using FireM
 
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
-	traceline (source, source + v_forward*64, FALSE, self);
-
+	traceline (source, source + v_forward*80, FALSE, self);		//SoC: increased range from 64 to 80
+	
 	if (trace_fraction == 1.0)
 	{
-		traceline (source, source + v_forward*64 - (v_up * 30), FALSE, self);  // 30 down
+		traceline (source, source + v_forward*80 - (v_up*30), FALSE, self);  // 30 down
 		if (trace_fraction == 1.0)
 		{
-			traceline (source, source + v_forward*64 + v_up * 30, FALSE, self);  // 30 up
+			traceline (source, source + v_forward*80 + v_up*30, FALSE, self);  // 30 up
 			if (trace_fraction == 1.0)
-				return;
+			{
+				traceline (source, source + v_forward*80 + v_right*15, FALSE, self);  // 15 right
+				if (trace_fraction == 1.0)
+				{
+					traceline (source, source + v_forward*80 - v_right*15, FALSE, self);  // 15 left
+					if (trace_fraction == 1.0)
+						return;
+				}
+			}
 		}
 	}
-
+	
 	org = trace_endpos + (v_forward * 4);
-
+	
 	if (trace_ent.takedamage)
 	{
 		if (trace_ent.thingtype == THINGTYPE_FLESH)
@@ -196,9 +207,8 @@ void axe_melee (float damage_base,float damage_mod,float mode)	//ws: using FireM
 		}
 		
 		if (trace_ent.flags & FL_MONSTER || trace_ent.flags & FL_CLIENT)
-			self.greenmana-=AXE_MELEE_COST*mode;	//mode 0 for no mana, mode 3 for tomed, mode 1 for normal
+			self.greenmana-=AXE_MELEE_COST*mode;	//mode 0 for low power, mode 1 for charged, mode 3 for tomed
 		
-		damg = random(damage_mod+damage_base,damage_base);
 		SpawnPuff (org, '0 0 0', damg,trace_ent);
 		if (trace_ent.flags & FL_ONGROUND)
 			Knockback (trace_ent, self, self, 12+mode, 0.2);
@@ -212,7 +222,9 @@ void axe_melee (float damage_base,float damage_mod,float mode)	//ws: using FireM
 	else
 	{	// hit wall
 		sound (self, CHAN_WEAPON, "weapons/hitwall.wav", 1, ATTN_NORM);
-		CreateWhiteSmoke(trace_endpos - v_forward*8,'0 0 2',HX_FRAME_TIME);
+		//CreateWhiteSmoke(trace_endpos - v_forward*8,'0 0 2',HX_FRAME_TIME);
+		makevectors(self.angles);
+		CreateSpark (trace_endpos + v_right*16 - v_up*24 - v_forward*8);
 		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
 		WriteCoord (MSG_BROADCAST, org_x);
@@ -239,12 +251,18 @@ void(float rightclick, float tome) axeblade_fire =
 	
 	if (rightclick)
 	{
-		if (tome && self.greenmana >= AXE_MELEE_COST*3)
-			axe_melee (strmod*3, strmod*3.25, 3);
-		else if (self.greenmana >= AXE_MELEE_COST)
-			axe_melee (strmod*1.2, strmod*1.6, 1);
+		damg = strmod;
+		if (self.flags2&FL2_FADE_UP && self.greenmana >= AXE_MELEE_COST)
+			damg+=55;
+		if (tome && self.greenmana >= AXE_MELEE_COST*2)
+			damg*=2;
+		
+		if (tome)
+			axe_melee (damg, 2);
+		if (self.flags2&FL2_FADE_UP)
+			axe_melee (damg, 1);
 		else
-			axe_melee (strmod*0.8, strmod*1.2, 0);
+			axe_melee (damg, 0);
 	}
 	else
 	{
@@ -254,10 +272,9 @@ void(float rightclick, float tome) axeblade_fire =
 			sound (self, CHAN_WEAPON, "paladin/axgenpr.wav", 1, ATTN_NORM);
 
 			launch_axe('0 0 0','0 0 0', damg, tome);	// Middle
-
 			launch_axe('0 5 0','0 0 0', damg, tome);    // Side
 			launch_axe('0 -5 0','0 0 0', damg, tome);   // Side
-
+			
 			self.greenmana -= AXE_THROW_COST + AXE_THROW_TOMECOST;
 		}
 		else if (self.greenmana >= AXE_THROW_COST)	//regular throw
@@ -310,30 +327,43 @@ void axe_deselect (void)
 		W_SetCurrentAmmo();
 }
 
-void axe_b ()	//altfire
+void axe_b ()
 {
 	float tome;
 	tome = self.artifact_active & ART_TOMEOFPOWER;
-	
-	self.wfs = advanceweaponframe($1stAxe1,$1stAxe25);
 	self.th_weapon = axe_b;
-
-	// These frames are used during selection animation
-	if ((self.weaponframe >= $1stAxe2) && (self.weaponframe <= $1stAxe4))
-		self.weaponframe +=1;
-	else if ((self.weaponframe >= $1stAxe6) && (self.weaponframe <= $1stAxe7))
-		self.weaponframe +=1;
-
+	self.attack_finished = time+0.1;
+	
+	if (self.weaponframe == $1stAxe7) {
+		if (!self.button1)		//end loop if fire button released
+			++self.weaponframe;
+		else {
+			self.weaponframe = $1stAxe7;
+			self.weaponframe_cnt += 1;
+			if (self.weaponframe_cnt==AXE_BUILDUP)
+				sound (self, CHAN_VOICE, "player/paljmp.wav", 1, ATTN_NORM);
+		}
+	}
+	else
+		advanceweaponframe($1stAxe1,$1stAxe25);
+	
 	if (self.weaponframe == $1stAxe15)
 	{
+		if (self.weaponframe_cnt>=AXE_BUILDUP) {
+			self.punchangle_x=-8;	//downward shake
+			self.flags2(+)FL2_FADE_UP;
+		}
+		else
+			self.punchangle_x=-1;
 		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
 		axeblade_fire(TRUE, tome);
+		self.weaponframe_cnt=0;
+		self.flags2(-)FL2_FADE_UP;
 	}
-
-	if (self.wfs == WF_LAST_FRAME)
+	else if (self.weaponframe == $1stAxe2 || self.weaponframe == $1stAxe8)
+		++self.weaponframe;		//speed up animation
+	else if (self.weaponframe == $1stAxe25)
 		axe_ready();
-	
-	self.attack_finished = time + .1;
 }
 
 void axe_a ()	//normal fire
@@ -368,7 +398,6 @@ void axe_a ()	//normal fire
 void pal_axe_fire()
 {
 	float rightclick;
-	
 	rightclick = self.button1;
 	
 	if (rightclick)
