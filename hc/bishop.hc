@@ -383,6 +383,8 @@ void() monster_bishop =
 	if(!self.mass)
 		self.mass = 10;
 
+	self.init_exp_val = self.experience_value;
+
 	self.th_stand = dark_bishop_float1;
 	self.th_walk = dark_bishop_walk1;
 	self.th_run = dark_bishop_run1;

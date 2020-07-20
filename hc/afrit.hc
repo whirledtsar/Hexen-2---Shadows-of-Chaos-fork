@@ -521,6 +521,7 @@ void() monster_afrit =
 	if(!self.mass)
 		self.mass = 6;
 	
+	self.init_exp_val = self.experience_value;
 	self.headmodel = "models/h_imp.mdl";
 	
 	self.th_walk = afrit_glide1;

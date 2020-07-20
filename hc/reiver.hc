@@ -528,6 +528,8 @@ void monster_reiver ()
 	self.aflag = 0;	//counter for draining health
 	self.count = time+2;	//counter for look anim
 	self.experience_value = 40;
+	self.init_exp_val = self.experience_value;
+
 	self.flags (+) FL_FLY;
 	if (!self.health)
 		self.health = 120;

@@ -232,6 +232,8 @@ void() monster_death_knight =
 	if(!self.experience_value)
 		self.experience_value = 15;
 	
+	self.init_exp_val = self.experience_value;
+	
 	if(!self.mass)
 		self.mass = 11;
 		
