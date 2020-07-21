@@ -468,28 +468,8 @@ void() ImpulseCommands =
 		player_everything_cheat();
 	else if(self.impulse==44)
 		DropInventoryItem();
-	else if (self.impulse == 45)
-	{
-		if (SetCfgParm(PARM_RESPAWN))
-			sprint (self, "Monster respawning enabled\n");
-		else 
-			sprint (self, "Monster respawning disabled\n");
-	}
-	else if (self.impulse == 46)
-	{
-		if (SetCfgParm(PARM_FADE))
-			sprint (self, "Corpse fading enabled\n");
-		else 
-			sprint (self, "Corpse fading disabled\n");
-	}
-	else if (self.impulse == 47)
-	{
-		if (SetCfgParm(PARM_BUFF))
-			sprint (self, "Random monster variations enabled\n");
-		else
-			sprint (self, "Random monster variations disabled\n");
-	}
-	else if (self.impulse == 48)
+	//config flags, starting with impulse 50
+	else if (self.impulse == IMPULSE_INFO)
 	{
 	string respawning, fade, buff;
 		if (CheckCfgParm(PARM_RESPAWN))
@@ -508,6 +488,27 @@ void() ImpulseCommands =
 		sprint (self, "Monster respawning is "); sprint(self, respawning); sprint(self, ". type Impulse 45 to toggle\n");
 		sprint (self, "Corpse fading is "); sprint(self, fade); sprint(self, ". type Impulse 46 to toggle\n");
 		sprint (self, "Random monster variants is "); sprint(self, buff); sprint(self, ". type Impulse 47 to toggle\n");
+	}
+	else if (self.impulse == IMPULSE_RESPAWN)
+	{
+		if (SetCfgParm(PARM_RESPAWN))
+			sprint (self, "Monster respawning enabled\n");
+		else 
+			sprint (self, "Monster respawning disabled\n");
+	}
+	else if (self.impulse == IMPULSE_FADE)
+	{
+		if (SetCfgParm(PARM_FADE))
+			sprint (self, "Corpse fading enabled\n");
+		else 
+			sprint (self, "Corpse fading disabled\n");
+	}
+	else if (self.impulse == IMPULSE_BUFF)
+	{
+		if (SetCfgParm(PARM_BUFF))
+			sprint (self, "Random monster variations enabled\n");
+		else
+			sprint (self, "Random monster variations disabled\n");
 	}
 /*	else if (self.impulse == 99)
 	{	// RJ's test impulse
