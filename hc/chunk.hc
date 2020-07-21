@@ -479,7 +479,6 @@ void CreateModelChunks (vector space,float scalemod, float numChunks)
 		chunk.frame=random(2);
 		chunk.drawflags(+)DRF_TRANSLUCENT|MLS_ABSLIGHT;
 		chunk.abslight=0.5;
-  
 	}
 	else if (self.thingtype==THINGTYPE_ASH)
 	{
@@ -700,11 +699,7 @@ entity splat;
 	
 	if (trace_plane_normal_x || trace_plane_normal_y)
 	{	//on slope
-		entity oself;
-		oself = self;
-		self = splat;
-		pitch_roll_for_slope(trace_plane_normal);
-		self = oself;
+		pitch_roll_for_slope(trace_plane_normal, splat);
 	}
 }
 
@@ -877,9 +872,9 @@ void chunk_death (void)
 	SUB_UseTargets();
 	SUB_ResetTarget();
 	
-	if (self.th_init)
-	{
-		//set up respawn time
+	if (self.th_init && self.th_init != SUB_Null)
+	{	//set up respawn time
+		self.lifetime = time + random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
 		self.think = MarkForRespawn;
 		self.nextthink = time + 0.01;
 	}
@@ -889,8 +884,6 @@ void chunk_death (void)
 	}
 	else
 	{
-		if(self.movechain)
-			remove(self.movechain);
 		remove(self);
 	}
 }

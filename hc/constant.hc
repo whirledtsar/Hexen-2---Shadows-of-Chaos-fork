@@ -60,6 +60,7 @@ float FL2_CROUCH_TOGGLE			= 8192;
 //FIXME: Shielded and small may be able to be determined by
 //other means...
 float FL2_FADE_UP				= 128;		//Succ.
+//SoC: reuse FL2_FADE_UP for paladin's axe special, and any future flag used by only 1 class
 float FL2_RESPAWN				= 256;		//Monster that respawns
 float FL2_DEADMEAT				= 1024;		//Tagged for death
 float FL2_FIRERESIST			= 16384;	// resistant to fire and heat and lava
@@ -713,3 +714,7 @@ float MAX_URN = 2;
 float PARM_RESPAWN = 1;
 float PARM_FADE = 2;
 float PARM_BUFF = 4;
+
+//GoT wandering monster respawn
+float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
+float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
