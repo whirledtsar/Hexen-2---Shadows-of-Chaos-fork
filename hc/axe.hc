@@ -171,7 +171,6 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 {
 	vector	source;
 	vector	org;
-	float damg;
 
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
@@ -285,9 +284,9 @@ void(float rightclick, float tome) axeblade_fire =
 			self.greenmana -= AXE_THROW_COST;
 		}
 		else if (self.greenmana >= AXE_MELEE_COST)	//not enough mana for throw, do altfire
-			axe_melee (strmod*1.25, strmod*1.75, 1);
+			axe_melee (strmod*1.5, 1);
 		else	//dry melee
-			axe_melee (strmod*0.25, strmod*0.75, 0);
+			axe_melee (strmod*0.5, 0);
 	}
 	
 };
