@@ -1232,6 +1232,7 @@ void precache_knight ()
 	precache_sound ("death_knight/kdeath.wav");
 	precache_sound ("death_knight/kdeath2.wav");
 	precache_sound ("death_knight/khurt.wav");
+	precache_sound ("death_knight/khurt2.wav");
 	precache_sound ("death_knight/ksight.wav");
 	precache_sound ("death_knight/gib2.wav");
 	//precache_sound ("death_knight/sword1.wav");
@@ -1370,6 +1371,7 @@ void precache_soc()
 	precache_model ("models/warhamerblood.mdl");
 	precache_model ("models/icecloud.spr");		//SoC: ice glyph
 	precache_model ("models/mumshot.mdl");		//SoC: purifier altfire
+	precache_model ("models/blast.mdl");		//SoC: sunstaff altfire tomed
 
 //ambient & fx sounds
 	precache_sound ("ambience/water1.wav");
