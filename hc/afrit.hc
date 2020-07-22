@@ -501,8 +501,8 @@ void() monster_afrit =
 
 	setsize (self, '-16 -16 0', '16 16 36');
 	if(!self.health)
-		self.health = 77;
-	//self.scale = 0.9;
+		self.health = 75;
+	self.max_health = self.health;
 	
 	self.thingtype=THINGTYPE_FLESH;
 	
