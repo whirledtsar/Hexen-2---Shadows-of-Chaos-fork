@@ -291,10 +291,11 @@ void() monster_disciple =
 	//self.movetype = MOVETYPE_FLY;
 
 	setmodel (self, "models/disciple.mdl");
-
 	setsize (self, '-13 -13 -2', '13 13 45');
+	
 	if(!self.health)
-		self.health = 162;
+		self.health = 160;
+	self.max_health = self.health;
 	
 	self.thingtype=THINGTYPE_FLESH;
 	

@@ -320,10 +320,11 @@ void() monster_bishop =
 	self.movetype = MOVETYPE_STEP;
 
 	setmodel (self, "models/bishop.mdl");
-
 	setsize (self, '-13 -13 -2', '13 13 45');
+	
 	if(!self.health)
 		self.health = 200;
+	self.max_health = self.health;
 	
 	self.thingtype=THINGTYPE_FLESH;
 	
