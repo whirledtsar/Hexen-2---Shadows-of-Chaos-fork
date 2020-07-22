@@ -1287,6 +1287,7 @@ void precache_knight ()
 	precache_sound ("death_knight/kdeath.wav");
 	precache_sound ("death_knight/kdeath2.wav");
 	precache_sound ("death_knight/khurt.wav");
+	precache_sound ("death_knight/khurt2.wav");
 	precache_sound ("death_knight/ksight.wav");
 	precache_sound ("death_knight/gib2.wav");
 	//precache_sound ("death_knight/sword1.wav");
