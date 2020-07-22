@@ -295,7 +295,8 @@
 
 @SolidClass base(Button) = func_button : "Button"
 [
-	msg2(string) : "Deactivated Message"
+	msg2(integer) : "Deactivated message (index in strings.txt)"
+	msg4(string) : "Deactivated message (string)"
 	aflag(integer) : "Order"
 ]
 
@@ -384,7 +385,8 @@
 	puzzle_piece_2(integer) : "Puzzle Piece 2"
 	puzzle_piece_3(integer) : "Puzzle Piece 3"
 	puzzle_piece_4(integer) : "Puzzle Piece 4"
-	no_puzzle_msg(string) : "Puzzle message"
+	no_puzzle_msg(string) : "Puzzle message (index in strings.txt)"
+	no_puzzle_str(string) : "Puzzle message (string)"
 	close_target(string) : "Close Target (PoP)"
 	abslight(integer) : "Absolute light value"
 ]
@@ -409,7 +411,8 @@
 	puzzle_piece_2(integer) : "Puzzle Piece 2"
 	puzzle_piece_3(integer) : "Puzzle Piece 3"
 	puzzle_piece_4(integer) : "Puzzle Piece 4"
-	no_puzzle_msg(string) : "Puzzle message"
+	no_puzzle_msg(string) : "Puzzle message (index in strings.txt)"
+	no_puzzle_str(string) : "Puzzle message (string)"
 	close_target(string) : "Close Target (PoP)"
 	abslight(integer) : "Absolute light value"
 ]
@@ -975,7 +978,7 @@
 	lightvalue1(integer) : "Lowest light value" : 0
 	lightvalue2(integer) : "Highest light value" : 11
 	fadespeed(integer) : "Fade speed" : 1
-	angle(integer) : "Spotlight cone angle" : 40 : "Specifies the angle in degrees for a spotlight cone. Default 40"
+	mangle(integer) : "Spotlight cone angle" : 40 : "Specifies the angle in degrees for a spotlight cone. Default 40"
 	_dirt(integer) : "Dirt map (override)" :  : "Overrides the worldspawn setting of '_dirt' for this particular light. -1 to disable dirtmapping (ambient occlusion) for this light, making it illuminate the dirtmapping shadows. 1 to enable ambient occlusion for this light. Default is to defer to the worldspawn setting"
 	_dirtscale(integer) : "Dirt scale (override)" :  : "Override the global '_dirtscale' or '_dirtgain' settings to change how this light is affected by dirtmapping (ambient occlusion). See descriptions of these keys in the worldspawn section"
 	_deviance(integer) : "Deviance" :  : "Split up the light into a sphere of randomly positioned lights within radius 'n' (in world units). Useful to give shadows a wider penumbra. '_samples' specifies the number of lights in the sphere. The 'light' value is automatically scaled down for most lighting formulas (except linear and non-additive minlight) to attempt to keep the brightness equal. Default is 0, do not split up lights"
@@ -997,7 +1000,6 @@
 ]
 
 @PointClass base(Lights, Lightdmg) model(":models/flame1.mdl") size(-10 -10 -40, 10 10 40) = light_flame_large_yellow : "Flame large yellow"[]
-@PointClass base(Lights) model(":models/flame2.mdl") size(-10 -10 -12, 12 12 18) = light_flame_small_white : "Flame small white"[]
 @PointClass base(Lights, Lightdmg) model(":models/flame2.mdl") size(-10 -10 -12, 12 12 18) = light_flame_small_yellow : "Flame small yellow"[]
 @PointClass base(Lights, Angles) model(":models/gemlight.mdl") size(-8 -8 -8, 8 8 8) = light_gem : "Gem light" []
 @PointClass base(Lights) model(":models/cflmtrch.mdl") size(-8 -8 -8, 8 8 8) = light_torch_castle : "Castle torch" []
@@ -1007,9 +1009,17 @@
 @PointClass base(Lights, Lightdmg) model(":models/flame.mdl") size(-10 -10 -20, 10 10 20) = light_torch_small_walltorch : "Walltorch" []
 
 @PointClass base(Lights, Lightdmg) size(-16 -16 -52, 16 16 16) = light_burner : "Burner (PoP)" []
-@PointClass base(Lights) model(":models/candle.mdl") size(-8 -8 -16, 8 8 32) = light_candle : "Candle (PoP)" []
+@PointClass base(Lights) model(":models/candle.mdl") size(-8 -8 -16, 8 8 32) = light_candle : "Candle - Asian theme in PoP" [
+	spawnflags(Flags) =
+	[
+		1 : "Start low" : 0
+		2 : "Hurt (PoP)" : 0
+		4 : "" : 0
+		8 : "Force candle model in PoP"
+	]
+]
 @PointClass base(Lights) model(":models/lantern.mdl") size(-8 -8 -40, 8 8 8) = light_lantern : "Lantern (PoP)" []
-@PointClass base(Lights, Lightdmg) size(-48 -48 -4, 48 48 224) = light_newfire : "Newfire (PoP)"
+@PointClass base(Lights, Lightdmg) size(-48 -48 -4, 48 48 224) = light_newfire : "Large fire"
 [
 	spawnflags(Flags) =
 	[
@@ -1335,17 +1345,17 @@
 [
 	skin(choices) : "Skin" : 0 =
 	[
-		0 : "Generic texture"
-		1 : "Roman texture"
+		0 : "Roman texture"
+		1 : "Generic texture"
 	]
 ]
 @PointClass base(Object, Spawn) model(":models/chest2.mdl") size(-16 -16 0, 16 16 32) = obj_chest2 : "Chest #2"
 [
 	skin(choices) : "Skin" : 0 =
 	[
-		0 : "Generic texture"
-		1 : "Meso texture"
-		2 : "Egypt texture"
+		0 : "Meso texture"
+		1 : "Egypt texture"
+		2 : "Wooden texture"
 	]
 ]
 @PointClass base(Object, Spawn) model(":models/chest3.mdl") size(-16 -16 0, 16 16 32) = obj_chest3 : "Chest #3" []
@@ -1420,7 +1430,13 @@
 @PointClass base(Object) model(":models/tombstn1.mdl") size(-24 -24 0, 24 24 60) = obj_tombstone1 : "Cross tombstone" []
 @PointClass base(Object) model(":models/tombstn2.mdl") size(-16 -16 0, 16 16 40) = obj_tombstone2 : "Rounded tombstone" []
 @PointClass base(Object) model(":models/tree.mdl") size(-42 -42 0, 42 42 160) = obj_tree : "Leaveless tree" []
-@PointClass base(Object) model(":models/tree2.mdl") size(-140 -140 -16, 140 140 220) = obj_tree2 : "Normal tree" []
+@PointClass base(Object) model(":models/tree2.mdl") size(-140 -140 -16, 140 140 220) = obj_tree2 : "Normal tree"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Animated swaying" : 0
+	]
+]
 @PointClass base(Object) model(":models/webs.mdl") size(-25 -25 -25, 25 25 25) = obj_webs : "Spider web"
 [
 	spawnflags(Flags) =
@@ -1727,7 +1743,8 @@
 	wait(integer) : "Wait" : 2
 	health(integer) : "Health"
 	delay(integer) : "Delay before trigger"
-	message(string) : "Message"
+	message(string) : "Message (index in strings.txt)"
+	msg3(string) : "Message string (overrides message)"
 	style(integer) : "Light Style"
 ]
 
@@ -1742,7 +1759,8 @@
 	puzzle_piece_2(string) : "Puzzle Piece 2"
 	puzzle_piece_3(string) : "Puzzle Piece 3"
 	puzzle_piece_4(string) : "Puzzle Piece 4"	
-	no_puzzle_msg(string) : "No puzzle message"
+	no_puzzle_msg(string) : "Puzzle message (index in strings.txt)"
+	no_puzzle_str(string) : "Puzzle message (string)"
 ]
 
 @baseclass = Triggerflags
@@ -1755,7 +1773,7 @@
 		8 : "Deactivated" : 0
 		64 : "light toggle" : 0
 		128 : "light start low" : 0
-		65536 : "Monster & player touch" : 0
+		65536 : "Monster or player touch" : 0
 	]
 ]
 
@@ -1795,7 +1813,8 @@
 	aflag(integer) : "Order"
 	health(integer) : "Health"
 	delay(integer) : "Delay before trigger"
-	message(string) : "Message"
+	message(string) : "Message (index in strings.txt)"
+	msg3(string) : "Message string (overrides message)"
 	style(integer) : "Light Style"
 	failtarget(target_destination) : "Fail target (PoP)"
 	wait(integer) : "Wait (PoP)"
@@ -1817,7 +1836,8 @@
 		4 : "Always return" : 0
 		8 : "Deactivated" : 0
 	]
-	msg2(integer) : "Count fail message"
+	msg2(integer) : "Count fail message (index in strings.txt)"
+	msg4(string) : "Count fail message (string)"
 	puzzle_id(target_destination) : "Count fail target"
         count(integer) : "Number of triggers - 1"
         mangle(string) : "Mangle (x1 x2 x3)"
@@ -1868,19 +1888,14 @@
 	th_die(integer) : "Death type"
 ]
 
-@PointClass base(Appearflags, Targetname, Target) = trigger_hub_intermission : "Trigger hub intermission (PoP)"
-[
-	map(string) : "Map"
-]
-
 @SolidClass base(Appearflags, Targetname, Target) = trigger_hurt : "Hurt brush
 If it has a target, it will act like a relay and hurt that target when triggered."
 [
 	spawnflags(Flags) =
 	[
-		1 : "Player only (PoP)" : 0
-		2 : "Monster only (PoP)" : 0
-		8 : "Deactivated (PoP)" : 0
+		1 : "Player only" : 0
+		2 : "Monster only" : 0
+		8 : "Deactivated" : 0
 	]
 	deathtype(choices) : "Death message" =
 	[
@@ -1925,7 +1940,8 @@ If it has a target, it will act like a relay and hurt that target when triggered
 
 @SolidClass base(Appearflags, Targetname, Target) = trigger_message_transfer : "Message transferer"
 [
-	message(string) : "Message (required)" : "139"
+	message(string) : "Message (index in strings.txt) - required" : "139"
+	msg3(string) : "Message string (overrides message)"
 ]
 
 @SolidClass base(Appearflags, Targetname) = trigger_monsterjump : "Monster jumper"
@@ -1952,7 +1968,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	]
 ]
 
-@SolidClass base(Appearflags) = trigger_no_friction : "Removes friction"
+@SolidClass base(Appearflags) = trigger_no_friction : "Removes friction (PoP)"
 [
 	style(integer) : "Light toggle style (33 - 63)"
 	lightvalue1(integer) : "Low light value" : 0
@@ -2203,6 +2219,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		8 : "Fullbright" 
 		16 : "Scale horizontally"
 		32 : "Scale vertically"
+		64 : "Scale from top"
 	]
 	modeltype(choices) : "Wide or skinny" : 0 =
 	[
@@ -2211,15 +2228,15 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	]
 	skin(choices) : "Skin" : 0 =
 	[
-		0 : "Water (dark)"
+		0 : "Water"
 		1 : "Lava"
 		2 : "Sludge"
-		3 : ""
-		4 : ""
-		5 : "Water (light)"
-		6 : "Water (alt)"
-		7 : "Water (alt, light)"
+		3 : "Blood"
+		4 : "Water (light)"
+		5 : "Water (foamy)"
+		6 : "Water (foamy, light)"
 	]
+	abslight(integer) : "Absolute light level (0-11)" : 0
 	wait(integer) : "Animation speed" : 0.05
 ]
 
@@ -2249,6 +2266,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	spawnflags(Flags) =
 	[
 		2 : "Cocoon (place on ground)"
+		16 : "Cocoon: dormant (don't wake until triggered)"
 	]
 ]
 
@@ -2268,7 +2286,21 @@ If it has a target, it will act like a relay and hurt that target when triggered
 @PointClass base(Appearflags, Targetname, Target) = trigger_hub_intermission : "Trigger hub intermission"
 [
 	delay(integer) : "Minimum duration" : 2
-	level(integer) : "Intermission #" : 11
+	level(choices) : "Intermission #" : 11 =
+	[
+		1 : "Famine"
+		2 : "Death"
+		3 : "Pestilence"
+		4 : "War"
+		5 : "End of demo"
+		6 : "Eidolon"
+		7 : "Eidolon page 2"
+		8 : "Eidolon page 3"
+		9 : "?"
+		10 : "Praevus"
+		11 : "Half PoP"
+		12 : "New game (PoP)"
+	]
 	map(string) : "Next map"
 	spawnflags(Flags) =
 	[
@@ -2298,4 +2330,13 @@ This trigger reserves the targetname 'trigger_random_target'. If you give an ent
 		8 : ""
 		16 : "After triggering random id, remove all other entities in trigger's range. Possible useage: spawning random monster or activating random trigger and removing the ones not chosen. Implies single-use."
 	]
+]
+
+@SolidClass base(Appearflags) = fx_leaves : "Leaf spawner"
+[
+	angle(integer) : "Angle to spawn"
+	speed(integer) : "Speed of leaves" : 125
+	veer(integer) : "Maximum offset from angle (1-360)" : 45
+	wait(integer) : "Spawns per second. Because each spawner has a limit of 18 active leaves, low values (<0.33) will have erratic results." : 1
+	targetname(target_source) : "Name. Don't killtarget to remove, just use."
 ]

@@ -21,15 +21,15 @@ Tomed altfire: Quietus (fires projectiles)
 
 	Axe
 Main: standard
-Altfire: Melee attack
+Altfire: Melee attack (consumes no mana normally, but can be held to charge for a much stronger swing that uses mana)
 Tomed: standard
 Tomed altfire: Stronger altfire
 
-	Sunstaff
+	Purifier
 Main: standard
-Altfire: Fire trail (moves along the ground and burns enemies)
+Altfire: Flamethrower
 Tomed: standard
-Tomed altfire: same as tomed
+Tomed altfire: Flame trail
  
 		Crusader
 	War hammer
@@ -50,6 +50,12 @@ Altfire: Meteor grenade
 Tomed: standard
 Tomed altfire: same as tomed
 
+	Sunstaff
+Main: standard
+Altfire: same
+Tomed: standard
+Tomed altfire: same as tomed
+
 		Necromancer
 	Sickle
 Main: standard
@@ -59,7 +65,7 @@ Tomed altfire: Resurrection with increased monster tier
 
 	Magic missile
 Main: standard
-Altfire: Short-ranged attack that drains health if your health is low
+Altfire: Short-range attack that drains health if your health is low
 Tomed: standard
 Tomed altfire: Stronger altfire that always drains health
 
@@ -87,7 +93,7 @@ Changes
 
 	Changes to the SoC mod
 -Various balance tweaks & bugfixes
--Corpses fading out, monsters respawning, & random monster variations can be toggled in the console. Type "impulse 48" to see your current settings and how to toggle them.
+-Corpses fading out, monsters respawning, & random monster variations are disabled by default but can be toggled in the console. Type "impulse 50" to see your current settings and how to toggle them.
 -All classes receive mana & health upon leveling up (only the amount added to their maximum pool)
 -Glyph artifact has a small delay between firing (length depends on class)
 -All melee attacks knock enemies back
@@ -95,10 +101,11 @@ Changes
 -Assassin's Set Staff doesn't drain mana continuously after charging
 -Inventory maximum amounts reduced to encourage use over hoarding - you can only carry 5 Quartz Flasks, and 1 or 2 each of powerful artifacts such as the Mystic Urn
 -Disc of repulsion puts some monsters into jump state so they can't attack in the air
--Afrits no longer phase through geometry
--Archer Lord health (and experience points given) approximately halved
+-Afrits & Bishops no longer phase through geometry
+-Archer Lord health (and experience points given) reduced by 1/3rd
 -Mummies make a sound and light up when firing arrows
 -Skull Wizard Lord can resurrect nearby corpses
+-Fallen Angels rebalanced across the board
 
 	Mapping features
 -Monsters can use "waketarget" field; they will trigger that entity upon sighting the player (eg. waketarget a button to simulate them pressing it); uses "delay" field if non-zero
@@ -117,6 +124,20 @@ Changes
 -monster_undying: reanimated corpse; model by Bloodshot, code by Bloodshot & Whirledtsar
 -sound_ambient_custom: ambient sound maker that can use any sound file; code by Shanjaq
 -sound_maker_custom: triggered sound maker that can use any sound file; code by Shanjaq
--light_newfire: large raging fire; use spawnflag 4 to scale size from bottom; ported from the Portals of Praevus expansion
+-light_newfire: large raging fire; ported from the Portals of Praevus expansion
 -trigger_reflect: brush entity that reflects missiles
--trigger_random: point entity that triggers a random entity from a range of targets
+-trigger_random: point entity that triggers a random entity from a range of targets. see FGD for documentation
+-fx_leaves: brush entity that spawns leaves with gravity; inspired by Hexen 1
+
+==================
+Additional credits
+==================
+	Incomplete list; most models can be assumed credit to Bloodshot
+Bishop sounds: Hexen 1
+Chandelier model: Heretic 2
+Disciple sounds: Heretic
+Fog sprites: Hexen 1
+Portal sprite: Hexen 1
+Tree (swaying) model: Hexen 2 beta
+Waterfall models: originally by Preach, modified by Bloodshot & whirledtsar
+Wendigo model: Bloodshot, based on Shambler model by Skiffy
