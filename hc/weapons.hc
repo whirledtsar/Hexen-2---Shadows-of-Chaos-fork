@@ -683,7 +683,7 @@ void W_Attack (float rightclick)
 			Cru_Wham_Fire(rightclick);
 			break;
 		case CLASS_SUCCUBUS:
-			Suc_Blrn_Fire();
+			Suc_Blrn_Fire(rightclick);
 			break;
 		}
 	break;
