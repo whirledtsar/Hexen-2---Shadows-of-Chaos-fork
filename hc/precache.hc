@@ -1392,6 +1392,8 @@ void precache_soc()
 	precache_model ("models/shardwend.mdl");
 	precache_model ("models/icewall.mdl");
 	precache_model ("models/fog.spr");
+	precache_model ("models/fog2.spr");
+	precache_model ("models/fog3.spr");
 	precache_model ("models/burn.spr");
 	precache_model ("models/burn1.spr");
 	precache_model ("models/burn2.spr");
