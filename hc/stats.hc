@@ -231,12 +231,6 @@ void PlayerAdvanceLevel(float NewLevel)
 	s2 = ftos(self.level);
 	sprint(self,s2);
 	sprint(self,"!\n");
-	
-	if(!self.newclass)
-	{
-		centerprint(self, "Level up!");
-		sound (self, CHAN_AUTO, "fx/level.wav", 1, ATTN_NORM);
-	}
 
 	//if not a player, exit
 	if (self.playerclass < CLASS_PALADIN ||
@@ -260,20 +254,31 @@ void PlayerAdvanceLevel(float NewLevel)
 		{
 			HealthInc = hitpoint_table[index+4];
 			ManaInc = mana_table[index+4];
+			ManaInc += rint(self.intelligence / 12);
 		}
+		
 		self.max_health += HealthInc;
-
 		if (self.max_health > 999)
 			self.max_health = 999;
 		
-		//give int bonus to mana increase
-		ManaInc += rint(self.intelligence / 12);
-
-		//recharge mana
 		self.max_mana += ManaInc;
-		
 		if (self.max_mana > 999)
 			self.max_mana = 999;
+		
+		self.bluemana += ManaInc;
+		if (self.bluemana > self.max_mana)
+			self.bluemana = self.max_mana;
+		self.greenmana += ManaInc;
+		if (self.greenmana > self.max_mana)
+			self.greenmana = self.max_mana;
+		
+		if (self.health < self.max_health)
+		{
+			if (self.health + HealthInc > self.max_health)
+				self.health = self.max_health;
+			else
+				self.health += HealthInc;
+		}
 
 		//base stat increase of 1 for all
 		self.strength += 1;
@@ -311,27 +316,14 @@ void PlayerAdvanceLevel(float NewLevel)
 		}
 	}
 	
-	if (self.bluemana + ManaInc > self.max_mana)
-		self.bluemana = self.max_mana;
-	else
-		self.bluemana += ManaInc;
-	
-	if (self.greenmana + ManaInc > self.max_mana)
-		self.greenmana = self.max_mana;
-	else
-		self.greenmana += ManaInc;
-	
-	if (self.health < self.max_health)
+	if(!self.newclass)
 	{
-		if (self.health + HealthInc > self.max_health)
-			self.health = self.max_health;
-		else
-			self.health += HealthInc;
-	}
-	
+		centerprint(self, "Level up!");
+		sound (self, CHAN_AUTO, "fx/level.wav", 1, ATTN_NORM);
+		
 		if (self.playerclass == CLASS_PALADIN)
 		{
-		   sprint(self,"Paladin gained a level\n");
+			sprint(self,"Paladin gained a level\n");
 			if (self.level==3)
 				sprint(self,"You have learned a new use for the Vorpal Blade\n");
 		}
@@ -347,7 +339,6 @@ void PlayerAdvanceLevel(float NewLevel)
 		else if (self.playerclass == CLASS_NECROMANCER)
 		{
 			sprint(self,"Necromancer gained a level\n");
-				
 			if (self.level==3)
 				sprint(self,"You have learned a new use for the Bone Shard\n");
 		}
@@ -355,7 +346,8 @@ void PlayerAdvanceLevel(float NewLevel)
 		{
 			sprint(self,"Assassin gained a level\n");
 		}
-
+	}
+	
 	if (self.level > 2)
 		self.flags(+)FL_SPECIAL_ABILITY1;
 
