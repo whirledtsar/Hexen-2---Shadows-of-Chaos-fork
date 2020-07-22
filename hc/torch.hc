@@ -75,16 +75,22 @@ NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS 
 --------------------------------------------------------
 */
 void light_candle (void)
-{
-	precache_model4("models/candle.mdl");
+{	//ws: the following nonsense is not my choice, bloodshot's "light_candle" entity that conflicts with this PoP entity forced my hand...
+string model;
+	if (world.spawnflags&MISSIONPACK || self.spawnflags&8)
+		model = "models/candle.mdl";
+	else
+		model = "models/candle1.mdl";
+	
+	precache_model(model);
 	self.drawflags(+)MLS_ABSLIGHT;
 	if(!self.abslight)
 		self.abslight = .75;
+	
+	self.mdl = model;
+	self.weaponmodel = model;	//FIXME: Flame On!
 
-	self.mdl = "models/candle.mdl";
-	self.weaponmodel = "models/candle.mdl";	//FIXME: Flame On!
-
-	self.thingtype	= THINGTYPE_GREYSTONE;
+	self.thingtype	= THINGTYPE_BROWNSTONE;
 	setsize(self, '-6 -6 -8','6 6 8');
 
 	FireAmbient();
