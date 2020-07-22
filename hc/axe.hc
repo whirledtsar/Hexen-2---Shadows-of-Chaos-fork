@@ -206,13 +206,13 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 		}
 		
 		if (trace_ent.flags & FL_MONSTER || trace_ent.flags & FL_CLIENT)
-			self.greenmana-=AXE_MELEE_COST*mode;	//mode 0 for low power, mode 1 for charged, mode 3 for tomed
+			self.greenmana-=AXE_MELEE_COST*mode;	//mode 0 for low power, mode 1 for charged, mode 2 for tomed
 		
 		SpawnPuff (org, '0 0 0', damg,trace_ent);
 		if (trace_ent.flags & FL_ONGROUND)
-			Knockback (trace_ent, self, self, 12+mode, 0.2);
+			Knockback (trace_ent, self, self, 10+(mode*4), 0.2);
 		else
-			Knockback (trace_ent, self, self, 12+mode, -1);
+			Knockback (trace_ent, self, self, 10+(mode*4), -1);
 		T_Damage (trace_ent, self, self, damg);
 		
 		if (!MetalHitSound(trace_ent.thingtype))
@@ -252,13 +252,13 @@ void(float rightclick, float tome) axeblade_fire =
 	{
 		damg = strmod;
 		if (self.flags2&FL2_FADE_UP && self.greenmana >= AXE_MELEE_COST)
-			damg+=55;
+			damg+=(strmod*2.75);
 		if (tome && self.greenmana >= AXE_MELEE_COST*2)
 			damg*=2;
-		
+		dprint(ftos(damg));dprint("\n");
 		if (tome)
 			axe_melee (damg, 2);
-		if (self.flags2&FL2_FADE_UP)
+		else if (self.flags2&FL2_FADE_UP)
 			axe_melee (damg, 1);
 		else
 			axe_melee (damg, 0);
@@ -283,10 +283,10 @@ void(float rightclick, float tome) axeblade_fire =
 			launch_axe('0 0 0','0 0 300', damg, tome);
 			self.greenmana -= AXE_THROW_COST;
 		}
-		else if (self.greenmana >= AXE_MELEE_COST)	//not enough mana for throw, do altfire
+		/*else if (self.greenmana >= AXE_MELEE_COST)	//not enough mana for throw, do altfire
 			axe_melee (strmod*1.5, 1);
 		else	//dry melee
-			axe_melee (strmod*0.5, 0);
+			axe_melee (strmod*0.5, 0);*/
 	}
 	
 };
@@ -334,7 +334,7 @@ void axe_b ()
 	self.attack_finished = time+0.1;
 	
 	if (self.weaponframe == $1stAxe7) {
-		if (!self.button1)		//end loop if fire button released
+		if ((!self.button1 && !self.button0) || self.greenmana<AXE_MELEE_COST)		//end loop if fire button released
 			++self.weaponframe;
 		else {
 			self.weaponframe = $1stAxe7;
@@ -399,7 +399,7 @@ void pal_axe_fire()
 	float rightclick;
 	rightclick = self.button1;
 	
-	if (rightclick)
+	if (rightclick || self.greenmana<AXE_THROW_COST)
 		axe_b();
 	else
 		axe_a();
