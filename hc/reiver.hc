@@ -649,7 +649,9 @@ void monster_reiver ()
 	self.check_ok = FALSE;	//in ranged phase or melee drain phase
 	self.count = time+2;	//timer for look anim
 	self.counter = time;	//timer for when to stop charging & dodging
-	self.experience_value = 80;
+	if (!self.experience_value)
+		self.experience_value = 80;
+	self.init_exp_val = self.experience_value;
 	self.flags (+) FL_FLY;
 	self.glyph_finished = time;		//timer for voice
 	if (!self.health)

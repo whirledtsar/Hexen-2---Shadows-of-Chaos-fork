@@ -380,6 +380,7 @@ void() monster_bishop =
 	
 	if(!self.experience_value)
 		self.experience_value = 140;
+	self.init_exp_val = self.experience_value;
 	if(!self.mass)
 		self.mass = 10;
 

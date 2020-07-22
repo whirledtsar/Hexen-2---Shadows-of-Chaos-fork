@@ -516,6 +516,7 @@ void() monster_afrit =
 	
 	if(!self.experience_value)
 		self.experience_value = 40;
+	self.init_exp_val = self.experience_value;
 	if(!self.mass)
 		self.mass = 6;
 	
