@@ -307,8 +307,9 @@ void() monster_disciple =
 	
 	if(!self.experience_value)
 		self.experience_value = 140;
+	self.init_exp_val = self.experience_value;
 	if(!self.mass)
-		self.mass = 15;		//self.mass = 80;
+		self.mass = 15;	
 
 	self.th_stand = bishop_float1;
 	self.th_walk = bishop_walk1;
