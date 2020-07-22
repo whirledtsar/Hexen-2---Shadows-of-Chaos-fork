@@ -654,18 +654,20 @@ void BloodSplat(float type)
 {
 entity splat;
 	
-	if (!bloodpool_check(type))
-	{	//try smaller splats if bigger splat wont fit
-		if (type==BLOOD_LARGE) {
-			BloodSplat(BLOOD_MED);
-			return;
+	if (type!=BLOOD_GREEN) {
+		if (!bloodpool_check(type))
+		{	//try smaller splats if bigger splat wont fit
+			if (type==BLOOD_LARGE) {
+				BloodSplat(BLOOD_MED);
+				return;
+			}
+			else if (type==BLOOD_MED) {
+				BloodSplat(BLOOD_SMALL);
+				return;
+			}
+			else
+				return;
 		}
-		else if (type==BLOOD_MED) {
-			BloodSplat(BLOOD_SMALL);
-			return;
-		}
-		else
-			return;
 	}
 
 	traceline (self.origin + v_up*8,self.origin - v_up*32, TRUE, self);
