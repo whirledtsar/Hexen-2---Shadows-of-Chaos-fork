@@ -234,13 +234,13 @@ This routine is called (from the game C side) when a player is advanced a level
 (self.level)
 ================
 */
+float STAT_POOL_COUNT = 4;
 void PlayerAdvanceLevel(float NewLevel)
 {
 	string s2;
 	float OldLevel,Diff;
 	float index,HealthInc,ManaInc;
-
-	sound (self, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NONE);
+	float statpool, statspread, statrandom;
 
 	OldLevel = self.level;
 	self.level = NewLevel;
@@ -251,8 +251,100 @@ void PlayerAdvanceLevel(float NewLevel)
 	sprint(self,s2);
 	sprint(self,"!\n");
 
+	if (self.playerclass < CLASS_PALADIN ||
+		self.playerclass > CLASS_SUCCUBUS)
+		return;
+
+	index = (self.playerclass - 1) * 5;
+
+	// Have to do it this way in case they go up more than 1 level at a time
+	while(Diff > 0)
+	{
+		OldLevel += 1;
+		Diff -= 1;
+
+		if (OldLevel <= MAX_LEVELS)
+		{
+			HealthInc = stats_compute(hitpoint_table[index+2],hitpoint_table[index+3]);
+			ManaInc = stats_compute(mana_table[index+2],mana_table[index+3]);
+		}
+		else
+		{
+			HealthInc = hitpoint_table[index+4];
+			ManaInc = mana_table[index+4];
+			ManaInc += rint(self.intelligence / 12);
+		}
+		
+		self.max_health += HealthInc;
+		if (self.max_health > 150)
+			self.max_health = 150;
+		
+		self.max_mana += ManaInc;
+		
+		self.bluemana += ManaInc;
+		if (self.bluemana > self.max_mana)
+			self.bluemana = self.max_mana;
+		self.greenmana += ManaInc;
+		if (self.greenmana > self.max_mana)
+			self.greenmana = self.max_mana;
+		
+		if (self.health < self.max_health)
+		{
+			if (self.health + HealthInc > self.max_health)
+				self.health = self.max_health;
+			else
+				self.health += HealthInc;
+		}
+
+		sprint(self, "Stats: MP +");
+		s2 = ftos(ManaInc);
+		sprint(self, s2);
+
+		sprint(self, "  HP +");
+		s2 = ftos(HealthInc);
+		sprint(self, s2);
+		sprint(self, "\n");
+		
+		//base stat increase of 1 for all
+		self.strength += 1;
+		self.wisdom += 1;
+		self.intelligence += 1;
+		self.dexterity += 1;
+		
+		//increase stats at random
+		statpool = STAT_POOL_COUNT; //distribute more at random, and favor highest stats
+		while(statpool > 0)
+		{
+			//create a tower of existing stats
+			statspread = self.strength + self.wisdom + self.intelligence + self.dexterity;
+			statrandom = random(0, statspread - 1);
+			
+			//assign stat depending on where it lands in the tower
+			if (statrandom < self.strength)
+			{
+				self.strength += 1;
+			}
+			else if (statrandom < self.strength + self.wisdom)
+			{
+				self.wisdom += 1;
+			}
+			else if (statrandom < self.strength + self.wisdom + self.intelligence)
+			{
+				self.intelligence += 1;
+			}
+			else
+			{
+				self.dexterity += 1;
+			}
+				
+			statpool -= 1;
+		}
+	}
+	
 	if(!self.newclass)
 	{
+		sound (self, CHAN_AUTO, "fx/level.wav", 1, ATTN_NORM);
+		
 		switch (self.playerclass)
 		{
 		case CLASS_PALADIN:
@@ -276,8 +368,8 @@ void PlayerAdvanceLevel(float NewLevel)
 				sprint(self,"You have learned a new use for the Warhammer\n");
 		break;
 		case CLASS_NECROMANCER:
-		   centerprint(self,"Necromancer gained a level\n");
-		   if (self.level==3)
+			centerprint(self,"Necromancer gained a level\n");
+			if (self.level==3)
 				sprint(self,"You have learned a new use for the Bone Shard\n");
 		break;
 		case CLASS_ASSASSIN:
@@ -289,59 +381,12 @@ void PlayerAdvanceLevel(float NewLevel)
 		}
 	}
 
-	if (self.playerclass < CLASS_PALADIN ||
-		self.playerclass > CLASS_SUCCUBUS)
-		return;
-
-	index = (self.playerclass - 1) * 5;
-
-	// Have to do it this way in case they go up more than 1 level at a time
-	while(Diff > 0)
-	{
-		OldLevel += 1;
-		Diff -= 1;
-
-		if (OldLevel <= MAX_LEVELS)
-		{
-			HealthInc = stats_compute(hitpoint_table[index+2],hitpoint_table[index+3]);
-			ManaInc = stats_compute(mana_table[index+2],mana_table[index+3]);
-		}
-		else
-		{
-			HealthInc = hitpoint_table[index+4];
-			ManaInc = mana_table[index+4];
-		}
-		self.health += HealthInc;
-		self.max_health += HealthInc;
-
-		//	An upper limit of 150 on health
-		if (self.health > 150) 
-			self.health = 150;
-
-		if (self.max_health > 150)
-			self.max_health = 150;
-
-		self.greenmana += ManaInc;
-		self.bluemana += ManaInc;
-		self.max_mana += ManaInc;
-
-		sprint(self, "Stats: MP +");
-		s2 = ftos(ManaInc);
-		sprint(self, s2);
-
-		sprint(self, "  HP +");
-		s2 = ftos(HealthInc);
-		sprint(self, s2);
-		sprint(self, "\n");
-	}
-
 	if (self.level > 2)
 		self.flags(+)FL_SPECIAL_ABILITY1;
 
 	if (self.level >5)
 		self.flags(+)FL_SPECIAL_ABILITY2;
 }
-
 
 float FindLevel(entity WhichPlayer)
 {
