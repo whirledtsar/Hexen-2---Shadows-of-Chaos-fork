@@ -711,16 +711,17 @@ void fx_leaves_init ()
 {	//find nearby foliage to link with (remove self if theyre removed)
 entity found;
 	if (self.target!="") {
-		found = find(world);
-		while (found!=world) {
-			if (found.targetname==self.target) {
+		found = world;
+		do
+		{
+			found = find(found, targetname, self.killtarget);
+			if (found) {
 				self.aflag = TRUE;
 				self.owner = found;
 				found = world;	//end loop
 			}
-			else
-				found = found.chain;
 		}
+		while(found!=world);
 	}
 	else {
 		found = findradius((self.absmin+self.absmax)*0.5, 192);
