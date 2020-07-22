@@ -41,11 +41,11 @@ $frame select11     select12     select13     select14
 //
 $frame settle1      settle2      settle3      settle4      settle5      
 
-
+float SUN_BALL_COST = 8;
 
 void FireSunstaff (vector dir, float ofs)
 {
-vector  org1,org2, vec, dir, endspot,endplane;
+vector  org1,org2, vec, endspot,endplane;
 float remainder, reflect_count,damg;
 //Draw a larger pulsating transparent yellow beam,
 //rotating, with a smaller solid white beam in the
@@ -164,7 +164,7 @@ void sunstaff_fire_loop ()
 {
 	self.wfs = advanceweaponframe($fircyc1,$fircyc10);
 	self.th_weapon=sunstaff_fire_loop;
-	if(self.attack_finished<=time&&(self.button0 || self.button1)&&self.greenmana>=2&&self.bluemana>=2)
+	if(self.attack_finished<=time&&(self.button0)&&self.greenmana>=2&&self.bluemana>=2)
 	{
 		if(self.artifact_active&ART_TOMEOFPOWER)
 		{
@@ -182,7 +182,7 @@ void sunstaff_fire_loop ()
 		self.attack_finished=time + 0.05;
 	}
 
-	if(self.wfs==WF_CYCLE_WRAPPED&&(!(self.button0 || self.button1)||self.greenmana<2||self.bluemana<2))
+	if(self.wfs==WF_CYCLE_WRAPPED&&(!(self.button0)||self.greenmana<2||self.bluemana<2))
 	{
 		self.effects(-)EF_BRIGHTLIGHT;
 		sunstaff_fire_settle();
@@ -197,13 +197,194 @@ void sunstaff_fire (void)
 		sunstaff_fire_loop();
 }
 
+void sun_ray ()
+{
+vector  org1,org2, vec, dir;
+	
+	if (self.lifetime<time || !self.controller || self.controller.origin==VEC_ORIGIN){	//sunball died and controller was reset to world
+		remove(self);
+		return;
+	}
+	
+	dir = self.movedir;
+	if (self.enemy) {	//finaldest = enemy position
+		org1 = org2 = self.controller.origin + self.controller.proj_ofs;
+		vec = self.finaldest;
+	}
+	else {
+		org1 = self.controller.origin + self.controller.proj_ofs;
+		org2 = org1 + dir*10;
+		vec = org2 + dir*self.level;
+	}
+	traceline (org2, vec, TRUE, self);
+	
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_STREAM_SUNSTAFF1);
+	WriteEntity (MSG_BROADCAST, self);
+	WriteByte (MSG_BROADCAST, STREAM_ATTACHED);
+	WriteByte (MSG_BROADCAST, 1);
+	WriteCoord (MSG_BROADCAST, org2_x);
+	WriteCoord (MSG_BROADCAST, org2_y);
+	WriteCoord (MSG_BROADCAST, org2_z);
+	WriteCoord (MSG_BROADCAST, trace_endpos_x);
+	WriteCoord (MSG_BROADCAST, trace_endpos_y);
+	WriteCoord (MSG_BROADCAST, trace_endpos_z);
+	
+    LightningDamage (org1 - dir*7, trace_endpos+dir*7, self.owner, 15, "sunbeam");
+	
+	if (self.level<self.t_length)
+		self.level+=self.speed;
+	
+	self.think = sun_ray;
+	thinktime self : 0.001;
+}
+
+void sun_think ()
+{
+	if (self.scale>=self.target_scale)
+		self.check_ok=TRUE;
+	
+	if (!self.check_ok)
+		self.scale+=0.025;
+	
+	T_RadiusDamage(self,self.owner,40,self.owner);
+	
+	if (self.attack_finished<time) {
+		local entity dummy;
+		dummy = spawn();
+		makevectors(self.angles);
+		local float r = random();
+		if (r<0.25)
+			dummy.movedir = v_up;
+		else if (r<0.5)
+			dummy.movedir = v_forward;
+		else if (r<0.75)
+			dummy.movedir = v_right;
+		else
+			dummy.movedir = (-v_right);
+		dummy.level = 50;					//initial beam length
+		dummy.t_length = 1000;				//max beam length
+		dummy.speed = random(20,35);		//beam growth speed
+		dummy.lifetime = time+random(2,3);
+		dummy.controller = self;
+		dummy.owner = self.owner;
+		dummy.think = sun_ray;
+		thinktime dummy : 0;
+		
+		if (self.t_length < time) {
+			local entity find, oself;
+			oself = self;
+			self = self.owner;
+			find = HomeFindTarget();
+			self = oself;
+			if (find && find.flags&FL_ALIVE && find!=self.enemy) {
+				self.t_length = time+0.3;
+				self.enemy = find;
+				dummy.enemy = find;
+				dummy.finaldest = find.origin+find.proj_ofs;
+				makevectors(self.origin+self.proj_ofs - dummy.finaldest);
+				dummy.movedir = v_forward;
+			}
+		}
+		
+		if (self.t_width < time) {
+			sound (self, CHAN_AUTO, "crusader/sunstart.wav", 1, ATTN_NORM);
+			self.t_width=time+random(0.25,0.4);
+		}
+		
+		self.attack_finished = time+random(0.033,0.33);
+	}
+	
+	self.think = sun_think;
+	thinktime self : HX_FRAME_TIME*0.25;
+}
+
+void sun_touch ()
+{
+	if(other.takedamage)
+		T_Damage(other,self,self.owner,self.dmg);
+	T_RadiusDamage(self,self.owner,self.dmg,other);
+	
+	sound(self,CHAN_AUTO,"weapons/exphuge.wav",1,0.75);	//weapons/fbfire
+	
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
+	WriteCoord (MSG_BROADCAST, self.origin_x);
+	WriteCoord (MSG_BROADCAST, self.origin_y);
+	WriteCoord (MSG_BROADCAST, self.origin_z);
+	
+	remove(self);
+	//self.think = sun_shrink;
+}
+
+void FireSunstaffPowerAlt ()
+{
+vector org, size;
+entity sun;
+	self.bluemana -= SUN_BALL_COST;
+	self.greenmana -= SUN_BALL_COST;
+	
+	makevectors (self.v_angle);
+	org = self.origin+self.proj_ofs+v_forward*4;
+	size = '16 16 16';
+	
+	sun = spawn ();
+	sun.owner = self;
+	sun.movetype = MOVETYPE_FLYMISSILE;
+	sun.solid = SOLID_BBOX;
+	
+	setmodel (sun,"models/blast.mdl");
+	setsize (sun, (-size), size);	
+	setorigin (sun, org);
+	
+	sun.velocity = v_forward * 500;
+	sun.angles = vectoangles(sun.velocity);
+	sun.avelocity_x = 50;
+	sun.avelocity_y = random(200,400);
+	
+	sun.classname = "sun";
+	sun.attack_finished = time+0.1;
+	sun.dmg = 100;
+	sun.effects = EF_BRIGHTLIGHT;
+	sun.proj_ofs = '0 0 12';
+	//sun.scale = 0.5;
+	sun.scale = 0.1;
+	sun.target_scale = 0.5;
+	
+	sun.touch = sun_touch;
+	sun.think = sun_think;
+	thinktime sun : 0;
+}
+
+void sunstaff_altfire ()
+{
+	self.wfs = advanceweaponframe($fire1,$fire4);
+	self.th_weapon=sunstaff_altfire;
+	if (self.wfs==WF_CYCLE_WRAPPED) {
+		self.attack_finished = time+0.75;
+		self.effects(+)EF_MUZZLEFLASH;
+		FireSunstaffPowerAlt();
+		sunstaff_fire_settle();
+	}
+	if (self.wfs==WF_CYCLE_WRAPPED && (!self.button1 || self.greenmana<SUN_BALL_COST || self.bluemana<SUN_BALL_COST)) {
+		self.attack_finished = time+0.75;
+		sunstaff_fire_settle();
+	}
+}
+
 void() Cru_Sun_Fire =
 {
 	if(self.weaponframe<$idle1 || self.weaponframe>$idle31)
 		return;
-
-	sound (self, CHAN_AUTO, "crusader/sunstart.wav", 1, ATTN_NORM);
-	self.th_weapon=sunstaff_fire;
+	
+	if (self.button1 && self.artifact_active&ART_TOMEOFPOWER && self.bluemana>=SUN_BALL_COST && self.greenmana>=SUN_BALL_COST) {
+		sound (self, CHAN_WEAPON, "eidolon/fireball.wav", 1, ATTN_NORM);
+		self.th_weapon=sunstaff_altfire;
+	}
+	else {
+		sound (self, CHAN_AUTO, "crusader/sunstart.wav", 1, ATTN_NORM);
+		self.th_weapon=sunstaff_fire;
+	}
 	thinktime self : 0;
 };
 
