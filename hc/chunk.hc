@@ -876,6 +876,7 @@ void chunk_death (void)
 	
 	if (self.th_init && self.th_init != SUB_Null)
 	{	//set up respawn time
+		self.aflag = TRUE;		//tell MarkForRespawn not to gib this entity again
 		self.lifetime = time + random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
 		self.think = MarkForRespawn;
 		self.nextthink = time + 0.01;
