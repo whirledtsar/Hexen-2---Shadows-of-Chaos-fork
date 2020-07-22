@@ -206,6 +206,74 @@ void  blrn_normal()
 	self.attack_finished=time+0.4;
 }
 
+void succ_scratch ()
+{
+vector source, end;
+float damg, poisondmg, poisontime;
+	
+	self.attack_finished=time+0.3;
+	
+	damg = self.strength*0.1;
+	poisondmg = 6+(self.level*0.75);
+	poisontime = self.intelligence*0.5;
+	
+	makevectors (self.v_angle);
+	source = self.origin + self.proj_ofs;
+	end = source + v_forward*56;
+	traceline (source, end, FALSE, self);
+	if (trace_fraction == 1.0) {
+		traceline (source, end - (v_up * 15), FALSE, self);
+		
+		if (trace_fraction == 1.0) {
+			traceline (source, end + v_up * 15, FALSE, self);
+		
+			if (trace_fraction == 1.0) {
+				traceline (source, end + v_right * 15, FALSE, self);
+				
+				if (trace_fraction == 1.0) {
+					traceline (source, end - v_right * 15, FALSE, self);
+					
+					if (trace_fraction == 1.0) {
+						sound(self,CHAN_AUTO,"succubus/miss.wav",0.75,ATTN_NORM);
+						return;
+					}
+				}
+			}
+		}
+	}
+	
+	if (trace_ent.takedamage) {
+		if ((trace_ent.flags&FL_MONSTER || trace_ent.flags&FL_CLIENT) && trace_ent.health>0 && !(trace_ent.flags2&FL2_POISONED)) {
+			if (trace_ent.flags&FL_CLIENT)
+				poisontime*=0.75;
+			
+			float i;
+			for (i = 0; i <= poisondmg; i++) {
+				spawn_poison(trace_ent, self, poisontime);
+				CreateGreenSmoke (trace_endpos,'0 0 2',HX_FRAME_TIME);
+			}
+		}
+		if (trace_ent.thingtype == THINGTYPE_FLESH)
+			sound(self,CHAN_AUTO,"assassin/chntear.wav",1,ATTN_NORM);
+		else
+			sound(self,CHAN_AUTO,"succubus/miss.wav",0.75,ATTN_NORM);
+		SpawnPuff (trace_endpos, '0 0 -4', damg, trace_ent);
+		T_Damage (trace_ent, self, self, damg);
+	}
+	else {
+		vector org;
+		org = trace_endpos - v_right*8;
+		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
+		WriteCoord (MSG_BROADCAST, org_x);
+		WriteCoord (MSG_BROADCAST, org_y);
+		WriteCoord (MSG_BROADCAST, org_z);
+		
+		sound(self,CHAN_AUTO,"succubus/miss.wav",0.75,ATTN_NORM);
+		//sound(self,CHAN_AUTO,"succubus/scratchw.wav",1,ATTN_NORM);
+	}
+}
+
 /*======================
 ACTION
 select
@@ -220,9 +288,9 @@ relax to ready(Fire delay?  or automatic if see someone?)
 
 
 void()bloodrain_ready;
-void() Suc_Blrn_Fire;
+void Suc_Blrn_Fire (float rightclick);
 
-void bloodrain_fire (void)
+void bloodrain_fire (float rightclick)
 {
 	if(self.button0&&self.weaponframe==$normal07 &&!self.artifact_active&ART_TOMEOFPOWER)
 		self.weaponframe=$normal07;
@@ -240,13 +308,16 @@ void bloodrain_fire (void)
 			blrn_power((self.weaponframe - $normal08) *3);
 	}
 	else if(self.weaponframe==$normal07)
-		blrn_normal();
+		if (rightclick)
+			succ_scratch();
+		else
+			blrn_normal();
 }
 
-void() Suc_Blrn_Fire =
+void Suc_Blrn_Fire (float rightclick) =
 {
 	self.weaponframe_cnt=0;
-	bloodrain_fire();
+	bloodrain_fire(rightclick);
 
 	thinktime self : 0;
 };

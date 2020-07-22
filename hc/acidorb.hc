@@ -358,9 +358,26 @@ void acidorb_fire (void)
 		aorb_power();//Fixme: hold this frame for a few
 }
 
-void Suc_Aorb_Fire() 
-{	
-	acidorb_fire();
+void acidorb_scratch ()
+{
+	self.wfs = advanceweaponframe($normal51,$normal64);
+		if(self.weaponframe<$normal58)
+			self.weaponframe+=1;
+	
+	self.th_weapon=acidorb_scratch;
+	self.last_attack=time;
+	if(self.wfs==WF_CYCLE_WRAPPED||(self.artifact_active&ART_TOMEOFPOWER))
+		acidorb_ready_normal();
+	else if(self.weaponframe==$normal58)
+		succ_scratch();
+}
+
+void Suc_Aorb_Fire(float rightclick) 
+{
+	if (rightclick && (!self.artifact_active&ART_TOMEOFPOWER))
+		acidorb_scratch();
+	else
+		acidorb_fire();
 
 	thinktime self : 0;
 }
