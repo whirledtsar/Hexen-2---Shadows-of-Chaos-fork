@@ -76,15 +76,15 @@ NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS 
 */
 void light_candle (void)
 {
-	precache_model4("models/candle.mdl");
+	precache_model4("models/candle1.mdl");
 	self.drawflags(+)MLS_ABSLIGHT;
 	if(!self.abslight)
 		self.abslight = .75;
-
-	self.mdl = "models/candle.mdl";
-	self.weaponmodel = "models/candle.mdl";	//FIXME: Flame On!
-
-	self.thingtype	= THINGTYPE_GREYSTONE;
+	
+	self.mdl = "models/candle1.mdl";
+	self.weaponmodel = "models/candle1.mdl";	//FIXME: Flame On!
+	
+	self.thingtype	= THINGTYPE_BROWNSTONE;
 	setsize(self, '-6 -6 -8','6 6 8');
 	
 	FireAmbient();
