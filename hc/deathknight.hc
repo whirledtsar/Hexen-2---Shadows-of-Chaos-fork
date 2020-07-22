@@ -119,10 +119,17 @@ void()	death_knight_pain11	=[	67,	death_knight_run1	] {};
 
 void(entity attacker, float damage)	death_knight_pain =
 {
+	local float r;
+
 	if (self.pain_finished > time)
 		return;
+
+	r = random();
 	
-	sound (self, CHAN_VOICE, "death_knight/khurt.wav", 1, ATTN_NORM);
+	if (r<0.5)
+		sound (self, CHAN_VOICE, "death_knight/khurt.wav", 1, ATTN_NORM);
+	else
+		sound (self, CHAN_VOICE, "death_knight/khurt2.wav", 1, ATTN_NORM);
 	ThrowGib ("models/blood.mdl", self.health);
 	ThrowGib ("models/blood.mdl", self.health);
 	death_knight_pain1 ();
@@ -207,14 +214,13 @@ void() monster_death_knight =
 	}
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_knight();
-
+	
+	self.init_org = self.origin;
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
-	self.init_org=self.origin;
-
 	setmodel (self, "models/footsoldier.mdl");
-
 	setsize (self, '-13 -13 -12', '13 13 44');
+	
 	if (!self.health)
 		self.health = 62;
 	self.max_health = self.health;
@@ -231,7 +237,7 @@ void() monster_death_knight =
 	
 	if(!self.experience_value)
 		self.experience_value = 15;
-	
+	self.init_exp_val = self.experience_value;
 	if(!self.mass)
 		self.mass = 11;
 		
