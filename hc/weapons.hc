@@ -697,7 +697,7 @@ void W_Attack (float rightclick)
 			crossbow_fire();
 		break;
 		case CLASS_SUCCUBUS:
-			Suc_Aorb_Fire();
+			Suc_Aorb_Fire(rightclick);
 		break;
 		case CLASS_CRUSADER:
 			if(self.th_weapon==icestaff_idle)
