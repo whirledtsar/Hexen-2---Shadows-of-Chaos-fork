@@ -126,7 +126,10 @@ void(entity attacker, float damage)	death_knight_pain =
 
 	r = random();
 	
-	sound (self, CHAN_VOICE, "death_knight/khurt.wav", 1, ATTN_NORM);
+	if (r<0.5)
+		sound (self, CHAN_VOICE, "death_knight/khurt.wav", 1, ATTN_NORM);
+	else
+		sound (self, CHAN_VOICE, "death_knight/khurt2.wav", 1, ATTN_NORM);
 	ThrowGib ("models/blood.mdl", self.health);
 	ThrowGib ("models/blood.mdl", self.health);
 	death_knight_pain1 ();
@@ -234,7 +237,7 @@ void() monster_death_knight =
 	
 	if(!self.experience_value)
 		self.experience_value = 15;
-	
+	self.init_exp_val = self.experience_value;
 	if(!self.mass)
 		self.mass = 11;
 		
