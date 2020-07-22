@@ -204,11 +204,6 @@ void()	corpse_swing14	=[	13,	corpse_idle1	] {};
 
 void() corpse_idle1	=[	13,	corpse_idle1	] {};
 
-void()	corpse_die1	=[	0,	corpse_die2	] {chunk_death();};
-
-void()	corpse_die2	= {SUB_Remove;};
-
-
 void() object_start =
 {
 	self.takedamage=DAMAGE_YES;
@@ -220,38 +215,35 @@ void() object_start =
 	if (self.th_die)
 		self.use = self.th_die;
 	
-	self.th_stand ();
+	if (self.th_stand)
+		self.th_stand ();
 };
 
 void() obj_hang_corpse =
 {
-	precache_model ("models/hangass.mdl");
-	precache_model ("models/hangskel.mdl");
-	
-	//precache_sound ("fx/bonebrk.wav");
-
 	self.solid = SOLID_BBOX;
-
 	if (self.spawnflags & IS_SKELETON)
 	{
+		precache_model ("models/hangskel.mdl");
 		setmodel (self, "models/hangskel.mdl");
 		self.thingtype=THINGTYPE_BONE;
+		self.th_pain = SUB_Null;
 	}
 	else
 	{
+		precache_model ("models/hangass.mdl");
 		setmodel (self, "models/hangass.mdl");
 		self.thingtype=THINGTYPE_FLESH;
+		self.th_pain = corpse_swing1;
+		self.th_stand = corpse_idle1;
 	}
 
 	setsize (self, '-13 -13 -7', '13 13 25');
 	self.health = 45;
 	
-	self.th_stand = corpse_idle1;
-	self.th_die = corpse_die1;
-	self.th_pain = corpse_swing1;
-	self.netname="hanged";
+	self.th_die = chunk_death;
 	
-	self.flags (+) FL_FLY;
+	self.netname="hanged";
 	
 	object_start();
 };
@@ -270,7 +262,7 @@ void() obj_skeleton_body =
 	self.health = 45;
 	
 	self.th_stand = corpse_idle1;
-	self.th_die = corpse_die1;
+	self.th_die = chunk_death;
 	self.netname="skeleton";
 	
 	self.flags (+) FL_FLY;
