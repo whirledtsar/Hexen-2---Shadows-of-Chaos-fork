@@ -338,10 +338,11 @@ void() monster_wendigo =
 	self.init_org=self.origin;
 
 	setmodel (self, "models/wendigo.mdl");
-
 	setsize (self, '-13 -13 -22', '13 13 35');
-	self.health = 62;
-	//self.scale = 0.9;
+	
+	if (!self.health)
+		self.health = 60;
+	self.max_health = self.health;
 	
 	self.thingtype=THINGTYPE_ICE;
 	
