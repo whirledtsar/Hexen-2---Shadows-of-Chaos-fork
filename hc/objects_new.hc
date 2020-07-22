@@ -7,19 +7,11 @@ float PORTAL_CLOSED = 2;
 float WATER_OFF = 2;
 float WATER_TRANS = 4;
 float WATER_FULLBR = 8;
+float WATER_SCALEZ = 16;
+float WATER_SCALEXY = 32;
+float WATER_TOPORIGIN = 64;
 
 .float modeltype;
-
-void()	fog_loop1	=[	0,	fog_loop2	] {};
-void()	fog_loop2	=[	0,	fog_loop3	] {};
-void()	fog_loop3	=[	1,	fog_loop4	] {};
-void()	fog_loop4	=[	1,	fog_loop5	] {};
-void()	fog_loop5	=[	2,	fog_loop6	] {};
-void()	fog_loop6	=[	2,	fog_loop7	] {};
-void()	fog_loop7	=[	3,	fog_loop8	] {};
-void()	fog_loop8	=[	3,	fog_loop9	] {};
-void()	fog_loop9	=[	4,	fog_loop10	] {};
-void()	fog_loop10	=[	4,	fog_loop1	] {};
 
 void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, self.noise1, 0.75, ATTN_IDLE);};
 void()	fire_burn2	=[	1,	fire_burn3	] {};
@@ -161,37 +153,35 @@ void()	portal_open23	=[	22,	portal_open24	] {};
 void()	portal_open24	=[	23,	portal_open25	] {};
 void()	portal_open25	=[	24,	portal_anim1	] {};
 
-void water_fall ()
+void water_fall () [++ 41 .. 66]
 {
-	AdvanceFrame(42,67);
+	if (!self.aflag) {
+		sound (self, CHAN_ITEM, "fx/wfall.wav", 1, ATTN_NORM);
+		self.aflag = TRUE;
+	}
 	self.think = water_fall;
 	thinktime self : self.wait;
 }
 
-void water_start ()
+void water_start () [++ 0 .. 25]
 {
 float result;
-	result = AdvanceFrame(1,26);
 	if (self.frame <= 1) {
 		self.think = water_start;
-		if (self.modeltype == 1)
-			setmodel (self, "models/waterfall2.mdl");
-		else
-			setmodel (self, "models/waterfall.mdl");
+		setmodel(self, self.mdl);
 	}
 	else if (self.frame==3)
 		sound (self, CHAN_ITEM, "fx/wfstart.wav", 1, ATTN_NORM);
-	
-	if (result == AF_END)
+	else if (self.frame == 25)
 		self.think = water_fall;
 	
 	thinktime self : self.wait;
 }
 
-void water_stop ()
+void water_stop () [++ 26 .. 40]
 {
 	self.think = water_stop;
-	if (AdvanceFrame(27,41) == AF_END)
+	if (self.frame >= 40)
 		self.think = SUB_Null;
 	
 	thinktime self : self.wait;
@@ -216,7 +206,7 @@ void() corpse_idle1	=[	13,	corpse_idle1	] {};
 
 void()	corpse_die1	=[	0,	corpse_die2	] {chunk_death();};
 
-void()	corpse_die2	=[	0,	corpse_die2	] {SUB_Remove;};
+void()	corpse_die2	= {SUB_Remove;};
 
 
 void() object_start =
@@ -339,37 +329,40 @@ void() misc_starwall =
 
 void() misc_waterfall =
 {
-	precache_model ("models/waterfall.mdl");
-	precache_model ("models/waterfall2.mdl");
 	precache_sound ("fx/wfstart.wav");
 	precache_sound ("fx/wfall.wav");
 	precache_sound ("fx/wfend.wav");
 	
 	if (self.modeltype == 1)
-		setmodel (self, "models/waterfall2.mdl");
+		self.mdl = "models/waterfall2.mdl";
 	else
-		setmodel (self, "models/waterfall.mdl");
+		self.mdl = "models/waterfall.mdl";
 	
-	if (self.spawnflags & WATER_OFF)
-	{
-		setmodel (self, "");
-		self.th_stand = SUB_Null;
-	}
-	else
-		self.th_stand = water_fall;
-	
-	self.netname="waterfall";
-	self.flags (+) FL_FLY;
-	
-	if (self.spawnflags & WATER_TRANS)
-		self.drawflags (+) DRF_TRANSLUCENT;
-	else if (self.spawnflags & WATER_FULLBR)
-		self.drawflags (+) MLS_FULLBRIGHT;
+	precache_model(self.mdl);
+	setmodel (self, self.mdl);
 	
 	setsize (self, '-73 -73 -150', '73 73 120');
 	
+	self.netname="waterfall";
+	self.flags (+) FL_FLY;
 	if (!self.wait)
 		self.wait = HX_FRAME_TIME;
+	
+	if (self.spawnflags & WATER_TRANS)
+		self.drawflags (+) DRF_TRANSLUCENT;
+	else if (self.spawnflags & WATER_FULLBR || self.abslight) {
+		//self.drawflags (+) MLS_FULLBRIGHT;
+		self.drawflags (+) MLS_ABSLIGHT;
+		if (!self.abslight)
+			self.abslight = 1.0;
+	}
+	
+	if (self.spawnflags & WATER_TOPORIGIN)
+		self.drawflags (+) SCALE_ORIGIN_TOP;
+	if (self.spawnflags & WATER_SCALEXY)
+		self.drawflags (+) SCALE_TYPE_XYONLY;
+	else if (self.spawnflags & WATER_SCALEZ)
+		self.drawflags (+) SCALE_TYPE_ZONLY;
 	
 	if (self.targetname)
 	{
@@ -379,15 +372,34 @@ void() misc_waterfall =
 			self.use = water_stop;
 	}
 	
+	if (self.spawnflags & WATER_OFF)
+	{
+		setmodel (self, "");
+		self.th_stand = SUB_Null;
+	}
+	else
+		self.th_stand = water_fall;
+	
 	self.th_stand ();
 }
+
+string fog_sprites[3] = {"models/fog.spr", "models/fog2.spr", "models/fog3.spr"};
 
 void CreateFog (vector org)
 {
 entity new;
+float type;
+	type = random(-0.5,2.5);
+	if (type>2)
+		type=2;
+	else if (type<0)
+		type=0;
+	else
+		type = rint(type);
+	
 	new = spawn();
 	setorigin (new, org);
-	setmodel (new, "models/fog.spr");
+	setmodel (new, fog_sprites[type]);
 	setsize (new, '0 0 0', '0 0 0');
 	
 	new.movetype = MOVETYPE_FLY;
@@ -419,25 +431,37 @@ vector org;
 	thinktime self : random(self.wait,self.wait*2);
 }
 
+void fog_loop () [++ 0 .. 4]
+{
+	self.think = fog_loop;
+	thinktime self : 0.15;
+}
+
 void() misc_mist
 {
-	precache_model ("models/fog.spr");
-	setmodel (self, "models/fog.spr");
+	float type;
+	type = random(-0.5,2.5);
+	if (type>2)
+		type=2;
+	else if (type<0)
+		type=0;
+	else
+		type = rint(type);
+	precache_model(fog_sprites[type]);
+	setmodel (self, fog_sprites[type]);
 	
 	self.drawflags (+) DRF_TRANSLUCENT;
 	
-	self.th_stand = fog_loop1;
 	self.netname="fog";
 	self.flags (+) FL_FLY;
-	self.th_stand();
+	self.think = fog_loop;
+	thinktime self : 0.1;
 	if (self.targetname)
 		self.use = SUB_Remove;
 };
 
 void() misc_mistgen
 {
-	precache_model ("models/fog.spr");
-	
 	if (!self.t_width)		//spawning area
 		self.t_width=30;
 	if (!self.wait)
@@ -551,3 +575,11 @@ void() obj_mummy =
 	setsize (self, self.mins, self.maxs);
 	*/
 }
+/*
+void() obj_statue_armor =
+{
+	precache_model("models/statue_armor");
+	CreateEntityNew(self, ENT_STATUE_ARMOR, "models/statue_armor", SUB_Null);
+	self.touch	= obj_push;
+	self.flags	(+) FL_PUSH;
+}*/
