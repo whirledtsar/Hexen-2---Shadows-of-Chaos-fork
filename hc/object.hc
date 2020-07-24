@@ -1927,6 +1927,7 @@ void obj_playerhead_paladin (void)
 	precache_model("models/h_pal.mdl");
 	CreateEntityNew(self,ENT_PLAYERHEAD,"models/h_pal.mdl",chunk_death);
 	self.use=chunk_death;
+	self.flags2(+)FL_SMALL;
 }
 
 /*QUAKED obj_playerhead_assassin (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
@@ -1940,6 +1941,7 @@ void obj_playerhead_assassin (void)
 	precache_model("models/h_ass.mdl");
 	CreateEntityNew(self,ENT_PLAYERHEAD,"models/h_ass.mdl",chunk_death);
 	self.use=chunk_death;
+	self.flags2(+)FL_SMALL;
 }
 
 /*QUAKED obj_playerhead_necromancer (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
@@ -1953,6 +1955,7 @@ void obj_playerhead_necromancer (void)
 	precache_model ("models/h_nec.mdl");
 	CreateEntityNew(self,ENT_PLAYERHEAD,"models/h_nec.mdl",chunk_death);
 	self.use=chunk_death;
+	self.flags2(+)FL_SMALL;
 }
 
 /*QUAKED obj_playerhead_crusader (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
@@ -1966,6 +1969,7 @@ void obj_playerhead_crusader (void)
 	precache_model ("models/h_cru.mdl");
 	CreateEntityNew(self,ENT_PLAYERHEAD,"models/h_cru.mdl",chunk_death);
 	self.use=chunk_death;
+	self.flags2(+)FL_SMALL;
 }
 
 /*QUAKED obj_statue_king (0.3 0.1 0.6) (-30 -30 0) (30 30 120)
