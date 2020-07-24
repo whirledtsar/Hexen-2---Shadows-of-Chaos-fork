@@ -309,6 +309,10 @@ void monster_golem_crystal(void)
 
 	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
+		precache_model3("models/goarm.mdl");
+		precache_model3("models/golegs.mdl");
+		precache_model3("models/g-head.mdl");
+		
 		precache_model3("models/golem_s.mdl");
 		precache_sound3("golem/stnpain.wav");
 		precache_sound3("golem/slide.wav");
@@ -1390,19 +1394,19 @@ void GolemDeathFinish(void) [++ $death12..$death22]
 		{ // Assumed bronze
 			sound(self, CHAN_BODY, "golem/mtlfall.wav", 1, ATTN_NORM);
 		}
-
-
+/*
 		if (GolemCheckSolidGround())
 		{
 			GolemChunkDeath();
-			//MakeSolidCorpse();
 		}
 		else
 		{
 			self.think = chunk_death;
 			thinktime self : 0.1;
 		}
-
+		*/
+		
+		GolemChunkDeath();
 		return;
 	}
 	
