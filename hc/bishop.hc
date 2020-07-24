@@ -19,7 +19,7 @@ void() dark_bishop_warp1;
 void()	dark_bishop_fire1	=[	0,	dark_bishop_fire2	] {};
 void()	dark_bishop_fire2	=[	1,	dark_bishop_fire1	] {};
 
-void()	dark_bishop_pdie1	=[	0,	dark_bishop_pdie2	] {dprint("pdie\n"); sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);};
+void()	dark_bishop_pdie1	=[	0,	dark_bishop_pdie2	] {sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);};
 void()	dark_bishop_pdie2	=[	1,	dark_bishop_pdie3	] {};
 void()	dark_bishop_pdie3	=[	2,	dark_bishop_pdie4	] {};
 void()	dark_bishop_pdie4	=[	3,	dark_bishop_pdie5	] {};
