@@ -321,10 +321,17 @@ void monster_golem_crystal(void)
 		return;
 	}
 
-	precache_model3("models/golem_s.mdl");
-	precache_sound3("golem/stnpain.wav");
-	precache_sound3("golem/slide.wav");
-	precache_sound3("golem/dthgroan.wav");
+	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	{
+		precache_model3("models/goarm.mdl");
+		precache_model3("models/golegs.mdl");
+		precache_model3("models/g-head.mdl");
+		
+		precache_model3("models/golem_s.mdl");
+		precache_sound3("golem/stnpain.wav");
+		precache_sound3("golem/slide.wav");
+		precache_sound3("golem/dthgroan.wav");
+	}
 	self.thingtype = THINGTYPE_ICE;
 	setmodel(self, "models/golem_s.mdl");
 	setsize(self, '-24 -24 0', '24 24 80');
@@ -1429,19 +1436,19 @@ void GolemDeathFinish(void) [++ $death12..$death22]
 		{ // Assumed bronze
 			sound(self, CHAN_BODY, "golem/mtlfall.wav", 1, ATTN_NORM);
 		}
-
-
+/*
 		if (GolemCheckSolidGround())
 		{
 			GolemChunkDeath();
-			//MakeSolidCorpse();
 		}
 		else
 		{
 			self.think = chunk_death;
 			thinktime self : 0.1;
 		}
-
+*/
+		
+		GolemChunkDeath();
 		return;
 	}
 	
