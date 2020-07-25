@@ -61,7 +61,6 @@ void wandering_monster_respawn()
 void MarkForRespawn (void)
 {
 	entity newmis;
-	float timelimit;
 	
 	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn && !self.playercontrolled) //do not respawn players or summoned monsters
 	{
