@@ -117,7 +117,7 @@ void undying_debug(void) [++ 0 .. 182]
 void undying_painfall(void) [++ 90 .. 130]
 {
 	if (self.frame == 130)
-		thinktime self : random(3.75,4.5-(skill*0.5));
+		thinktime self : random(4,5.5-(skill*0.5));
 	else
 		thinktime self : HX_FRAME_TIME;
 	
