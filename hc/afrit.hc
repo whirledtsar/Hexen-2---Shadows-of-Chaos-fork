@@ -496,11 +496,11 @@ void() monster_afrit =
 	self.movetype = MOVETYPE_STEP;
 
 	setmodel (self, "models/afrit.mdl");
-
 	setsize (self, '-16 -16 0', '16 16 36');
+	
 	if(!self.health)
-		self.health = 77;
-	//self.scale = 0.9;
+		self.health = 75;
+	self.max_health = self.health;
 	
 	self.thingtype=THINGTYPE_FLESH;
 	

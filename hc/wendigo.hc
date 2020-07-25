@@ -336,10 +336,11 @@ void() monster_wendigo =
 	self.movetype = MOVETYPE_STEP;
 
 	setmodel (self, "models/wendigo.mdl");
-
 	setsize (self, '-13 -13 -22', '13 13 35');
-	self.health = 62;
-	//self.scale = 0.9;
+	
+	if (!self.health)
+		self.health = 60;
+	self.max_health = self.health;
 	
 	self.thingtype=THINGTYPE_ICE;
 	
@@ -354,6 +355,7 @@ void() monster_wendigo =
 	
 	if(!self.experience_value)
 		self.experience_value = 60;
+	self.init_exp_val=self.experience_value;
 	if(!self.mass)
 		self.mass = 10;
 
