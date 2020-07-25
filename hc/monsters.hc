@@ -207,9 +207,9 @@ void() flymonster_start_go =
 	if (!self.yaw_speed)
 		self.yaw_speed = 10;
 
-	if(self.view_ofs=='0 0 0');
+	if(self.view_ofs=='0 0 0')
 		self.view_ofs = '0 0 24';
-	if(self.proj_ofs=='0 0 0');
+	if(self.proj_ofs=='0 0 0')
 		self.proj_ofs = '0 0 24';
 
 	self.use = monster_use;
