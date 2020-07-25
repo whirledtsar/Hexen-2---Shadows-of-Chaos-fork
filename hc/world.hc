@@ -274,7 +274,7 @@ void() worldspawn =
 	lightstyle(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
 	
 	// 12 Slow fluorescent flicker
-	lightstyle(12, "mmmmmmmmmammammmmmmmmaammmmmmaamammmmmmmmmmaammmmmmmmama");
+	lightstyle(12, "mmmmmmmmmmammammmmmmmmmmaammmmmmmaamammmmmmmmmmmaammmmmmmmmama");
 	
 	// 13 Soft flicker alternate
 	lightstyle(13, "mmnnommnpmmmqnmmnmonmmpommmnmq");
