@@ -1193,6 +1193,8 @@ void trigger_fan_blow (void)
 void() angletrigger_done =
 {
 	self.level = FALSE;
+	if (self.noise1)	//SoC
+		sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 };
 
 void() angletrigger_blocked =
@@ -1234,6 +1236,9 @@ vector newvect;
 		SUB_UseTargets();
 	}
 	
+	if (self.noise4)	//SoC
+		sound(self, CHAN_VOICE, self.noise4, 1, ATTN_NORM);
+	
 	SUB_CalcAngleMove(self.angles + newvect, self.speed, angletrigger_done);
 };
 
@@ -1269,6 +1274,8 @@ void() func_angletrigger =
 	setorigin (self, self.origin);	
 	setmodel (self, self.model);
 	self.classname = "angletrigger";
+	
+	door_sounds();	//SoC
 
 	if (self.abslight)
 		self.drawflags(+)MLS_ABSLIGHT;
