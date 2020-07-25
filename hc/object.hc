@@ -2285,7 +2285,7 @@ Talking door animation
 netname: name of target to movechain to
 --------------------------------------------------------
 */
-/*void obj_talking_door(void)
+void obj_talking_door(void)
 {
 	precache_model4("models/face.spr");
 
@@ -2305,7 +2305,7 @@ netname: name of target to movechain to
 
 	setsize (self, '0 0 0','0 0 0');//-32 -32 -16','32 32 16');
 }
-*/
+
 /*QUAKED obj_skeleton_throne (0.3 0.1 0.6) (-33 -33 -0) (33 33 115)
 Frickin' kick-ass Skeletal King on his Throne O' Bones!
 
