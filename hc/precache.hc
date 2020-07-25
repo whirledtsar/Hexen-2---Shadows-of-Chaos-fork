@@ -1240,7 +1240,6 @@ void precache_disciple()
 	precache_model ("models/purplexp.spr");
 		
 	precache_sound ("disciple/death.wav");
-	precache_sound ("disciple/death2.wav");
 	precache_sound ("disciple/atk.wav");
 	precache_sound ("disciple/pain.wav");
 	precache_sound ("disciple/pain2.wav");
