@@ -92,7 +92,7 @@ void()	bishop_atk17=[	24,		bishop_run1	] {SUB_AttackFinished(0.5); };
 
 //===========================================================================
 
-void()	bishop_pain1	=[	25,	bishop_pain2	] {self.drawflags(-)DRF_TRANSLUCENT;};
+void()	bishop_pain1	=[	25,	bishop_pain2	] {};
 void()	bishop_pain2	=[	26,	bishop_pain3	] {};
 void()	bishop_pain3	=[	27,	bishop_pain4	] {ai_pain(1);};
 void()	bishop_pain4	=[	28,	bishop_pain5	] {ai_pain(2);};
@@ -110,6 +110,8 @@ void(entity attacker, float damage)	bishop_pain =
 
 	if (self.pain_finished > time)
 		return;
+	if (damage < self.health*0.2 && random()<0.66)
+		return;
 	
 	self.drawflags(-)DRF_TRANSLUCENT;	//reset in case we enter pain state while translucent
 	r = random();
@@ -119,7 +121,7 @@ void(entity attacker, float damage)	bishop_pain =
 		sound (self, CHAN_VOICE, "disciple/pain2.wav", 1, ATTN_NORM);
 	ThrowGib ("models/blood.mdl", self.health);
 	bishop_pain1 ();
-	self.pain_finished = time + 1;
+	self.pain_finished = time + 1.5;
 	
 };
 
@@ -135,7 +137,7 @@ void() discip_fx =
 	newmis.nextthink = time + 0.1;
 }
 
-void()	bishop_die1	=[	36,	bishop_die2	] {};
+void()	bishop_die1	=[	36,	bishop_die2	] {self.movetype = MOVETYPE_NONE; };
 void()	bishop_die2	=[	37,	bishop_die3	] {};
 void()	bishop_die3	=[	38,	bishop_die4	] {};
 void()	bishop_die4	=[	39,	bishop_die5	] {};
@@ -149,7 +151,13 @@ void()	bishop_die11=[	46,	bishop_die12] {};
 void()	bishop_die12=[	47,	bishop_die13] {};
 void()	bishop_die13=[	48,	bishop_die14] {};
 void()	bishop_die14=[	49,	bishop_die15] {};
-void()	bishop_die15=[	50,	bishop_die15] {discip_fx();chunk_death();sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);ThrowGib ("models/blood.mdl", self.health);ThrowGib ("models/blood.mdl", self.health);};
+void()	bishop_die15=[	50,	bishop_die15] {
+	discip_fx();
+	chunk_death();
+	sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
+};
 
 
 void() bishop_die =
