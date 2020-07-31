@@ -164,6 +164,26 @@ void () CorpseThink =
 		MarkForRespawn();
 };
 
+void CorpsePain (entity attacker, float damage) =
+{
+	if (self.pain_finished > time)
+		return;
+	
+	string mdl;
+	float r = random();
+	
+	if (r<0.33)
+		mdl = "models/flesh1.mdl";
+	else if (r<0.66)
+		mdl = "models/flesh2.mdl";
+	else
+		mdl = "models/flesh3.mdl";
+	
+	ThrowGib(mdl, self.health);
+	ThrowGib("models/blood.mdl", self.health);
+	self.pain_finished = time+0.5;
+}
+
 /*
  * This uses entity.netname to hold the head file (for CorpseDie())
  * hack so that we don't have to set anything outside this function.
@@ -177,7 +197,8 @@ vector newmaxs;
 //value set in spawn
 	self.netname="corpse";
 	SUB_ResetTarget();
-    self.th_die = chunk_death;
+	self.th_pain = CorpsePain;	//SoC
+	self.th_die = chunk_death;
 	if (self.skin==GLOBAL_SKIN_ASH)
 		self.th_die = shatter;
 	//self.touch = obj_push; //Pushable corpses has the side effect of getting the player stuck when ironically it was meant to prevent that
