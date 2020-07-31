@@ -184,7 +184,7 @@ void() bishop_fx
 //===========================================================================
 void(vector org) CreateFog;		//objects_new.hc
 
-void()	dark_bishop_die1	=[	36,	dark_bishop_die2	] {};//self.movetype = MOVETYPE_FLY;};
+void()	dark_bishop_die1	=[	36,	dark_bishop_die2	] {self.movetype=MOVETYPE_NONE; };
 void()	dark_bishop_die2	=[	37,	dark_bishop_die3	] {};
 void()	dark_bishop_die3	=[	38,	dark_bishop_die4	] {};
 void()	dark_bishop_die4	=[	39,	dark_bishop_die5	] {self.solid = SOLID_PHASE; };
@@ -193,16 +193,12 @@ void()	dark_bishop_die6	=[	41,	dark_bishop_die7	] {};
 void()	dark_bishop_die7	=[	42,	dark_bishop_die8	] {};
 void()	dark_bishop_die8	=[	43,	dark_bishop_die9	] {};
 void()	dark_bishop_die9	=[	44,	dark_bishop_die10] {};
-void()	dark_bishop_die10=[	45,	dark_bishop_die11] {};
-void()	dark_bishop_die11=[	46,	dark_bishop_die12] {};
-void()	dark_bishop_die12=[	47,	dark_bishop_die13] {};
-void()	dark_bishop_die13=[	48,	dark_bishop_die14] {};
-void()	dark_bishop_die14=[	49,	dark_bishop_die15] {CreateFog(self.origin); };
+void()	dark_bishop_die10=[	45,	dark_bishop_die11] {CreateFog(self.origin+'0 0 8'); };
+void()	dark_bishop_die11=[	46,	dark_bishop_die12] {CreateFog(self.origin+'0 0 8'); };
+void()	dark_bishop_die12=[	47,	dark_bishop_die13] {CreateFog(self.origin+'0 0 8'); };
+void()	dark_bishop_die13=[	48,	dark_bishop_die14] {CreateFog(self.origin+'0 0 8'); };
+void()	dark_bishop_die14=[	49,	dark_bishop_die15] {};
 void()	dark_bishop_die15=[	50,	dark_bishop_die15] {
-	local float i;
-	for (i = 0; i <= 4; i++) {
-		CreateFog(self.origin); 
-	}
 	ThrowGib ("models/blood.mdl", self.health);
 	ThrowGib ("models/blood.mdl", self.health);
 	CreateGreenSmoke(self.origin,'0 0 0',HX_FRAME_TIME);
