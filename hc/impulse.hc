@@ -485,9 +485,9 @@ void() ImpulseCommands =
 		else
 			buff="off";
 		
-		sprint (self, "Monster respawning is "); sprint(self, respawning); sprint(self, ". type Impulse 45 to toggle\n");
-		sprint (self, "Corpse fading is "); sprint(self, fade); sprint(self, ". type Impulse 46 to toggle\n");
-		sprint (self, "Random monster variants is "); sprint(self, buff); sprint(self, ". type Impulse 47 to toggle\n");
+		sprint (self, "Monster respawning is "); sprint(self, respawning); sprint(self, ". type Impulse 51 to toggle\n");
+		sprint (self, "Corpse fading is "); sprint(self, fade); sprint(self, ". type Impulse 52 to toggle\n");
+		sprint (self, "Random monster variants is "); sprint(self, buff); sprint(self, ". type Impulse 53 to toggle\n");
 	}
 	else if (self.impulse == IMPULSE_RESPAWN)
 	{
