@@ -1103,18 +1103,6 @@ void yakman_stand () [++ $wait1 .. $wait24]
 }
 
 
-void() yakman_create =
-{
-	setmodel (self, "models/yakman.mdl");
-	self.hull=HULL_PLAYER;
-	setsize(self, '-18 -18 0', '18 18 80');
-	self.takedamage = DAMAGE_YES;
-	self.use=monster_use;
-	spawn_tfog(self.origin);
-	walkmonster_start ();
-	self.movetype = MOVETYPE_STEP;
-}
-
 /*QUAKED monster_yakman (1 0.3 0) (-28 -28 0) (28 28 80) AMBUSH STUCK JUMP x DORMANT 
 The Yakman Cometh... and the Yakman taketh away...
 skin:	0 - white: more often uses ice, and less often charges
@@ -1227,6 +1215,7 @@ void() monster_yakman =
 	self.th_missile=yakman_shoot_or_charge;
 	self.th_jump=yakman_jump;
 	self.th_die=yakman_die;
+	self.th_init=monster_yakman;
 
 	self.spawnflags (+) JUMP;
 
@@ -1244,13 +1233,6 @@ void() monster_yakman =
 	self.frame=$shard32;
 
 	self.init_exp_val = self.experience_value;
-	if (self.spawnflags&128)
-	{
-		self.movetype = MOVETYPE_NONE;
-		self.takedamage = DAMAGE_NO;
-		setmodel (self, "");
-		self.use = yakman_create;
-	}
-	else
-		walkmonster_start();
+	
+	walkmonster_start();
 };
