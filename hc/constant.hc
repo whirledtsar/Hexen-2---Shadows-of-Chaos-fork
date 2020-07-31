@@ -718,3 +718,9 @@ float PARM_BUFF = 4;
 //GoT wandering monster respawn
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
 float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
+
+//impulse commands
+float IMPULSE_INFO = 50;
+float IMPULSE_RESPAWN = 51;
+float IMPULSE_FADE = 52;
+float IMPULSE_BUFF = 53;
