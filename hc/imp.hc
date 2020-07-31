@@ -273,7 +273,7 @@ void imp_die ()
 			self.velocity_x = self.velocity_y = 0.0;
 		}
 		else
-			self.frame==$death7;
+			self.frame=$death7;	//self.frame==$death7;
 	
 	MonsterCheckContents();
 	
@@ -653,7 +653,7 @@ void imp_rise () [++ $impfly1 .. $impfly20]
 	}
 	else if(self.frame>$impfly14 &&self.attack_finished<time)
 	{
-		self.frame==$impfly14;
+		self.frame=$impfly14;	//self.frame==$impfly14;
 		self.velocity_z-=100;
 	}
 	else
