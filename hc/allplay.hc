@@ -219,7 +219,7 @@ vector	offset;
 	thinktime self : 0.1;
 	self.think = DeathBubblesSpawn;
 	self.air_finished = self.air_finished + 1;
-	if (self.air_finished >= self.bubble_count)
+	if (self.air_finished >= self.count)
 		remove(self);
 }
 
@@ -239,7 +239,7 @@ entity	bubble_spawner, bubble_owner;
 	thinktime bubble_spawner : 0.1;
 	bubble_spawner.think = DeathBubblesSpawn;
 	bubble_spawner.air_finished = 0;
-	bubble_spawner.bubble_count = num_bubbles;
+	bubble_spawner.count = num_bubbles;
 }
 
 
