@@ -259,7 +259,7 @@ void mumshot_gone(void)
 {
 	float damg;
 	
-	if (self.netname=="maulotaur" && other.netname=="maulotaur") {
+	if (self.owner.netname=="maulotaur" && other.netname=="maulotaur") {
 		remove(self);
 		return;
 	}
