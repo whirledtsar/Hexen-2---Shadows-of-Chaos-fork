@@ -569,10 +569,10 @@ float W_CheckNoAmmo (float check_weapon)
 		case IT_WEAPON2:
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
-				if(self.bluemana >= MMIS_TOME_COST)
+				if(self.bluemana >= MMIS_SHOCK_COST)
 					return TRUE;
 			}
-			else if(self.bluemana >= MMIS_COST)
+			else if(self.bluemana >= MMIS_SHOCK_COST)
 					return TRUE;
 		break;
 		}
