@@ -258,7 +258,12 @@ void SpawnMummyFlame(void)
 void mumshot_gone(void)
 {
 	float damg;
-
+	
+	if (self.netname=="maulotaur" && other.netname=="maulotaur") {
+		remove(self);
+		return;
+	}
+	
 	if (other.health)
 	{
 		damg = 15 + random() * 10;
