@@ -1458,8 +1458,9 @@ void() trigger_monsterjump_touch =
 {
 	if ( other.flags & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER )
 		return;
-	if (self.netname && other.classname != self.netname)
-		return;
+	if (self.noise1 || self.noise2 || self.noise3 || self.noise4)	//SoC
+		if (other.classname!=self.noise1 && other.classname!=self.noise2 && other.classname!=self.noise3 && other.classname!=self.noise4)
+			return;
 
 // set XY even if not on ground, so the jump will clear lips
 	if(other.classname=="monster_eidolon")
