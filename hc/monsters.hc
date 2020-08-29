@@ -325,6 +325,9 @@ void walkmonster_start ()
 // spread think times so they don't all happen at same time
 	if(self.puzzle_id)
 		MonsterPrecachePuzzlePiece();
+	
+	self.init_org = self.origin;
+	
 	if (self.spawnflags&SPAWNIN) {
 		monster_dormant();
 		return;
@@ -401,6 +404,8 @@ void() flymonster_start_go =
 
 void() flymonster_start =
 {
+	self.init_org = self.origin;
+	
 	if (self.spawnflags&SPAWNIN) {
 		monster_dormant();
 		return;
