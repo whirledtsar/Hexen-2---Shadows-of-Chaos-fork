@@ -106,7 +106,7 @@ void launch_axtail (entity axeblade)
 	tail.owner = axeblade;
 	tail.origin = tail.owner.origin;
 	tail.velocity = tail.owner.velocity;
-    tail.angles = tail.owner.angles;
+ 	tail.angles = tail.owner.angles;
 
 	axeblade.goalentity = tail;
 
@@ -255,7 +255,7 @@ void(float rightclick, float tome) axeblade_fire =
 			damg+=(strmod*2.75);
 		if (tome && self.greenmana >= AXE_MELEE_COST*2)
 			damg*=2;
-		dprint(ftos(damg));dprint("\n");
+		
 		if (tome)
 			axe_melee (damg, 2);
 		else if (self.flags2&FL2_FADE_UP)
