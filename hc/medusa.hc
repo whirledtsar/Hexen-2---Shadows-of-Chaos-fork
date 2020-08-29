@@ -152,6 +152,8 @@ float MEDUSA_RATTLE = 1;
 float MEDUSA_HEADBUTT = 2;
 float MEDUSA_SNAKES = 3;
 
+float MEDUSA_SKIN_RED = 1;
+
 void(entity attacker,float total_damage)medusa_pain;
 void()medusa_attack_right;
 void()medusa_attack_left;
@@ -200,14 +202,16 @@ void() SnakeHit =
 	if(other==self.owner||(other.owner==self.owner&&other.classname=="snakearrow"))
 		return;
 	starteffect(CE_MEDUSA_HIT,self.origin);
-	sound(other,CHAN_AUTO,"medusa/hitplayr.wav",1,ATTN_NORM);
     if(other.takedamage)
     {
-        other.bloodloss=other.bloodloss+1;
+		sound(other,CHAN_AUTO,"medusa/hitplayr.wav",1,ATTN_NORM);
+        //other.bloodloss=other.bloodloss+1;
         SpawnPuff(other.origin,'0 0 0',self.dmg,other);
 //Snakehit sprite
 		T_Damage(other,self,self.owner,self.dmg);
     }
+	else
+		sound(self,CHAN_AUTO,"afrit/afrithit.wav",0.75,ATTN_NORM);		//SoC: sound for hitting walls
     snake_remove();
 };
 
@@ -218,7 +222,7 @@ void snake_fly ()
 		CreateGreenSmoke(self.origin,'0 0 0',HX_FRAME_TIME);
 	HomeThink();
 	self.think=snake_fly;
-	thinktime self : 0.05;
+	thinktime self : self.wait;
 }
 
 void FireSnakeArrow (vector offset)
@@ -250,7 +254,15 @@ void FireSnakeArrow (vector offset)
 		newmis.th_die=snake_remove;
 		newmis.think=snake_fly;
 		newmis.hoverz=TRUE;			//slow down on turns
-		thinktime newmis : 0;		
+		if (self.skin==MEDUSA_SKIN_RED)		//red version fires less smart missiles
+		{
+			newmis.hoverz = FALSE;
+			newmis.speed = 350;
+			newmis.wait = 0.1; 
+		}
+		else
+			newmis.wait = 0.05;
+		thinktime newmis : 0;
 
 //appearance,size, and position, always in this order!!!
         setmodel(newmis,"models/snakearr.mdl");
@@ -276,7 +288,7 @@ float damg;
 		makevectors (self.angles+self.angle_ofs);
 		source = self.origin+self.view_ofs;
 		traceline (source, source + v_forward*48, FALSE, self);
-		if (trace_fraction == 1.0)  
+		if (trace_fraction == 1.0)
 			return;
 		org = trace_endpos + (v_forward * 4);
 		sound (self, CHAN_WEAPON, "weapons/gauntht1.wav", 1, ATTN_NORM);
@@ -932,6 +944,7 @@ void monster_medusa_green (void)
 
 	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
+		precache_model2("models/stmedgaz.mdl");
 		precache_model2("models/medusa.mdl");
 		precache_model2("models/medusa2.mdl");
 		precache_model2("models/snakearr.mdl");
@@ -947,6 +960,7 @@ void monster_medusa_green (void)
 		precache_sound2("medusa/death.wav");
 		precache_sound2("medusa/stoned.wav");
 		precache_sound2("medusa/hitplayr.wav");
+		precache_sound2("afrit/afrithit.wav");		//SoC
 	}
 
 //	if(random()<0.5)
@@ -964,8 +978,12 @@ void monster_medusa_green (void)
 	self.speed=5;
 	self.yaw_speed = 5;
 	self.classname="monster_medusa";
-	self.health = 600;	//700
-	self.experience_value = 500;
+	if (!self.health)
+		self.health = 600;	//700
+	self.max_health = self.health;
+	if (!self.experience_value)
+		self.experience_value = 500;
+	self.init_exp_val = self.experience_value;
 
 	self.th_stand=medusa_stand;
 	self.th_run=medusa_hunt;
@@ -975,8 +993,12 @@ void monster_medusa_green (void)
 	self.th_pain=medusa_pain;
 	self.th_missile=medusa_rattle;
 	self.th_melee=medusa_attack;
-	self.th_init=monster_medusa_green;
 	self.th_raise=medusa_raise;
+	
+	if (self.skin)
+		self.th_init=monster_medusa_green;
+	else
+		self.th_init=monster_medusa_red;
 
 	setmodel (self, "models/medusa.mdl");
 
@@ -1000,7 +1022,10 @@ The medusa monster with its nasty sharp pointy teeth
 */
 void monster_medusa_red (void)
 {
+	if (!self.health)
+		self.health = 300;
+	if (!self.experience_value)
+		self.experience_value = 200;
+	self.skin = MEDUSA_SKIN_RED;
 	monster_medusa_green();
-	self.health = 250;
-	self.experience_value = 200;
 }
