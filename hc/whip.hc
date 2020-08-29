@@ -30,6 +30,9 @@ void whip_pull (vector dir, entity targetent)
 	
 	if (targetent.thingtype == THINGTYPE_FLESH)
 		sound(targetent,CHAN_AUTO,"assassin/chntear.wav",1,ATTN_NORM);
+	else
+		sound(self,CHAN_AUTO,"weapons/ric2.wav",1,ATTN_NORM);
+	
 	T_Damage (targetent, self, self.owner, 5);
 	if (targetent.movetype == MOVETYPE_NONE)
 		return;
@@ -37,7 +40,7 @@ void whip_pull (vector dir, entity targetent)
 	//break up total pull into equal parts
 	totalmass = targetent.mass + self.mass;
 	pullstr1 = (self.mass / totalmass) * PULL_TOTAL;
-	pullstr2 = (targetent.mass / totalmass) * PULL_TOTAL;
+	pullstr2 = (targetent.mass / (totalmass*2)) * PULL_TOTAL;	//ws: increase mass factor
 
 	if (targetent.mass > 1000 || !targetent.flags2&FL_ALIVE)
 	{
@@ -50,12 +53,10 @@ void whip_pull (vector dir, entity targetent)
 	{
 		targetent.storethink = targetent.think;
 		targetent.think = targetent.th_pain;
-		targetent.nextthink = time + 1.1;
+		targetent.nextthink = time + 1.1;		//ws: this doesnt makes sense...
 		targetent.think = targetent.storethink;
 		targetent.nextthink = time + 0.1;
 	}
-	
-	
 	
 	//pull player
 	self.velocity+=dir * pullstr1 / 2;
@@ -67,7 +68,7 @@ void whip_pull (vector dir, entity targetent)
 		//pull target
 		targetent.velocity+=(dir * -1) * pullstr2;
 		targetent.velocity+=upvec * PULL_RESISTGRAVITY;//get off ground
-		targetent.velocity_z+=110;
+		targetent.velocity_z+=100/(self.mass*0.25);
 		targetent.flags(-)FL_ONGROUND;
 	}
 	//self.think = self.storethink;
