@@ -928,6 +928,8 @@ void medusa_jump () [++$stand1..$stand29]
 	}
 }
 
+void() monster_medusa_red;
+
 /*QUAKED monster_medusa_green (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
 
 The medusa monster with its nasty sharp pointy teeth
