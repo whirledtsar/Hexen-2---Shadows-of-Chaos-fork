@@ -455,7 +455,7 @@ entity found;
 
 		stopSound(found, 0);
 
-		if (found.classname == "func_train" || found.classname == "func_door_rotating")
+		if (found.classname == "train" || found.classname == "door_rotating")
 			sound (found, CHAN_VOICE, found.noise1, 1, ATTN_NORM);
 
 		found=find(found,targetname,self.target);
