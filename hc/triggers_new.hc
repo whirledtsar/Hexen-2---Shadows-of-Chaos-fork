@@ -436,3 +436,118 @@ void trigger_random ()
 	if (self.spawnflags&RANDOM_REMOVELOSER)
 		self.count=1;
 }
+
+void reverse_door (entity door)
+{	dprint("Door reversed\n");
+	if (door.movedir_z == -1 || door.movedir_z == 1)
+		door.movedir_z *= (-1);
+	else
+		door.movedir *= (-1);
+	
+	door.angles *= (-1);
+	door.v_angle *= (-1);
+//set new off/on position
+	door.pos1 = door.origin;
+	if(door.level)
+		door.pos2 = door.pos1 + door.movedir*(door.level - door.lip);
+	else
+		door.pos2 = door.pos1 + door.movedir*(fabs(door.movedir*door.size) - door.lip);
+}
+
+void reverse_door_rotating (entity door)
+{	dprint("Rotating door reversed\n");
+	door.movedir *= (-1);
+	door.v_angle *= (-1);
+	door.angles *= (-1);
+//set new off/on position
+	door.pos1 = door.angles;
+	door.pos2 = door.angles + door.movedir * door.dflags;
+}
+
+void reverse_rotating (entity door)
+{	dprint("Rotate reversed\n");
+	door.movedir *= (-1);
+}
+
+void trigger_reverse_wait ()
+{
+	self.think = trigger_reverse_wait;
+	thinktime self : HX_FRAME_TIME;
+//check if the door were waiting for is done moving
+	if ( ((self.enemy.classname=="door" || self.enemy.classname=="door_rotating") && self.enemy.state == STATE_BOTTOM)
+		|| (self.enemy.classname=="rotating non-door" && !self.enemy.avelocity) )
+	{
+		self.use(self.enemy);
+		remove(self);
+		return;
+	}
+}
+
+void trigger_reverse_use ()
+{
+entity found, t;
+	if (self.cnt > self.count) {
+		remove(self);
+		return;
+	}
+	if (self.count)
+		++self.cnt;
+	
+	found=find(world,targetname,self.target);
+	while(found)
+	{
+		if (found.classname == "door") {	//wait for door to return to default/off state to reverse direction
+			if (found.state != STATE_BOTTOM)
+			{	dprint("Reversing door delayed\n");
+				t = spawn();
+				thinktime t : HX_FRAME_TIME;
+				t.use = reverse_door;
+				t.think = trigger_reverse_wait;
+				t.enemy = found;
+			}
+			else
+				reverse_door(found);
+		}	
+		else if (found.classname == "door_rotating") {
+			if (found.state != STATE_BOTTOM)
+			{	dprint("Reversing rotating door delayed\n");
+				t = spawn();
+				thinktime t : HX_FRAME_TIME;
+				t.use = reverse_door_rotating;
+				t.think = trigger_reverse_wait;
+				t.enemy = found;
+			}
+			else
+				reverse_door_rotating(found);
+		}
+		else if (found.classname == "rotating non-door") {	//very cool classname Raven...
+			if (found.avelocity)
+			{	dprint("Reversing rotate delayed\n");
+				t = spawn();
+				thinktime t : HX_FRAME_TIME;
+				t.use = reverse_rotating;
+				t.think = trigger_reverse_wait;
+				t.enemy = found;
+			}
+			else
+				reverse_rotating(found);
+		}
+
+		found=find(found,targetname,self.target);
+	}
+}
+
+/*
+	~trigger_reverse~
+A relay trigger (point entity) that reverses the direction of its target. That is assuming that the target is a func_door, func_door_rotating, or func_rotating.
+It doesnt move the target, it just changes their direction for the next time theyre used.
+The target must be in its default/off state; otherwise the trigger will wait for it to return to that state and reverse it then.
+Will not work well with a func_rotating that already has the TOGGLE_REVERSE spawnflag.
+
+count: maximum uses
+*/
+
+void trigger_reverse ()
+{
+	self.use = trigger_reverse_use;
+}
