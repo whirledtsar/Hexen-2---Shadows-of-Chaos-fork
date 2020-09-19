@@ -162,6 +162,15 @@ void FireMagicMissile (float offset, float seeking)
 	
 	if (seeking)
 	{
+		newmis.effects=EF_DIMLIGHT;
+		newmis.frags=TRUE;
+		newmis.hoverz=TRUE;
+		newmis.turn_time=2;
+		newmis.lifetime=time+5;
+		newmis.th_die=chain_remove;
+		newmis.think=HomeThink;
+		thinktime newmis : 0.2;
+			
 		if(self.classname=="monster_eidolon")
 		{
 			newmis.scale=0.75;
@@ -170,18 +179,19 @@ void FireMagicMissile (float offset, float seeking)
 			
 			newmis.enemy=self.enemy;
 			newmis.classname = "eidolon spell";
+			newmis.homerate = 0.1;
 			newmis.turn_time=3;
 			newmis.dmg=random(30,40);
 		}
 		else
-		{
-			setorigin(newmis,self.origin+self.proj_ofs+v_forward*8+v_right*7+'0 0 5');
-			sound(newmis,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
+		{	//ws: changed so magic missile fire rate is the same across levels but homing improves
+			newmis.homerate=0.16-(self.level*0.01);
+			if (newmis.homerate<0.01)
+				newmis.homerate=0.01;
 			
 			if (tome)
 			{
-				//newmis.dmg = random(40, 50) + wismod;
-				newmis.dmg=random(45,60);
+				newmis.dmg=random(45,60);		//newmis.dmg = random(40, 50) + wismod;
 				newmis.scale=1.5;
 				newmis.veer = 110 - intmod;
 				if (newmis.veer < 30)
@@ -189,27 +199,15 @@ void FireMagicMissile (float offset, float seeking)
 			}
 			else
 			{
-				//newmis.dmg = random(18, 24) + (wismod * 0.5);
-				newmis.dmg = random(22,28);
+				newmis.dmg = random(22,28);		//newmis.dmg = random(18, 24) + (wismod * 0.5);
 				newmis.scale=1;
-				newmis.veer = 60 - intmod;
-				if (newmis.veer < 15)
-					newmis.veer = 15;
-				else
-					newmis.veer=15;
+				newmis.veer = 50 - intmod;
+				if (newmis.veer < 10)
+					newmis.veer = 10;
 			}
 			
-			newmis.effects=EF_DIMLIGHT;
-			newmis.frags=TRUE;
-			newmis.homerate=0.11-(self.level*0.01);
-			if (newmis.homerate<0.01)
-				newmis.homerate=0.01;	//dprint(ftos(newmis.homerate*1000));
-			newmis.hoverz=TRUE;
-			newmis.turn_time=2;
-			newmis.lifetime=time+5;
-			newmis.th_die=chain_remove;
-			newmis.think=HomeThink;
-			thinktime newmis : 0.2;
+			setorigin(newmis,self.origin+self.proj_ofs+v_forward*8+v_right*7+'0 0 5');
+			sound(newmis,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
 		}
 	}
 	else
@@ -578,24 +576,10 @@ void  mmis_normal()
 	}
 	
 	self.bluemana-=cost;
-	self.attack_finished = time+(0.625 - self.level*0.025);
+	self.attack_finished = time+0.3;
+	/*self.attack_finished = time+(0.625 - self.level*0.025);
 	if (self.attack_finished<time+0.2)	//vanilla magic missile delay
-		self.attack_finished = time+0.2;
-	
-	/*if (self.level < 2)		//ws: bloodshot's method
-		self.attack_finished=time+0.6;
-	else if (self.level < 3)
-		self.attack_finished=time+0.55;
-	else if (self.level < 5)
-		self.attack_finished=time+0.5;
-		else if (self.level < 7)
-		self.attack_finished=time+0.45;
-	else if (self.level < 9)
-		self.attack_finished=time+0.4;
-		else if (self.level < 10)
-		self.attack_finished=time+0.35;
-	else
-		self.attack_finished=time+0.3;*/
+		self.attack_finished = time+0.2;*/
 }
 
 
