@@ -175,8 +175,8 @@ float dist, bestdist;
 	bestdist+=1;
 	while (loser)
 	{
-		if(loser.health&&loser.takedamage&&(loser.flags2&FL_ALIVE)&&visible(loser)&&loser!=self&&loser!=world&&loser!=self.owner&&!other.effects&EF_NODRAW
-		  && loser.controller!=self.controller && loser.owner!=self.owner)//&&!(loser.artifact_active&ARTFLAG_STONED) Why Not?
+		if(loser.health&&loser.takedamage&&(loser.flags2&FL_ALIVE)&&visible(loser)&&loser!=self&&loser!=world&&loser!=self.owner&&!loser.effects&EF_NODRAW
+			&& (self.owner && loser.controller!=self.owner && loser.owner!=self.owner)) //&&!(loser.artifact_active&ARTFLAG_STONED) Why Not?
 			if((!self.aflag||self.ideal_yaw)&&!ahead(loser,self))			//looks for someone in front first time
 				dprint("");//not infront\n");
 			else if(teamplay&&loser.classname=="player"&&((loser.team==self.owner.team&&self.owner.classname=="player")||(loser.team==self.controller.team&&self.owner.classname=="player")))
