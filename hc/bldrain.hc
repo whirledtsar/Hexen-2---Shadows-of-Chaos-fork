@@ -314,10 +314,65 @@ void bloodrain_fire (float rightclick)
 			blrn_normal();
 }
 
+void bloodrain_charge ()
+{
+	self.th_weapon=bloodrain_charge;
+	self.last_attack=time;
+	
+	if (self.weaponframe < $normal05) {
+		if (self.search_time < time) {
+			advanceweaponframe($normal02,$normal13);
+			self.search_time = time+HX_FRAME_TIME*2;	//animate at half-speed
+		}
+	}
+	else if (self.weaponframe == $normal05) {
+		if (!self.button1 && self.weaponframe_cnt>=BLRAIN_CHARGE) {		//end loop if fire button released
+			//advanceweaponframe($normal02,$normal13);
+			++self.weaponframe;
+			self.search_time = time + HX_FRAME_TIME*8;
+		}
+		else {
+			self.weaponframe = $normal05;
+			self.weaponframe_cnt += 1;
+		}
+	}
+	
+	if (self.weaponframe>$normal05) {
+		if(self.weaponframe==$normal07) {
+			if (self.search_time < time)
+				advanceweaponframe($normal02,$normal13);
+			if (self.altfiring < 3) {
+				FireBloodMissile(random(-2,2));
+				++self.altfiring;
+			}
+		}
+		else
+			advanceweaponframe($normal02,$normal13);
+	}
+	
+	if (self.weaponframe>=$normal04 && self.weaponframe<=$normal06) {
+		makevectors(self.v_angle);
+		vector org = self.origin+self.proj_ofs+v_forward*15-v_right*12+'0 0 8';
+		if (random()<0.5)
+			particle3(org,'0.5 0.5 0.5',144,PARTICLETYPE_REDFIRE,1);
+		//particle(org, '0 0 1', 384, 1);	//why does every fucking color i choose make grey particles? what the fuck? why have a color field if it doesnt fucking work?
+	}
+	
+	if(self.weaponframe==$normal13) {
+		self.altfiring = 0;
+		self.search_time = 0;
+		self.weaponframe_cnt = 0;
+		self.attack_finished = time+0.3;
+		bloodrain_ready();
+	}
+}
+
 void Suc_Blrn_Fire (float rightclick) =
 {
-	self.weaponframe_cnt=0;
-	bloodrain_fire(rightclick);
+	if (rightclick && !self.artifact_active&ART_TOMEOFPOWER)
+		bloodrain_charge();
+	else
+		bloodrain_fire();
 
 	thinktime self : 0;
 };
