@@ -19,7 +19,7 @@ void() dark_bishop_warp1;
 void()	dark_bishop_fire1	=[	0,	dark_bishop_fire2	] {};
 void()	dark_bishop_fire2	=[	1,	dark_bishop_fire1	] {};
 
-void()	dark_bishop_pdie1	=[	0,	dark_bishop_pdie2	] {sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);};
+void()	dark_bishop_pdie1	=[	0,	dark_bishop_pdie2	] {};
 void()	dark_bishop_pdie2	=[	1,	dark_bishop_pdie3	] {};
 void()	dark_bishop_pdie3	=[	2,	dark_bishop_pdie4	] {};
 void()	dark_bishop_pdie4	=[	3,	dark_bishop_pdie5	] {};
@@ -215,14 +215,6 @@ void() dark_bishop_die =
 
 void() bmis_touch =
 {
-	setmodel (self, "models/grndie.spr");
-	self.movetype = MOVETYPE_NONE;
-	self.think = SUB_Remove;
-	self.nextthink = time + 1.5;
-	
-	if (other.classname == "worldspawn")
-		sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);
-
 	if (other.solid == SOLID_TRIGGER)
 		return;	// trigger field, do nothing
 
@@ -231,7 +223,10 @@ void() bmis_touch =
 		remove(self);
 		return;
 	}
-	// hit something that bleeds
+	
+	if (other.classname == "worldspawn")
+		sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);
+	
 	if (other.takedamage)
 	{
 		sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);
@@ -246,9 +241,13 @@ void() bmis_touch =
 			T_Damage (other, self, self.owner, 7);
 			remove(self);
 		}
+		return;
 	}
+	
+	setmodel (self, "models/grndie.spr");
+	self.movetype = MOVETYPE_NONE;
+	dark_bishop_pdie1();
 };
-
 
 void FireBishopMissile ()
 {
@@ -256,45 +255,44 @@ void FireBishopMissile ()
 	v_forward=self.v_angle;
 
 	self.effects(+)EF_MUZZLEFLASH;
+//identity
 	newmis=spawn();
-	newmis.angles = self.angles;
-	newmis.drawflags = MLS_FULLBRIGHT;
 	newmis.owner=self;
+	newmis.classname = "bishop star";
+//physics
 	newmis.movetype=MOVETYPE_FLYMISSILE;
 	newmis.solid=SOLID_BBOX;
-	newmis.scale=.8;
-
-	newmis.touch=bmis_touch;
-
-	newmis.speed=500;
-	//newmis.velocity=normalize(v_forward)*newmis.speed + spread;
-	newmis.velocity = normalize((self.enemy.origin+self.enemy.proj_ofs) - (self.origin+self.proj_ofs));
-	newmis.velocity = newmis.velocity * 50;
-	//newmis.movedir=normalize(newmis.velocity);
-	newmis.avelocity_z=random(300,600);
-	//newmis.avelocity_y=300;
-	newmis.level=TRUE;
-
+//rendering
+	newmis.drawflags(+)MLS_ABSLIGHT;
+	newmis.effects(+)EF_DIMLIGHT;
+	newmis.abslight=0.6;
+	newmis.scale=0.8;
+//appearance, size, origin
 	setmodel(newmis,"models/bishop_proj.mdl");
 	setsize(newmis,'0 0 0','0 0 0');
 	setorigin(newmis,self.origin+self.proj_ofs+'0 0 20'+v_forward*20);
-
-	//if(seeking)
-	//{	
-		newmis.enemy=self.enemy;
-		newmis.classname = "bishop star";
-		newmis.turn_time=12;
-		newmis.dmg=random(3,7);
-		newmis.effects=EF_DIMLIGHT;
-		newmis.frags=TRUE;
-		newmis.veer=60;
-		newmis.homerate=0.05;
-		newmis.lifetime=time+5;
-		newmis.th_die=chain_remove;
-		newmis.think=HomeThink;
-		newmis.hoverz=TRUE;
-		thinktime newmis : 0.2;
-	//}
+//impact
+	newmis.touch=bmis_touch;
+//velocity
+	newmis.speed=500;
+	newmis.velocity = normalize((self.enemy.origin+self.enemy.proj_ofs) - (self.origin+self.proj_ofs));
+	newmis.velocity = newmis.velocity * 50;
+	newmis.movedir = normalize(newmis.velocity);
+	newmis.angles = vectoangles(newmis.velocity);
+	newmis.avelocity_z=random(300,600);
+//behavior
+	newmis.dmg=random(3,7);
+//homing
+	newmis.enemy=newmis.lockentity=self.enemy;
+	newmis.homerate=0.05;
+	newmis.hoverz=TRUE;
+	newmis.lifetime=time+1.5;		//stop homing at this time
+	newmis.turn_time=8;//12;
+	newmis.th_die=SUB_Null;	//SUB_Remove
+	newmis.veer=10;
+//think	
+	newmis.think=HomeThink;
+	thinktime newmis : 0;
 }
 
 /*QUAKED monster_bishop (1 0 0) (-16 -16 -24) (16 16 40) Ambush
