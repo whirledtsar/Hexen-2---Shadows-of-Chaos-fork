@@ -228,13 +228,13 @@
 		0 : "No sound"
 		1 : "Stone/ceramic"
 		2 : "Wood"
-		//4 : "Metal" //Listed on Eye of Horus, doesn't work though?
+		3 : "Metal"
 	]
 ]
 
 @PointClass base(Appearflags, Targetname) size(-8 -8 -8, 8 8 8) = camera_remote : "Camera"
 [
-	target(target_destination) : "Target (target_null)"
+	target(target_destination) : "Target (info_null)"
 	wait(integer) : "Time in camera mode" : 3
 	angles_x(integer) : "Pitch (optional)"
 	angles_y(integer) : "Yaw (optional)"
@@ -256,7 +256,7 @@
 	mangle(string) : "Mangle (x y z)"
 	cnt(integer) : "Degrees per move"
 	speed(integer) : "Speed" : 40
-	dmg(integer) : "Damage when blocked"
+	dmg(integer) : "Damage when blocked" : 2
 	netname(string) : "Netname"
 	abslight(integer) : "Absolute light level"
 ]
@@ -1138,8 +1138,8 @@
 
 @PointClass base(monster_imp_fire) = monster_imp_lord : "Lord imp" []
 
-@PointClass base(Monster) model(":models/medusa.mdl") = monster_medusa_green : "Green medusa" []
-@PointClass base(monster_medusa_green) = monster_medusa_red : "Red medusa" []
+@PointClass base(Monster) size(-28 -28 0, 28 28 56) model({ "path": ":models/medusa.mdl", "skin": 0 }) = monster_medusa_green : "Green medusa" []
+@PointClass base(Monster) size(-28 -28 0, 28 28 56) model({ "path": ":models/medusa.mdl", "skin": 1 }) = monster_medusa_red : "Red medusa" []
 
 @PointClass base(Monster) model(":models/mummy.mdl") size(-16 -16 0, 16 16 55) = monster_mummy : "Mummy" []
 @PointClass base(Monster) model(":models/mummy.mdl") size(-16 -16 0, 16 16 55) = monster_mummy_lord : "Mummy lord" []
@@ -2236,7 +2236,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		5 : "Water (foamy)"
 		6 : "Water (foamy, light)"
 	]
-	abslight(integer) : "Absolute light level (0-11)" : 0
+	abslight(integer) : "Absolute light level (0-1)" : 0
 	wait(integer) : "Animation speed" : 0.05
 ]
 
@@ -2330,6 +2330,15 @@ This trigger reserves the targetname 'trigger_random_target'. If you give an ent
 		8 : ""
 		16 : "After triggering random id, remove all other entities in trigger's range. Possible useage: spawning random monster or activating random trigger and removing the ones not chosen. Implies single-use."
 	]
+]
+
+@PointClass base(Appearflags, Targetname, Target) = trigger_reverse : "
+A relay trigger (point entity) that reverses the direction of its target. That is assuming that the target is a func_door, func_door_rotating, or func_rotating.
+It doesnt move the target, it just changes their direction for the next time theyre used.
+The target must be in its default/off state; otherwise the trigger will wait for it to return to that state and reverse it then.
+Will not work well with a func_rotating that already has the TOGGLE_REVERSE spawnflag."
+[
+	count(integer) : "Number of uses before deactivating" : 0
 ]
 
 @SolidClass base(Appearflags) = fx_leaves : "Leaf spawner"
