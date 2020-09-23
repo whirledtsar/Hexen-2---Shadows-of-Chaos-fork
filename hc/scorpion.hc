@@ -188,7 +188,7 @@ void ScorpionInit(float type)
 		return;
 	}
 
-	if (!self.flags2 & FL_SUMMONED &&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_scorpion();
 	setmodel(self, "models/scorpion.mdl");
 
@@ -347,7 +347,7 @@ void ScorpionRunBlack(void) [++ $scwalk1..$scwalk16]
 
 	enemy_dist = vlen(self.enemy.origin - self.origin);
 	
-	if (enemy_dist < 120)
+	if (enemy_dist < 120 && !IsAlly(self.enemy))
 	{
 		if ((random() < 0.33) && (infront(self.enemy)) && (self.cnt <= time))
 		{
@@ -407,7 +407,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 
 	enemy_dist = vlen(self.enemy.origin - self.origin);
 	
-	if (enemy_dist < 120 && (self.enemy != self.controller))
+	if (enemy_dist < 120 && !IsAlly(self.enemy))
 	{
 		if ((random() < 0.33) && (infront(self.enemy)) && (self.cnt <= time))
 		{
