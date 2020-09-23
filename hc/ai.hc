@@ -57,6 +57,7 @@ void() eidolon_guarding;
 void()hive_die;
 float()eidolon_check_attack;
 float(entity ent) EnemyIsValid;
+float(entity ent) IsAlly;
 
 //void()check_climb;
 
@@ -345,6 +346,7 @@ float		ideal, move;
 
 void() HuntTarget =
 {
+	sdprint("Hunting target... ", TRUE);
 	self.goalentity = self.enemy;
 	self.think = self.th_run;
 //	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
@@ -427,9 +429,9 @@ float		r;
 		}
 		//return FALSE;
 	}
-
+	
 	sdprint("Summon monster finding Player target", TRUE);
-	if (sight_entity_time >= time&&sight_entity!=world && !(self.spawnflags & 1))
+	if (sight_entity_time >= time && sight_entity!=world && !(self.spawnflags & 1))
 	{
 		client = sight_entity;
 		if (client.enemy == self.enemy)
@@ -442,15 +444,15 @@ float		r;
 			return FALSE;	// current check entity isn't in PVS
 	}
 
-	if (self.playercontrolled && client==self.controller)	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
+	if (self.playercontrolled && (client==self.controller || client==self.owner))	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
 	{
 		HuntTarget();
 		return TRUE;
 	}
-
+	
 	if (client == self.enemy)
 		return FALSE;
-
+	
 	if (client.flags & FL_NOTARGET)
 		return FALSE;
 
@@ -486,7 +488,7 @@ float		r;
 //
 	self.enemy = client;
 
-	if (self.enemy.classname != "player")
+	if (self.enemy.classname != "player" && !self.playercontrolled)
 	{//If this check fails, do not let this entity set self as
 	 //sight_ent- avoids daisy-chaining of enemy sight
 		self.enemy = self.enemy.enemy;
@@ -631,7 +633,7 @@ void() ai_stand =
 	MonsterCheckContents();
 	
 	sdprint("Summon monster contents are ok", FALSE);
-	if (self.playercontrolled && self.enemy=self.controller)	//ws: if summoned minion and already close to player, dont move further
+	if (self.playercontrolled && self.enemy==self.controller)	//ws: if summoned minion and already close to player, dont move further
 			if (range(self.controller)<=RANGE_MELEE && visible(self.controller))
 				return;
 	
@@ -773,6 +775,9 @@ float() CheckAnyAttack =
 //		dprint("medusa checking\n");
 		return MedusaCheckAttack();
 	}
+	
+	if (IsAlly(self.enemy))
+		return FALSE;
 
 	return CheckAttack ();
 };
@@ -844,6 +849,7 @@ void(float dist) ai_run =
 	
 	movedist = dist;
 // see if the enemy is dead
+	//if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
 	if (!EnemyIsValid(self.enemy))
 	{	sdprint("summoned monster target dead ", TRUE);
 //THE PIT!
@@ -1048,14 +1054,35 @@ float IsMissile (entity ent)
 float EnemyIsValid (entity ent)
 {
 	if (ent==world)								return FALSE;
+	if (ent==self)								return FALSE;
 	if (!ent.flags2&FL_ALIVE)					return FALSE;
-	if (ent.health<0)							return FALSE;
+	if (ent.health<=0)							return FALSE;
 	if (ent.artifact_active&ARTFLAG_FROZEN)		return FALSE;
 	if (ent.artifact_active&ARTFLAG_STONED
 		&& self.classname!="monster_medusa")	return FALSE;
 	if (ent.artifact_active&ARTFLAG_ASH)		return FALSE;
 	
 	return TRUE;
+}
+
+float IsAlly (entity ent)
+{
+	if (teamplay && self.team)
+		if (ent.team == self.team || ent.owner.team == self.team || ent.controller.team == self.team || ent.team == self.owner.team || ent.team == self.controller.team)
+			return TRUE;
+	if (coop && self.flags&FL_CLIENT && ent.flags&FL_CLIENT)
+		return TRUE;
+	if (self.playercontrolled) {
+		if (coop && ent.flags&FL_CLIENT)
+			return TRUE;
+		if (self.owner)
+			if (ent == self.owner || ent.owner == self.owner)
+				return TRUE;
+		if (self.controller)
+			if (ent == self.controller || ent.controller == self.controller)
+				return TRUE;
+	}
+	return FALSE;
 }
 
 //ws: copy of ChangeYaw adapted for pitch. useful for flying & swimming enemies. uses entity's turn_time in place of yaw_speed.
