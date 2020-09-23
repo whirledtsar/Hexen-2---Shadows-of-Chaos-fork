@@ -206,14 +206,18 @@ void ScorpionInit(float type)
 
 	if(type == SCORPION_YELLOW)
 	{
-		self.health = 100;
-		self.experience_value = 60;
+		if(!self.health)
+			self.health = 100;
+		self.experience_value = 50;
 	}
 	else
 	{
-		self.health = 200;
-		self.experience_value = 150;
+		if(!self.health)
+			self.health = 200;
+		self.experience_value = 120;
 	}
+	if(!self.max_health)
+		self.max_health=self.health;
 
 	self.takedamage = DAMAGE_YES;
 
@@ -238,6 +242,7 @@ void ScorpionInit(float type)
 	{
 		self.skin = 1;
 	}
+	self.init_exp_val = self.experience_value;
 	
 	self.buff=1;
 	walkmonster_start();
@@ -341,7 +346,7 @@ void ScorpionRunBlack(void) [++ $scwalk1..$scwalk16]
 
 	enemy_dist = vlen(self.enemy.origin - self.origin);
 	
-	if (enemy_dist < 120)
+	if (enemy_dist < 120 && !IsAlly(self.enemy))
 	{
 		if ((random() < 0.33) && (infront(self.enemy)) && (self.cnt <= time))
 		{
@@ -401,7 +406,7 @@ void ScorpionRun(void) [++ $scwalk1..$scwalk16]
 
 	enemy_dist = vlen(self.enemy.origin - self.origin);
 	
-	if (enemy_dist < 120 && (self.enemy != self.controller))
+	if (enemy_dist < 120 && !IsAlly(self.enemy))
 	{
 		if ((random() < 0.33) && (infront(self.enemy)) && (self.cnt <= time))
 		{
