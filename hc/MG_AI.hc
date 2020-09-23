@@ -124,16 +124,21 @@ FALSE if not.
 */
 float FindMonsterTarget ()
 {
-entity found;
+entity found, client;
 float okay;
 	sdprint ("Summoned monster started finding monster target", TRUE);
-	if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
+	if (self.controller)
+		client = self.controller;
+	else if (self.owner)
+		client = self.owner;
+	
+	if(EnemyIsValid(client.enemy) && !IsAlly(client.enemy) && visible(client.enemy))
 	{
-		self.enemy=self.controller.enemy;
+		self.enemy=client.enemy;
 		sdprint ("Summoned monster's controller has a target", TRUE);
 		return TRUE;
 	}
-
+	
 	sdprint ("Summoned monster's controller has no target... searching", TRUE);
 	okay=FALSE;
 	found=findradius(self.origin,1000);
@@ -142,33 +147,36 @@ float okay;
 		if(found!=self)
 			if(EnemyIsValid(found))
 				if(visible(found))
-					if(found!=self.controller && found!=self.owner)
-						if(found.controller!=self.controller)
+					if(!IsAlly(found))
+					{
+						sdprint ("Summoned monster found a target!", TRUE);
+						if(coop)
 						{
-							if(coop)
-							{
-								if(found.classname!="player")
-									okay = TRUE;
-							}
-							else if(teamplay)
-							{
-								if(found.team!=self.controller.team)
-									okay = TRUE;
-							}
-							else
+							if(found.classname!="player")
 								okay = TRUE;
-							if(okay)
-							{
-								self.enemy=found;
-								sdprint ("Returning monster target", TRUE);
-								return TRUE;
-							}
 						}
+						else if(teamplay)
+						{
+							if(found.team!=client.team)
+								okay = TRUE;
+						}
+						else
+							okay = TRUE;
+						if(okay)
+						{
+							self.enemy=found;
+							sdprint ("Returning monster target", TRUE);
+							return TRUE;
+						}
+					}
 		found=found.chain;
 	}
 	sdprint ("Summoned monster found no targets, seeking controller instead", TRUE);
 	if(self.playercontrolled) // if imp, or summoned by player
-		self.enemy=self.controller;
+		if (self.owner)
+			self.enemy=self.owner;
+		else
+			self.enemy=self.controller;
 	return FALSE;
 }
 
