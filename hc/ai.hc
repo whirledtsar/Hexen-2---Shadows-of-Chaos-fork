@@ -56,6 +56,7 @@ void()riderpath_init;
 float(float move_speed)eidolon_riderpath_move;
 void()hive_die;
 float(entity ent) EnemyIsValid;
+float(entity ent) IsAlly;
 
 //void()check_climb;
 
@@ -382,7 +383,7 @@ float		r;
 	}
 	
 	sdprint("Summon monster finding Player target", TRUE);
-	if (sight_entity_time >= time&&sight_entity!=world && !(self.spawnflags & 1))
+	if (sight_entity_time >= time && sight_entity!=world && !(self.spawnflags & 1))
 	{
 		client = sight_entity;
 		if (client.enemy == self.enemy)
@@ -395,7 +396,7 @@ float		r;
 			return FALSE;	// current check entity isn't in PVS
 	}
 	
-	if (self.playercontrolled && client==self.controller)	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
+	if (self.playercontrolled && (client==self.controller || client==self.owner))	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
 	{
 		HuntTarget();
 		return TRUE;
@@ -683,8 +684,8 @@ float() CheckAnyAttack =
 
 	//if (self.model=="models/archer.mdl")
 		//return(ArcherCheckAttack ());
-
-	if(self.goalentity==self.controller)
+	
+	if (IsAlly(self.enemy))
 		return FALSE;
 
 	return CheckAttack ();
@@ -929,14 +930,35 @@ float IsMissile (entity ent)
 float EnemyIsValid (entity ent)
 {
 	if (ent==world)								return FALSE;
+	if (ent==self)								return FALSE;
 	if (!ent.flags2&FL_ALIVE)					return FALSE;
-	if (ent.health<0)							return FALSE;
+	if (ent.health<=0)							return FALSE;
 	if (ent.artifact_active&ARTFLAG_FROZEN)		return FALSE;
 	if (ent.artifact_active&ARTFLAG_STONED
 		&& self.classname!="monster_medusa")	return FALSE;
 	if (ent.artifact_active&ARTFLAG_ASH)		return FALSE;
 	
 	return TRUE;
+}
+
+float IsAlly (entity ent)
+{
+	if (teamplay && self.team)
+		if (ent.team == self.team || ent.owner.team == self.team || ent.controller.team == self.team || ent.team == self.owner.team || ent.team == self.controller.team)
+			return TRUE;
+	if (coop && self.flags&FL_CLIENT && ent.flags&FL_CLIENT)
+		return TRUE;
+	if (self.playercontrolled) {
+		if (coop && ent.flags&FL_CLIENT)
+			return TRUE;
+		if (self.owner)
+			if (ent == self.owner || ent.owner == self.owner)
+				return TRUE;
+		if (self.controller)
+			if (ent == self.controller || ent.controller == self.controller)
+				return TRUE;
+	}
+	return FALSE;
 }
 
 //ws: copy of ChangeYaw adapted for pitch. useful for flying & swimming enemies. uses entity's turn_time in place of yaw_speed.
