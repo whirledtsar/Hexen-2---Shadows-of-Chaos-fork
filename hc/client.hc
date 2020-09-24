@@ -9,7 +9,9 @@ void(entity attacker,float total_damage) player_pain;
 void (vector org, entity death_owner) spawn_tdeath;
 void() DecrementSuperHealth;
 void CheckRings (void);
+void(entity client) ResetInventory;
 
+float EXIT_RESETINV = 16;		//ws: trigger_changelevel spawnflag
 
 void FreezeAllEntities(void)
 {
@@ -398,6 +400,17 @@ entity found;
 		WriteByte (MSG_ALL, 5);
 		FreezeAllEntities();
 		return;
+	}
+	
+	if (!deathmatch && self.spawnflags&EXIT_RESETINV)
+	{
+		entity search;
+		search=find(world,classname,"player");
+		while(search) {
+			search.weaponmodel = "";
+			ResetInventory(search);
+			search=find(search,classname,"player");
+		}
 	}
 
 /*	if (self.spawnflags & 2)
@@ -3232,4 +3245,51 @@ float retval;
 	}
 	parm16=self.state;
 	return retval;
+}
+
+void ResetInventory (entity client)
+{
+	if (!client.flags&FL_CLIENT)
+		return;
+	
+	//client.items(-)IT_WEAPON4|IT_WEAPON3|IT_WEAPON4_1|IT_WEAPON4_2|IT_WEAPON2;
+	client.items = IT_WEAPON1;
+	client.bluemana = client.greenmana = 0;
+	
+	client.rings = 0;
+	client.rings_active = 0;
+	client.ring_flight =
+	client.ring_water =
+	client.ring_turning =
+	client.ring_regeneration = 0;
+	
+	client.cnt_torch =
+	client.cnt_h_boost =
+	client.cnt_sh_boost =
+	client.cnt_mana_boost =
+	client.cnt_teleport =
+	client.cnt_tome =
+	client.cnt_summon =
+	client.cnt_invisibility =
+	client.cnt_glyph =
+	client.cnt_haste =
+	client.cnt_blast =
+	client.cnt_polymorph =
+	client.cnt_flight =
+	client.cnt_cubeofforce =
+	client.cnt_invincibility = 0;
+	
+	client.armor_amulet =
+	client.armor_breastplate =
+	client.armor_bracer =
+	client.armor_helmet = 0;
+	
+	client.puzzle_inv1 =
+	client.puzzle_inv2 =
+	client.puzzle_inv3 =
+	client.puzzle_inv4 =
+	client.puzzle_inv5 =
+	client.puzzle_inv6 =
+	client.puzzle_inv7 =
+	client.puzzle_inv8 = string_null;
 }
