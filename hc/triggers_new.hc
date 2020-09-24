@@ -82,11 +82,11 @@ void trigger_reflect ()
 
 /*======================================================================
  Player ladder (originally from Rubicon2 codebase by JohnFitz)
- - This is a very simple system, jump to attach to the ladder brush
- - move up down via jumpping (hook in preplayer code)
- - Added multiple climbing sounds (works with player footsound state)
- - Modified to have on/off/toggle state via triggers
- - Downsides to system, there is no abilty to go down a ladder
+ - Sock: This is a very simple system, jump to attach to the ladder brush
+ - Sock: move up down via jumpping (hook in preplayer code)
+ - Sock: Added multiple climbing sounds (works with player footsound state)
+ - Sock: Modified to have on/off/toggle state via triggers
+ - ws: Adapated to H2, added ability to crouch to move down
 
 /*======================================================================
 /*QUAKED trigger_ladder (.5 .5 .5) x x x Deactivated
@@ -114,7 +114,7 @@ void trigger_ladder_touch (void)
 	if (other.flags&FL_WATERJUMP) return;
 	if (other.flags2&FL_CHAINED) return;
 	
-	if (self.movedir != '0 0 0')
+	if (self.movedir != '0 0 0' && other.ladder!=self)
 	{
 		makevectors (other.angles);
 		if (v_forward * self.movedir < 0)
