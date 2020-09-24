@@ -1638,7 +1638,7 @@ void() PlayerPreThink =
 			self.velocity_z = self.ladder.speed * self.hasted;
 			if (crouching) {					//ws: if pressing crouch button, move down ladder
 				self.velocity_z *= (-1);
-				if (self.hull=HULL_CROUCH)		//ws: if in actual crouch state, return to normal once on ladder
+				if (self.hull==HULL_CROUCH)		//ws: if in actual crouch state, return to normal once on ladder
 					PlayerUnCrouching();
 			}
 			self.gravity = 0.0000001;
@@ -1673,12 +1673,8 @@ void() PlayerPreThink =
 		if (self.button2)
 			PlayerJump ();
 		else
-			self.flags = self.flags | FL_JUMPRELEASED;
+			self.flags(+)FL_JUMPRELEASED;
 	}
-	/*if (self.button2)
-		PlayerJump ();
-	else
-		self.flags(+)FL_JUMPRELEASED;*/
 
 // teleporters can force a non-moving pause time
 	if (time < self.pausetime)
