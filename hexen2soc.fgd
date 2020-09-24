@@ -65,7 +65,7 @@
 // Base definitions!
 //
 
-@baseclass = FuncLighting [
+@baseclass = BrushLighting [
 	_dirt(integer) : "Dirt mapping (override)"
 	_minlight(integer) : "Min light for all surface"
 	_mincolor(string) : "Min light color R G B"
@@ -173,7 +173,7 @@
 
 @PointClass base(Appearflags, Targetname) = buddha_trigger_endgame  : "Buddha trigger endgame (PoP)" []
 
-@SolidClass base(Appearflags, Targetname, Target, FuncLighting) = breakable_brush : "Breakable brush"
+@SolidClass base(Appearflags, Targetname, Target, BrushLighting) = breakable_brush : "Breakable brush"
 [
 	spawnflags(Flags) =
 	[
@@ -220,7 +220,7 @@
 	abslight(integer) : "Absolute light level"
 ]
 
-@SolidClass base(Appearflags, Targetname, FuncLighting) = brush_pushable : "Pushable brush"
+@SolidClass base(Appearflags, Targetname, BrushLighting) = brush_pushable : "Pushable brush"
 [
 	mass(integer) : "Mass" : 5
 	thingtype(choices) : "Material type" : 1 =
@@ -261,7 +261,7 @@
 	abslight(integer) : "Absolute light level"
 ]
 
-@BaseClass base(Appearflags, Targetname, Target, FuncLighting) = Button [
+@BaseClass base(Appearflags, Targetname, Target, BrushLighting) = Button [
 	spawnflags(Flags) =
 	[
 		1 : "Deactivated" : 0
@@ -300,7 +300,7 @@
 	aflag(integer) : "Order"
 ]
 
-@SolidClass base(Appearflags, Targetname, FuncLighting) = func_crusher : "Crusher"
+@SolidClass base(Appearflags, Targetname, BrushLighting) = func_crusher : "Crusher"
 [
 	spawnflags(Flags) =
 	[
@@ -321,7 +321,7 @@
 	]
 ]
 
-@BaseClass base(Appearflags, Targetname, Target, FuncLighting) = Door
+@BaseClass base(Appearflags, Targetname, Target, BrushLighting) = Door
 [
 	spawnflags(Flags) =
 	[
@@ -775,7 +775,7 @@
 	abslight(integer) : "Absolute light value"
 ]
 
-@SolidClass base(Appearflags, Targetname, FuncLighting) = func_wall : "Wall"
+@SolidClass base(Appearflags, Targetname, BrushLighting) = func_wall : "Wall"
 [
         spawnflags(Flags) =
 	[
@@ -1803,9 +1803,13 @@
 		1 : "No intermission" : 0
 		//2 : "End of unit" : 0
 		//4 : "End of episode" : 0
+		8 : "Deactivated" : 0
+		16 : "Reset inventory" : 0
 	]
 	map(string) : "Map name"
+	target(string) : "Player start name"
 ]
+
 @SolidClass base(Appearflags, Targetname, Target) = trigger_check : "Check" //Not triggered by players
 [
 	killtarget(target_destination) : "KillTarget"
@@ -1929,7 +1933,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		8 : "Deactivated" : 0
 	]
 	angle(integer) : "Angle"
-	count(integer) : "Count" : 0.7 : "Delay between sounds"
+	count(float) : "Count" : 0.7 : "Delay between sounds"
 	soundtype(choices) : "Sound" : 0 =
 	[
 		0 : "Silent"
@@ -1951,6 +1955,10 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	[
 		1 : "Deactivated (PoP)" : 0
 	]
+	noise1(string) : "Only monsters with this classname (or noise2/3/4) will jump"
+	noise2(string) : ""
+	noise3(string) : ""
+	noise4(string) : ""
 	speed(integer) : "Speed forward" : 200
 	height(integer) : "Speed upwards" : 200
 	wait(integer) : "Wait" : 0
@@ -2030,7 +2038,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	wait(integer) : "Delay before quake" : 1
 ]
 
-@SolidClass base(Appearflags) size(-8 -8 -8, 8 8 8) = trigger_reflect : "Reflector. Brush reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with clip func_wall to block movement and un-reflectable attacks like lightning beams. Don't killtarget this entity - just target it to remove it."
+@SolidClass base(Appearflags) = trigger_reflect : "Reflector. Brush reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with clip func_wall to block movement and un-reflectable attacks like lightning beams. Don't killtarget this entity - just target it to remove it."
 [
 	speed(integer) : "Multiplier for reflected missiles' speed"
 	targetname(target_source) : "Name - trigger to remove, don't killtarget"
@@ -2194,11 +2202,11 @@ If it has a target, it will act like a relay and hurt that target when triggered
 @PointClass base(wp_weapon2) model(":models/w_l41_c1.mdl") = wp_weapon4_head : "Weapon 4 head" []
 @PointClass base(wp_weapon2) model(":models/w_l42_c1.mdl") = wp_weapon4_staff : "Weapon 4 staff" []
 
-@SolidClass base(FuncLighting,Appearflags) = func_detail : "Detail brush" []
-@SolidClass base(FuncLighting,Appearflags) = func_detail_fence : "Detail Fence brush" []
-@SolidClass base(FuncLighting,Appearflags,targetname) = func_detail_wall : "Detail Wall brush" []
-@SolidClass base(FuncLighting,Appearflags)= func_detail_illusionary : "Detail Illusionary brush" []
-@SolidClass base(FuncLighting)= func_group : "Group brush" []
+@SolidClass base(BrushLighting,Appearflags) = func_detail : "Detail brush" []
+@SolidClass base(BrushLighting,Appearflags) = func_detail_fence : "Detail Fence brush" []
+@SolidClass base(BrushLighting,Appearflags,Targetname) = func_detail_wall : "Detail Wall brush" []
+@SolidClass base(BrushLighting,Appearflags)= func_detail_illusionary : "Detail Illusionary brush" []
+@SolidClass base(BrushLighting)= func_group : "Group brush" []
 
 @PointClass base(Object) model(":models/hangskel.mdl") size(-10 -10 -5, 10 10 40) = obj_hang_corpse : "Hanging corpse, assassin and skeleton variants" [
 	spawnflags(Flags) =
@@ -2236,8 +2244,8 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		5 : "Water (foamy)"
 		6 : "Water (foamy, light)"
 	]
-	abslight(integer) : "Absolute light level (0-1)" : 0
-	wait(integer) : "Animation speed" : 0.05
+	abslight(float) : "Absolute light level (0-1)" : 0
+	wait(float) : "Animation speed" : 0.05
 ]
 
 @PointClass base(Object) model(":models/portal.mdl") = misc_portal_big : "Large Portal Effect, for use with teleporters/level exits a la Hexen 1" []
@@ -2253,7 +2261,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		2 : "Start off"
 	]
 	t_width(integer) : "Mist max offset from origin" : 30
-	wait(integer) : "Delay between spawns" : 0.5
+	wait(float) : "Delay between spawns" : 0.5
 ]
 
 @PointClass base(light) model(":models/chan.mdl") size(-8 -8 -8, 8 8 8) = light_chan : "Chandelier (heretic 2)" []
