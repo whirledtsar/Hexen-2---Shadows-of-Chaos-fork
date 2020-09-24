@@ -112,7 +112,7 @@ void trigger_ladder_touch (void)
 	if (other.flags&FL_WATERJUMP) return;
 	if (other.flags2&FL_CHAINED) return;
 	
-	if (self.movedir != '0 0 0')
+	if (self.movedir != '0 0 0' && other.ladder!=self)
 	{
 		makevectors (other.angles);
 		if (v_forward * self.movedir < 0)
