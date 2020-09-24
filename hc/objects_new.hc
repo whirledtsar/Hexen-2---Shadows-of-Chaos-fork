@@ -165,7 +165,6 @@ void water_fall () [++ 41 .. 66]
 
 void water_start () [++ 0 .. 25]
 {
-float result;
 	if (self.frame <= 1) {
 		self.think = water_start;
 		setmodel(self, self.mdl);
