@@ -3,7 +3,7 @@
  */
 
 float SPAWNFLAG_ACTIVATED	= 8;
-
+float SPAWNFLAG_USESTRING = 131072;
 
 void SUB_Null() {}
 
@@ -77,8 +77,8 @@ void InitTrigger()
 
 void(vector tdest, float tspeed, void() func) SUB_CalcMove =
 {
-	local vector vdestdelta;
-	local float  len, traveltime;
+vector vdestdelta;
+float  len, traveltime;
 
 	if(!tspeed)
 		objerror("No speed is defined!");
@@ -395,6 +395,7 @@ string s;
 		t.think = DelayThink;
 		t.enemy = activator;
 		t.message = self.message;
+		t.messagestr = self.messagestr;
 		t.killtarget = self.killtarget;
 		t.target = self.target;
 		return;
@@ -403,9 +404,12 @@ string s;
 //
 // print the message
 //
-	if(activator.classname == "player" && self.message != 0)
+	if(activator.flags&FL_CLIENT && (self.message || self.messagestr != ""))
 	{
-		s = getstring(self.message);
+		if (self.messagestr != "")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+			s = self.messagestr;
+		else
+			s = getstring(self.message);
 		centerprint (activator, s);
 		if(!self.noise)
 			sound (activator, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NORM);
@@ -514,7 +518,7 @@ void (void() thinkst) SUB_CheckRefire =
 };
 */
 
-void SUB_UseWakeTargets()
+void SUB_UseWakeTargets()	//ws: monsters use self.waketarget upon sighting player
 {
 	if (self.waketarget=="")
 		return;
