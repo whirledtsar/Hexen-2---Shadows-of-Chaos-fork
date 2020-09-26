@@ -569,7 +569,7 @@ void counter_return_buttons ()
 
 void() counter_use_ordered =
 {
-string oldtarg;
+string oldtarg, oldstr;
 float oldmsg;
 string temp;
 
@@ -640,8 +640,10 @@ string temp;
 			self.target = self.puzzle_id;
 			oldmsg = self.message;
 			self.message = FALSE;
+			self.messagestr = "";	//SoC
 			SUB_UseTargets();
 			self.message = oldmsg;
+			self.messagestr = oldstr;
 			self.target = oldtarg;
 
 			self.cnt = 1;
