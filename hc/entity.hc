@@ -728,7 +728,7 @@ void end_sys_fields;
 
 .float inactive;
 .float msg2;
-.string msg3;
+.string msg3;			//only used by raven staff
 .string nexttarget;		//For target transferral
 .float gravity;			//Gravity, duh
 //.float upside_down;	unused
@@ -789,6 +789,9 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
 .void() th_raise;		//monster revival system
 .float targetid;		//numerical id for trigger_random
+.string messagestr		//string version of message
+.string msg2str;		//string version of msg2
+.string no_puzzle_str	//string version of no_puzzle_msg
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
