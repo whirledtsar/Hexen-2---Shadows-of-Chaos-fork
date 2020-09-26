@@ -1211,6 +1211,8 @@ void trigger_fan_blow (void)
 void() angletrigger_done =
 {
 	self.level = FALSE;
+	if (self.noise1)	//SoC
+		sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 };
 
 void() angletrigger_blocked =
@@ -1249,8 +1251,11 @@ vector newvect;
 	else if (self.check_ok)
 	{
 		self.check_ok = FALSE;
-		SUB_UseTargets();
+		SUB_UseTargets();	//ws: causes angletrigger to fire target twice - can this be fixed w/o breaking shit?
 	}
+	
+	if (self.noise4)	//SoC
+		sound(self, CHAN_VOICE, self.noise4, 1, ATTN_NORM);
 	
 	SUB_CalcAngleMove(self.angles + newvect, self.speed, angletrigger_done);
 };
@@ -1287,6 +1292,8 @@ void() func_angletrigger =
 	setorigin (self, self.origin);	
 	setmodel (self, self.model);
 	self.classname = "angletrigger";
+	
+	door_sounds();	//SoC
 
 	if (self.abslight)
 		self.drawflags(+)MLS_ABSLIGHT;
@@ -1298,16 +1305,6 @@ void() func_angletrigger =
 	if (!self.dmg)
 		self.dmg = 2;
 	
-/*
-	precache_sound ("doors/hydro1.wav");
-	precache_sound ("doors/hydro2.wav");
-	precache_sound ("doors/basetry.wav");
-	precache_sound ("doors/baseuse.wav");
-	self.noise2 = "doors/hydro1.wav";
-	self.noise1 = "doors/hydro2.wav";
-	self.noise3 = "doors/basetry.wav";
-	self.noise4 = "doors/baseuse.wav";
-*/
 	self.blocked = angletrigger_blocked;
 	self.use = angletrigger_use;
 	
