@@ -501,11 +501,17 @@ entity	starte;
 	if (self.owner != self)
 		objerror ("door_fire: self.owner != self");
 
-	self.no_puzzle_msg = 0;
+	if (self.no_puzzle_msg)
+		self.no_puzzle_msg = 0;
+	if (self.no_puzzle_str!="")
+		self.no_puzzle_str = "";	//SoC
 
 // play use key sound
 
-	self.message = 0;		// no more message
+	if (self.message)
+		self.message = 0;		// no more message
+	if (self.messagestr!="") 
+		self.messagestr = "";
 	oself = self;
 
 	if (self.spawnflags & DOOR_TOGGLE)
@@ -561,6 +567,9 @@ entity oself;
 	self.message = 0;			// door messages are for touch only
 	self.owner.message = 0;
 	self.enemy.message = 0;
+	self.messagestr="";		//SoC
+	self.owner.messagestr="";
+	self.enemy.messagestr="";
 	oself = self;
 	self = self.owner;
 	door_fire ();
@@ -602,9 +611,12 @@ void door_trigger_touch()
 
 		if (!check_puzzle_pieces(other,removepp,inversepp))
 		{
-			if (self.no_puzzle_msg && !deathmatch) 
+			if ((self.no_puzzle_msg || self.no_puzzle_str!="") && !deathmatch) 
 			{
-				temp = getstring(self.no_puzzle_msg);
+				if (self.no_puzzle_str!="")
+					temp = self.no_puzzle_str;
+				else
+					temp = getstring(self.no_puzzle_msg);
 				centerprint (other, temp);
 				door.attack_finished = time + 2;
 			}
@@ -670,9 +682,12 @@ void door_touch()
 	if (self.owner)
 		self.owner.attack_finished = time + 2;
 
-	if(self.owner.message != 0 && other.flags&FL_CLIENT && !deathmatch && self.owner != world)
+	if(self.owner!=world && (self.owner.message || self.owner.messagestr!="") && other.flags&FL_CLIENT && !deathmatch)
 	{
-		temp = getstring(self.owner.message);
+		if (self.owner.messagestr != "")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+			temp = self.owner.messagestr;
+		else
+			temp = getstring(self.owner.message);
 		centerprint (other, temp);
 		sound (other, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NORM);
 	}
@@ -819,6 +834,8 @@ vector	cmins, cmaxs;
 			starte.targetname = self.targetname;
 		if (self.message != 0)
 			starte.message = self.message;
+		if (self.messagestr!="")
+			starte.messagestr = self.messagestr;	//SoC
 
 		t = find (t, classname, self.classname);	
 		if (!t)
@@ -1411,6 +1428,7 @@ void fd_secret_use()
 		return;
 
 	self.message = 0;		// no more message
+	self.messagestr = "";	//SoC
 
 	SUB_UseTargets();				// fire all targets / killtargets
 
@@ -1543,9 +1561,12 @@ void secret_touch()
 
 	self.attack_finished = time + 2;
 	
-	if (self.message)
+	if (self.message || self.messagestr!="")
 	{
-		s = getstring(self.message);
+		if (self.messagestr != "")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+			s = self.messagestr;
+		else
+			s = getstring(self.message);
 		centerprint (other, s);
 		sound (other, CHAN_BODY, "misc/comm.wav", 1, ATTN_NORM);
 	}

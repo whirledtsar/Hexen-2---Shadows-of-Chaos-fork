@@ -28,6 +28,7 @@ float SPAWNFLAG_REMOVE_PP	= 16;
 float SPAWNFLAG_NO_PP		= 32;
 
 float SPAWNFLAG_ALLTOUCH	= 65536;
+
 // the wait time has passed, so set back up for another activation
 void() multi_wait =
 {
@@ -68,9 +69,9 @@ void() multi_trigger =
 
 	activator = self.enemy;
 
-	if (self.experience_value)
+	if (self.experience_value && activator.flags&FL_CLIENT)
 	{
-		AwardExperience(activator,self,0);
+		AwardExperience(activator,self,self.experience_value);	//ws: changes to self.experience_value from 0 (?)
 	}
 
 //	if(self.spawnflags & SPAWNFLAG_REMOVE_PP)
@@ -236,9 +237,12 @@ void() multi_use =
 	{
 		if (!check_puzzle_pieces(other,removepp,inversepp))
 		{
-			if (self.no_puzzle_msg && !deathmatch&& time>self.attack_finished)
+			if ((self.no_puzzle_msg || self.no_puzzle_str!="") && !deathmatch)
 			{
-				temp = getstring(self.no_puzzle_msg);
+				if (self.no_puzzle_str!="")
+					temp = self.no_puzzle_str;
+				else
+					temp = getstring(self.no_puzzle_msg);
 				if (!deathmatch)
 					centerprint (other, temp);
 				self.attack_finished = time + 2;
@@ -292,6 +296,11 @@ void() multi_touch =
 	if (self.spawnflags & SPAWNFLAG_MTOUCH)
 	{
 		if (!other.flags & FL_MONSTER)
+			return;
+	}
+	else if (self.spawnflags & SPAWNFLAG_ALLTOUCH)
+	{
+		if (!other.flags & FL_MONSTER && !other.flags & FL_CLIENT)
 			return;
 	}
 	else if (self.spawnflags & SPAWNFLAG_PUSHTOUCH)
@@ -697,7 +706,7 @@ void counter_return_buttons ()
 
 void() counter_use_ordered =
 {
-string oldtarg;
+string oldtarg, oldstr;
 float oldmsg;
 string temp;
 
@@ -731,11 +740,13 @@ string temp;
 			if (activator.classname == "player" && (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0 &&
 			    !deathmatch)
 			{
-				if(self.message)
-					temp=getstring(self.message);
-				else
-					temp="Sequence completed!";
-				centerprint(activator, temp);
+				if(self.message || self.messagestr!="")
+				{
+					if (self.messagestr!="")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+						temp=self.messagestr;
+					else
+						temp=getstring(self.message);
+				}
 			}
 			self.enemy = activator;
 			multi_trigger ();
@@ -762,8 +773,10 @@ string temp;
 			self.target = self.puzzle_id;
 			oldmsg = self.message;
 			self.message = FALSE;
+			self.messagestr = "";	//SoC
 			SUB_UseTargets();
 			self.message = oldmsg;
+			self.messagestr = oldstr;
 			self.target = oldtarg;
 
 			self.cnt = 1;
@@ -2498,7 +2511,10 @@ void trigger_message_transfer_use ()
 {
 	string temp;
 
-	temp = getstring(self.message);
+	if (self.messagestr != "")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+		temp = self.messagestr;
+	else
+		temp = getstring(self.message);
 	if (!deathmatch)
 		centerprint(activator, temp);
 	other.nexttarget=self.target;
@@ -2642,7 +2658,7 @@ entity found;
 
 void trigger_stop_touch ()
 {
-	if(other.classname!="player")
+	if(other.classname!="player" || self.inactive)
 		return;
 
 	trigger_stop_use();
@@ -2656,6 +2672,9 @@ void trigger_stop(void)
 {
 	InitTrigger();
 	self.use=trigger_stop_use;
+	if(self.spawnflags&8)
+		self.inactive=TRUE;
 	if(!self.spawnflags&1)
 		self.touch=trigger_stop_touch;
 }
+
