@@ -15,7 +15,7 @@
 
 @SolidClass = worldspawn : "World entity"
 [
-	message(string) : "Level name"
+	message(integer) : "Level name (index in Strings.txt)"
 	worldtype(choices) : "World Type" : 0 =
 	[
 		0 : "Castle"
@@ -30,7 +30,7 @@
 		0 : "Hexen2 Func_Trains"
 		1 : "PoP Func_Trains"
 	]
-	netname(string) : "Netname (PoP)"
+	netname(string) : "Level name as string (PoP)"
 	
 	//----------------------------------------------------------------------
 	// Ericw/Tyran's new compile tools (www.celephais.net/board/view_thread.php?id=61211)
@@ -148,7 +148,8 @@
 	[
 		1 : "Floating" : 0
 	]
-	message(string) : "Message"
+	message(integer) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	style(integer) : "Light Style"
 ]
 @PointClass base(Artifact) model(":models/a_blast.mdl") = art_blastradius : "Blast Radius" []
@@ -278,7 +279,8 @@
 	[
 		-1 : "Stay pressed"
 	]
-	message(string) : "Message"
+	message(integer) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	delay(integer) : "Delay"
 	lip(integer) : "Lip" : 4
 	health(integer) : "Health"
@@ -296,7 +298,7 @@
 @SolidClass base(Button) = func_button : "Button"
 [
 	msg2(integer) : "Deactivated message (index in strings.txt)"
-	msg4(string) : "Deactivated message (string)"
+	msg2str(string) : "Deactivated message (string)"
 	aflag(integer) : "Order"
 ]
 
@@ -329,7 +331,8 @@
 		2 : "Reverse" : 0
 		4 : "Don't link" : 0
 	]
-	message(string) : "Message"
+	message(string) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	health(integer) : "Health (shootable)"
 	speed(integer) : "Speed" : 100
 	wait(choices) : "Wait" : 3 =
@@ -1526,8 +1529,9 @@
 		2 : "Floating" : 0
 		4 : "Auto get" : 0
 	]
-	puzzle_id(string) : "Puzzle id" //Model name also works (without path or .mdl)
-	message(string) : "Message"
+	puzzle_id(string) : "Model name (without path or filetype)" //Model name also works (without path or .mdl)
+	message(integer) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	netname(string) : "Puzzle piece name" //Name of piece, displayed when picked up
 	style(integer) : "Light Style"
 ]
@@ -1743,8 +1747,8 @@
 	wait(integer) : "Wait" : 2
 	health(integer) : "Health"
 	delay(integer) : "Delay before trigger"
-	message(string) : "Message (index in strings.txt)"
-	msg3(string) : "Message string (overrides message)"
+	message(integer) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	style(integer) : "Light Style"
 ]
 
@@ -1759,7 +1763,7 @@
 	puzzle_piece_2(string) : "Puzzle Piece 2"
 	puzzle_piece_3(string) : "Puzzle Piece 3"
 	puzzle_piece_4(string) : "Puzzle Piece 4"	
-	no_puzzle_msg(string) : "Puzzle message (index in strings.txt)"
+	no_puzzle_msg(integer) : "Puzzle message (index in strings.txt)"
 	no_puzzle_str(string) : "Puzzle message (string)"
 ]
 
@@ -1817,8 +1821,8 @@
 	aflag(integer) : "Order"
 	health(integer) : "Health"
 	delay(integer) : "Delay before trigger"
-	message(string) : "Message (index in strings.txt)"
-	msg3(string) : "Message string (overrides message)"
+	message(integer) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	style(integer) : "Light Style"
 	failtarget(target_destination) : "Fail target (PoP)"
 	wait(integer) : "Wait (PoP)"
@@ -1841,10 +1845,10 @@
 		8 : "Deactivated" : 0
 	]
 	msg2(integer) : "Count fail message (index in strings.txt)"
-	msg4(string) : "Count fail message (string)"
+	msg2str(string) : "Count fail message (string)"
 	puzzle_id(target_destination) : "Count fail target"
-        count(integer) : "Number of triggers - 1"
-        mangle(string) : "Mangle (x1 x2 x3)"
+    count(integer) : "Number of triggers - 1"
+    mangle(string) : "Mangle (x1 x2 x3)"
 ]
 @SolidClass base(Trigger) = trigger_counter_reset : "Counter reset"
 [
@@ -1865,14 +1869,14 @@
 [
 	spawnflags(Flags) =
 	[
-                1 : "Trigger 1" : 0
-                2 : "Trigger 2" : 0
-                4 : "Trigger 3" : 0
-                8 : "Trigger 4" : 0
-                16 : "Trigger 5" : 0
-                32 : "Trigger 6" : 0
-                64 : "Trigger 7" : 0
-                128 : "Trigger 8" : 0
+        1 : "Trigger 1" : 0
+        2 : "Trigger 2" : 0
+        4 : "Trigger 3" : 0
+        8 : "Trigger 4" : 0
+        16 : "Trigger 5" : 0
+        32 : "Trigger 6" : 0
+        64 : "Trigger 7" : 0
+        128 : "Trigger 8" : 0
 	]
 	map(string) : "Map"
 ]
@@ -1884,10 +1888,10 @@
 [
 	spawnflags(Flags) =
 	[
-                1 : "No touch" : 0
-                2 : "Any player" : 0
-                4 : "Gib" : 0
-                8 : "Deactivated" : 0
+        1 : "No touch" : 0
+        2 : "Any player" : 0
+        4 : "Gib" : 0
+        8 : "Deactivated" : 0
 	]
 	th_die(integer) : "Death type"
 ]
@@ -1926,13 +1930,13 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	wait(integer) : "Wait"
 ]
 
-@SolidClass base(Appearflags) = trigger_ladder : "Ladder brush (ported from Arcane Dimensions)"
+@SolidClass base(Appearflags) = trigger_ladder : "Ladder field (ported from Arcane Dimensions)"
 [
 	spawnflags(Flags) =
 	[
 		8 : "Deactivated" : 0
 	]
-	angle(integer) : "Angle"
+	angle(integer) : "Angle player must face to attach"
 	count(float) : "Count" : 0.7 : "Delay between sounds"
 	soundtype(choices) : "Sound" : 0 =
 	[
@@ -1944,8 +1948,8 @@ If it has a target, it will act like a relay and hurt that target when triggered
 
 @SolidClass base(Appearflags, Targetname, Target) = trigger_message_transfer : "Message transferer"
 [
-	message(string) : "Message (index in strings.txt) - required" : "139"
-	msg3(string) : "Message string (overrides message)"
+	message(integer) : "Message (index in strings.txt) - required" : 139
+	messagestr(string) : "Message string (overrides message)"
 ]
 
 @SolidClass base(Appearflags, Targetname) = trigger_monsterjump : "Monster jumper"
@@ -2031,7 +2035,8 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		//8 : "Deactivated" : 0 //Quake doesn't appear to function properly after activating
 	]
 	killtarget(target_destination) : "KillTarget"
-	message(string) : "Message"
+	message(integer) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	items(integer) : "Radius of quake"
 	dmg(integer) : "Damage" : 5
 	lifespan(integer) : "Duration" : 2
@@ -2056,7 +2061,8 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	lifetime(integer) : "Random delay minimum"
 	wait(integer) : "Wait"
 	delay(integer) : "Delay before trigger"
-	message(string) : "Message"
+	message(integer) : "Message (index in strings.txt)"
+	messagestr(string) : "Message string (overrides message)"
 	fadespeed(integer) : "Fade speed"
 	style(integer) : "Light Style"
 ]
