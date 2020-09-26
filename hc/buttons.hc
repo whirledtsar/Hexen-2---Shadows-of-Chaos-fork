@@ -53,12 +53,15 @@ void() button_fire =
 
 	if (self.inactive)
 	{
-		if (other.classname == "player" && self.msg2) 
+		if (other.classname == "player" && (self.msg2 || self.msg2str!="")) 
 		{
-			s = getstring(self.msg2);
+			if (self.msg2str!="")			//SoC: triggers can use msg2str for raw string instead of using an index for strings.txt
+				s = self.msg2str;
+			else
+				s = getstring(self.msg2);
 			centerprint(other, s);
 		}
-		return;	
+		return;
 	}
 
 	if(self.spawnflags&BUTTON_TOGGLE&&self.state==STATE_TOP)
