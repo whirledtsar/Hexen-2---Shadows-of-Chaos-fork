@@ -73,7 +73,7 @@ void() multi_trigger =
 
 	if (self.experience_value && activator.flags&FL_CLIENT)
 	{
-		AwardExperience(activator,self,self.experience_value);	//ws: changes to self.experience_value from 0 (?)
+		AwardExperience(activator,self,self.experience_value);	//ws: changed to self.experience_value from 0 (?)
 	}
 
 	self.check_ok=TRUE;
@@ -213,9 +213,12 @@ void() multi_use =
 
 	if (!check_puzzle_pieces(other,removepp,inversepp))
 	{
-		if (self.no_puzzle_msg && !deathmatch)
+		if ((self.no_puzzle_msg || self.no_puzzle_str!="") && !deathmatch)
 		{
-			temp = getstring(self.no_puzzle_msg);
+			if (self.no_puzzle_str!="")
+				temp = self.no_puzzle_str;
+			else
+				temp = getstring(self.no_puzzle_msg);
 			if (!deathmatch)
 				centerprint (other, temp);
 			self.attack_finished = time + 2;
@@ -270,9 +273,12 @@ void() multi_touch =
 
 	if (!check_puzzle_pieces(other,removepp,inversepp))
 	{
-		if (self.no_puzzle_msg && !deathmatch)
+		if ((self.no_puzzle_msg || self.no_puzzle_str!="") && !deathmatch)
 		{
-			temp = getstring(self.no_puzzle_msg);
+			if (self.no_puzzle_str!="")
+				temp = self.no_puzzle_str;
+			else
+				temp = getstring(self.no_puzzle_msg);
 			if (!deathmatch)
 				centerprint (other, temp);
 			self.attack_finished = time + 2;
@@ -425,6 +431,11 @@ void () interval_use =
 //	dprint("interval used\n");
 
 	self.think = interval_use;
+	if (self.count) {
+		++self.counter;
+		if (self.counter > self.count)
+			self.think = SUB_Remove;
+	}
 	thinktime self : self.wait;
 };
 
@@ -438,9 +449,9 @@ void() trigger_interval =
 	InitTrigger ();
 
 	self.use = interval_use;
-
+	
 	self.think = interval_use;
-	if (!self.targetname)
+	if (!self.targetname && !self.targetid)
 		thinktime self : 0.1;
 };
 
@@ -588,8 +599,13 @@ string temp;
 			if (activator.classname == "player" && (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0 &&
 			    !deathmatch)
 			{
-				if(self.message)
-					temp=getstring(self.message);
+				if(self.message || self.messagestr!="")
+				{
+					if (self.messagestr!="")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+						temp=self.messagestr;
+					else
+						temp=getstring(self.message);
+				}
 				else
 					temp="Sequence completed!";
 				centerprint(activator, temp);
@@ -608,8 +624,13 @@ string temp;
 			self.check_ok = FALSE;
 			if (activator.classname == "player" && !deathmatch) 
 			{
-				if (self.msg2) 
-					temp = getstring(self.msg2);
+				if (self.msg2 || self.msg2str!="")
+				{
+					if (self.msg2str!="")			//SoC: triggers can use msg2str for raw string instead of using an index for strings.txt
+						temp = self.msg2str;
+					else
+						temp = getstring(self.msg2);
+				}
 				else
 					temp = "Nothing seemed to happen";
 				centerprint(activator, temp);
@@ -1393,7 +1414,10 @@ void() trigger_hurt =
 	}
 	if (!self.dmg)
 		self.dmg = 1000;
+	if(!self.wait)
+		self.wait = 1;
 };
+
 //============================================================================
 
 //============================================================================
@@ -2108,8 +2132,11 @@ FEILDS
 void trigger_message_transfer_use ()
 {
 	string temp;
-
-	temp = getstring(self.message);
+	
+	if (self.messagestr != "")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+		temp = self.messagestr;
+	else
+		temp = getstring(self.message);
 	if (!deathmatch)
 		centerprint(activator, temp);
 	other.nexttarget=self.target;
