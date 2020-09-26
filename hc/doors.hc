@@ -374,12 +374,17 @@ void door_fire()
 	if (self.owner != self)
 		objerror ("door_fire: self.owner != self");
 
-	self.no_puzzle_msg = 0;
-	self.no_puzzle_str = "";	//SoC
+	if (self.no_puzzle_msg)
+		self.no_puzzle_msg = 0;
+	if (self.no_puzzle_str!="")
+		self.no_puzzle_str = "";	//SoC
 
 // play use key sound
 
-	self.message = 0;		// no more message
+	if (self.message)
+		self.message = 0;		// no more message
+	if (self.messagestr!="")
+		self.messagestr = "";
 	oself = self;
 
 	if (self.spawnflags & DOOR_TOGGLE)
@@ -425,6 +430,9 @@ void door_use()
 	self.message = 0;			// door messages are for touch only
 	self.owner.message = 0;
 	self.enemy.message = 0;
+	self.messagestr="";	//SoC
+	self.owner.messagestr="";
+	self.enemy.messagestr="";
 	oself = self;
 	self = self.owner;
 	door_fire ();
@@ -690,6 +698,7 @@ void LinkDoors()
 			starte.targetname = self.targetname;
 		if (self.message != 0)
 			starte.message = self.message;
+		if (self.messagestr!="")
 
 		t = find (t, classname, self.classname);	
 		if (!t)
@@ -1221,6 +1230,7 @@ void fd_secret_use()
 		return;
 
 	self.message = 0;		// no more message
+	self.messagestr = "";
 
 	SUB_UseTargets();				// fire all targets / killtargets
 
