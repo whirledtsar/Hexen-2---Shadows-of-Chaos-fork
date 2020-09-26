@@ -449,6 +449,7 @@ string s;
 		t.think = DelayThink;
 		t.enemy = activator;
 		t.message = self.message;
+		t.messagestr = self.messagestr;		//SoC
 		t.killtarget = self.killtarget;
 		t.target = self.target;
 		t.failtarget = self.failtarget;
@@ -467,9 +468,12 @@ string s;
 //
 // print the message
 //
-	if(activator.classname == "player" && self.message != 0)
+	if(activator.flags&FL_CLIENT && (self.message || self.messagestr != ""))
 	{
-		s = getstring(self.message);
+		if (self.messagestr != "")			//SoC: triggers can use messagestr for raw string instead of using an index for strings.txt
+			s = self.messagestr;
+		else
+			s = getstring(self.message);
 		centerprint (activator, s);
 		if(!self.noise)
 			sound (activator, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NORM);
@@ -517,7 +521,7 @@ string s;
 // fire targets
 //
 	self.style=0;
-	if (self.target!="")
+	if (self.target != "")
 	{
 		act = activator;
 		t = world;
@@ -623,7 +627,7 @@ void (void() thinkst) SUB_CheckRefire =
 };
 */
 
-void SUB_UseWakeTargets()
+void SUB_UseWakeTargets()	//ws: monsters use self.waketarget upon sighting player
 {
 	if (self.waketarget=="")
 		return;
@@ -641,5 +645,5 @@ void SUB_UseWakeTargets()
 
 void SUB_ResetTarget()
 {
-	self.target = self.killtarget = "";
+	self.target = "";
 }
