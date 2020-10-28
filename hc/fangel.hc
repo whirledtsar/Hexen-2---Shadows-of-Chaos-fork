@@ -892,8 +892,6 @@ void() init_fangel =
 		remove(self);
 		return;
 	}
-	
-	self.init_org = self.origin;
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
