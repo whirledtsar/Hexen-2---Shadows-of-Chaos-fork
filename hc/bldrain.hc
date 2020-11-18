@@ -40,7 +40,7 @@ $frame select90     select91     select92     select93     select94
 $frame select95     select96     select97     select98     select99     
 
 
-
+float BLRAIN_CHARGE = 8;
 
 void bloodmissile_impact_effect()
 {
