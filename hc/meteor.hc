@@ -877,16 +877,16 @@ void meteor_power_altfire (void)
 		FireComet();
 	}
 }
-
+/*
 void() Cru_Met_Attack =
 {
 	float altfire;
 	
 	altfire = self.button1;
 	
-	/*if (altfire && self.greenmana >= BOUNCE_TOME_COST && self.artifact_active&ART_TOMEOFPOWER)
-		self.th_weapon=meteor_power_altfire;
-	*/
+	//if (altfire && self.greenmana >= BOUNCE_TOME_COST && self.artifact_active&ART_TOMEOFPOWER)
+	//	self.th_weapon=meteor_power_altfire;
+	
 	if (altfire && self.greenmana >= BOUNCE_COST)
 	{
 		if(self.artifact_active&ART_TOMEOFPOWER && self.greenmana >= 20)
@@ -901,6 +901,17 @@ void() Cru_Met_Attack =
 		else
 			self.th_weapon=meteor_fire;
 	}
+	thinktime self : 0;
+};
+*/
+
+void() Cru_Met_Attack =
+{
+	if(self.artifact_active&ART_TOMEOFPOWER)
+		self.th_weapon=meteor_power_fire;
+	else
+		self.th_weapon=meteor_fire;
+	
 	thinktime self : 0;
 };
 

@@ -493,7 +493,7 @@ void end_sys_fields;
 .float lifetime;
 .float lifespan;
 
-.float walkframe;
+.float walkframe;		//unused
 .float wfs;				// Weapon frame state
 
 .float attack_finished;
@@ -519,7 +519,7 @@ void end_sys_fields;
 .float air_finished;
 
 // Keeps track of the number of bubbles.
-.float bubble_count;
+//.float bubble_count;
 
 // Keeps track of how the player died.
 .string deathtype;
@@ -531,7 +531,7 @@ void end_sys_fields;
 // Only used by secret door.
 .vector oldorigin;
 
-.float t_length, t_width;
+.float t_length, t_width;	//ws: using t_length for custom monster melee range for ai_melee();
 
 // Things color.
 .float color;
@@ -545,14 +545,14 @@ void end_sys_fields;
 
 
 // Doors, etc.
-.vector dest, dest1, dest2;
+.vector dest, dest1, dest2;	//dest is only used by barrel
 .float wait;					// Time from firing to restarting
 .float delay;					// Time from activation to firing
 .entity trigger_field;			// Door's trigger entity
 .string noise4;
 
 // Monsters.
-.float pausetime;
+.float pausetime;		//also used by teleporters to stop players velocity
 .entity pathentity;
 
 // Doors.
@@ -586,7 +586,7 @@ void end_sys_fields;
 
 // Plats/doors/buttons
 .float lip;
-.float state;
+.float state;		// ws: reused for client config parm flags system
 .vector pos1, pos2; // Top and bottom positions
 .float height;
 
@@ -653,6 +653,7 @@ void end_sys_fields;
 .entity shield;
 .float frozen;		//Can't be a flag, is a counter
 .float oldskin;
+.void() oldthink;
 .void() th_weapon;
 .float decap;		//To know if was beheaded, not a flag, set to 2 if
 					//head should explode
@@ -683,7 +684,7 @@ void end_sys_fields;
 
 .float inactive;
 .float msg2;
-.string msg3;
+.string msg3;			//only used by raven staff
 .string nexttarget;		//For target transferral
 .float gravity;			//Gravity, duh
 //.float upside_down;	unused
@@ -719,23 +720,25 @@ entity	sight_entity;	//So monsters wake up other monsters
 .entity path_last;
 .float dflags;
 
+//Game of Tomes
 .float preventrespawn;
 .float playercontrolled;
 .float whiptime;
 .float killerlevel;	//used to measure player level for respawn strength
-.float bufftype;	//used for monsters to determine bonus types on spawn
+.float bufftype;	 //used for monsters to determine bonus types on spawn
 .float tempscale;
-.float buff;		//1 = can become a buffed variant, 2 = can further become a leader variant
+.float buff;	//1 = can become a buffed variant, 2 = can further become a leader variant
 
 //EXPANSION CODE FOR YAKMAN
-.void() th_init;
-//.vector init_org;	//used for expansion respawning system
+.void() th_init;		//used for expansion respawning system and monster resurrection system
+//.vector init_org;
 .float init_exp_val;
 
-  //extras
-  .void() storethink;
-  .float welcomeshown;
+//Bloodshot
+.void() storethink;
+.float welcomeshown;
 
+//WS
 .float altfiring;		//track altfire even when button isn't pressed
 .float glyph_finished;
 .string waketarget;		//monsters use self.waketarget upon sighting player
@@ -746,6 +749,8 @@ entity	sight_entity;	//So monsters wake up other monsters
 .string messagestr		//string version of message
 .string msg2str;		//string version of msg2
 .string no_puzzle_str	//string version of no_puzzle_msg
+.float class_weaponvar	//variable that can be used by each class for specific weapon purposes; currently used by crusader to track direction of icemace wave
 
-.float onladder;		//rubicon 2 / arcane dimensions ladder system
+//rubicon 2 / arcane dimensions ladder system
+.float onladder;
 .entity ladder;
