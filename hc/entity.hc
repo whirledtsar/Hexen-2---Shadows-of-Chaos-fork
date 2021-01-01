@@ -789,10 +789,10 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
 .void() th_raise;		//monster revival system
 .float targetid;		//numerical id for trigger_random
-.string messagestr		//string version of message
+.string messagestr;		//string version of message
 .string msg2str;		//string version of msg2
-.string no_puzzle_str	//string version of no_puzzle_msg
-.float class_weaponvar	//variable that can be used by each class for specific weapon purposes; currently used by crusader to track direction of icemace wave
+.string no_puzzle_str;		//string version of no_puzzle_msg
+.float class_weaponvar;		//variable that can be used by each class for specific weapon purposes; currently used by crusader to track direction of icemace wave
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
