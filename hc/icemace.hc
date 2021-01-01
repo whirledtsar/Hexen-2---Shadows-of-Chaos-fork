@@ -41,7 +41,6 @@ $frame select6      select7      select8      select9      select10
 
 void(float damage,entity victim) spawn_touchpuff;
 
-float wavedir;
 float ICEWAVE_SHOTS = 4;
 
 void() IceCubeThink =
@@ -106,17 +105,17 @@ entity oself;
 		loser.o_angle=loser.mins;
 		loser.v_angle=loser.maxs;
 		loser.enemy=forwhom;
-		//loser.oldthink=loser.think;
-		loser.think=IceCubeThink;
-		thinktime loser : 0;
-		loser.touch=SUB_Null;
+        //loser.oldthink=loser.think;
+        loser.think=IceCubeThink;
+        thinktime loser : 0;
+        loser.touch=SUB_Null;
 		loser.th_pain=SUB_Null;
 		loser.wait = time + 3;
 		if(loser.angles_x==0&&loser.angles_z==0)
 			loser.drawflags(+)SCALE_ORIGIN_BOTTOM;
 		loser.oldmovetype=loser.movetype;
 		loser.movetype=MOVETYPE_TOSS;
- 		loser.health=1;
+        loser.health=1;
 		loser.deathtype="ice melt";
 		loser.th_die=shatter;
 		AwardExperience(forwhom,loser,loser.experience_value);
@@ -196,7 +195,7 @@ void() FreezeTouch=
 				thinktime newmis : 0.1;
 			}
 		}
-		if(other.flags2&FL2_COLDHEAL)//Had to take out cold heal, so cold resist
+		if(other.flags&FL_COLDHEAL)//Had to take out cold heal, so cold resist
 	        T_Damage(other,self,self.owner, damg / 3);
 		else if ((other.health<=10||(other.classname=="player"&&other.frozen<=-5&&other.health<200))&&other.solid!=SOLID_BSP&&!other.artifact_active&ART_INVINCIBILITY&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
 			SnowJob(other,self.owner);
@@ -257,7 +256,7 @@ void(float altfire) FireFreeze=
 		
 		makevectors (self.v_angle);	
 		dir = normalize(v_forward) * 1000;
-		dir += normalize(v_right) * (self.weaponframe_cnt * spread * wavedir);
+		dir += normalize(v_right) * (self.weaponframe_cnt * spread * self.class_weaponvar);
 	}
 	
 	newmis = spawn ();
@@ -436,7 +435,7 @@ float beam_count;
 	while(loser)
 	{
 		if(loser.takedamage&&loser.health&&loser.frozen<=0&&loser!=self.owner&&loser.solid!=SOLID_BSP)
-			if(loser.flags2&FL2_COLDHEAL)
+			if(loser.flags&FL_COLDHEAL)
 				T_Damage(loser,self,self.owner,1);
 			else
 			{
@@ -569,7 +568,7 @@ void icestaff_select (void)
 
 	//self.weaponframe_cnt = 10;//default to half of sine wave
 	self.weaponframe_cnt = ICEWAVE_SHOTS*(-1);
-	wavedir = 1;
+	self.class_weaponvar = 1;
 		
 	if (self.wfs==WF_CYCLE_WRAPPED)
 	{
@@ -704,7 +703,7 @@ void icestaff_wave (void)
 		FireFreeze(TRUE);
 	}
 	else if (self.weaponframe==$power9)
-		wavedir *= (-1);	//reverse direction of wave
+		self.class_weaponvar *= (-1);	//reverse direction of wave
 }
 
 void icestaff_shard (void)
@@ -733,7 +732,7 @@ void Cru_Ice_Fire (float rightclick)
 		icestaff_blizzard();
 	else
 	{
-		if (rightclick)
+		if (rightclick && self.bluemana >= (ICEWAVE_SHOTS*2))
 			icestaff_wave();
 		else
 			icestaff_shard();		
