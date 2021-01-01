@@ -749,6 +749,87 @@ void W_Attack (float rightclick)
 		}
 	break;
 	}
+		case IT_WEAPON5:
+		switch (self.playerclass)
+		{
+		case CLASS_PALADIN:
+			pal_gauntlet_fire(rightclick);
+			break;
+		case CLASS_NECROMANCER:
+			self.th_missile();
+			break;
+		case CLASS_ASSASSIN:
+			Ass_Pdgr_Fire();
+			break;
+		case CLASS_CRUSADER:
+			Cru_Wham_Fire(rightclick);
+			break;
+		case CLASS_SUCCUBUS:
+			Suc_Blrn_Fire(rightclick);
+			break;
+		}
+	break;
+	case IT_WEAPON6:
+		switch (self.playerclass)
+		{
+		case CLASS_PALADIN:
+			pal_gauntlet_fire(rightclick);
+			break;
+		case CLASS_NECROMANCER:
+			self.th_missile();
+			break;
+		case CLASS_ASSASSIN:
+			Ass_Pdgr_Fire();
+			break;
+		case CLASS_CRUSADER:
+			Cru_Wham_Fire(rightclick);
+			break;
+		case CLASS_SUCCUBUS:
+			Suc_Blrn_Fire(rightclick);
+			break;
+		}
+	break;
+	case IT_WEAPON7:
+		switch (self.playerclass)
+		{
+		case CLASS_PALADIN:
+			pal_gauntlet_fire(rightclick);
+			break;
+		case CLASS_NECROMANCER:
+			self.th_missile();
+			break;
+		case CLASS_ASSASSIN:
+			Ass_Pdgr_Fire();
+			break;
+		case CLASS_CRUSADER:
+			Cru_Wham_Fire(rightclick);
+			break;
+		case CLASS_SUCCUBUS:
+			Suc_Blrn_Fire();
+			break;
+		}
+	break;
+	case IT_WEAPON8:
+		switch (self.playerclass)
+		{
+		case CLASS_PALADIN:
+			pal_gauntlet_fire(rightclick);
+			break;
+		case CLASS_NECROMANCER:
+			self.th_missile();
+			break;
+		case CLASS_ASSASSIN:
+			Ass_Pdgr_Fire();
+			break;
+		case CLASS_CRUSADER:
+			Cru_Wham_Fire(rightclick);
+			break;
+		case CLASS_SUCCUBUS:
+			Suc_Blrn_Fire(rightclick);
+			break;
+		}
+	break;
+	}
 };
 
 
@@ -848,6 +929,101 @@ void W_DeselectWeapon (void)
 		W_SetCurrentAmmo();
 	break;
 	}
+	case IT_WEAPON5:
+		self.weaponmodel="";
+		self.weaponframe = 0;
+
+		switch(self.playerclass)
+		{
+		case CLASS_PALADIN:
+			gauntlet_select();
+			break;
+		case CLASS_CRUSADER:
+			warhammer_select();
+			break;
+		case CLASS_NECROMANCER:
+			sickle_select();
+			break;
+		case CLASS_SUCCUBUS:
+			bloodrain_select();
+			break;
+		default:	//CLASS_ASSASSIN
+			punchdagger_select();
+			break;
+		}
+		break;
+	case IT_WEAPON6:
+		self.weaponmodel="";
+		self.weaponframe = 0;
+	
+		switch(self.playerclass)
+		{
+		case CLASS_PALADIN:
+			gauntlet_select();
+			break;
+		case CLASS_CRUSADER:
+			warhammer_select();
+			break;
+		case CLASS_NECROMANCER:
+			sickle_select();
+			break;
+		case CLASS_SUCCUBUS:
+			bloodrain_select();
+			break;
+		default:	//CLASS_ASSASSIN
+			punchdagger_select();
+			break;
+		}
+		break;
+	case IT_WEAPON7:
+		self.weaponmodel="";
+		self.weaponframe = 0;
+		switch(self.playerclass)
+		{
+		case CLASS_PALADIN:
+			gauntlet_select();
+			break;
+		case CLASS_CRUSADER:
+			warhammer_select();
+			break;
+		case CLASS_NECROMANCER:
+			sickle_select();
+			break;
+		case CLASS_SUCCUBUS:
+			bloodrain_select();
+			break;
+		default:	//CLASS_ASSASSIN
+			punchdagger_select();
+			break;
+		}
+	break;
+	case IT_WEAPON8:
+		self.weaponmodel="";
+		self.weaponframe = 0;
+
+		switch(self.playerclass)
+		{
+		case CLASS_PALADIN:
+			gauntlet_select();
+			break;
+		case CLASS_CRUSADER:
+			warhammer_select();
+			break;
+		case CLASS_NECROMANCER:
+			sickle_select();
+			break;
+		case CLASS_SUCCUBUS:
+			bloodrain_select();
+			break;
+		default:	//CLASS_ASSASSIN
+			punchdagger_select();
+			break;
+		}
+	break;
+	default:
+		W_SetCurrentAmmo();
+	break;
+	}
 }
 
 /*
@@ -895,6 +1071,22 @@ float	it, am, fl;
 		fl = IT_WEAPON4;
 		if ((self.bluemana < 1) && (self.greenmana <1))
 			am = 1;
+	break;
+	}
+	case 5:
+		fl = IT_WEAPON5;
+	break;
+	case 6:
+		fl = IT_WEAPON6;
+	break;
+	case 7:
+		fl = IT_WEAPON7;
+	break;
+	case 8:
+		fl = IT_WEAPON8;
+	break;
+	case 9:
+		fl = IT_WEAPON1;
 	break;
 	}
 
