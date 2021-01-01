@@ -222,23 +222,21 @@ void () punchdagger_a =		//forward
 		punchdagger_idle();
 };
 
-float r2;
-
 void Ass_Pdgr_Fire ()
 {
 	self.attack_finished = time + .5;  // Attack every .7 seconds
-//	r2 = rint(random(1,4));
-	if (r2==1)
+//	self.class_weaponvar = rint(random(1,4));
+	if (self.class_weaponvar==1)
 		punchdagger_a();
-	else if (r2==2)
+	else if (self.class_weaponvar==2)
 		punchdagger_b();
-	else if (r2==3)
+	else if (self.class_weaponvar==3)
 		punchdagger_c();
 	else
 		punchdagger_d();
-	r2+=1;
-	if (r2>4)
-	r2=1;
+	self.class_weaponvar+=1;
+	if (self.class_weaponvar>4)
+		self.class_weaponvar=1;
 }
 
 void punchdagger_select (void)
