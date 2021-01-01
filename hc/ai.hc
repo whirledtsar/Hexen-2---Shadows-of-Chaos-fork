@@ -949,7 +949,7 @@ float IsAlly (entity ent)
 	if (coop && self.flags&FL_CLIENT && ent.flags&FL_CLIENT)
 		return TRUE;
 	if (self.playercontrolled) {
-		if (coop && ent.flags&FL_CLIENT)
+		if (coop && (ent.flags&FL_CLIENT || ent.playercontrolled))
 			return TRUE;
 		if (self.owner)
 			if (ent == self.owner || ent.owner == self.owner)
