@@ -1085,9 +1085,8 @@ vector destiny,org;
 		return FALSE;
 	}
 
-	if(self.enemy==self.controller||self.enemy==self)
-		if(!LocateTarget())
-			return FALSE;
+	if(IsAlly(self.enemy)||self.enemy==self)	//summoned imp
+		return FALSE;
 
 	if(self.attack_state==AS_FERRY)
 		return FALSE;
