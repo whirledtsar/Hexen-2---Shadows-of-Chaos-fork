@@ -1000,3 +1000,15 @@ void ChangePitch (void)
 	current_pitch = anglemod (current_pitch + move);
 	self.angles_x = current_pitch;
 }
+
+float PlayerHasMelee (entity player)
+{
+	if (!player || !player.flags&FL_CLIENT)
+		return FALSE;
+	if (player.weapon==IT_WEAPON1)
+		return TRUE;
+	if (player.playerclass==CLASS_PALADIN && player.weapon==IT_WEAPON2 && !player.altfiring)
+		return TRUE;
+	
+	return FALSE;
+}
