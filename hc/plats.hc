@@ -12,7 +12,6 @@ void() plat_go_up;
 void() plat_go_down;
 void() plat_crush;
 float PLAT_LOW_TRIGGER = 1;
-float PLAT_NOCRUSH = 128;
 
 void() crusher_hit_bottom;
 void() crusher_hit_top;
@@ -232,10 +231,9 @@ void() func_plat =
 	setorigin (self, self.origin);	
 	setmodel (self, self.model);
 	setsize (self, self.mins , self.maxs);
-	if (!self.spawnflags & PLAT_NOCRUSH)
-		self.blocked = plat_crush;
-	else
-		self.blocked = plat_dmg_return;
+	
+	self.blocked = plat_crush;
+	
 	if (!self.speed)
 		self.speed = 150;
 
@@ -814,10 +812,8 @@ void() func_newplat =
 	}
 
 	self.use = newplat_trigger_use;
-	if (!self.spawnflags & PLAT_NOCRUSH)
-		self.blocked = newplat_crush;
-	else
-		self.blocked = newplat_dmg_return;
+	
+	self.blocked = newplat_crush;
 
 	newplat_spawn_inside_trigger ();	//set the "start moving" trigger	
 
