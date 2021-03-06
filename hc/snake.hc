@@ -68,6 +68,8 @@ void wake_effect (void);
 void snake_think(void);
 float snake_look(void);
 
+float SNAKE_SCALEBOTTOM = 2;
+
 /*
 void snake_deflect (void)
 {
@@ -500,9 +502,11 @@ void() monster_snake =
 	if (!self.health)
 		self.health = 1200;
 	if (self.scale) {
-		self.drawflags (+) SCALE_ORIGIN_BOTTOM;
+		if (self.spawnflags&SNAKE_SCALEBOTTOM)
+			self.drawflags (+) SCALE_ORIGIN_BOTTOM;
 		self.proj_ofs_z *= self.scale;
-		ScaleBoundingBox(self.scale, self, TRUE);
+		setsize (self, self.mins*self.scale, self.maxs*self.scale);
+		//ScaleBoundingBox(self.scale, self, TRUE);
 	}
 
 	total_monsters += 1;
