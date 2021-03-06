@@ -766,7 +766,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 .vector init_org;
 
 .float fire_damage;
-.float scoped;
+//.float scoped;	unused
 
 //Game of Tomes
 .float preventrespawn;
@@ -778,7 +778,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float buff;	//1 = can become a buffed variant, 2 = can further become a leader variant
 
 //Bloodshot
-.void() storethink;
+.void() storethink;	//for assassin whip
 .float welcomeshown;
 
 //WS
@@ -792,7 +792,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 .string messagestr;		//string version of message
 .string msg2str;		//string version of msg2
 .string no_puzzle_str;		//string version of no_puzzle_msg
-.float class_weaponvar;		//variable that can be used by each class for specific weapon purposes; currently used by crusader to track direction of icemace wave
+.float class_weaponvar;		//variable that can be used by each class for specific weapon purposes; used by crusader icemace and assassin dagger
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
