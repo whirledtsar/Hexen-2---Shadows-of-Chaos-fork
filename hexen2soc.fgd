@@ -1191,6 +1191,7 @@
 	spawnflags(Flags) =
 	[
 		1 : "Ambush" : 0
+		2 : "Scale from bottom" : 0
 	]
 ]
 @PointClass base(Appearflags, Targetname, Target) model({ "path": ":models/boss/smaleido.mdl" }) size(-100 -100 0, 100 100 666) = monster_eidolon : "Eidolon" []
