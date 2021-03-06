@@ -277,9 +277,9 @@ void reiv_checkdef ()
 		return;
 	if (random()<0.33)
 		return;
-	if (self.enemy == world)
+	if (!EnemyIsValid(self.enemy))
 		return;
-	if ((self.enemy.health<=0) || (range(self.enemy) == RANGE_MELEE) || (self.enemy.flags&FL_CLIENT && self.enemy.weapon==IT_WEAPON1))
+	if ((range(self.enemy) == RANGE_MELEE) || (self.enemy.flags&FL_CLIENT && PlayerHasMelee(self.enemy)))
 		return;
 	if (!reiv_checkdodge())
 		return;
