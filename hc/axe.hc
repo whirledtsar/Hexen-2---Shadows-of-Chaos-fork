@@ -30,7 +30,7 @@ float AXE_THROW_COST		= 4;
 float AXE_THROW_TOMECOST	= 3;
 float AXE_MELEE_COST		= 3;
 
-float AXE_BUILDUP 			= 15;
+float AXE_BUILDUP 			= 10;
 
 string AXE_TEXMOD		= "models/axe.mdl";
 
