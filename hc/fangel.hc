@@ -109,7 +109,7 @@ float dot;
 
 	if(fov(self,self.enemy,30)&&self.enemy.last_attack+0.75>time)
 	{
-		if ( !(self.enemy.weapon == IT_WEAPON1 && range(self.enemy)>RANGE_NEAR) )
+		if ( !(PlayerHasMelee(self.enemy) && range(self.enemy)>RANGE_NEAR) )
 		{	//if enemy is punching air or fighting something else in melee, dont block
 			self.th_save = self.think;
 			if (self.think == fangel_painframes)
