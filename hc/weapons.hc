@@ -483,6 +483,18 @@ float W_CheckNoAmmo (float check_weapon)
 			else if(self.bluemana >= 2)
 					return TRUE;
 		break;
+		case IT_WEAPON8:
+			return TRUE;
+		break;
+		case IT_WEAPON7:
+			return TRUE;
+		break;
+		case IT_WEAPON6:
+			return TRUE;
+		break;
+		case IT_WEAPON5:
+			return TRUE;
+		break;
 		}
 	break;
 	case CLASS_SUCCUBUS:
@@ -515,6 +527,18 @@ float W_CheckNoAmmo (float check_weapon)
 			else if(self.bluemana >= 3)
 					return TRUE;
 		break;
+		case IT_WEAPON8:
+			return TRUE;
+		break;
+		case IT_WEAPON7:
+			return TRUE;
+		break;
+		case IT_WEAPON6:
+			return TRUE;
+		break;
+		case IT_WEAPON5:
+			return TRUE;
+		break;
 		}
 	break;
 	case CLASS_CRUSADER:
@@ -543,6 +567,18 @@ float W_CheckNoAmmo (float check_weapon)
 			else if(self.bluemana >= 1)
 					return TRUE;
 		break;
+		case IT_WEAPON8:
+			return TRUE;
+		break;
+		case IT_WEAPON7:
+			return TRUE;
+		break;
+		case IT_WEAPON6:
+			return TRUE;
+		break;
+		case IT_WEAPON5:
+			return TRUE;
+		break;
 		}
 	break;
 	case CLASS_NECROMANCER:
@@ -569,11 +605,23 @@ float W_CheckNoAmmo (float check_weapon)
 		case IT_WEAPON2:
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
-				if(self.bluemana >= MMIS_SHOCK_COST)
+				if(self.bluemana >= MMIS_TOME_COST)
 					return TRUE;
 			}
-			else if(self.bluemana >= MMIS_SHOCK_COST)
+			else if(self.bluemana >= MMIS_COST)
 					return TRUE;
+		break;
+		case IT_WEAPON8:
+			return TRUE;
+		break;
+		case IT_WEAPON7:
+			return TRUE;
+		break;
+		case IT_WEAPON6:
+			return TRUE;
+		break;
+		case IT_WEAPON5:
+			return TRUE;
 		break;
 		}
 	break;
@@ -600,6 +648,18 @@ float W_CheckNoAmmo (float check_weapon)
 			}
 			else if(self.bluemana >= 2) 
 					return TRUE;*/
+			return TRUE;
+		break;
+		case IT_WEAPON8:
+			return TRUE;
+		break;
+		case IT_WEAPON7:
+			return TRUE;
+		break;
+		case IT_WEAPON6:
+			return TRUE;
+		break;
+		case IT_WEAPON5:
 			return TRUE;
 		break;
 		}
@@ -749,7 +809,7 @@ void W_Attack (float rightclick)
 		}
 	break;
 	}
-		case IT_WEAPON5:
+	case IT_WEAPON5:
 		switch (self.playerclass)
 		{
 		case CLASS_PALADIN:
@@ -1072,7 +1132,7 @@ float	it, am, fl;
 		if ((self.bluemana < 1) && (self.greenmana <1))
 			am = 1;
 	break;
-	}
+	
 	case 5:
 		fl = IT_WEAPON5;
 	break;
@@ -1168,6 +1228,18 @@ void() CycleWeaponCommand =
 		case IT_WEAPON4:
 			fl = IT_WEAPON1;
 			break;
+		case IT_WEAPON5:
+			fl = IT_WEAPON6;
+			break;
+		case IT_WEAPON6:
+			fl = IT_WEAPON7;
+			break;
+		case IT_WEAPON7:
+			fl = IT_WEAPON8;
+			break;
+		case IT_WEAPON8:
+			fl = IT_WEAPON5;
+			break;
 		default: /* ouch !!?? */
 			return;/*fl = IT_WEAPON1;*/
 		    break;
@@ -1212,6 +1284,18 @@ void() CycleWeaponReverseCommand =
 			break;
 		case IT_WEAPON4:
 			fl = IT_WEAPON3;
+			break;
+		case IT_WEAPON5:
+			fl = IT_WEAPON8;
+			break;
+		case IT_WEAPON6:
+			fl = IT_WEAPON5;
+			break;
+		case IT_WEAPON7:
+			fl = IT_WEAPON6;
+			break;
+		case IT_WEAPON8:
+			fl = IT_WEAPON7;
 			break;
 		default: /* ouch !!?? */
 			return;/*fl = IT_WEAPON1;*/
@@ -1302,6 +1386,22 @@ void ClassChangeWeapon(void)
 			self.th_weapon=purifier_select;
 			self.weaponmodel = "models/purifier.mdl";
 		break;
+		case IT_WEAPON5:
+			self.th_weapon=gauntlet_select;
+			self.weaponmodel = "models/gauntlet.mdl";
+		break;
+		case IT_WEAPON6:
+			self.th_weapon=gauntlet_select;
+			self.weaponmodel = "models/gauntlet.mdl";
+		break;
+		case IT_WEAPON7:
+			self.th_weapon=gauntlet_select;
+			self.weaponmodel = "models/gauntlet.mdl";
+		break;
+		case IT_WEAPON8:
+			self.th_weapon=gauntlet_select;
+			self.weaponmodel = "models/gauntlet.mdl";
+		break;
 		}
 	}
 	else if (self.playerclass==CLASS_CRUSADER)
@@ -1323,6 +1423,22 @@ void ClassChangeWeapon(void)
 		case IT_WEAPON4:
 			self.th_weapon=sunstaff_select;
 			self.weaponmodel = "models/sunstaff.mdl";
+		break;
+		case IT_WEAPON5:
+			self.th_weapon=warhammer_select;
+			self.weaponmodel = "models/warhamer.mdl";
+		break;
+		case IT_WEAPON6:
+			self.th_weapon=warhammer_select;
+			self.weaponmodel = "models/warhamer.mdl";
+		break;
+		case IT_WEAPON7:
+			self.th_weapon=warhammer_select;
+			self.weaponmodel = "models/warhamer.mdl";
+		break;
+		case IT_WEAPON8:
+			self.th_weapon=warhammer_select;
+			self.weaponmodel = "models/warhamer.mdl";
 		break;
 		}
 	}
@@ -1346,6 +1462,22 @@ void ClassChangeWeapon(void)
 			self.th_weapon=ravenstaff_select;
 			self.weaponmodel = "models/ravenstf.mdl";
 		break;
+		case IT_WEAPON5:
+			self.th_weapon=sickle_select;
+			self.weaponmodel = "models/sickle.mdl";
+		break;
+		case IT_WEAPON6:
+			self.th_weapon=sickle_select;
+			self.weaponmodel = "models/sickle.mdl";
+		break;
+		case IT_WEAPON7:
+			self.th_weapon=sickle_select;
+			self.weaponmodel = "models/sickle.mdl";
+		break;
+		case IT_WEAPON8:
+			self.th_weapon=sickle_select;
+			self.weaponmodel = "models/sickle.mdl";
+		break;
 		}
 	}
 	else if (self.playerclass==CLASS_ASSASSIN)
@@ -1368,6 +1500,22 @@ void ClassChangeWeapon(void)
 			self.th_weapon=setstaff_select;
 			self.weaponmodel = "models/scarabst.mdl";
 		break;
+		case IT_WEAPON5:
+			self.th_weapon=punchdagger_select;
+			self.weaponmodel = "models/punchdgr.mdl";
+		break;
+		case IT_WEAPON6:
+			self.th_weapon=punchdagger_select;
+			self.weaponmodel = "models/punchdgr.mdl";
+		break;
+		case IT_WEAPON7:
+			self.th_weapon=punchdagger_select;
+			self.weaponmodel = "models/punchdgr.mdl";
+		break;
+		case IT_WEAPON8:
+			self.th_weapon=punchdagger_select;
+			self.weaponmodel = "models/punchdgr.mdl";
+		break;
 		}
 	}
 	else if (self.playerclass==CLASS_SUCCUBUS)
@@ -1389,6 +1537,22 @@ void ClassChangeWeapon(void)
 		case IT_WEAPON4:
 			self.th_weapon=lightning_select;
 			self.weaponmodel = "models/sucwp4.mdl";
+		break;
+		case IT_WEAPON5:
+			self.th_weapon=bloodrain_select;
+			self.weaponmodel = "models/sucwp1.mdl";
+		break;
+		case IT_WEAPON6:
+			self.th_weapon=bloodrain_select;
+			self.weaponmodel = "models/sucwp1.mdl";
+		break;
+		case IT_WEAPON7:
+			self.th_weapon=bloodrain_select;
+			self.weaponmodel = "models/sucwp1.mdl";
+		break;
+		case IT_WEAPON8:
+			self.th_weapon=bloodrain_select;
+			self.weaponmodel = "models/sucwp1.mdl";
 		break;
 		}
 	}
