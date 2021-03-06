@@ -82,26 +82,28 @@ void sound_maker (void)
 void sound_again(void)
 {
 	float chance;
-
-	if (self.soundtype == 13)
+	
+	//if (self.soundtype == 13)
+	if (self.noise3)
 	{
 		chance = random();
 		if (chance < .33)
-			sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, self.noise1, 1, self.lip);
 		else if (chance < .66)
-			sound (self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, self.noise2, 1, self.lip);
 		else
-			sound (self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, self.noise3, 1, self.lip);
 	}
-	else if ((self.soundtype == 11) || (self.soundtype == 12) || (self.soundtype == 14))
+	//else if ((self.soundtype == 11) || (self.soundtype == 12) || (self.soundtype == 14))
+	else if (self.noise2)
 	{
 		if (random() < .5)
-			sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, self.noise1, 1, self.lip);
 		else
-			sound (self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, self.noise2, 1, self.lip);
 	}
 	else
-		sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+		sound (self, CHAN_VOICE, self.noise1, 1, self.lip);
 
 	self.think = sound_again;
 	
@@ -143,144 +145,128 @@ void sound_ambient (void)
 {
 	if (self.soundtype == 1)
 	{
-		precache_sound ("ambience/windmill.wav");
 		self.noise1 = ("ambience/windmill.wav");
 	}
 	else if (self.soundtype == 2)
 	{
-		precache_sound ("ambience/drip1.wav");
 		self.noise1 = ("ambience/drip1.wav");
 		self.flags = 5;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 3)
 	{
-		precache_sound ("ambience/drip2.wav");
 		self.noise1 = ("ambience/drip2.wav");
 		self.flags = 5;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 4)
 	{
-		precache_sound ("ambience/wind.wav");
 		self.noise1 = ("ambience/wind.wav");
 	}
 	else if (self.soundtype == 5)
 	{
-		precache_sound ("ambience/night.wav");
 		self.noise1 = ("ambience/night.wav");
-		self.flags = 5;
+		self.noise2 = ("ambience/crickets1.wav");
+		self.flags = 10;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 6)
 	{
-		precache_sound ("ambience/birds.wav");
 		self.noise1 = ("ambience/birds.wav");
-		self.flags = 15;
-		self.flags2 = 60;
-		self.think = sound_again;
+		self.flags = 10;
+		self.flags2 = 30;
 	}
 	else if (self.soundtype == 7)
 	{
-		precache_sound ("ambience/raven.wav");
 		self.noise1 = ("ambience/raven.wav");
 		self.flags = 15;
-		self.flags2 = 60;
-		self.think = sound_again;
+		self.flags2 = 40;
 	}
 	else if (self.soundtype == 8)
 	{
-		precache_sound ("ambience/rockfall.wav");
 		self.noise1 = ("ambience/rockfall.wav");
+		self.noise2 = ("ambience/rockfal2.wav");
+		self.noise3 = ("ambience/rockfal3.wav");
 		self.flags = 15;
-		self.flags2 = 60;
-		self.think = sound_again;
+		self.flags2 = 40;
 	}
 	else if (self.soundtype == 9)
 	{
-		precache_sound ("ambience/lava.wav");
 		self.noise1 = ("ambience/lava.wav");
+		self.flags = 10;
+		self.flags2 = 40;
 	}
 	else if (self.soundtype == 10)
 	{
-		precache_sound ("ambience/water.wav");
 		self.noise1 = ("ambience/water.wav");
 	}
 	else if (self.soundtype == 11)
 	{
-		precache_sound ("ambience/metal.wav");
 		self.noise1 = ("ambience/metal.wav");
-		precache_sound ("ambience/metal2.wav");
 		self.noise2 = ("ambience/metal2.wav");
-		self.flags = 5;
+		self.flags = 10;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 12)
 	{
-		precache_sound ("ambience/pounding.wav");
 		self.noise1 = ("ambience/pounding.wav");
-		precache_sound ("ambience/poundin2.wav");
 		self.noise2 = ("ambience/poundin2.wav");
-		self.flags = 5;
+		self.flags = 10;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 13)
 	{
-		precache_sound ("ambience/moan1.wav");
 		self.noise1 = ("ambience/moan1.wav");
-		precache_sound ("ambience/moan2.wav");
 		self.noise2 = ("ambience/moan2.wav");
-		precache_sound ("ambience/moan3.wav");
 		self.noise3 = ("ambience/moan3.wav");
-		self.flags = 5;
+		self.flags = 10;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 14)
 	{
-		precache_sound ("ambience/creak.wav");
 		self.noise1 = ("ambience/creak.wav");
-		precache_sound ("ambience/creak2.wav");
 		self.noise2 = ("ambience/creak2.wav");
-		self.flags = 5;
+		self.flags = 10;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 15)
 	{
-		precache_sound ("ambience/rattle.wav");
 		self.noise1 = ("ambience/rattle.wav");
-		self.flags = 5;
+		self.flags = 10;
 		self.flags2 = 30;
-		self.think = sound_again;
 	}
 	else if (self.soundtype == 16)
 	{
-		precache_sound4("ambience/gurgle.wav");
-		self.noise1 =  ("ambience/gurgle.wav");
+		self.noise1 = ("ambience/gurgle.wav");
 	}
 	
+	if (self.noise1)
+		precache_sound(self.noise1);
+	if (self.noise2)
+		precache_sound(self.noise2);
+	if (self.noise3)
+		precache_sound(self.noise3);
+	
+	if (self.flags)
+		self.think = sound_again;
+	
 	if (self.lip==0)
+	{
 		if (!self.think)
 			self.lip = ATTN_STATIC;
 		else
 			self.lip = ATTN_NORM;
-	else if (self.lip<1)
+	}
+	else if (self.lip<0)
 		self.lip = ATTN_NONE;
-
+	
 	if (!self.think)
 		ambientsound (self.origin, self.noise1, 1, self.lip);
 	else
 	{
 		sound (self, CHAN_VOICE, self.noise1, 1, self.lip);
-		thinktime self : random(15,60);
+		thinktime self : random(self.flags,self.flags2);
 	}
-
 }
 
 void custom_sound_maker (void)
@@ -290,7 +276,7 @@ void custom_sound_maker (void)
 	
 	if (self.lip==0)
 		self.lip = ATTN_NORM;
-	else if (self.lip<1)
+	else if (self.lip<0)
 		self.lip = ATTN_NONE;
 	
 	if (self.delay) 
@@ -302,7 +288,11 @@ void custom_sound_maker (void)
 void custom_sound_ambient (void)
 {
 	precache_sound (self.netname);
-	self.noise1 = (self.netname);
+	self.noise1 = self.netname;
+	if (self.noise2)
+		precache_sound (self.noise2);
+	if (self.noise3)
+		precache_sound (self.noise3);
 
 	if (self.flags) {		
 		self.think = sound_again;
@@ -314,13 +304,16 @@ void custom_sound_ambient (void)
 			self.lip = ATTN_STATIC;
 		else
 			self.lip = ATTN_NORM;
-	else if (self.lip<1)
+	else if (self.lip<0)
 		self.lip = ATTN_NONE;
 	
+	if (self.height<=0 || self.height>1)
+		self.height = 1;
+	
 	if (!self.think)
-		ambientsound (self.origin, self.noise1, 1, self.lip);
+		ambientsound (self.origin, self.noise1, self.height, self.lip);
 	else
-		sound (self, CHAN_VOICE, self.noise1, 1, self.lip);
+		sound (self, CHAN_VOICE, self.noise1, self.height, self.lip);
 }
 
 void custom_music_player (void)
