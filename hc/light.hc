@@ -316,7 +316,7 @@ void() FireAmbient =
 	else {
 		self.noise = "raven/flame1.wav";
 		if (!self.height)
-			self.height = 0.5;
+			self.height = 0.25;
 		self.t_length = 3.39;
 	}
 	precache_sound (self.noise);
