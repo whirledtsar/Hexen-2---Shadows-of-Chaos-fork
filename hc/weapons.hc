@@ -1133,11 +1133,11 @@ Called every frame so impulse events can be handled as well as possible
 */
 void() W_WeaponFrame =
 {
-/*if (!(deathmatch))
+if (!(deathmatch))
 {
-	if (world.model == "maps/demo1.bsp")
+	if (world.model == "maps/demo1.bsp" || world.model == "maps/vil1.bsp")
 	{
-if (self.welcomeshown <= 16)		// set endtime of welcome message here
+	if (self.welcomeshown <= 12)		// set endtime of welcome message here
 			{
 			if (time > self.welcomeshown)	// needed to set delay for welcome message
 				{
@@ -1146,13 +1146,13 @@ if (self.welcomeshown <= 16)		// set endtime of welcome message here
 				else
 					{
 					self.welcomeshown = time + 1.9;
-					centerprint(self, "Welcome to Hexen II: Shadows of Chaos @@Change keybinds from the autoexec.cfg: @@@@Binds:@@Right mouse: Altfire @G: Glyph (grenade) @Z: Flask (health) @@@@Damage and abilities now increase in power as you level @@Some altfires you acquire by leveling up");
+					centerprint(self, "Welcome to Hexen II: Shadows of Chaos @@@@Change keybinds from autoexec.cfg: @Default altfire key: right mouse @@@@Damage and abilities now increase in power as you level @@Some altfires you acquire by leveling up");
 					}
 				}
 			}
 		
 	}
-}*/
+}
 	ImpulseCommands ();
 	
 	if (self.playerclass==CLASS_ASSASSIN && self.button1 && self.weapon != IT_WEAPON2 && self.whiptime < time)
