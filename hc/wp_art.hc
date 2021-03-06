@@ -145,3 +145,42 @@ void wp_weapon4_staff (void)
 
 }
 
+/*
+void wp_weapon5 (void)
+{
+	precache_model("models/w_15_c1.mdl");
+	precache_model("models/w_15_c2.mdl");
+	precache_model("models/w_15_c3.mdl");
+	precache_model4("models/w_15_c5.mdl");
+	precache_model("models/w_15_c4.mdl");
+	
+	CreateEntityNew(self,ENT_WEAPON5_ART,"models/w_15_c1.mdl",SUB_Null);
+	setsize(self,'0 0 0','0 0 0');
+	self.hull=HULL_POINT;
+	
+	self.flags(+)FL_CLASS_DEPENDENT;
+	self.touch = weapon_touch;	
+	self.items=IT_WEAPON4_2;
+	StartItem ();
+
+}
+
+void wp_weapon6 (void)
+{
+	precache_model("models/w_16_c1.mdl");
+	precache_model("models/w_16_c2.mdl");
+	precache_model("models/w_16_c3.mdl");
+	precache_model4("models/w_16_c5.mdl");
+	precache_model("models/w_16_c4.mdl");
+	
+	CreateEntityNew(self,ENT_WEAPON5_ART,"models/w_15_c1.mdl",SUB_Null);
+	setsize(self,'0 0 0','0 0 0');
+	self.hull=HULL_POINT;
+	
+	self.flags(+)FL_CLASS_DEPENDENT;
+	self.touch = weapon_touch;	
+	self.items=IT_WEAPON4_2;
+	StartItem ();
+
+}
+*/
