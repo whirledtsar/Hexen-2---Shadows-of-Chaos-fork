@@ -71,6 +71,10 @@ float zap_cnt,zap_other;
 vector org,tospot;
 	if(other.classname==self.classname&&other.owner==self.owner)
 		return;
+	if(pointcontents(self.origin)==CONTENT_SKY) {
+		remove(self);
+		return;
+	}
 
 	self.level=FALSE;
 	if(other.takedamage)
