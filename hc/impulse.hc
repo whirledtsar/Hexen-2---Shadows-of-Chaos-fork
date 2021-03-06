@@ -530,6 +530,19 @@ void() ImpulseCommands =
 	{
 		Inventory_Quick(self.impulse - 99);
 	}
+	else if (self.impulse == 200)
+	{
+		eprint(self);
+		dprint(vtos(self.origin));
+		dprint("\n");
+	}
+	else if (self.impulse == 201)
+	{
+		makevectors(self.v_angle);
+		traceline(self.origin+self.view_ofs, self.origin+v_forward*2048, FALSE, self);
+		SpawnPuff(trace_endpos, 0, 10, trace_ent);
+		eprint(trace_ent);
+	}
 	else if (self.impulse == 254)
 	{
 		sprint(self,"King of the Hill is ");
