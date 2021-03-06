@@ -507,9 +507,9 @@ entity oself;
 
 	if(world.target=="sheep")
 	{
-		if(inflictor.scoped)
+		/*if(inflictor.scoped)
 			CheckExpAward(attacker,self,TRUE,damage);
-		else
+		else*/
 			CheckExpAward(attacker,self,2,damage);
 	}
 	else
