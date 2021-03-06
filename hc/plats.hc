@@ -22,6 +22,7 @@ float CRUSH_MULT   = 1;
 float CRUSH_SLIDE  = 2;
 float CRUSH_START_OPEN = 4;
 float CRUSH_ENDPOS = 8;
+float CRUSH_CONTACTDMG = 16;	//SoC: do damage on any contact
 
 float START_BOTTOM = 1;
 float START_RTRN= 2;
@@ -924,6 +925,18 @@ void() crusher_use =
 	crusher_go_down();
 };
 
+void crusher_touch_dmg ()
+{
+	if (!other.health || !other.takedamage || other.safe_time>time)
+		return;
+	
+	if (self.velocity=='0 0 0')
+		return;
+	
+	other.safe_time = time+0.25;
+	crusher_crush();
+}
+
 /*QUAKED func_crusher (0 .5 .8) ? multiple slide start_open end_open
 speed	default 150
 dmg default 10
@@ -1004,6 +1017,9 @@ void() func_crusher =
 		self.pos2 = self.pos1;
 		self.pos1 = self.origin;
 	}
+	
+	if (self.spawnflags & CRUSH_CONTACTDMG)
+		self.touch = crusher_touch_dmg;
 
 	self.use = crusher_trigger_use;
 
