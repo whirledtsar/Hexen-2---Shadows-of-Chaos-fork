@@ -525,7 +525,7 @@ void bloodpool_step ()
 	sound (self, CHAN_BODY, bloodsound[rint(random(0,2))], random(0.5,0.8), ATTN_IDLE);
 	other.movetime=time+0.5;
 	self.scale-=0.025;
-	if (self.scale<=0)
+	if (self.scale<=0.075)
 		remove(self);
 }
 
@@ -594,8 +594,6 @@ entity splat;
 		splat.scale *= 1.25;
 	else if (self.netname == "maulotaur")
 		splat.scale *= 1.5;
-	else if (self.bufftype && self.scale>1)
-		splat.scale = self.scale*random(0.75, 0.9);
 	
 	setmodel (splat, bloodsplat_mdl[type]);
 	setsize(splat,'0 0 0','0 0 0');
