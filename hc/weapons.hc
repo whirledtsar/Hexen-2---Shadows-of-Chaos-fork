@@ -575,10 +575,10 @@ float W_CheckNoAmmo (float check_weapon)
 		{
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
-				if(self.bluemana >= MMIS_SHOCK_COST)
+				if(self.bluemana >= MMIS_TOME_COST)
 					return TRUE;
 			}
-			else if(self.bluemana >= MMIS_SHOCK_COST)
+			else if(self.bluemana >= MMIS_COST)
 					return TRUE;
 		}
 	}
@@ -724,7 +724,7 @@ void W_Attack (float rightclick)
 			sickle_decide_attack(rightclick);
 		else if (self.playerclass==CLASS_ASSASSIN)
 		{
-			Ass_Pdgr_Fire();			
+			Ass_Pdgr_Fire();
 		}
 		else if (self.playerclass==CLASS_CRUSADER)
 			Cru_Wham_Fire(rightclick);
