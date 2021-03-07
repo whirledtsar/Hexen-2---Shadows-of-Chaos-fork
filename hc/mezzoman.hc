@@ -110,6 +110,13 @@ void() mezzo_in_air;
 void() mezzo_run_loop;
 void()mezzo_charge;
 
+void mezzo_reset_shield ()
+{
+	if(self.shield)
+		if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
+			remove(self.shield);
+}
+
 void mezzo_idle_sound ()
 {
 string soundstr;
@@ -406,38 +413,20 @@ float r;
 		self.velocity='0 0 0';//Clear velocity from last jump so he doesn't go nuts
 
 	r=range(enemy_proj);
-	if(self.enemy.weapon==IT_WEAPON1&&r<=RANGE_NEAR&&self.enemy.playerclass!=CLASS_SUCCUBUS)
+	if(PlayerHasMelee(self.enemy) && r<=RANGE_NEAR && self.enemy.playerclass!=CLASS_SUCCUBUS)
 	{
 		thinktime self : 0;
-		if(r==RANGE_MELEE)
+		if(self.think==mezzo_block_wait)
 		{
-			if(random()<0.7||self.enemy.v_angle_x>=0)
-				self.think=mezzo_duck;
-			else if(self.think==mezzo_block_wait)
-			{
-				self.t_width=time+1;
-				return;
-			}
-			else if(self.think==mezzo_run_loop||random()<0.3)
-				self.think=mezzo_charge;
-			else
-				self.think=mezzo_block;
+			self.t_width=time+1;
 			return;
 		}
-		else if(random()<0.5)
+		else if(r!=RANGE_MELEE && random()<0.5)
 			mezzo_choose_roll(enemy_proj);
-		else if(random()<0.7||self.enemy.v_angle_x>=0)
+		else if(random()<0.3||self.enemy.v_angle_x>=10)
 			self.think=mezzo_duck;
-		else if(self.think==mezzo_block_wait)
-		{
-			self.t_width=time+1;
-			return;
-		}
-		else if(self.think==mezzo_block_wait)
-		{
-			self.t_width=time+1;
-			return;
-		}
+		else if(r==RANGE_MELEE && random()<0.3)
+			self.think=mezzo_block;
 		else if(self.think==mezzo_run_loop||random()<0.3)
 			self.think=mezzo_charge;
 		else
@@ -445,12 +434,12 @@ float r;
 		return;
 	}
 
-	if(self.level>0.3)//I've got 0.3 seconds before impact
+	if(self.level>0.3 && self.think!=mezzo_block_wait)//I've got 0.3 seconds before impact
 	{
 		mezzo_choose_roll(enemy_proj);
 		return;
 	}
-	else if(mezzo_check_duck(enemy_proj))
+	else if(mezzo_check_duck(enemy_proj) && self.think!=mezzo_block_wait)
 	{
 		thinktime self : 0;
 		tracearea(self.origin,self.origin+v_forward*64,self.mins,'16 16 20',FALSE,self);
@@ -617,8 +606,8 @@ void mezzo_reflect_trig_touch ()
 vector  org, vec, dir;//, endspot,endplane, dif;
 float magnitude;//remainder, reflect_count, 
 
-	if (other.flags & FL_MONSTER || other.flags & FL_CLIENT || !other || other == self) return;
-
+	if (!other || other == self) return;
+	if (!IsMissile(other))	return;
 	if (other.safe_time>time) return;
 
 	if(!self.owner)	// fix the "assignment to world entity" bug
@@ -668,7 +657,7 @@ float magnitude;//remainder, reflect_count,
 				dir=v_forward + v_up*random(-0.75,.75) + v_right*random(-0.75,.75);
 				dir=normalize(dir);
 			}
-			else// if(visible(other.owner))//reflect
+			else	//if(self.owner.classname=="monster_fallen_angel_lord")
 			{
 				v_forward=normalize(other.owner.origin+other.owner.view_ofs-other.origin);
 				dir+= 2*v_forward;
@@ -876,9 +865,7 @@ void mezzo_missile ()
 
 void mezzo_die () [++ $death1 .. $death16]
 {
-	if(self.shield)
-		if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
-			remove(self.shield);
+	mezzo_reset_shield();
 	if (self.health < -40)
 	{
 		chunk_death();
@@ -916,9 +903,7 @@ void mezzo_pain (entity attacker, float damage)
 
 	self.monster_awake=TRUE;
 
-	if(self.shield)
-		if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
-			remove(self.shield);
+	mezzo_reset_shield();
 
 	if(self.health<=100)
 	{
@@ -947,7 +932,7 @@ void mezzo_pain (entity attacker, float damage)
 			if(self.enemy!=world&&self.enemy!=attacker)
 				self.oldenemy=self.enemy;
 			if (!attacker.flags&FL_NOTARGET && attacker!=self.owner && attacker!=self.controller)
-			self.enemy=attacker;
+				self.enemy=attacker;
 		}
 		self.pain_finished=time+1+self.strength;
 		self.think=mezzo_pain_seq;
@@ -1010,6 +995,7 @@ void mezzo_jump () [++ $jump1 .. $jump11]
 {
 //SOUND?
 	ai_face();
+	mezzo_reset_shield();
 	self.touch=impact_touch_hurt_no_push;
 	if(self.flags&FL_ONGROUND)
 	{
@@ -1111,9 +1097,7 @@ void mezzo_block_return () [-- $block6 .. $block1]
 	if(cycle_wrapped)
 	{
 	float r;
-		if(self.shield)
-			if(self.shield.classname=="mezzo_reflect" && self.shield.owner==self)
-				remove(self.shield);
+		mezzo_reset_shield();
 		r=vlen(self.enemy.origin-self.origin);
 		if(infront(self.enemy)&&r<100)
 		{
@@ -1197,7 +1181,7 @@ void mezzo_block () [++ $block1 .. $block6]
 		thinktime self : 0;
 		self.think=mezzo_block_wait;
 	}
-	else if(self.frame==$block1)
+	else if(self.frame==$block4)
 		spawn_reflect();
 }
 
@@ -1230,10 +1214,9 @@ float skidspeed, anim_stretch;
 		self.think=mezzo_block_return;
 	}
 	else if(self.frame==$block1)
-	{
-		spawn_reflect();
 		sound(self,CHAN_AUTO,"mezzo/skid.wav",1,ATTN_NORM);
-	}
+	else if(self.frame==$block4)
+		spawn_reflect();
 	else if(self.level<anim_stretch)
 	{
 		self.frame-=1;
