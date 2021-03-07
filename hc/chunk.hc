@@ -782,7 +782,7 @@ void chunk_death (void)
 			imp_gibs();
 		if (self.netname == "afrit")
 			afrit_gibs();
-		if (self.netname == "footsoldier")
+		if (self.netname == "footsoldier" || self.classname == "monster_death_knight")
 			death_knight_gibs();
 		//Made temporary changes to make weapons look and sound
 		//better, more blood and gory sounds.
