@@ -679,6 +679,8 @@ vector org;
 	splat.movetype=MOVETYPE_NONE;
 	splat.solid=SOLID_TRIGGER;		//SOLID_NOT
 	splat.drawflags=SCALE_ORIGIN_BOTTOM+SCALE_TYPE_XYONLY;
+	if (!self.scale)
+		self.scale = 1;
 	splat.scale = self.scale*random(0.7,1);
 	if (self.flags2&FL_SMALL)
 		splat.scale = random(0.25,0.4);
