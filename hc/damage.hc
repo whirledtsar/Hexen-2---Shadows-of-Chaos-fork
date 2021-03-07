@@ -321,7 +321,7 @@ void(entity targ, entity attacker, entity inflictor) Killed =
 
 	self.th_stand=self.th_walk=self.th_run=self.th_pain=self.storethink=self.think=self.th_melee=self.th_missile=SUB_Null;
 	
-	if(pointcontents(self.origin+self.view_ofs)==CONTENT_WATER)
+	if(pointcontents(self.origin+self.view_ofs)==CONTENT_WATER||pointcontents(self.origin+self.view_ofs)==CONTENT_SLIME)
 		DeathBubbles(20);
 
 	if(attacker.classname=="rider_death")
