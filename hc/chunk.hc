@@ -782,13 +782,8 @@ void chunk_death (void)
 			imp_gibs();
 		if (self.netname == "afrit")
 			afrit_gibs();
-		if (self.netname == "footsoldier" && self.headmodel != "")
+		if (self.netname == "footsoldier")
 			death_knight_gibs();
-		else if (self.netname == "footsoldier")
-		{
-			ThrowGib ("models/footsoldierleg.mdl", self.health);
-			ThrowGib ("models/footsoldierleg.mdl", self.health);
-		}
 		//Made temporary changes to make weapons look and sound
 		//better, more blood and gory sounds.
 		if(self.enemy.playerclass==CLASS_ASSASSIN && (self.enemy.weapon == IT_WEAPON4))
