@@ -251,14 +251,14 @@ void(float rightclick, float tome) axeblade_fire =
 	if (rightclick)
 	{
 		damg = strmod;
-		if (self.flags2&FL2_FADE_UP && self.greenmana >= AXE_MELEE_COST)
+		if (self.class_weaponvar && self.greenmana >= AXE_MELEE_COST)
 			damg+=(strmod*2.75);
 		if (tome && self.greenmana >= AXE_MELEE_COST*2)
 			damg*=2;
 		
 		if (tome)
 			axe_melee (damg, 2);
-		else if (self.flags2&FL2_FADE_UP)
+		else if (self.class_weaponvar)
 			axe_melee (damg, 1);
 		else
 			axe_melee (damg, 0);
@@ -295,8 +295,9 @@ void axe_ready (void)
 {
 	self.th_weapon=axe_ready;
 	self.weaponframe = $AxeRoot1;
-	
 	self.weaponmodel = AXE_TEXMOD;
+	
+	self.class_weaponvar = FALSE;
 }
 
 void axe_select (void)
@@ -350,14 +351,12 @@ void axe_b ()
 	{
 		if (self.weaponframe_cnt>=AXE_BUILDUP) {
 			self.punchangle_x=-8;	//downward shake
-			self.flags2(+)FL2_FADE_UP;
+			self.class_weaponvar=TRUE;
 		}
-		else
-			self.punchangle_x=-1;
 		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
 		axeblade_fire(TRUE, tome);
 		self.weaponframe_cnt=0;
-		self.flags2(-)FL2_FADE_UP;
+		self.flags2=FALSE;
 	}
 	else if (self.weaponframe == $1stAxe2 || self.weaponframe == $1stAxe8)
 		++self.weaponframe;		//speed up animation
