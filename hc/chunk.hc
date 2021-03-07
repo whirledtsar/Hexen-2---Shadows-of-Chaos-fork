@@ -758,7 +758,7 @@ void chunk_death (void)
 	{
 		if (!self.flags&FL_SWIM)
 		{
-			if (self.netname == "spider")
+			if (self.model == "models/spider.mdl")
 				BloodSplat(BLOOD_GREEN);
 			else if (self.flags2&FL_SMALL)
 				BloodSplat(BLOOD_SMALL);
@@ -782,7 +782,7 @@ void chunk_death (void)
 			imp_gibs();
 		if (self.netname == "afrit")
 			afrit_gibs();
-		if (self.netname == "footsoldier" || self.classname == "monster_death_knight")
+		if (self.classname == "monster_death_knight")
 			death_knight_gibs();
 		//Made temporary changes to make weapons look and sound
 		//better, more blood and gory sounds.
