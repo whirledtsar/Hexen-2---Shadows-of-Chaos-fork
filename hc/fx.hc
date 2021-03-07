@@ -631,7 +631,7 @@ void leaf_touch ()
 {
 	if (pointcontents(self.origin) == CONTENT_SKY)
 		leaf_reset();	//remove(self);
-	if (other.classname=="obj_tree2" || other.classname=="tree2top" || other.classname=="obj_bush1")
+	if (other.thingtype==THINGTYPE_LEAVES || other.thingtype==THINGTYPE_WOOD_LEAF)
 		return;
 	
 	if (other && other.solid!=SOLID_BSP)
@@ -664,6 +664,7 @@ vector dir, org;
 	new.avelocity_y = (self.speed*0.25);
 	new.effects = 0;	//remove EF_NODRAW
 	new.flags(-)FL_ONGROUND;
+	new.frags = 0;	//how many times its been blown
 	new.gravity = 0.05;
 	new.movetype = MOVETYPE_TOSS;
 	new.owner = self.owner;
@@ -727,7 +728,8 @@ entity found;
 		found = findradius((self.absmin+self.absmax)*0.5, 192);
 		while (found!=world)
 		{
-			if (found.classname=="obj_tree2" || found.classname=="tree2top") {
+			//if (found.classname=="obj_tree2" || found.classname=="tree2top") {
+			if (found.thingtype==THINGTYPE_LEAVES || found.thingtype==THINGTYPE_WOOD_LEAF) {
 				self.aflag = TRUE;
 				self.owner = found;
 				found = world;
