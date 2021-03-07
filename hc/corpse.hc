@@ -168,6 +168,8 @@ void CorpsePain (entity attacker, float damage) =
 {
 	if (self.pain_finished > time)
 		return;
+	if (self.model == "models/spider.mdl")
+		return;
 	
 	string mdl;
 	float r = random();
