@@ -1610,7 +1610,9 @@
 
 @PointClass base(Appearflags) = custom_sound_ambient : "Ambient sound (custom)"
 [
-	netname(string) : "Sound filename, including subfolder. If no delay is supplied, it will loop continuously"
+	netname(string) : "Sound filename, including subfolder and .wav extension. If no delay is supplied, it will loop continuously"
+	noise2(string) : "Optional second sound, played randomly"
+	noise3(string) : "Optional third sound, played randomly"
 	flags(integer) : "Random delay minimum" : 0
 	flags2(integer) : "Random delay maximum" : 0
 	lip(choices) : "Attenuation" : 1 = 
@@ -1627,7 +1629,7 @@
 	soundtype(choices) : "Sound" : 4 = //9-15 Do not work properly
 	[
 		1 : "Windmill"
-		2 : "Sewer water sound"
+		2 : "Sewer water drip"
 		3 : "Dripping water, no echo"
 		4 : "Subtle sky/wind"
 		5 : "Crickets / night sounds"
@@ -1641,6 +1643,7 @@
 		13 : "Moans and screams"
 		14 : "Creaking"
 		15 : "Chain rattling"
+		16 : "Water gurgle 2"
 	]
 ]
 
