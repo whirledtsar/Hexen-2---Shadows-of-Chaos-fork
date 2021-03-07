@@ -653,6 +653,7 @@ float bloodpool_check(float type)
 void BloodSplat(float type)
 {
 entity splat;
+vector org;
 	
 	if (type!=BLOOD_GREEN) {
 		if (!bloodpool_check(type))
@@ -678,7 +679,9 @@ entity splat;
 	splat.movetype=MOVETYPE_NONE;
 	splat.solid=SOLID_TRIGGER;		//SOLID_NOT
 	splat.drawflags=SCALE_ORIGIN_BOTTOM+SCALE_TYPE_XYONLY;
-	splat.scale = self.scale*random(0.7,0.9);
+	splat.scale = self.scale*random(0.7,1);
+	if (self.flags2&FL_SMALL)
+		splat.scale = random(0.25,0.4);
 	if (self.model == "models/spider.mdl")
 		splat.scale *= 0.5;
 	else if (self.netname == "yakman")
@@ -686,9 +689,11 @@ entity splat;
 	else if (self.netname == "maulotaur")
 		splat.scale *= 1.5;
 	
+	org = trace_endpos;
+	org_z += random(0,0.4);
 	setmodel (splat, bloodsplat_mdl[type]);
 	setsize(splat,'0 0 0','0 0 0');
-	setorigin(splat,trace_endpos + '0 0 0.1');	//0.5
+	setorigin(splat,org);
 	
 	splat.angles_y=random(360);
 	splat.touch=bloodpool_step;
