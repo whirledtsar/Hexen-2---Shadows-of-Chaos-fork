@@ -412,7 +412,7 @@ void MonsterCheckContents ()
 			self.flags (+) FL_WATERJUMP;
 		}
 		else if (self.splash_time < time) {
-			if (self.velocity != '0 0 0') {
+			if (self.flags2&FL2_MOVING) {	//can't simply check velocity because thats just not how it works
 				vector org;
 				float found;
 				
@@ -426,13 +426,13 @@ void MonsterCheckContents ()
 				}
 				
 				makevectors(self.angles);
-				org = trace_endpos + v_forward*(self.maxs_x*1.5);
+				org = trace_endpos + v_forward*(self.maxs_x*1.5) + v_right*(-15);
 				if (self.watertype == CONTENT_SLIME)
 					CreateSludgeSplash(org, VEC_ORIGIN);
 				else//if (self.watertype == CONTENT_WATER)
 					CreateWaterSplash(org, VEC_ORIGIN);
 			}
-			self.splash_time = time + 0.4;
+			self.splash_time = time + 0.25;
 		}
 	}
 	else if (pointcontents(self.origin)!=CONTENT_WATER && self.flags&FL_WATERJUMP && !self.flags&FL_SWIM)
