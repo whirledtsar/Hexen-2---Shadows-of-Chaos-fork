@@ -1089,6 +1089,7 @@ void Precache_spr (void)
 
 	precache_model("models/whtsmk1.spr");
 	precache_model("models/wsplash.spr");
+	precache_model("models/slsplash.spr");	//SoC sludge splash
 
 	precache_model("models/xbowexpl.spr");	//Crossbow explosion
 	precache_model("models/xplod29.spr");	//old Eidolon flames
