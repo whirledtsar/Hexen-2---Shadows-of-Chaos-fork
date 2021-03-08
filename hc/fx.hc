@@ -133,12 +133,11 @@ void splash_run (void)
 
 	if (result == AF_END)
 	{
-		self.nextthink = time + HX_FRAME_TIME;
 		self.think = SUB_Remove;
 	}
 }
 
-void CreateWaterSplash (vector spot)
+void CreateWaterSplash (vector spot, vector vel)
 {
 	entity newent;
 
@@ -146,12 +145,82 @@ void CreateWaterSplash (vector spot)
   	setmodel (newent, "models/wsplash.spr");
 
 	setorigin (newent, spot);
-	newent.movetype = MOVETYPE_NOCLIP;
+	if (vel)
+		newent.movetype = MOVETYPE_TOSS;
+	else
+		newent.movetype = MOVETYPE_NOCLIP;
+	newent.gravity = 0.1;
 	newent.solid = SOLID_NOT;
-	newent.velocity = '0 0 0';
+	newent.velocity = vel;
 	newent.nextthink = time + 0.05;
 	newent.think = splash_run;
+}
 
+void CreateSludgeSplash (vector spot, vector vel)
+{
+	entity newent;
+
+	newent = spawn();
+  	setmodel (newent, "models/slsplash.spr");
+	
+	setorigin (newent, spot);
+	if (vel)
+		newent.movetype = MOVETYPE_TOSS;
+	else
+		newent.movetype = MOVETYPE_NOCLIP;
+	newent.gravity = 0.1;
+	newent.solid = SOLID_NOT;
+	newent.velocity = vel;
+	newent.nextthink = time + HX_FRAME_TIME*7;
+	newent.think = SUB_Remove;
+}
+
+void CreateWaterSplashBig (vector org)
+{
+	float i, max;
+	float neg;
+	
+	neg = 1;
+	if (self.flags&FL_CLIENT)
+		max = 6;
+	else
+		max = 4;
+	
+	for (i=0; i<=max-((coop||deathmatch||teamplay)*3); i++) {		//create fewer splashes in netgames for speed purposes
+		if (random()<0.5)
+			neg *= (-1);
+		vector dir;
+		dir_x = random(60,120) * neg;
+		if (random()<0.5)
+			neg *= (-1);
+		dir_y = random(60,120) * neg;
+		dir_z = random(20, 40);
+		CreateWaterSplash(org, dir);
+	}
+}
+
+void CreateSludgeSplashBig (vector org)
+{
+	float i, max;
+	float neg;
+	
+	neg = 1;
+	if (self.flags&FL_CLIENT)
+		max = 6;
+	else
+		max = 4;
+	
+	for (i=0; i<=max-((coop||deathmatch||teamplay)*3); i++) {		//create fewer splashes in netgames for speed purposes
+		if (random()<0.5)
+			neg *= (-1);
+		vector dir;
+		dir_x = random(60,120) * neg;
+		if (random()<0.5)
+			neg *= (-1);
+		dir_y = random(60,120) * neg;
+		dir_z = random(20, 40);
+		CreateSludgeSplash(org, dir);
+	}
 }
 
 /*
