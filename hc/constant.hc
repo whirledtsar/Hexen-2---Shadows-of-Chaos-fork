@@ -699,14 +699,14 @@ float MISSIONPACK		= 1;	//Spawnflag for world, telling us it's a Mission Pack ma
 float SHEEPHUNT			= 2;	//Spawnflag for world, enables special sheep hunter code...
 
 //Inventory maximums
-float MAX_CUBE = 1;
+float MAX_CUBE = 2;
 float MAX_FLASK = 5;
 float MAX_ICON = 2;
 float MAX_INV = 15;
-float MAX_GHOST = 1;
-float MAX_KRATER = 1;
-float MAX_POLY = 1;
-float MAX_SUMMON = 1;
+float MAX_GHOST = 2;
+float MAX_KRATER = 2;
+float MAX_POLY = 2;
+float MAX_SUMMON = 2;
 float MAX_TOME = 2;
 float MAX_URN = 2;
 
