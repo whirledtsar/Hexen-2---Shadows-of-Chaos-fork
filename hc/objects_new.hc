@@ -13,21 +13,6 @@ float WATER_TOPORIGIN = 64;
 
 .float modeltype;
 
-void()	fire_burn1	=[	0,	fire_burn2	] {sound (self, CHAN_ITEM, self.noise1, 0.75, ATTN_IDLE);};
-void()	fire_burn2	=[	1,	fire_burn3	] {};
-void()	fire_burn3	=[	2,	fire_burn4	] {};
-void()	fire_burn4	=[	3,	fire_burn5	] {};
-void()	fire_burn5	=[	4,	fire_burn6	] {};
-void()	fire_burn6	=[	5,	fire_burn7	] {};
-void()	fire_burn7	=[	6,	fire_burn8	] {};
-void()	fire_burn8	=[	7,	fire_burn9	] {};
-void()	fire_burn9	=[	8,	fire_burn10	] {};
-void()	fire_burn10	=[	9,	fire_burn11	] {};
-void()	fire_burn11	=[	10,	fire_burn12	] {};
-void()	fire_burn12	=[	11,	fire_burn13	] {};
-void()	fire_burn13	=[	12,	fire_burn14	] {};
-void()	fire_burn14	=[	13,	fire_burn1	] {CreateWhiteSmoke(self.origin + '0 0 56','0 0 8',HX_FRAME_TIME * 2);};
-
 void()	star_sparkle1	=[	0,	star_sparkle2	] {};
 void()	star_sparkle2	=[	1,	star_sparkle3	] {};
 void()	star_sparkle3	=[	2,	star_sparkle4	] {};
@@ -58,21 +43,6 @@ void()	portal_spin6	=[	5,	portal_spin7	] {thinktime self : 0.1;};
 void()	portal_spin7	=[	6,	portal_spin8	] {thinktime self : 0.1;};
 void()	portal_spin8	=[	7,	portal_spin9	] {thinktime self : 0.1;};
 void()	portal_spin9	=[	8,	portal_spin1	] {thinktime self : 0.1;};
-/*
-void()	portal_spin10	=[	9,	portal_spin11	] {};
-void()	portal_spin11	=[	10,	portal_spin12	] {};
-void()	portal_spin12	=[	11,	portal_spin13	] {};
-void()	portal_spin13	=[	12,	portal_spin14	] {};
-void()	portal_spin14	=[	13,	portal_spin15	] {};
-void()	portal_spin15	=[	14,	portal_spin16	] {};
-void()	portal_spin16	=[	15,	portal_spin17	] {};
-void()	portal_spin17	=[	16,	portal_spin18	] {};
-void()	portal_spin18	=[	17,	portal_spin19	] {};
-void()	portal_spin19	=[	18,	portal_spin20	] {};
-void()	portal_spin20	=[	19,	portal_spin21	] {};
-void()	portal_spin21	=[	20,	portal_spin22	] {};
-void()	portal_spin22	=[	21,	portal_spin1	] {};
-*/
 
 void()	portal_anim1	=[	26,	portal_anim2	] {};
 void()	portal_anim2	=[	27,	portal_anim3	] {};
@@ -260,7 +230,6 @@ void() obj_skeleton_body =
 	setsize (self, '-29 -29 0', '29 29 8');
 	self.health = 45;
 	
-	self.th_stand = corpse_idle1;
 	self.th_die = chunk_death;
 	self.netname="skeleton";
 	
@@ -494,18 +463,67 @@ void() obj_treelarge
 		self.use = SUB_Remove;
 }
 
+void fire_large_loop ()
+{
+	if (time<self.counter && self.flags2&FL2_ONFIRE) {
+		sound (self, CHAN_ITEM, self.noise, self.height, self.lip);
+		self.counter = time+self.t_length;
+	}
+	CreateWhiteSmoke(self.origin + '0 0 80','0 0 8',HX_FRAME_TIME * 2);
+	
+	thinktime self : 0.5+random(0.5);
+}
+
 void() light_fire_large
 {
-	self.solid = SOLID_NOT;
-	precache_model ("models/flammd.spr");
-	setmodel (self, "models/flammd.spr");
-	self.think = fire_burn1;
-	if (self.targetname)
+	precache_model ("models/flamelrg.spr");
+	setmodel (self, "models/flamelrg.spr");
+	self.drawflags(+)DRF_TRANSLUCENT;
+	
+	if (self.soundtype == 0) {
+		self.noise = "misc/fburn_bg.wav";
+		if (!self.height)
+			self.height = 0.75;
+		self.t_length = 2.43;
+	}
+	else if (self.soundtype == 1) {
+		self.noise = "raven/flame1.wav";
+		if (!self.height)
+			self.height = 0.25;
+		self.t_length = 3.39;
+	}
+	else if (self.soundtype == 2) {
+		self.noise = "misc/fburn_md.wav";
+		if (!self.height)
+			self.height = 0.75;
+		self.t_length = 2.787;
+	}
+	else if (self.soundtype == 3) {
+		self.noise = "misc/fburn_sm.wav";
+		if (!self.height)
+			self.height = 1;
+		if (!self.lip)
+			self.lip = ATTN_NORM;
+		self.t_length = 1.812;
+	}
+	else if (self.soundtype == 4)
+		self.noise = "";
+	
+	if (self.noise&&self.noise!="")
+		precache_sound(self.noise);
+	
+	if (!self.lip || self.lip <=0 || self.lip > ATTN_STATIC)
+		self.lip = ATTN_STATIC;
+	
+	self.think = fire_large_loop;
+	thinktime self : HX_FRAME_TIME;
+	
+	if (self.targetname) {
+		self.flags2 (+) FL2_ONFIRE;
 		self.use = SUB_Remove;
-	if (!self.noise1)
-		self.noise1 = "misc/fburn_bg.wav";
-	precache_sound(self.noise1);
-	self.think();
+	}
+	else
+		ambientsound(self.origin, self.noise, self.height, self.lip);
 }
 
 /*void() misc_stream =
