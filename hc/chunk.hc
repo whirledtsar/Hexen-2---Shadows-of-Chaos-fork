@@ -249,19 +249,7 @@ void CreateModelChunks (vector space,float scalemod)
 			setmodel (chunk, "models/schunk4.mdl");
 		chunk.skin = 1;
 	}
-	else if (self.thingtype==THINGTYPE_BONE)
-	{
-		if (final < 0.25)
-			setmodel (chunk, "models/schunk1.mdl");
-		else if (final < 0.50)
-			setmodel (chunk, "models/schunk2.mdl");
-		else if (final < 0.75)
-			setmodel (chunk, "models/schunk3.mdl");
-		else 
-			setmodel (chunk, "models/schunk4.mdl");
-		chunk.skin = 1;
-	}
-	else if (self.thingtype==THINGTYPE_CLAY)
+	else if (self.thingtype==THINGTYPE_CLAY || self.thingtype==THINGTYPE_BONE)
 	{
 		if (final < 0.25)
 			setmodel (chunk, "models/clshard1.mdl");
@@ -271,6 +259,10 @@ void CreateModelChunks (vector space,float scalemod)
 			setmodel (chunk, "models/clshard3.mdl");
 		else 
 			setmodel (chunk, "models/clshard4.mdl");
+		if (self.thingtype==THINGTYPE_BONE)
+		{
+			chunk.skin = 1;
+		}
 	}
 	else if (self.thingtype==THINGTYPE_LEAVES)
 	{
