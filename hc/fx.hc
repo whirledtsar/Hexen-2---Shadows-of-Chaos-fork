@@ -124,12 +124,11 @@ void splash_run (void)
 
 	if (result == AF_END)
 	{
-		self.nextthink = time + HX_FRAME_TIME;
 		self.think = SUB_Remove;
 	}
 }
 
-void CreateWaterSplash (vector spot)
+void CreateWaterSplash (vector spot, vector vel)
 {
 	entity newent;
 
@@ -137,12 +136,82 @@ void CreateWaterSplash (vector spot)
   	setmodel (newent, "models/wsplash.spr");
 
 	setorigin (newent, spot);
-	newent.movetype = MOVETYPE_NOCLIP;
+	if (vel)
+		newent.movetype = MOVETYPE_TOSS;
+	else
+		newent.movetype = MOVETYPE_NOCLIP;
+	newent.gravity = 0.1;
 	newent.solid = SOLID_NOT;
-	newent.velocity = '0 0 0';
+	newent.velocity = vel;
 	newent.nextthink = time + 0.05;
 	newent.think = splash_run;
+}
 
+void CreateSludgeSplash (vector spot, vector vel)
+{
+	entity newent;
+
+	newent = spawn();
+  	setmodel (newent, "models/slsplash.spr");
+	
+	setorigin (newent, spot);
+	if (vel)
+		newent.movetype = MOVETYPE_TOSS;
+	else
+		newent.movetype = MOVETYPE_NOCLIP;
+	newent.gravity = 0.1;
+	newent.solid = SOLID_NOT;
+	newent.velocity = vel;
+	newent.nextthink = time + HX_FRAME_TIME*7;
+	newent.think = SUB_Remove;
+}
+
+void CreateWaterSplashBig (vector org)
+{
+	float i, max;
+	float neg;
+	
+	neg = 1;
+	if (self.flags&FL_CLIENT)
+		max = 6;
+	else
+		max = 4;
+	
+	for (i=0; i<=max-((coop||deathmatch||teamplay)*3); i++) {		//create fewer splashes in netgames for speed purposes
+		if (random()<0.5)
+			neg *= (-1);
+		vector dir;
+		dir_x = random(60,120) * neg;
+		if (random()<0.5)
+			neg *= (-1);
+		dir_y = random(60,120) * neg;
+		dir_z = random(20, 40);
+		CreateWaterSplash(org, dir);
+	}
+}
+
+void CreateSludgeSplashBig (vector org)
+{
+	float i, max;
+	float neg;
+	
+	neg = 1;
+	if (self.flags&FL_CLIENT)
+		max = 6;
+	else
+		max = 4;
+	
+	for (i=0; i<=max-((coop||deathmatch||teamplay)*3); i++) {		//create fewer splashes in netgames for speed purposes
+		if (random()<0.5)
+			neg *= (-1);
+		vector dir;
+		dir_x = random(60,120) * neg;
+		if (random()<0.5)
+			neg *= (-1);
+		dir_y = random(60,120) * neg;
+		dir_z = random(20, 40);
+		CreateSludgeSplash(org, dir);
+	}
 }
 
 float AshColor()
@@ -160,7 +229,9 @@ void  SpawnPuff (vector org, vector vel, float damage,entity victim)
 	float part_color;
 	float rad;
 
-	if (victim.thingtype==THINGTYPE_FLESH && victim.classname!="mummy" && victim.netname != "spider")
+	if(victim.frozen>0)
+		part_color = 406+random(8);				// Ice particles
+	else if (victim.thingtype==THINGTYPE_FLESH && victim.classname!="mummy" && victim.netname != "spider")
 		part_color = 256 + 8 * 16 + random(9);				//Blood red
 	else if ((victim.thingtype==THINGTYPE_GREYSTONE) || (victim.thingtype==THINGTYPE_BROWNSTONE))
 		part_color = 256 + 20 + random(8);			// Gray
@@ -170,6 +241,8 @@ void  SpawnPuff (vector org, vector vel, float damage,entity victim)
 		part_color = 256 + (5 * 16) + random(8);			// Wood chunks
 	else if (victim.thingtype==THINGTYPE_ICE)	
 		part_color = 406+random(8);				// Ice particles
+	else if (victim.thingtype==THINGTYPE_ASH)	// Blackened ash
+		part_color = AshColor();
 	else if (victim.netname == "spider")	
 		part_color = 256 + 183 + random(8);		// Spider's have green blood
 	else
