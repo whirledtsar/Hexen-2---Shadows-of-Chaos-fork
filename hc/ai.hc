@@ -540,7 +540,8 @@ void(float dist) ai_walk =
 	if (FindTarget (FALSE))
 		return;
 	
-	self.flags2(+)FL2_MOVING;
+	if (movedist)
+		self.flags2(+)FL2_MOVING;
 	movetogoal (dist);
 };
 
@@ -880,7 +881,8 @@ void(float dist) ai_run =
 // head straight in
 //	if(self.netname=="spider")
 //		check_climb();
-	self.flags2(+)FL2_MOVING;
+	if (movedist)
+		self.flags2(+)FL2_MOVING;
 	if(self.classname=="monster_eidolon")
 	{
 		if(!self.path_current)
