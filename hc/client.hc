@@ -1547,9 +1547,9 @@ void() WaterMove =
 		{
 			self.dmgtime = time + 0.5;
 
-			if(other.flags&FL_FIREHEAL)
+			if(other.flags&FL2_FIREHEAL)
 				other.health=other.health+5*self.waterlevel;
-			else if(!other.flags&FL_FIRERESIST)
+			else if(!other.flags&FL2_FIRERESIST)
 				T_Damage (self, world, world, 5*self.waterlevel);
 		}
 	}
