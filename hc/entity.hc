@@ -295,11 +295,15 @@ void end_sys_fields;
 // outside of the inner physics stuff
 .vector	adjust_velocity;
 
+//ws: moved out of union so all monsters can use them
+.float splash_time;	    // When to generate the next splash
+.float idealpitch;
+
 .union	//must all be the same type!
 { // Entity type specific stuff
 	struct // player stuff
 	{		
-		float splash_time;	    // When to generate the next splash
+		float oldwatertype;		// Last water type for splash effect
 		float camera_time;      //
 		float weaponframe_cnt;  //
 		float attack_cnt;       // Shows which attack animation can be used
@@ -456,11 +460,11 @@ void end_sys_fields;
 	};
 	struct	// For raven staff Ravens
 	{
-		float idealpitch;
+		float dummy;	//ws: idealpitch moved out of union
 		float pitchdowntime;
 		float searchtime;	// Amount of time bird has been searching
 		float next_action;	// Next time to take action
-		float searchtime;	// When search was first started
+		//float searchtime;	// When search was first started
 		float damage_max; // Amount of damage each raven can do before it has to leave
 	};
 	struct
@@ -499,6 +503,17 @@ void end_sys_fields;
 		// super_damage becoming negative..
 		vector dest, dest1, dest2;	//9 spots unioned
 	};
+	struct
+	{	// Reiver
+		float reivAcceleration;
+		float reivDodgeTimer;
+		float reivSecondPhase;
+		float reivFXTimer;
+		float reivDrainTimer;
+		float reivVoiceTimer;
+		float reivChargeTime;
+		float reivIdleTimer;
+	};
 };
 
 //Needed to remember set gravity compared to other grav changes
@@ -528,7 +543,7 @@ void end_sys_fields;
 .float lifetime;
 .float lifespan;
 
-.float walkframe;
+//.float walkframe;		//unused
 .float wfs;				// Weapon frame state
 
 .float attack_finished;
@@ -554,7 +569,7 @@ void end_sys_fields;
 .float air_finished;
 
 // Keeps track of the number of bubbles.
-.float bubble_count;
+//.float bubble_count;
 
 .union
 { 
@@ -579,7 +594,7 @@ void end_sys_fields;
 // Only used by secret door.
 .vector oldorigin;
 
-.float t_length, t_width;
+.float t_length, t_width;	//ws: using t_length for custom monster melee range for ai_melee()
 
 // Things color.
 .float color;
@@ -778,7 +793,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float buff;	//1 = can become a buffed variant, 2 = can further become a leader variant
 
 //Bloodshot
-.void() storethink;	//for assassin whip
+.void() storethink;		//for assassin whip
 .float welcomeshown;
 
 //WS
@@ -787,12 +802,12 @@ entity	sight_entity;	//So monsters wake up other monsters
 .string waketarget;		//monsters use self.waketarget upon sighting player
 .string sightsound;
 .float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
-.void() th_raise;		//monster revival system
+.void() th_raise;		//monster resurrection system
 .float targetid;		//numerical id for trigger_random
 .string messagestr;		//string version of message
 .string msg2str;		//string version of msg2
-.string no_puzzle_str;		//string version of no_puzzle_msg
-.float class_weaponvar;		//variable that can be used by each class for specific weapon purposes; used by crusader icemace and assassin dagger
+.string no_puzzle_str;	//string version of no_puzzle_msg
+.float class_weaponvar;	//variable that can be used by each class for specific weapon purposes; used by paladin axe, crusader icemace, assassin dagger
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
