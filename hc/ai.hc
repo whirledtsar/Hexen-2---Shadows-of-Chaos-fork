@@ -532,13 +532,15 @@ void(float dist) ai_walk =
 {
 	CheckMonsterBuff();
 	MonsterCheckContents();
+	self.flags2(-)FL2_MOVING;
 
 	movedist = dist;
 
 	// check for noticing a player
 	if (FindTarget (FALSE))
 		return;
-
+	
+	self.flags2(+)FL2_MOVING;
 	movetogoal (dist);
 };
 
@@ -753,6 +755,7 @@ void(float dist) ai_run =
 	sdprint("Doing AI run... ", FALSE);
 	CheckMonsterBuff();
 	MonsterCheckContents();
+	self.flags2(-)FL2_MOVING;
 	
 	movedist = dist;
 // see if the enemy is dead
@@ -877,6 +880,7 @@ void(float dist) ai_run =
 // head straight in
 //	if(self.netname=="spider")
 //		check_climb();
+	self.flags2(+)FL2_MOVING;
 	if(self.classname=="monster_eidolon")
 	{
 		if(!self.path_current)
