@@ -55,6 +55,7 @@ float FL_TORNATO_SAFE			= 512;
 float FL_CHAINED				= 2048;		//Held by chains
 float FL2_CROUCHED				= 4096;
 float FL2_CROUCH_TOGGLE			= 8192;
+float FL2_MOVING				= 8192;		//Used by monsters to indicate if theyre moving or still
 
 //edict.flags2 EXPANSION
 //FIXME: Shielded and small may be able to be determined by
@@ -66,8 +67,8 @@ float FL2_DEADMEAT				= 1024;		//Tagged for death
 float FL2_FIRERESIST			= 16384;	// resistant to fire and heat and lava
 float FL2_FIREHEAL				= 32768;	// healed by fire, heat, and lava
 float FL2_COLDHEAL				= 65536;	// healed by freezing
-float FL2_TEST_TRACE			= 131072;	// healed by freezing
-float FL2_POISONED				= 262144;	// healed by freezing
+float FL2_TEST_TRACE			= 131072;	// 
+float FL2_POISONED				= 262144;	// 
 float FL2_ONFIRE				= 4194304;  // on fire
 
 float	SFL_FLUFFY					= 1;// All largish flakes
