@@ -647,14 +647,14 @@ float ACT_DEAD			= 8;
 float ACT_DECAP			= 9;
 
 //Inventory maximums
-float MAX_CUBE = 1;
+float MAX_CUBE = 2;
 float MAX_FLASK = 5;
 float MAX_ICON = 2;
 float MAX_INV = 15;
-float MAX_GHOST = 1;
-float MAX_KRATER = 1;
-float MAX_POLY = 1;
-float MAX_SUMMON = 1;
+float MAX_GHOST = 2;
+float MAX_KRATER = 2;
+float MAX_POLY = 2;
+float MAX_SUMMON = 2;
 float MAX_TOME = 2;
 float MAX_URN = 2;
 
