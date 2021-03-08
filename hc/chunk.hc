@@ -662,7 +662,7 @@ void chunk_death (void)
 		deathsound="fx/metalbrk.wav";
 	else if ((self.thingtype==THINGTYPE_BONE))
 		deathsound="fx/bonebrk.wav";
-	else if ((self.thingtype==THINGTYPE_CLOTH) || (self.thingtype==THINGTYPE_REDGLASS))
+	else if ((self.thingtype==THINGTYPE_CLOTH) || (self.thingtype==THINGTYPE_WEBS))
 		deathsound="fx/clothbrk.wav";
 	else if (self.thingtype==THINGTYPE_ASH)
 		deathsound="misc/bshatter.wav";
