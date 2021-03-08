@@ -13,26 +13,7 @@ float WATER_TOPORIGIN = 64;
 
 .float modeltype;
 
-void()	star_sparkle1	=[	0,	star_sparkle2	] {};
-void()	star_sparkle2	=[	1,	star_sparkle3	] {};
-void()	star_sparkle3	=[	2,	star_sparkle4	] {};
-void()	star_sparkle4	=[	3,	star_sparkle5	] {};
-void()	star_sparkle5	=[	4,	star_sparkle6	] {};
-void()	star_sparkle6	=[	5,	star_sparkle7	] {};
-void()	star_sparkle7	=[	6,	star_sparkle8	] {};
-void()	star_sparkle8	=[	7,	star_sparkle9	] {};
-void()	star_sparkle9	=[	8,	star_sparkle10	] {};
-void()	star_sparkle10	=[	9,	star_sparkle11	] {};
-void()	star_sparkle11	=[	10,	star_sparkle12	] {};
-void()	star_sparkle12	=[	11,	star_sparkle13	] {};
-void()	star_sparkle13	=[	12,	star_sparkle14	] {};
-void()	star_sparkle14	=[	13,	star_sparkle15	] {};
-void()	star_sparkle15	=[	14,	star_sparkle16	] {};
-void()	star_sparkle16	=[	15,	star_sparkle17	] {};
-void()	star_sparkle17	=[	16,	star_sparkle18	] {};
-void()	star_sparkle18	=[	17,	star_sparkle19	] {};
-void()	star_sparkle19	=[	18,	star_sparkle20	] {};
-void()	star_sparkle20	=[	19,	star_sparkle1	] {};
+void()	star_sparkle1 [++ 0 .. 19]
 
 void()	portal_spin1	=[	0,	portal_spin2	] {thinktime self : 0.1;};	//ws: halved because 20 fps is too fast for the animation
 void()	portal_spin2	=[	1,	portal_spin3	] {thinktime self : 0.1;};
@@ -156,7 +137,10 @@ void water_stop () [++ 26 .. 40]
 	thinktime self : self.wait;
 }
 
-void()	corpse_swing1	=[	0,	corpse_swing2	] {};
+void()	corpse_swing1	=[	0,	corpse_swing2	] {
+	self.th_save = self.pain;
+	self.th_pain = SUB_Null;
+};
 void()	corpse_swing2	=[	1,	corpse_swing3	] {};
 void()	corpse_swing3	=[	2,	corpse_swing4	] {};
 void()	corpse_swing4	=[	3,	corpse_swing5	] {};
@@ -169,7 +153,9 @@ void()	corpse_swing10	=[	9,	corpse_swing11	] {};
 void()	corpse_swing11	=[	10,	corpse_swing12	] {};
 void()	corpse_swing12	=[	11,	corpse_swing13	] {};
 void()	corpse_swing13	=[	12,	corpse_swing14	] {};
-void()	corpse_swing14	=[	13,	corpse_idle1	] {};
+void()	corpse_swing14	=[	13,	corpse_idle1	] {
+	self.th_pain = self.th_save;
+};
 
 void() corpse_idle1	=[	13,	corpse_idle1	] {};
 
@@ -228,7 +214,7 @@ void() obj_skeleton_body =
 	self.thingtype=THINGTYPE_BONE;
 
 	setsize (self, '-29 -29 0', '29 29 8');
-	self.health = 45;
+	self.health = 30;
 	
 	self.th_die = chunk_death;
 	self.netname="skeleton";
@@ -469,7 +455,7 @@ void fire_large_loop ()
 		sound (self, CHAN_ITEM, self.noise, self.height, self.lip);
 		self.counter = time+self.t_length;
 	}
-	CreateWhiteSmoke(self.origin + '0 0 80','0 0 8',HX_FRAME_TIME * 2);
+	CreateWhiteSmoke(self.origin + '0 0 112','0 0 8',HX_FRAME_TIME * 2);
 	
 	thinktime self : 0.5+random(0.5);
 }
