@@ -646,6 +646,9 @@ float ACT_CROUCH_MOVE	= 7;
 float ACT_DEAD			= 8;
 float ACT_DECAP			= 9;
 
+//map spawnflags
+float SLIME_UNINHIBITIVE = 4;	//Slime doesn't slow player down more than water
+
 //Inventory maximums
 float MAX_CUBE = 2;
 float MAX_FLASK = 5;
