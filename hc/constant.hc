@@ -51,6 +51,7 @@ float FL_TORNATO_SAFE			= 512;
 float FL_CHAINED				= 2048;		//Held by chains
 float FL2_CROUCHED				= 4096;
 float FL2_CROUCH_TOGGLE			= 8192;
+float FL2_MOVING				= 8192;		//Used by monsters to indicate if theyre moving or still
 
 //edict.flags2 EXPANSION
 //FIXME: Shielded and small may be able to be determined by
