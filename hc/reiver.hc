@@ -152,15 +152,15 @@ void reiv_chargedrain () [++ $120leech .. $126leech]
 	self.think = reiv_chargedrain;
 	reiv_fx();
 	
-	if (self.weaponframe_cnt <= 6 + skill) {
-		++self.weaponframe_cnt;
+	if (self.reivAcceleration <= 6 + skill) {
+		++self.reivAcceleration;
 		ai_face();
 		ChangePitch();
 	}
 	
 	check_z_move(3);	//move along z axis too
 	
-	if (!walkmove(self.angles_y, REIV_CHARGE+self.weaponframe_cnt, TRUE))
+	if (!walkmove(self.angles_y, REIV_CHARGE+self.reivAcceleration, TRUE))
 	{
 		if (trace_ent == self.enemy)
 			self.think = reiv_meleedrain;
@@ -168,7 +168,7 @@ void reiv_chargedrain () [++ $120leech .. $126leech]
 			self.think = reiv_run;
 		thinktime self : 0;
 	}
-	else if (time > self.counter)
+	else if (time > self.reivChargeTime)
 	{
 		self.think = reiv_run;
 		thinktime self : 0;
@@ -183,7 +183,7 @@ void reiv_chargeprep () [++ $025idle .. $038idle]
 	
 	if (FacingIdeal()) {
 		self.yaw_speed = 12;	//reset yaw speed
-		self.counter = time+1;	//stop charging at this time
+		self.reivChargeTime = time+1;	//stop charging at this time
 		self.think = reiv_chargedrain;
 		thinktime self : 0;
 	}
@@ -203,7 +203,7 @@ void reiv_die () [++ $138death .. $144death]
 		bone.thingtype = THINGTYPE_BONE;
 		setmodel (bone, "models/null.spr");
 		setorigin (bone, self.origin+'0 0 8');
-		setsize (bone, self.mins*0.25, self.maxs*0.25);
+		setsize (bone, self.mins*0.5, self.maxs*0.5);
 		bone.think = chunk_death;
 		thinktime bone : 0;
 		
@@ -224,11 +224,11 @@ float moving;
 	self.think = reiv_dodge;
 	thinktime self : HX_FRAME_TIME;
 	
-	moving = movestep (0, 0, (REIV_SPEED*0.5+self.weaponframe_cnt) * self.height, FALSE);	//height is -1 if going down, 1 if going up
-	++self.weaponframe_cnt;
+	moving = movestep (0, 0, (REIV_SPEED*0.5+self.reivAcceleration) * self.height, FALSE);	//height is -1 if going down, 1 if going up
+	++self.reivAcceleration;
 	
-	if (!moving || self.counter<time) {
-		self.state = time+1;	//dont dodge again until then
+	if (!moving || self.reivChargeTime<time) {
+		self.reivDodgeTimer = time+1;	//dont dodge again until then
 		self.think = reiv_run;
 	}
 }
@@ -273,7 +273,7 @@ float up, down;
 
 void reiv_checkdef ()
 {
-	if (self.state>time)
+	if (self.reivDodgeTimer>time)
 		return;
 	if (random()<0.33)
 		return;
@@ -286,7 +286,7 @@ void reiv_checkdef ()
 	
 	if ((self.enemy.last_attack < time+1 && self.enemy.last_attack > time-1) && lineofsight(self, self.enemy))
 	{	//if enemy recently fired at us, then dodge
-		self.counter = time+0.5;	//stop dodging at this time
+		self.reivChargeTime = time+0.5;	//stop dodging at this time
 		self.monster_stage = self.height;	//dodge in the opposite direction next time
 		self.think = reiv_dodge;
 		reiv_dodge();
@@ -298,9 +298,9 @@ void reiv_checkdef ()
 void reiv_fx ()
 {
 	particle4(self.origin, 1, rint (256 + 16*8 + random(9)), PARTICLETYPE_FASTGRAV, rint(random(1,2)));
-	if (random()<0.1 && time > self.lifespan) {
+	if (random()<0.1 && time > self.reivFXTimer) {
 		sound (self, CHAN_BODY, "reiv/blood.wav", 1, ATTN_IDLE);
-		self.lifespan = time + 2;
+		self.reivFXTimer = time + 2;
 	}
 }
 
@@ -309,7 +309,7 @@ void reiv_hit (float dir, float drain)
 vector org1,org2;
 float dist,damg;
 	
-	if (drain && self.aflag > time)
+	if (drain && self.reivDrainTimer > time)
 		return;
 	
 	if (!self.enemy)
@@ -351,20 +351,20 @@ float dist,damg;
 		if (self.health > self.max_health)
 			self.health = self.max_health;	//dont give more than spawn health
 		if (self.health >= self.max_health*0.6)
-			self.check_ok = FALSE;
+			self.reivSecondPhase = FALSE;
 	}
 	sound(self,CHAN_WEAPON,"assassin/chntear.wav",1,ATTN_NORM);
 	SpawnPuff(trace_endpos,(v_right*100)*dir,10,trace_ent);
 	if(trace_ent.thingtype==THINGTYPE_FLESH)
 		MeatChunks (trace_endpos,(v_right*random(-200,200))*dir+'0 0 200', 3,trace_ent);
 	
-	self.aflag = time+0.5;
+	self.reivDrainTimer = time+0.5;
 }
 
 void reiv_charge ()
 {
-	self.weaponframe_cnt+=0.5;
-	ai_charge(REIV_SPEED+self.weaponframe_cnt);
+	self.reivAcceleration+=0.5;
+	ai_charge(REIV_SPEED+self.reivAcceleration);
 }
 
 void reiv_meleeL () [++ $071meleel .. $088meleel]
@@ -379,7 +379,7 @@ void reiv_meleeL () [++ $071meleel .. $088meleel]
 	
 	else if (cycle_wrapped)
 	{
-		self.weaponframe_cnt = 0;
+		self.reivAcceleration = 0;
 		self.lefty = FALSE;
 		self.think = reiv_run;
 		thinktime self : 0;
@@ -398,7 +398,7 @@ void reiv_meleeR () [++ $089meleer .. $103meleer]
 	
 	else if (cycle_wrapped)
 	{
-		self.weaponframe_cnt = 0;
+		self.reivAcceleration = 0;
 		self.lefty = TRUE;
 		self.think = reiv_run;
 		thinktime self : 0;
@@ -415,7 +415,7 @@ void reiv_meleedrain () [++ $120leech .. $126leech]
 	
 	if (cycle_wrapped)
 	{
-		self.weaponframe_cnt = 0;
+		self.reivAcceleration = 0;
 		self.think = reiv_run;
 		thinktime self : 0;
 	}
@@ -498,10 +498,10 @@ void reiv_mis ()
 	local float r = range(self.enemy);
 	if (r == RANGE_MELEE)
 		self.think = reiv_melee;
-	else if (r <= RANGE_MID && self.check_ok && (!self.spawnflags & SF_FLYABOVE)) {
-		if (self.glyph_finished < time) {
+	else if (r <= RANGE_MID && self.reivSecondPhase && (!self.spawnflags & SF_FLYABOVE)) {
+		if (self.reivVoiceTimer < time) {
 			sound (self, CHAN_VOICE, "reiv/idle.wav", 1, ATTN_NORM);
-			self.glyph_finished = time+1.5;
+			self.reivVoiceTimer = time+1.5;
 		}
 		self.yaw_speed = 16;	//turn faster in preparation
 		self.think = reiv_chargeprep;	//make sure were facing the right way first
@@ -544,11 +544,11 @@ void reiv_painstun () [++ $127stun .. $137stun]
 
 void reiv_pain (entity attacker, float damg)
 {
-	if (self.health < self.max_health*0.6 && self.check_ok == FALSE) {
+	if (self.health < self.max_health*0.6 && self.reivSecondPhase == FALSE) {
 		self.pain_finished = time-1;
 		MeatChunks (self.origin+randomv(self.mins*0.75, self.maxs*0.75),v_right*random(-200,200)+'0 0 200', 3, self);
 		MeatChunks (self.origin+randomv(self.mins*0.75, self.maxs*0.75),v_right*random(-200,200)+'0 0 200', 3, self);
-		self.check_ok = TRUE;	//enter phase 2
+		self.reivSecondPhase = TRUE;	//enter phase 2
 	}
 
 float enemy_range;
@@ -582,7 +582,7 @@ void reiv_run () [++ $025idle .. $038idle]
 	
 	ChangePitch();
 	reiv_fx();
-	self.weaponframe_cnt = 0;	//accelerator for charging
+	self.reivAcceleration = 0;	//accelerator for charging
 	ai_run(REIV_SPEED);
 	reiv_checkdef();
 	
@@ -607,7 +607,7 @@ void reiv_stand2 () [++ $039look .. $053look]
 	
 	if (cycle_wrapped)
 	{
-		self.count = time+3;
+		self.reivIdleTimer = time+3;
 		self.think = reiv_stand;
 		thinktime self : 0;
 	}
@@ -620,7 +620,7 @@ void reiv_stand () [++ $025idle .. $038idle]
 	ai_stand();
 	reiv_fx();
 	
-	if (cycle_wrapped && random()<0.2 && self.count < time)
+	if (cycle_wrapped && random()<0.2 && self.reivIdleTimer < time)
 		self.think = reiv_stand2;
 }
 
@@ -645,18 +645,18 @@ void monster_reiver ()
 	if(!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_reiver();
 	
-	self.aflag = time;			//timer for when to drain health again
-	self.check_ok = FALSE;	//in ranged phase or melee drain phase
-	self.count = time+2;	//timer for look anim
-	self.counter = time;	//timer for when to stop charging & dodging
+	self.reivDrainTimer = time;			//timer for when to drain health again
+	self.reivSecondPhase = FALSE;	//in ranged phase or melee drain phase
+	self.reivIdleTimer = time+2;	//timer for look anim
+	self.reivChargeTime = time;	//timer for when to stop charging & dodging
 	if (!self.experience_value)
 		self.experience_value = 80;
 	self.init_exp_val = self.experience_value;
 	self.flags (+) FL_FLY;
-	self.glyph_finished = time;		//timer for voice
+	self.reivVoiceTimer = time;		//timer for voice
 	if (!self.health)
 		self.health = 160;
-	self.lifespan = time+1;			//timer for blood sound
+	self.reivFXTimer = time+1;			//timer for blood sound
 	self.max_health = self.health;	//save spawn health for later checks
 	self.mass = 10.1;	//not 10!
 	self.monsterclass = CLASS_GRUNT;
@@ -664,11 +664,11 @@ void monster_reiver ()
 	self.proj_ofs = '0 0 24';
 	self.sightsound = "reiv/see.wav";
 	self.solid = SOLID_SLIDEBOX;
-	self.state = time;	//timer for when we can dodge again
+	self.reivDodgeTimer = time;	//timer for when we can dodge again
 	self.thingtype = THINGTYPE_FLESH;
 	self.turn_time = 6;		//change pitch at this speed
 	self.view_ofs = '0 0 32';
-	self.weaponframe_cnt = 0;	//counter for charge speed
+	self.reivAcceleration = 0;	//reivChargeTime for charge speed
 	self.yaw_speed = 12;
 	
 	setmodel (self, "models/reiver.mdl");
@@ -700,6 +700,7 @@ void monster_reiver ()
 	self.th_melee = reiv_melee;
 	self.th_missile = reiv_mis;
 	self.th_die = reiv_die;
+	self.th_init = monster_reiver;
 	
 	flymonster_start();
 }
