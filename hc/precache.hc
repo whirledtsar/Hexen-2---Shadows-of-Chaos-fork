@@ -1397,6 +1397,7 @@ void precache_soc()
 	precache_model ("models/burn1.spr");
 	precache_model ("models/burn2.spr");
 	//precache_model ("models/burn3.spr");
+	precache_model("models/slsplash.spr");	//sludge splash
 	
 //GLYPHS
 	precache_model ("models/glyphcru.mdl");	//Crusader ice cloud

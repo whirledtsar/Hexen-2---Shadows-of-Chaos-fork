@@ -1433,12 +1433,13 @@ WaterMove
 */
 void() WaterMove =
 {
-//dprint (ftos(self.waterlevel));
 	if (self.movetype == MOVETYPE_NOCLIP)
 		return;
 	if (self.health <= 0)
 		return;
-
+	
+	if (self.watertype<CONTENT_SOLID && self.watertype>CONTENT_SKY)
+		self.oldwatertype = self.watertype;
 	if (self.waterlevel == 3)
 	{
 		VORP_TEXMOD = "models/vorpal.mdl";
@@ -1448,50 +1449,54 @@ void() WaterMove =
 		GAUNT_TEXMOD = "models/gauntlet.mdl";
 		AXE_TEXMOD = "models/axe.mdl";
 	}
-	if ((self.flags & FL_INWATER) &&
-		(self.watertype == CONTENT_WATER) &&
-		(self.waterlevel == 3) &&
-		(self.air_finished>=time+11.5))//&&!self.lefty
-	{//OOPS- no free edicts crash?
-//		DeathBubbles(10);//was using self.lefty
-		DeathBubbles(1);
-//		self.lefty = 1;
-	}
-
-/*	if ((self.flags & FL_INWATER) && (self.splash_time < time))
+	if ((self.flags & FL_INWATER) && (self.watertype == CONTENT_WATER) && (self.waterlevel == 3) && (!self.lefty))
 	{
-		if (((self.velocity_x) || (self.velocity_y) || (self.velocity_z)) && (self.watertype == CONTENT_WATER))
+		DeathBubbles(10);
+		self.lefty = 1;
+	}
+	
+/*	//not really necessary, because the player cant really see the water splashing at their feet, and its probably not worth the amount of entities it uses in coop/dm mode
+	if ((self.flags & FL_INWATER) && (self.splash_time < time) && (self.watertype == CONTENT_WATER || self.watertype == CONTENT_SLIME))
+	{
+		if (((self.velocity_x) || (self.velocity_y) || (self.velocity_z)))
 		{
+			vector org;
+			makevectors(self.angles);
+			org = self.origin + '0 0 10' + v_forward*24 + v_right*10;
 			if (self.waterlevel == 1)
 			{
-				CreateWaterSplash(self.origin + '0 0 10');
+				if (self.watertype == CONTENT_SLIME)
+					CreateSludgeSplash(org, VEC_ORIGIN);
+				else//if (self.watertype == CONTENT_WATER)
+					CreateWaterSplash(org, VEC_ORIGIN);
 			}
 			else if (self.waterlevel == 2)
 			{
-				CreateWaterSplash(self.origin + '0 0 20');
+				if (self.watertype == CONTENT_SLIME)
+					CreateSludgeSplash(org + '0 0 15', VEC_ORIGIN);
+				else//if (self.watertype == CONTENT_WATER)
+					CreateWaterSplash(org + '0 0 15', VEC_ORIGIN);
 			}
 		}
-
-		self.splash_time = time + random(HX_FRAME_TIME,HX_FRAME_TIME*2);
+		self.splash_time = time + random(0.5,0.8);
 	}
 */
-
 	if (self.waterlevel != 3) // Not up to the eyes
 	{
 		if (self.air_finished < time)
 		{
 			if (self.model=="models/sheep.mdl")
 				sheep_sound(1);
-			else if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
+			else if(self.playerclass==CLASS_ASSASSIN)
 				sound (self, CHAN_VOICE, "player/assgasp1.wav", 1, ATTN_NORM);
 			else
 				sound (self, CHAN_VOICE, "player/palgasp1.wav", 1, ATTN_NORM);
 		}
-		else if (self.air_finished < time + 7)
+		else if (self.air_finished < time + 9)
 		{
 			if (self.model=="models/sheep.mdl")
 				sheep_sound(1);
-			else if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
+			else if(self.playerclass==CLASS_ASSASSIN)
 				sound (self, CHAN_VOICE, "player/assgasp2.wav", 1, ATTN_NORM);
 			else
 				sound (self, CHAN_VOICE, "player/palgasp2.wav", 1, ATTN_NORM);
@@ -1524,6 +1529,14 @@ void() WaterMove =
 			sound (self, CHAN_BODY, "raven/outwater.wav", 1, ATTN_NORM);
 			self.flags(-)FL_INWATER;
 			self.lefty = 0;
+			
+			vector org;
+			makevectors(self.angles);
+			org = self.origin + '0 0 15' + v_forward*24 + v_right*10;
+			if (self.oldwatertype == CONTENT_SLIME)
+				CreateSludgeSplashBig(org);
+			else//if (self.oldwatertype == CONTENT_WATER)
+				CreateWaterSplashBig(org);
 		}
 		return;
 	}
@@ -1534,20 +1547,12 @@ void() WaterMove =
 		{
 			self.dmgtime = time + 0.5;
 
-			if(other.flags2&FL2_FIREHEAL)
+			if(other.flags&FL2_FIREHEAL)
 				other.health=other.health+5*self.waterlevel;
-			else if(!other.flags2&FL2_FIRERESIST)
+			else if(!other.flags&FL2_FIRERESIST)
 				T_Damage (self, world, world, 5*self.waterlevel);
 		}
 	}
-	/*else if (self.watertype == CONTENT_SLIME)
-	{	// do damage
-		if (self.dmgtime < time)
-		{
-			self.dmgtime = time + 1;
-			T_Damage (self, world, world, 4*self.waterlevel);
-		}
-	}*/
 
 	// Just entering fluid
 	if (!(self.flags & FL_INWATER))
@@ -1557,26 +1562,33 @@ void() WaterMove =
 		// player enter water sound
 		if (self.watertype == CONTENT_LAVA)
 			sound (self, CHAN_BODY, "raven/inlava.wav", 1, ATTN_NORM);
-		else if (self.watertype == CONTENT_WATER)
+		else if (self.watertype == CONTENT_WATER || self.watertype == CONTENT_SLIME || pointcontents(self.origin)==CONTENT_SLIME)
 		{
-			sound (self, CHAN_BODY, "raven/inh2o.wav", 1, ATTN_NORM);
 			vector org;
-			makevectors(self.angles);
-			org = self.origin + '0 0 10' + v_forward*20 + v_right*15;
-			CreateWaterSplash(org);
-		}
-		else if (self.watertype == CONTENT_SLIME)
-			sound (self, CHAN_BODY, "player/MUCK5.wav", 1, ATTN_NORM);
-		//else if (self.watertype == CONTENT_SLIME)
-			//sound (self, CHAN_BODY, "player/slimbrn1.wav", 1, ATTN_NORM);
+			float neg;
+			float i;
 			
+			makevectors(self.angles);
+			org = self.origin + '0 0 10' + v_forward*30 + v_right*10;
+			
+			neg = 1;
+			
+			if (self.watertype == CONTENT_SLIME) {
+				sound (self, CHAN_BODY, "player/MUCK5.wav", 1, ATTN_NORM);
+				CreateSludgeSplashBig(org);
+			}
+			else {//if (self.watertype == CONTENT_WATER) {
+				sound (self, CHAN_BODY, "raven/inh2o.wav", 1, ATTN_NORM);
+				CreateWaterSplashBig(org);
+			}
+		}
 
 		self.flags(+)FL_INWATER;
 		self.dmgtime = 0;
 	}
 
 	if (! (self.flags & FL_WATERJUMP) )
-		self.velocity = self.velocity - 0.8*self.waterlevel*frametime*self.velocity;
+		self.velocity = self.velocity - 0.8*self.waterlevel*frametime*self.velocity*((self.watertype==CONTENT_SLIME&&!world.spawnflags&SLIME_UNINHIBITIVE)*5);
 };
 
 void CheckCrouch (void)

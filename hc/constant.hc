@@ -697,6 +697,7 @@ float ACT_DECAP			= 9;
 
 float MISSIONPACK		= 1;	//Spawnflag for world, telling us it's a Mission Pack map- used so certain code is used only for new levels
 float SHEEPHUNT			= 2;	//Spawnflag for world, enables special sheep hunter code...
+float SLIME_UNINHIBITIVE = 4;	//Slime doesn't slow player down more than water
 
 //Inventory maximums
 float MAX_CUBE = 2;

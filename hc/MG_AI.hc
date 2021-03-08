@@ -393,18 +393,51 @@ void do_contents_dam ()
 
 void MonsterCheckContents ()
 {
-	if(pointcontents(self.origin)==CONTENT_WATER && !self.flags&FL_SWIM)	//ws: check feet and make splash upon entering water
-	{
+	if((pointcontents(self.origin)==CONTENT_WATER||pointcontents(self.origin)==CONTENT_SLIME) && !self.flags&FL_SWIM &&(pointcontents(self.origin+self.view_ofs)!=CONTENT_WATER))
+	{	//ws: check feet and make big splash upon entering water and smaller splashes when moving through
 		if(!self.flags&FL_WATERJUMP) {
-			makevectors(self.angles);
 			vector org;
+			
+			makevectors(self.angles);
 			org = self.origin + v_forward*15 + v_right*10;
-			CreateWaterSplash(org);
+				
+			if(pointcontents(self.origin)==CONTENT_SLIME) {
+				sound (self, CHAN_BODY, "player/MUCK5.wav", 1, ATTN_NORM);
+				CreateSludgeSplashBig(org);
+			}
+			else {
+				//sound (self, CHAN_BODY, "raven/inh2o.wav", 1, ATTN_NORM);
+				CreateWaterSplashBig(org);
+			}
 			self.flags (+) FL_WATERJUMP;
+		}
+		else if (self.splash_time < time) {
+			if (self.velocity != '0 0 0') {
+				vector org;
+				float found;
+				
+				found = FALSE;
+				trace_endpos = self.origin;
+				
+				while (!found) {	//find where body is above water
+					traceline(self.origin, trace_endpos+'0 0 8', TRUE, self);
+					if (pointcontents(trace_endpos)==CONTENT_EMPTY)
+						found = TRUE;
+				}
+				
+				makevectors(self.angles);
+				org = trace_endpos + v_forward*(self.maxs_x*1.5);
+				if (self.watertype == CONTENT_SLIME)
+					CreateSludgeSplash(org, VEC_ORIGIN);
+				else//if (self.watertype == CONTENT_WATER)
+					CreateWaterSplash(org, VEC_ORIGIN);
+			}
+			self.splash_time = time + 0.4;
 		}
 	}
 	else if (pointcontents(self.origin)!=CONTENT_WATER && self.flags&FL_WATERJUMP && !self.flags&FL_SWIM)
 		self.flags (-) FL_WATERJUMP;
+	
 	if(random()>0.3)
 		return;
 
