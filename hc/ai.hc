@@ -591,8 +591,8 @@ entity found;
 void(float dist) ai_walk =
 {
 	CheckMonsterBuff();
-	
 	MonsterCheckContents();
+	self.flags2(-)FL2_MOVING;
 
 	movedist = dist;
 
@@ -606,6 +606,7 @@ void(float dist) ai_walk =
 	if (FindTarget (FALSE))
 		return;
 	
+	self.flags2(+)FL2_MOVING;
 	if(!movetogoal(dist))
 	{
 		if(trace_ent.solid==SOLID_BSP&&trace_fraction<1)
@@ -844,8 +845,8 @@ void(float dist) ai_run =
 {
 	sdprint("Doing AI run... ", FALSE);
 	CheckMonsterBuff();
-	
 	MonsterCheckContents();
+	self.flags2(-)FL2_MOVING;
 	
 	movedist = dist;
 // see if the enemy is dead
@@ -969,6 +970,7 @@ void(float dist) ai_run =
 // head straight in
 //	if(self.netname=="spider")
 //		check_climb();
+	self.flags2(+)FL2_MOVING;
 	if(self.classname=="monster_eidolon")
 	{
 		if(!self.path_current)
