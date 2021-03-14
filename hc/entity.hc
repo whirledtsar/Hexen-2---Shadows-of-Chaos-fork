@@ -514,6 +514,14 @@ void end_sys_fields;
 		float reivChargeTime;
 		float reivIdleTimer;
 	};
+	struct
+	{	// Sunstaff tomed altfire
+		float sunCurrLength;
+		float sunMaxLength;
+		float sunHomeTimer;
+		float sunSoundTimer;
+		float sunRayTimer;
+	};
 };
 
 //Needed to remember set gravity compared to other grav changes
