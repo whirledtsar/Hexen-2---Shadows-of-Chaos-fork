@@ -1063,7 +1063,8 @@ float EnemyIsValid (entity ent)
 	if (ent.artifact_active&ARTFLAG_FROZEN)		return FALSE;
 	if (ent.artifact_active&ARTFLAG_STONED
 		&& self.classname!="monster_medusa")	return FALSE;
-	if (ent.artifact_active&ARTFLAG_ASH)		return FALSE;
+	if (ent.artifact_active&ARTFLAG_ASH
+		|| ent.skin==GLOBAL_SKIN_ASH)			return FALSE;
 	
 	return TRUE;
 }
@@ -1076,13 +1077,22 @@ float IsAlly (entity ent)
 	if (coop && self.flags&FL_CLIENT && ent.flags&FL_CLIENT)
 		return TRUE;
 	if (self.playercontrolled) {
-		if (coop && (ent.flags&FL_CLIENT || ent.playercontrolled))
+		if (coop && (ent.flags&FL_CLIENT || ent.owner.flags&FL_CLIENT || ent.controller.flags&FL_CLIENT))
 			return TRUE;
 		if (self.owner)
-			if (ent == self.owner || ent.owner == self.owner)
+			if (ent == self.owner || ent.owner == self.owner || ent.controller == self.owner)
 				return TRUE;
 		if (self.controller)
-			if (ent == self.controller || ent.controller == self.controller)
+			if (ent == self.controller || ent.controller == self.controller || ent.owner == self.controller)
+				return TRUE;
+	}
+	else if (self.movetype==MOVETYPE_FLYMISSILE)
+	{
+		if (self.owner)
+			if (ent == self.owner || ent.owner == self.owner || ent.controller == self.owner)
+				return TRUE;
+		if (self.controller)
+			if (ent == self.controller || ent.controller == self.controller || ent.owner == self.controller)
 				return TRUE;
 	}
 	return FALSE;
