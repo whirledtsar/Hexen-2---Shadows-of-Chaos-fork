@@ -13,7 +13,7 @@ float WATER_TOPORIGIN = 64;
 
 .float modeltype;
 
-void()	star_sparkle1 [++ 0 .. 19]
+void	star_sparkle1 () [++ 0 .. 19] {}
 
 void()	portal_spin1	=[	0,	portal_spin2	] {thinktime self : 0.1;};	//ws: halved because 20 fps is too fast for the animation
 void()	portal_spin2	=[	1,	portal_spin3	] {thinktime self : 0.1;};
@@ -138,7 +138,7 @@ void water_stop () [++ 26 .. 40]
 }
 
 void()	corpse_swing1	=[	0,	corpse_swing2	] {
-	self.th_save = self.pain;
+	self.th_save = self.th_pain;
 	self.th_pain = SUB_Null;
 };
 void()	corpse_swing2	=[	1,	corpse_swing3	] {};
