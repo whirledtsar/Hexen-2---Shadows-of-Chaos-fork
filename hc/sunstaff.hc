@@ -199,41 +199,48 @@ void sunstaff_fire (void)
 
 void sun_ray ()
 {
-vector  org1,org2, vec, dir;
+vector  source, dest, dir;
 	
-	if (self.lifetime<time || !self.controller || self.controller.origin==VEC_ORIGIN){	//sunball died and controller was reset to world
+	if (self.lifetime<time || !self.controller || self.controller.origin==VEC_ORIGIN) {	//sunball died and controller was reset to world
 		remove(self);
 		return;
 	}
 	
 	dir = self.movedir;
+	source = self.controller.origin + self.proj_ofs + dir*8;
 	if (self.enemy) {	//finaldest = enemy position
-		org1 = org2 = self.controller.origin + self.controller.proj_ofs;
-		vec = self.finaldest;
+		setorigin(self, self.controller.origin+self.proj_ofs);
+		if (visible(self.enemy))
+			dest = self.finaldest;
+		else
+			dest = source + dir*self.sunCurrLength;
 	}
 	else {
-		org1 = self.controller.origin + self.controller.proj_ofs;
-		org2 = org1 + dir*10;
-		vec = org2 + dir*self.level;
+		dest = source + dir*self.sunCurrLength;
 	}
-	traceline (org2, vec, TRUE, self);
+	traceline (source, dest, TRUE, self);
+	
+	if (vlen(trace_endpos - source) > self.sunMaxLength+self.speed) {	//enemy is too far away
+		dest = source + dir*self.sunCurrLength;
+		traceline (source, dest, TRUE, self);
+	}
 	
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte (MSG_BROADCAST, TE_STREAM_SUNSTAFF1);
 	WriteEntity (MSG_BROADCAST, self);
 	WriteByte (MSG_BROADCAST, STREAM_ATTACHED);
 	WriteByte (MSG_BROADCAST, 1);
-	WriteCoord (MSG_BROADCAST, org2_x);
-	WriteCoord (MSG_BROADCAST, org2_y);
-	WriteCoord (MSG_BROADCAST, org2_z);
+	WriteCoord (MSG_BROADCAST, source_x);
+	WriteCoord (MSG_BROADCAST, source_y);
+	WriteCoord (MSG_BROADCAST, source_z);
 	WriteCoord (MSG_BROADCAST, trace_endpos_x);
 	WriteCoord (MSG_BROADCAST, trace_endpos_y);
 	WriteCoord (MSG_BROADCAST, trace_endpos_z);
 	
-    LightningDamage (org1 - dir*7, trace_endpos+dir*7, self.owner, 15, "sunbeam");
+    LightningDamage (source, trace_endpos, self.owner, 18, "sunbeam");
 	
-	if (self.level<self.t_length)
-		self.level+=self.speed;
+	if (self.sunCurrLength<self.sunMaxLength)
+		self.sunCurrLength+=self.speed;
 	
 	self.think = sun_ray;
 	thinktime self : 0.001;
@@ -241,17 +248,18 @@ vector  org1,org2, vec, dir;
 
 void sun_think ()
 {
-	if (self.scale>=self.target_scale)
-		self.check_ok=TRUE;
-	
-	if (!self.check_ok)
-		self.scale+=0.025;
-	
-	T_RadiusDamage(self,self.owner,40,self.owner);
+	if (self.scale<self.target_scale) {dprint(ftos(self.scale*10));dprint("\n");
+		self.scale+=0.05;}
 	
 	if (self.attack_finished<time) {
+		T_RadiusDamage(self,self.owner,60,self.owner);
+		self.attack_finished = time+HX_FRAME_TIME*5;
+	}
+	
+	if (self.sunRayTimer<time) {
 		local entity dummy;
 		dummy = spawn();
+		
 		makevectors(self.angles);
 		local float r = random();
 		if (r<0.25)
@@ -262,24 +270,38 @@ void sun_think ()
 			dummy.movedir = v_right;
 		else
 			dummy.movedir = (-v_right);
-		dummy.level = 50;					//initial beam length
-		dummy.t_length = 1000;				//max beam length
-		dummy.speed = random(20,35);		//beam growth speed
+		
+		dummy.sunCurrLength = 50;
+		dummy.sunMaxLength = 1000;
+		dummy.speed = 25;		//beam growth speed
 		dummy.lifetime = time+random(2,3);
+		dummy.proj_ofs = self.proj_ofs + RandomVector('0 0 -8', '0 0 8');
 		dummy.controller = self;
 		dummy.owner = self.owner;
 		dummy.think = sun_ray;
 		thinktime dummy : 0;
 		
-		if (self.t_length < time) {
+		if (self.sunHomeTimer < time) {
 			local entity find, oself;
-			oself = self;
-			self = self.owner;
-			find = HomeFindTarget();
-			self = oself;
-			if (find && find.flags&FL_ALIVE && find!=self.enemy) {
-				self.t_length = time+0.3;
+			find = findradius(self.origin,1000);
+			
+			while (find) {
+				if(EnemyIsValid(find) && !IsAlly(find) && find.takedamage && visible(find) && find!=self.owner && 
+				find!=self.oldenemy && find!=self.pathentity && find!=self.lockentity)	//try not to fire multiple rays at same target
+					break;
+				else
+					find=find.chain;
+			}
+			
+			if (find) {
+				self.sunHomeTimer = time+0.25;
 				self.enemy = find;
+				if (self.oldenemy)
+					self.pathentity = find;
+				else if (self.pathentity)
+					self.lockentity = find;
+				else
+					self.oldenemy = find;
 				dummy.enemy = find;
 				dummy.finaldest = find.origin+find.proj_ofs;
 				makevectors(self.origin+self.proj_ofs - dummy.finaldest);
@@ -287,20 +309,24 @@ void sun_think ()
 			}
 		}
 		
-		if (self.t_width < time) {
+		if (self.sunSoundTimer < time) {
 			sound (self, CHAN_AUTO, "crusader/sunstart.wav", 1, ATTN_NORM);
-			self.t_width=time+random(0.25,0.4);
+			self.sunSoundTimer=time+random(0.25,0.4);
 		}
 		
-		self.attack_finished = time+random(0.033,0.33);
+		self.sunRayTimer = time+random(0.03,0.3);
 	}
 	
 	self.think = sun_think;
-	thinktime self : HX_FRAME_TIME*0.25;
+	thinktime self : 0.01;
 }
 
 void sun_touch ()
 {
+	if (pointcontents(self.origin)==CONTENT_SKY) {
+		remove(self);
+		return;
+	}
 	if(other.takedamage)
 		T_Damage(other,self,self.owner,self.dmg);
 	T_RadiusDamage(self,self.owner,self.dmg,other);
@@ -314,7 +340,6 @@ void sun_touch ()
 	WriteCoord (MSG_BROADCAST, self.origin_z);
 	
 	remove(self);
-	//self.think = sun_shrink;
 }
 
 void FireSunstaffPowerAlt ()
@@ -343,12 +368,11 @@ entity sun;
 	sun.avelocity_y = random(200,400);
 	
 	sun.classname = "sun";
-	sun.attack_finished = time+0.1;
+	sun.sunRayTimer = time+0.1;
 	sun.dmg = 100;
 	sun.effects = EF_BRIGHTLIGHT;
 	sun.proj_ofs = '0 0 12';
-	//sun.scale = 0.5;
-	sun.scale = 0.1;
+	sun.scale = 0.05;
 	sun.target_scale = 0.5;
 	
 	sun.touch = sun_touch;

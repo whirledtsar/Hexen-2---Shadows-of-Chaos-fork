@@ -477,6 +477,14 @@ void end_sys_fields;
 		float reivChargeTime;
 		float reivIdleTimer;
 	};
+	struct
+	{	// Sunstaff tomed altfire
+		float sunCurrLength;
+		float sunMaxLength;
+		float sunHomeTimer;
+		float sunSoundTimer;
+		float sunRayTimer;
+	};
 };
 
 // Once we can do unions above end_sys, have this with the field 'playerclass'
