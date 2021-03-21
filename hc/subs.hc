@@ -647,3 +647,27 @@ void SUB_ResetTarget()
 {
 	self.target = "";
 }
+
+/*
+ * SUB_TraceRange -- Traces forward, up/down by vrange units, and side-to-side by hrange units. Assumes that makevectors has been run.
+ */
+void SUB_TraceRange(vector v1, vector v2, float nomonsters, entity forent, float vrange, float hrange)
+{
+	traceline(v1, v2, nomonsters, forent);
+	
+	if (trace_fraction==1.0) {
+		traceline(v1, v2+(v_up*vrange), nomonsters, forent);
+		if (trace_fraction==1.0)
+			traceline(v1, v2-(v_up*vrange), nomonsters, forent);
+	}
+	
+	if (trace_fraction==1.0)
+		if (!hrange)
+			return;
+	
+	if (trace_fraction==1.0) {
+		traceline(v1, v2+(v_right*vrange), nomonsters, forent);
+		if (trace_fraction==1.0)
+			traceline(v1, v2-(v_right*hrange), nomonsters, forent);
+	}
+}
