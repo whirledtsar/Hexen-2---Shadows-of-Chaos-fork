@@ -287,7 +287,8 @@ float damg;
 		self.attack_finished=time+1;
 		makevectors (self.angles+self.angle_ofs);
 		source = self.origin+self.view_ofs;
-		traceline (source, source + v_forward*48, FALSE, self);
+		//traceline (source, source + v_forward*48, FALSE, self);
+		SUB_TraceRange (source, source + v_forward*48, FALSE, self, 30, 15);	//trace 30 up/down, 15 side-to-side
 		if (trace_fraction == 1.0)
 			return;
 		org = trace_endpos + (v_forward * 4);
@@ -805,7 +806,7 @@ float dot;
 	dot=v_right*enemy_dir;
 	if(dot>0.3)
 	{
-		self.angle_ofs_y=-90;
+		self.angle_ofs_y=90;
 		if(action>=MEDUSA_HEADBUTT)
 			self.think=medusa_attack_right;
 		else if(action==MEDUSA_RATTLE)
