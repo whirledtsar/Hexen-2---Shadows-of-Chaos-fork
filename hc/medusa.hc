@@ -153,6 +153,7 @@ float MEDUSA_HEADBUTT = 2;
 float MEDUSA_SNAKES = 3;
 
 float MEDUSA_SKIN_RED = 1;
+float MEDUSA_HEAD_RED = 2;
 
 void(entity attacker,float total_damage)medusa_pain;
 void()medusa_attack_right;
@@ -582,7 +583,10 @@ void MedusaHeadDying () [++ 46 .. 105]
 		}
 		else if(self.frame==105)
 		{
-			self.skin=1;
+			if (self.skin==MEDUSA_HEAD_RED)
+				self.skin = MEDUSA_HEAD_RED+1;
+			else
+				self.skin=1;
 			self.lifetime = time+random(20,30);
 			self.flags2 (+) FL_SMALL;
 			self.preventrespawn=TRUE;
@@ -603,6 +607,8 @@ void MedusaThrowHead ()
 	self.headmodel="";
 	setsize (newmis, '-3 -3 -3', '3 3 3');
 	setorigin(newmis,self.absmax - '0 0 15');
+	if (self.skin==MEDUSA_SKIN_RED)
+		newmis.skin = MEDUSA_HEAD_RED;
 	newmis.velocity = randomv('-200 -200 200','200 200 600');
 	newmis.movetype = MOVETYPE_BOUNCE;
 	if(pointcontents(newmis.origin)==CONTENT_SOLID)
@@ -963,10 +969,7 @@ void monster_medusa_green (void)
 		precache_sound2("medusa/hitplayr.wav");
 		precache_sound2("afrit/afrithit.wav");		//SoC
 	}
-
-//	if(random()<0.5)
-//		self.skin=1;
-
+	
 	self.headmodel="models/medhead.mdl";
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
