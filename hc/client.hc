@@ -1694,6 +1694,7 @@ void() PlayerPreThink =
 			self.flags = self.flags | FL_JUMPRELEASED;
 			self.velocity = 0.9 * self.velocity;
 			self.velocity_z = 0;
+			self.gravity = 0.0000001;	//necessary to keep player from sliding down if they start climbing from jump
 		}
 	}
 	else {
