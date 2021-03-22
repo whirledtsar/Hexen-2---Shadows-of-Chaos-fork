@@ -1,3 +1,13 @@
+/*
+	=Maulotaur=
+	Code by Whirledtsar, model by Razumen
+	
+	Custom/edited functions used:
+	fx.hc:		void fx_light (vector org, float effect)
+	mummy.hc:	launch_mumshot (float time)
+	weapons.hc:	void Knockback (entity victim, entity attacker, entity inflictor, float force, float zmod)
+*/
+
 $frame idle1 idle2 idle3 idle4 idle5 idle6 idle7 idle8 idle9 idle10 idle11 idle12 idle13 idle14 idle15 idle16 idle17 idle18 idle19
 
 $frame maulsw1 maulsw2 maulsw3 maulsw4 maulsw5 maulsw6 maulsw7 maulsw8 maulsw9 maulsw10 maulsw11 maulsw12 maulsw13 maulsw14 maulsw15 maulsw16 maulsw17 maulsw18
@@ -14,6 +24,7 @@ void(entity victim, float damg, float force, float zmod, float gore_vel) maul_hi
 void() maul_run;
 void() maul_swing;
 void() maul_smash;
+void() maul_victory;
 void(string sound) maul_voice;
 
 float MAUL_HIT_FORCE = 30;
@@ -49,7 +60,7 @@ void maul_chargehit (entity victim)
 	if (victim.safe_time>time || !victim.takedamage || victim == world)
 		return;
 	
-	sound (self, CHAN_WEAPON, "weapons/vorpblst.wav", 1, self.lip);	//if (victim.thingtype == THINGTYPE_FLESH)
+	sound (self, CHAN_WEAPON, "weapons/vorpblst.wav", 1, self.maulAtten);	//if (victim.thingtype == THINGTYPE_FLESH)
 	
 	victim.safe_time = time+0.75;
 	if (victim.health - self.dmg*1.5 <= 0)
@@ -64,7 +75,7 @@ vector	org1,org2,orgsave;
 	
 	makevectors(self.angles);
 	org1=self.origin+self.proj_ofs;
-	org2=orgsave=(org1+self.proj_ofs)+(v_forward*self.level);
+	org2=orgsave=(org1+self.proj_ofs)+(v_forward*self.maulRange);
 	
 	traceline(org1,org2,FALSE,self);
 	
@@ -129,7 +140,7 @@ void maul_charging ()
 	if(random()<0.2)
 		CreateWhiteSmoke(self.origin,'0 0 8'*self.scale,HX_FRAME_TIME * 2);
 	
-	if (!walkmove (self.angles_y, 30*self.scale, TRUE) || time > self.counter)
+	if (!walkmove (self.angles_y, 30*self.scale, TRUE) || time > self.maulChargeTime)
 	{
 		if (trace_ent != world) {	dprint ("Mauloatur charge hit from maul_charging\n");
 			maul_chargehit (trace_ent);
@@ -150,8 +161,8 @@ void maul_charge () [++ $maulat1 .. $maulat12]
 	if (cycle_wrapped)
 	{
 		//self.touch = maul_chargetouch;	//ended up being unnecessary
-		sound (self, CHAN_BODY, "golem/slide.wav", 1, self.lip);
-		self.counter = time+1.5;	//stop charging after this time
+		sound (self, CHAN_BODY, "golem/slide.wav", 1, self.maulAtten);
+		self.maulChargeTime = time+1.5;	//stop charging after this time
 		self.pain_finished = time+100;	//dont go into pain while charging
 		self.think = maul_charging;
 		thinktime self : 0;
@@ -165,24 +176,26 @@ void maul_die () [++ $mauldt1 .. $mauldt29]
 		MakeSolidCorpse();
 		return;
 	}
-	else if (self.health <= (-50*self.scale))
+	else if ( self.frame < $mauldt21 && self.health <= (-50*self.scale))
 		chunk_death();
 	
 	if (self.frame == $mauldt1) {
 		stopSound(self,CHAN_WEAPON);
 		stopSound(self,CHAN_BODY);
-		sound (self, CHAN_VOICE, "maul/die.wav", 1, self.lip-0.25);
+		sound (self, CHAN_VOICE, "maul/die.wav", 1, self.maulAtten-0.25);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
 	}
-	else if (self.frame == $mauldt27 && self.flags&FL_ONGROUND)
-		sound (self, CHAN_BODY, "maul/fall.wav", 1, self.lip);
+	else if (self.frame == $mauldt27 && self.flags&FL_ONGROUND) {
+		MonsterQuake(96);
+		sound (self, CHAN_BODY, "maul/fall.wav", 1, self.maulAtten);
+	}
 	
 	if (self.frame < $mauldt21)
 		thinktime self : HX_FRAME_TIME*1.5;	//slower animation before he falls
 	else
-		self.skin = MAUL_SKIN_DEAD;
+		self.skin = MAUL_SKIN_DEAD;		//light leaves his eyes
 }
 
 void maul_fballtouch ()
@@ -327,9 +340,9 @@ float spread, range, dist;
 	local float ofs;
 		ofs = -20;
 		makevectors(self.angles);
-		traceline(self.origin+self.proj_ofs,(self.enemy.origin+self.enemy.proj_ofs)+(v_forward*self.level),FALSE,self);
+		traceline(self.origin+self.proj_ofs,(self.enemy.origin+self.enemy.proj_ofs)+(v_forward*self.maulRange),FALSE,self);
 		while (trace_fraction == 1 && ofs <= 20) {
-			traceline(self.origin+self.proj_ofs,(self.enemy.origin+self.proj_ofs)+(v_forward*self.level)+(v_right*ofs),FALSE,self);
+			traceline(self.origin+self.proj_ofs,(self.enemy.origin+self.proj_ofs)+(v_forward*self.maulRange)+(v_right*ofs),FALSE,self);
 			ofs +=20;
 		}
 		if (trace_fraction == 1 || trace_ent.takedamage || random()<0.25)
@@ -352,7 +365,7 @@ void maul_paingo () [++ $maulpn1 .. $maulpn11]
 		ThrowGib ("models/blood.mdl", self.health);
 		
 	else if (self.frame == $maulpn3)
-		sound (self, CHAN_VOICE, "maul/pain.wav", 1, self.lip);
+		sound (self, CHAN_VOICE, "maul/pain.wav", 1, self.maulAtten);
 	
 	if (cycle_wrapped)
 	{
@@ -379,10 +392,13 @@ void maul_run () [++ $maulrn1 .. $maulrn18]
 	ai_run(8*self.scale);
 	
 	if (self.frame == $maulrn9 || self.frame == $maulrn18)
-		sound (self, CHAN_BODY, "yakman/hoof.wav", 1, self.lip+1);
+		sound (self, CHAN_BODY, "yakman/hoof.wav", 1, self.maulAtten+1);
+	
+	if (self.enemy.classname=="player" && !self.enemy.flags&FL_ALIVE)
+		maul_victory();
 	
 	if (random()<0.03)
-		maul_voice("pest/snort.wav");	//sound (self, CHAN_VOICE, "pest/snort.wav", 1, ATTN_NORM);
+		maul_voice("pest/snort.wav");
 }
 
 void maul_stand () [++ $idle1 .. $idle19]
@@ -488,14 +504,14 @@ void maul_smash () [++ $maulat19 .. $maulat32]
 		ai_face();
 	
 	if (self.frame == $maulat26)
-		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, self.lip);
+		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, self.maulAtten);
 	else if (self.frame == $maulat29)
 		maul_smashmelee();
 	else if (self.frame == $maulat30)
 	{
 		if (self.aflag) {
 			fx_light (self.origin, EF_MUZZLEFLASH);	//creates quick flash of dynamic light
-			sound (self, CHAN_ITEM, "mummy/tap.wav", 1, self.lip);		//launch_mumshot uses CHAN_WEAPON
+			sound (self, CHAN_ITEM, "mummy/tap.wav", 1, self.maulAtten);		//launch_mumshot uses CHAN_WEAPON
 			launch_mumshot(3+self.scale);
 		}
 		else
@@ -508,6 +524,7 @@ void maul_smash () [++ $maulat19 .. $maulat32]
 	}
 }
 
+
 void maul_swingmelee ()
 {
 vector	org1,org2;
@@ -519,7 +536,7 @@ vector	org1,org2;
 	org1=self.origin+self.proj_ofs;
 	org2=self.enemy.origin;
 	
-	if(vlen(org2-org1)<=self.level) 
+	if(vlen(org2-org1)<=self.maulRange) 
 	{
 		traceline(org1,org2,FALSE,self);
 		if(trace_ent!=self.enemy)
@@ -530,7 +547,7 @@ vector	org1,org2;
 	}
 	else
 	{
-		org2=org1+v_forward*(self.level*2);
+		org2=org1+v_forward*(self.maulRange*2);
 		traceline(org1,org2,FALSE,self);
 	}
 	
@@ -538,7 +555,7 @@ vector	org1,org2;
 		return;
 	
 	if (!MetalHitSound (trace_ent.thingtype))
-		sound (self, CHAN_WEAPON, "mummy/tap.wav", 1, self.lip);
+		sound (self, CHAN_WEAPON, "mummy/tap.wav", 1, self.maulAtten);
 	maul_hit (trace_ent, self.dmg, MAUL_HIT_FORCE, 0.5, random(100,300));
 }
 
@@ -552,18 +569,19 @@ void maul_swing () [++ $maulsw1 .. $maulsw18]
 	if (self.frame == $maulsw1)
 		maul_voice ("maul/act.wav");
 	else if (self.frame == $maulsw11)
-		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, self.lip);
+		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, self.maulAtten);
 	
 	if (self.frame <= $maulsw9)
 		ai_face();
 	
-	if (self.frame >= $maulsw9 && self.frame <= $maulsw16)
-	{
-		if (self.aflag)	//if missile or melee attack
+	if (self.aflag)	{	//missile attack
+		if (self.frame >= $maulsw9 && self.frame <= $maulsw16)
 			ai_face();
-		else
-			walkmove (self.angles_y, 16, FALSE);
 	}
+	else if (self.frame < $maulsw9)
+		ai_charge(1);
+	else if (self.frame <= $maulsw16)
+		ai_charge(12);
 	
 	if (self.frame == $maulsw13)
 	{
@@ -581,19 +599,32 @@ void maul_walk () [++ $maulrn1 .. $maulrn18]
 		maul_voice("pest/snort.wav");
 	
 	if (self.frame == $maulrn9 || self.frame == $maulrn18)
-		sound (self, CHAN_BODY, "yakman/hoof.wav", 1, self.lip+1);
+		sound (self, CHAN_BODY, "yakman/hoof.wav", 1, self.maulAtten+1);
+}
+
+void maul_victory () [++ $maulat19 .. $maulat32]
+{
+	self.think = maul_victory;
+	thinktime self : HX_FRAME_TIME;
+	
+	if (self.frame == $maulat19)
+		maul_voice("maul/see.wav");
+	else if (self.frame == $maulat29)
+		maul_smashmelee();
+	else if (self.frame==$maulat32)
+		self.think = self.th_stand;
 }
 
 void maul_voice (string snd) =
 {
-	if (self.cnt > time)
+	if (self.maulVoiceTime > time)
 		return;
 	
-	sound (self, CHAN_VOICE, snd, 1, self.lip);
-	self.cnt = time+4;
+	sound (self, CHAN_VOICE, snd, 1, self.maulAtten);
+	self.maulVoiceTime = time+3;
 };
 
-/*monster_maulotaur (1 0.3 0) (-30 -30 0) (30 30 88) AMBUSH 
+/*monster_maulotaur (1 0.3 0) (-30 -30 0) (30 30 96) AMBUSH 
 	Mini-boss strength enemy. Has charge, melee, missile spread, and floor missile trail attacks. Health can be set in map.
 	Experience: 250
 	Health: 500
@@ -606,18 +637,18 @@ void monster_maulotaur ()
 		return;
 	}
 	
-	self.init_org = self.origin;
-	
 	if(!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_maulotaur();
 	
+	self.init_org = self.origin;
+	
 	self.aflag = FALSE;	//tracks whether to fire missile during swing animation
-	self.cnt = time;	//tracks last voice sound
-	self.counter = 0;	//tracks when to stop charging
+	self.maulVoiceTime = time;	//tracks last voice sound
+	self.maulChargeTime = 0;	//tracks when to stop charging
 	self.dmg = 12;		//melee attack damage
 	self.drawflags = SCALE_ORIGIN_BOTTOM;
-	self.level = 80;	//melee range
-	self.lip = ATTN_NORM;	//sound attenuation
+	self.maulRange = 80;	//melee range
+	self.maulAtten = ATTN_NORM;	//sound attenuation
 	self.mass = 50;
 	self.mintel = 10;
 	self.monsterclass = CLASS_LEADER;
@@ -646,8 +677,8 @@ void monster_maulotaur ()
 		if (!self.health)
 			self.health = 2000;
 		//self.hull = HULL_GOLEM;
-		self.level = 100;	//melee range
-		self.lip = 0.5;		//sound attenuation
+		self.maulRange = 100;	//melee range
+		self.maulAtten = 0.5;		//sound attenuation
 		self.mass *= 1.5;
 		self.mintel *= 1.5;
 		self.monsterclass = CLASS_BOSS;

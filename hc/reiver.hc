@@ -1,3 +1,13 @@
+/*
+	=Reiver=
+	Code by Whirledtsar, model by Razumen
+	
+	Custom/edited functions used:
+	ai.hc:		void ChangePitch ()
+	fx.hc:		void fx_light (vector org, float effect)
+	weapons.hc:	void Knockback (entity victim, entity attacker, entity inflictor, float force, float zmod)
+*/
+
 $frame 000pose
 
 $frame 001rise 002rise 003rise 004rise 005rise 006rise 007rise 008rise 009rise 010rise 011rise 012rise 013rise 014rise 015rise 016rise 017rise 018rise 019rise 020rise 021rise 022rise 023rise 024rise
@@ -224,7 +234,7 @@ float moving;
 	self.think = reiv_dodge;
 	thinktime self : HX_FRAME_TIME;
 	
-	moving = movestep (0, 0, (REIV_SPEED*0.5+self.reivAcceleration) * self.height, FALSE);	//height is -1 if going down, 1 if going up
+	moving = movestep (0, 0, (REIV_SPEED*0.5+self.reivAcceleration) * self.reivDodgeDir, FALSE);	//height is -1 if going down, 1 if going up
 	++self.reivAcceleration;
 	
 	if (!moving || self.reivChargeTime<time) {
@@ -251,19 +261,19 @@ float up, down;
 		down = TRUE;
 	
 	if (up&&down) {	//if we can dodge both up or down, do the opposite of what we did last
-		if (self.monster_stage && self.monster_stage==self.height)
-			self.height*=(-1);
+		if (self.monster_stage && self.monster_stage==self.reivDodgeDir)
+			self.reivDodgeDir*=(-1);
 		else if (random()<0.5)
-			self.height=1;
+			self.reivDodgeDir=1;
 		else
-			self.height=-1;
+			self.reivDodgeDir=-1;
 	}
 	else if (up)
-		self.height=1;
+		self.reivDodgeDir=1;
 	else if (down)
-		self.height=-1;
+		self.reivDodgeDir=-1;
 	else
-		self.height=0;
+		self.reivDodgeDir=0;
 		
 	if (up||down)
 		return TRUE;
@@ -287,7 +297,7 @@ void reiv_checkdef ()
 	if ((self.enemy.last_attack < time+1 && self.enemy.last_attack > time-1) && lineofsight(self, self.enemy))
 	{	//if enemy recently fired at us, then dodge
 		self.reivChargeTime = time+0.5;	//stop dodging at this time
-		self.monster_stage = self.height;	//dodge in the opposite direction next time
+		self.monster_stage = self.reivDodgeDir;	//dodge in the opposite direction next time
 		self.think = reiv_dodge;
 		reiv_dodge();
 	}
@@ -327,15 +337,7 @@ float dist,damg;
 	if (dist > REIV_RANGE)
 		return;
 	
-	traceline(org1,org2,FALSE,self);
-	if (trace_fraction==0)
-		traceline(org1,org2+v_up*30,FALSE,self);
-	if (trace_fraction==0)
-		traceline(org1,org2-v_up*30,FALSE,self);
-	if (trace_fraction==0)
-		traceline(org1,org2+v_right*15,FALSE,self);
-	if (trace_fraction==0)
-		traceline(org1,org2-v_right*15,FALSE,self);
+	SUB_TraceRange(org1,org2,FALSE,self,30,15);
 	
 	if (trace_fraction == 0 || !trace_ent.takedamage)
 		return;
@@ -641,12 +643,11 @@ void monster_reiver ()
 		remove(self);
 		return;
 	}
-	
-	self.th_init=monster_reiver;
-	self.init_org=self.origin;
 
 	if(!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_reiver();
+	
+	self.init_org = self.origin;
 	
 	self.reivDrainTimer = time;			//timer for when to drain health again
 	self.reivSecondPhase = FALSE;	//in ranged phase or melee drain phase
@@ -671,7 +672,7 @@ void monster_reiver ()
 	self.thingtype = THINGTYPE_FLESH;
 	self.turn_time = 6;		//change pitch at this speed
 	self.view_ofs = '0 0 32';
-	self.reivAcceleration = 0;	//reivChargeTime for charge speed
+	self.reivAcceleration = 0;	//accelerator for charge speed
 	self.yaw_speed = 12;
 	
 	setmodel (self, "models/reiver.mdl");
@@ -707,3 +708,4 @@ void monster_reiver ()
 	
 	flymonster_start();
 }
+
