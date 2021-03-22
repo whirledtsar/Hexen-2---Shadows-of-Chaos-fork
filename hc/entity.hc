@@ -476,6 +476,7 @@ void end_sys_fields;
 		float reivVoiceTimer;
 		float reivChargeTime;
 		float reivIdleTimer;
+		float reivDodgeDir;
 	};
 	struct
 	{	// Sunstaff tomed altfire
