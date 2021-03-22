@@ -485,6 +485,13 @@ void end_sys_fields;
 		float sunSoundTimer;
 		float sunRayTimer;
 	};
+	struct
+	{	// Maulotaur
+		float maulVoiceTime;
+		float maulChargeTime;
+		float maulAtten;
+		float maulRange;
+	};
 };
 
 // Once we can do unions above end_sys, have this with the field 'playerclass'
