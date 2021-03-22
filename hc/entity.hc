@@ -522,6 +522,13 @@ void end_sys_fields;
 		float sunSoundTimer;
 		float sunRayTimer;
 	};
+	struct
+	{	// Maulotaur
+		float maulVoiceTime;
+		float maulChargeTime;
+		float maulAtten;
+		float maulRange;
+	};
 };
 
 //Needed to remember set gravity compared to other grav changes
