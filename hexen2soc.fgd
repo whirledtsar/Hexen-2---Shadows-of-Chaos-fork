@@ -25,12 +25,13 @@
 	]
 	CD(integer) : "CD track to play" : 1
 	MIDI(string) : "Midi file to play" : "casa1"
-	spawnflags2(choices) : "Func_Train type" : 0 = //Spawnflags don't show for worldspawn. Needs to be edited in the .map manually
+	spawnflags(flags) =
 	[
-		0 : "Hexen2 Func_Trains"
-		1 : "PoP Func_Trains"
+		1 : "Use PoP trains, doors, trigger_push"
+		2 : ""
+		4 : "SoC sludge doesn't slow player down"
 	]
-	netname(string) : "Level name as string (PoP)"
+	netname(string) : "Level name as string"
 	
 	//----------------------------------------------------------------------
 	// Ericw/Tyran's new compile tools (www.celephais.net/board/view_thread.php?id=61211)
@@ -212,7 +213,7 @@
 		18 : "Ice"
 		19 : "Clear glass"
 		20 : "Red glass"
-		21 : "Bone"
+		24 : "Bone"
 	]
 	health(choices) : "Health" : 0 =
 	[
@@ -631,6 +632,7 @@
 		18 : "Ice"
 		19 : "Clear glass"
 		20 : "Red glass"
+		24 : "Bone"
 	]
 	health(choices) : "Health" : 0 = 
 	[
@@ -702,6 +704,7 @@
 		18 : "Ice"
 		19 : "Clear glass"
 		20 : "Red glass"
+		24 : "Bone"
 	]
 	abslight(integer) : "Absolute light value"
 ]
@@ -774,6 +777,7 @@
 		18 : "Ice"
 		19 : "Clear glass"
 		20 : "Red glass"
+		24 : "Bone"
 	]
 	abslight(integer) : "Absolute light value"
 ]
@@ -2227,7 +2231,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 
 @PointClass base(Object) model(":models/skeleton1.mdl") size(-29 -29 0, 29 29 8) = obj_skeleton_body : "Skeleton corpse" []
 
-@PointClass base(Targetname) model(":models/portal.mdl") = misc_portal : "Portal Effect, for use with teleporters/level exits a la Hexen 1" []
+@PointClass base(Targetname) model(":models/portal.mdl") = misc_portal : "Portal effect, for use with teleporters/level exits a la Hexen 1" []
 
 @PointClass base(Object) size(-82 -82 -150, 82 82 120) model(":models/waterfall.mdl") = misc_waterfall : "waterfall, animated, can be scaled and rotated" [
 	spawnflags(Flags) =
@@ -2235,8 +2239,8 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		2 : "Start off"
 		4 : "Translucent"
 		8 : "Fullbright" 
-		16 : "Scale horizontally"
-		32 : "Scale vertically"
+		16 : "Scale horizontally only"
+		32 : "Scale vertically only"
 		64 : "Scale from top"
 	]
 	modeltype(choices) : "Wide or skinny" : 0 =
@@ -2274,13 +2278,14 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	wait(float) : "Delay between spawns" : 0.5
 ]
 
-@PointClass base(light) model(":models/chan.mdl") size(-8 -8 -8, 8 8 8) = light_chan : "Chandelier (heretic 2)" []
+@PointClass base(light) model(":models/chan.mdl") size(-8 -8 -8, 8 8 8) = light_chan : "Chandelier (Heretic 2)" []
 
-@PointClass base(Object) model(":models/trees.mdl") size(-10 -10 -5, 10 10 40) = obj_treecluster : "Tree group 1, no collision (can be combined with skip texture brushes or used as background trees" []
+@PointClass base(Object) model(":models/trees.mdl") size(-10 -10 -5, 10 10 40) = obj_treecluster : "Tree group 1, no collision (can be combined with skip texture brushes or used as background trees)" []
+@PointClass base(Object) model(":models/treebig.mdl") size(-10 -10 -5, 10 10 40) = obj_treelarge : "Large tree, no collision (can be combined with skip texture brushes or used as background trees)" []
 
-@PointClass base(Object) model(":models/treebig.mdl") size(-10 -10 -5, 10 10 40) = obj_treelarge : "Large tree, no collision (can be combined with skip texture brushes or used as background trees" []
+@PointClass base(light) size(-16 -16 -0, 16 16 160) = light_fire_large : "Fire sprite (doesn't emit light)" []
 
-@PointClass base(Monster) size(-16 -16 0, 16 16 36) model(":models/afrit.mdl") = monster_afrit : "Afrit from hexen 1" [
+@PointClass base(Monster) size(-16 -16 0, 16 16 36) model(":models/afrit.mdl") = monster_afrit : "Afrit from Hexen 1" [
 	spawnflags(Flags) =
 	[
 		2 : "Cocoon (place on ground)"
@@ -2297,6 +2302,12 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		524288 : "Buried: no earth/dirt FX when rising"
 	]
 ]
+
+@PointClass base(Monster) size(-16 -16 0, 16 16 56) model(":models/roman.mdl") = monster_roman : "Legionnaire (similar to Mummy, with Roman theme)"
+[]
+
+@PointClass base(Monster) size(-16 -16 0, 16 16 56) model(":models/roman.mdl") = monster_roman_lord : "Elite Legionnaire (similar to Mummy Lord, with Roman theme)"
+[]
 
 @PointClass base(Appearflags, Targetname, Target) size(-10 -10 0, 10 10 12) model(":models/misc_mum.mdl") = obj_mummy : "Decorative mummy; use invisible breakable_brush's for collision"
 []
@@ -2364,6 +2375,66 @@ Will not work well with a func_rotating that already has the TOGGLE_REVERSE spaw
 	angle(integer) : "Angle to spawn"
 	speed(integer) : "Speed of leaves" : 125
 	veer(integer) : "Maximum offset from angle (1-360)" : 45
-	wait(integer) : "Spawns per second. Because each spawner has a limit of 18 active leaves, low values (<0.33) will have erratic results." : 1
+	wait(integer) : "Delay between spawns. Because each spawner has a limit of 18 active leaves, low values (<0.33) will have erratic results." : 1
 	targetname(target_source) : "Name. Don't killtarget to remove, just use."
+]
+
+@PointClass size(-8 -8 -8, 8 8 8) model ({"path": model, "scale": scale, "skin": skin, "frame": frame })= custom_model : "External model"
+[
+    abslight(integer) : "Absolute light value"
+    model(string):   "External model path"
+    scale(integer):   "Scale"
+    skin(integer):   "Skin"
+    frame(integer):   "Frame"
+    button0(integer) : "Starting animation frame # within the [button1-button2] range (button1 by default)"
+    button1(integer) : "First animation frame"
+    button2(integer) : "Last animation frame"
+	orgnl_mins(string) : "Bounding box minimum (x y z)"
+	orgnl_maxs(string) : "Bounding box maximum (x y z)"
+    speed(integer) : "Animation frames duration; default 0.05" : 0.05
+	wait(integer) : "Delay before beginning animation"
+	effects(flags) =
+	[
+		1 : "EF_BRIGHTFIELD"
+		2 : ""
+		4 : "EF_BRIGHTLIGHT"
+		6 : "EF_TORCHLIGHT"
+		8 : "EF_DIMLIGHT"
+		16 : "EF_DARKLIGHT"
+		32 : "EF_DARKFIELD"
+		64 : "EF_LIGHT"
+	]
+	thingtype(choices) : "Material type" : 0 =
+	[
+		0 : "Glass"
+		1 : "Grey stone"
+		2 : "Wood"
+		3 : "Metal"
+		4 : "Flesh"
+		5 : "Fire"
+		6 : "Clay"
+		7 : "Leaves"
+		8 : "Hay"
+		9 : "Brown stone"
+		10 : "Cloth"
+		11 : "Wood & leaf"
+		12 : "Wood & metal"
+		13 : "Wood & stone"
+		14 : "Metal & stone"
+		15 : "Metal & cloth"
+		16 : "Spider web"
+		//17 : "Glass"
+		18 : "Ice"
+		19 : "Clear glass"
+		20 : "Red glass"
+		24 : "Bone"
+	]
+	spawnflags(flags) =
+	[
+		1 : ""
+		2 : "Non-solid"
+		4 : "Breakable"
+		8 : "Starts off"
+		16 : "Using breaks instead of toggleing"
+	]
 ]
