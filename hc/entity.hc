@@ -767,7 +767,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 
 //WS
 .float altfiring;		//track altfire even when button isn't pressed
-.float glyph_finished;	//delay between glyph use (and a couple monster reuses as a timer)
+.float glyph_finished;		//delay between glyph use
 .string waketarget;		//monsters use self.waketarget upon sighting player
 .string sightsound;
 .float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
@@ -775,8 +775,9 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float targetid;		//numerical id for trigger_random
 .string messagestr;		//string version of message
 .string msg2str;		//string version of msg2
-.string no_puzzle_str;	//string version of no_puzzle_msg
-.float class_weaponvar;	//variable that can be used by each class for specific weapon purposes; used by paladin axe, crusader icemace, assassin dagger
+.string no_puzzle_str;		//string version of no_puzzle_msg
+.float class_weaponvar;		//variable that can be used by each class for specific weapon purposes; used by paladin axe, crusader icemace, assassin dagger
+.float safe_time_sunstaff;	//safe from sunstaff altfire seeking
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
