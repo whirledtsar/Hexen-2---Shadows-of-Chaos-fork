@@ -248,8 +248,8 @@ vector  source, dest, dir;
 
 void sun_think ()
 {
-	if (self.scale<self.target_scale) {dprint(ftos(self.scale*10));dprint("\n");
-		self.scale+=0.05;}
+	if (self.scale<self.target_scale)
+		self.scale+=0.05;
 	
 	if (self.attack_finished<time) {
 		T_RadiusDamage(self,self.owner,60,self.owner);
@@ -275,7 +275,7 @@ void sun_think ()
 		dummy.sunMaxLength = 1000;
 		dummy.speed = 25;		//beam growth speed
 		dummy.lifetime = time+random(2,3);
-		dummy.proj_ofs = self.proj_ofs + RandomVector('0 0 -8', '0 0 8');
+		dummy.proj_ofs = self.proj_ofs + RandomVector('0 0 8');
 		dummy.controller = self;
 		dummy.owner = self.owner;
 		dummy.think = sun_ray;
@@ -286,22 +286,23 @@ void sun_think ()
 			find = findradius(self.origin,1000);
 			
 			while (find) {
-				if(EnemyIsValid(find) && !IsAlly(find) && find.takedamage && visible(find) && find!=self.owner && 
-				find!=self.oldenemy && find!=self.pathentity && find!=self.lockentity)	//try not to fire multiple rays at same target
+				if(EnemyIsValid(find) && !IsAlly(find) && find.takedamage && visible(find) && find!=self.owner && find.safe_time_sunstaff<time) 
+				//&& find!=self.oldenemy && find!=self.pathentity && find!=self.lockentity)	//try not to fire multiple rays at same target
 					break;
 				else
 					find=find.chain;
 			}
 			
 			if (find) {
-				self.sunHomeTimer = time+0.25;
-				self.enemy = find;
+				self.sunHomeTimer = time+0.2;
+				/*self.enemy = find;
 				if (self.oldenemy)
 					self.pathentity = find;
 				else if (self.pathentity)
 					self.lockentity = find;
 				else
-					self.oldenemy = find;
+					self.oldenemy = find;*/
+				find.safe_time_sunstaff = time+4;	//dont seek enemy again until this time
 				dummy.enemy = find;
 				dummy.finaldest = find.origin+find.proj_ofs;
 				makevectors(self.origin+self.proj_ofs - dummy.finaldest);
