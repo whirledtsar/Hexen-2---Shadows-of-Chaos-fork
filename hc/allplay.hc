@@ -674,13 +674,9 @@ void PlayerDie ()
 	self.angles_x = 0;
 	self.angles_z = 0;
 
-	if(self.bloodloss==666)
-		DecapPlayer();
-	else
-	{
-		self.act_state=ACT_DEAD;
-		player_frames();
-	}
+	self.act_state=ACT_DEAD;
+	player_frames();
+	
 	if(self.health<-99)
 		self.health=-99;
 }
