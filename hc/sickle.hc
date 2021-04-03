@@ -57,7 +57,7 @@ void monster_werejaguar (void);
 void monster_mummy(void);
 void CorpseThink(void);
 void sickle_ready(void);
-void phase_init(void);
+float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore);
 
 void minion_solid()
 {
@@ -77,17 +77,25 @@ void minion_init()
 {
 	float level;
 	
-	//intmod = self.cnt;
+	if (!CanSpawnAtSpot(self.origin, self.mins, self.maxs, self.owner)) {
+		self.counter++;
+		if (self.counter>20) {
+			chunk_death();
+			return;
+		}
+		thinktime self : 0.1;
+		return;
+	}
+	
 	level = self.cnt + self.aflag;	//cnt is player level, aflag is monster class (0, grunt, henchman, leader, boss, final boss)
 	self.cnt = 0;
 	self.aflag = 0;
 	
-	phase_init();
 	newmis = spawn();	//create entity that makes the summoned monster solid to the player only if the player is far enough away not to be blocked
 	newmis.enemy = self;
 	newmis.controller = self.controller;
 	newmis.think = minion_solid;
-	newmis.nextthink = time + 1;
+	thinktime newmis : 1;
 	
 	if (level > 11)
 		monster_mummy();
@@ -104,7 +112,7 @@ void minion_init()
 	else
 		monster_spider_yellow_small();
 	
-	self.experience_value = 0; //no XP for summoned monsters
+	self.init_exp_val = self.experience_value = 0; //no XP for summoned monsters
 	self.th_die = chunk_death; //summoned monsters explode, don't respawn
 	thinktime self : 0;
 }
@@ -132,7 +140,7 @@ void minion_summon(entity body, float intmod, float level)
 	
 	newmis.flags2 (+) FL_SUMMONED;
 	newmis.flags2 (+) FL_ALIVE;
-	newmis.lifetime = time + (intmod * 2);
+	//newmis.lifetime = time + (intmod * 2);	only affects spiders
 	newmis.think = minion_init;
 	newmis.nextthink = time + 0.05;
 	newmis.controller = self;
