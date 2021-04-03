@@ -950,7 +950,7 @@ void skullwiz_melee (void) [++ $skspel2..$skspel30]
 		}
 		else  // Only the skull wizard lord can summon
 		{
-			if (random()<0.99)// 0.15)
+			if (random()<0.2)
 				skullwiz_summoninit();
 			else
 			{
