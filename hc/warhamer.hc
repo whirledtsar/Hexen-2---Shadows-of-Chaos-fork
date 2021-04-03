@@ -120,13 +120,13 @@ float distance;
 	destiny=self.controller.origin+self.controller.proj_ofs+v_right*7+'0 0 -7';
 	distance=vlen(self.origin-destiny);	
 
-	if(self.lifetime<time||(distance<28&&self.bloodloss<time))
+	if(self.lifetime<time||(distance<28&&self.counter<time))
 	{
 //		spawn_tfog(self.controller.origin);
 		ThrowHammerReturn();
 	}
 
-	if(self.bloodloss<=time)
+	if(self.counter<=time)
 		self.owner=self;
 	if(distance>377)
 		self.aflag= -1;
@@ -180,7 +180,7 @@ void HammerTouch ()
 	tome = self.owner.artifact_active&ART_TOMEOFPOWER;
 
 	if (other == self.controller)
-		if (self.aflag||self.bloodloss<time)
+		if (self.aflag||self.counter<time)
 			ThrowHammerReturn();
         else 
 			return;
@@ -249,7 +249,7 @@ void ThrowHammer (float dexmod, float tome)
 	missile.touch = HammerTouch;
 	thinktime missile : 0;
 	missile.frags=TRUE;
-	missile.bloodloss = time + 0.3;
+	missile.counter = time + 0.3;
 	missile.lifetime = time + 3;
 	sound(missile, CHAN_VOICE, "paladin/axblade.wav", 1, ATTN_NORM);
 	missile.think = ThrowHammerThink;
