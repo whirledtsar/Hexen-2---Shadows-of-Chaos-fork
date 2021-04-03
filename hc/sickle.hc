@@ -322,33 +322,29 @@ void sickle_fire (float altfire)
 //			msg_entity=self;
 //			WriteByte (MSG_ONE, SVC_SET_VIEW_TINT);
 //			WriteByte (MSG_ONE, 168);
-
-			chance = (self.level - 5) * .04;
-			if (chance > .20)
-				chance = .2;
+			
+			//chance = (self.level - 5) * .04;
+			chance = self.intelligence * .015;
+			
+			if (chance > .4)
+				chance = .4;
 
 			if (random() < chance)
 			{
-			//	point_chance = (self.level - 5) * 2;
-			//	if (point_chance > 10)
-			//		point_chance = 10;
-			/* Pa3PyX -- This HAS TO change: One will be dead 3 times
-			 * before stealing their 10 hit points at clvl 10 in 5 hits
-			 * trying to hack away at a medusa or an archer lord. This
-			 * has to be at least 20 to make any practical use of this
-			 * level 6 ability, and at most that, since spiders can be
-			 * leeched from fairly easily (but they will still caw at
-			 * you at least twice before your hit actually drains).
-			 * Given that you cannot leech from dead bodies.	*/
-				point_chance = (self.level - 5) * 4;
+				if (trace_ent.flags&FL_MONSTER)
+				{
+					point_chance = ((self.level - 5) * 2) + (trace_ent.monsterclass*6);
+					if (!trace_ent.monsterclass)
+						point_chance += 2;
+				}
+				else
+					point_chance = ((self.level - 5) * 2) + (trace_ent.level);
+				
 				if (point_chance > 20)
 					point_chance = 20;
 
 				sound (self, CHAN_BODY, "weapons/drain.wav", 1, ATTN_NORM);
-
-			//	self.health += point_chance;
-			//	if (self.health>self.max_health)
-			//		self.health = self.max_health;
+				
 			//	Pa3PyX: no longer cancel mystic urn effect
 				if (self.health < self.max_health) {
 					self.health += point_chance;
