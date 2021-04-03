@@ -1350,7 +1350,7 @@ if (!(deathmatch))
 				else
 					{
 					self.welcomeshown = time + 1.9;
-					centerprint(self, "Welcome to Hexen II: Shadows of Chaos @@@@Change keybinds from autoexec.cfg: @Default altfire key: right mouse @@@@Damage and abilities now increase in power as you level @@Some altfires you acquire by leveling up");
+					centerprint(self, "Welcome to Hexen II: Shadows of Chaos@@@Damage & abilities increase in power as you level@@@Default bindings (autoexec.cfg):@Altfire: right mouse@Stats menu: home @Selection down: pgdn@Selection up: pgup@Increase stat: enter@Dump all points: end");
 					}
 				}
 			}
