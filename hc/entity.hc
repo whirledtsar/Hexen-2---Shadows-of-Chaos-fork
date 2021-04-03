@@ -652,8 +652,7 @@ void end_sys_fields;
 .vector o_angle;//Just to remember an old angle or vector
 
 //Player
-.float bloodloss;//For the Bleed() function which will remove health
-				//and add graphic.  Set to 666 for beheading death.
+//.float bloodloss;//For the Bleed() function which will remove health and add graphic.  Set to 666 for beheading death.
 .float oldweapon;//For remembering your last weapon, has many uses
 
 //Monsters (and some projectiles)

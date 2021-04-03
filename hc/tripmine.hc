@@ -11,9 +11,9 @@ void BoomCheck (void)
 {
 	if(self.goalentity.classname=="chain_head")
 		self.goalentity.view_ofs=self.origin;
-	if(self.bloodloss<30)
+	if(self.counter<30)
         setmodel (self, "models/sm_expld.spr");
-	if(pointcontents(self.origin)==CONTENT_SOLID||self.bloodloss<=0)
+	if(pointcontents(self.origin)==CONTENT_SOLID||self.counter<=0)
 	{
 		if(self.goalentity.classname=="chain_head")
 			remove(self.goalentity);
@@ -21,40 +21,40 @@ void BoomCheck (void)
 	}
 }
 
-void()  b_explode1      =       [0,             b_explode2] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode1      =       [0,             b_explode2] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode2      =       [1,             b_explode3] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode2      =       [1,             b_explode3] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode3      =       [2,             b_explode4] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode3      =       [2,             b_explode4] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode4      =       [3,             b_explode5] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode4      =       [3,             b_explode5] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode5      =       [4,             b_explode6] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode5      =       [4,             b_explode6] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode6      =       [5,             b_explode7] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode6      =       [5,             b_explode7] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode7      =       [6,             b_explode8] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode7      =       [6,             b_explode8] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode8      =       [7,             b_explode9] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode8      =       [7,             b_explode9] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode9      =       [8,             b_explode10] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode9      =       [8,             b_explode10] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode10      =       [9,             b_explode11] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode10      =       [9,             b_explode11] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };														   
-void()  b_explode11     =       [10,             b_explode12] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode11     =       [10,             b_explode12] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
-void()  b_explode12      =       [11,             ShaBoom] {T_RadiusDamage (self, self.owner, self.bloodloss, world);self.bloodloss=self.bloodloss - 1;
+void()  b_explode12      =       [11,             ShaBoom] {T_RadiusDamage (self, self.owner, self.counter, world);self.counter=self.counter - 1;
 		BoomCheck();
 };
 
@@ -62,9 +62,9 @@ void() ShaBoom =
 {
 		BoomCheck();
 
-        T_RadiusDamage (self, self.owner, self.bloodloss, world);
+        T_RadiusDamage (self, self.owner, self.counter, world);
 
-        self.bloodloss=self.bloodloss - 1;
+        self.counter=self.counter - 1;
 		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 		WriteByte (MSG_BROADCAST, TE_EXPLOSION);
 		WriteCoord (MSG_BROADCAST, self.origin_x);
@@ -84,7 +84,7 @@ entity boommissile;
     boommissile.think=ShaBoom;
     boommissile.nextthink=time;
 	boommissile.goalentity=self.goalentity;
-    boommissile.bloodloss=100;
+    boommissile.counter=100;
     boommissile.classname="tripwire";
     setorigin(boommissile,self.origin);
     setmodel (boommissile, "models/bg_expld.spr");
