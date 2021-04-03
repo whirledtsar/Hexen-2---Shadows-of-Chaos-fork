@@ -2,6 +2,8 @@
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/constant.hc,v 1.2 2005-09-19 19:50:09 sezero Exp $
  */
 
+#pragma warning disable F304	//shut the fuck up about unary operators
+
 //
 // constants
 //
@@ -31,7 +33,7 @@ float FL_ARTIFACTUSED			= 16384;	// an artifact was just used
 float FL_MOVECHAIN_ANGLE		= 32768;    // when in a move chain, will update the angle
 //float FL_FIRERESIST				= 65536;	// resistant to fire and heat and lava
 //float FL_FIREHEAL				= 131072;	// healed by fire, heat, and lava
-//float FL_COLDHEAL				= 524288;	// healed by freezing
+float FL_COLDHEAL				= 524288;	// healed by freezing
 float FL_HUNTFACE				= 65536;	//Makes monster go for enemy view_ofs thwn moving
 float FL_NOZ					= 131072;	//Monster will not automove on Z if flying or swimming
 float FL_SET_TRACE				= 262144;
@@ -48,7 +50,8 @@ float FL2_ADJUST_MON_DAM		= 1;		//Do more damage to monsters
 float FL_NODAMAGE				= 2;		//Special flag put on a missle to make it not do damage- used only by mezzoman
 float FL_SMALL					= 4;		//Small enough to be crsuhed underfoot
 float FL_ALIVE					= 8;		//Dead or alive.
-float FL_FAKE_WATER				= 16;		//Fake water
+//float FL_FAKE_WATER			= 16;		//Fake water
+float FL2_MENUACTIVE			= 16;		//SoC: player has stats menu active
 float FL_SUMMONED				= 32;		//Summoned monster, stops it from precaching
 float FL_LEDGEHOLD				= 64;		//Can realistically pull yourself up over ledges, etc.
 float FL_TORNATO_SAFE			= 512;
@@ -61,7 +64,6 @@ float FL2_MOVING				= 8192;		//Used by monsters to indicate if theyre moving or 
 //FIXME: Shielded and small may be able to be determined by
 //other means...
 float FL2_FADE_UP				= 128;		//Succ.
-//SoC: reuse FL2_FADE_UP for paladin's axe special, and any future flag used by only 1 class
 float FL2_RESPAWN				= 256;		//Monster that respawns
 float FL2_DEADMEAT				= 1024;		//Tagged for death
 float FL2_FIRERESIST			= 16384;	// resistant to fire and heat and lava
@@ -70,6 +72,7 @@ float FL2_COLDHEAL				= 65536;	// healed by freezing
 float FL2_TEST_TRACE			= 131072;	// 
 float FL2_POISONED				= 262144;	// 
 float FL2_ONFIRE				= 4194304;  // on fire
+float FL2_SPAWNED				= 8388608;	// SoC: monster spawned with spawnin system
 
 float	SFL_FLUFFY					= 1;// All largish flakes
 float	SFL_MIXED					= 2;// Mixed flakes
@@ -712,17 +715,30 @@ float MAX_SUMMON = 2;
 float MAX_TOME = 2;
 float MAX_URN = 2;
 
-//Config flag parm system
-float PARM_RESPAWN = 1;
-float PARM_FADE = 2;
-float PARM_BUFF = 4;
-
 //GoT wandering monster respawn
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
 float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
+
+//Config flag parm system
+float PARM_RESPAWN	= 1;
+float PARM_FADE		= 2;
+float PARM_BUFF		= 4;
+float PARM_STATS	= 8;
 
 //impulse commands
 float IMPULSE_INFO = 50;
 float IMPULSE_RESPAWN = 51;
 float IMPULSE_FADE = 52;
 float IMPULSE_BUFF = 53;
+float IMPULSE_STATS = 54;
+float STATS_MENU = 80;
+float STATS_MOVEDOWN = 81;
+float STATS_MOVEUP = 82;
+float STATS_INCREASE = 83;
+float STATS_DUMP = 84;
+
+//possible extra weapons
+float IT_WEAPON5					= 8;
+float IT_WEAPON6					= 16;
+float IT_WEAPON7					= 32;
+float IT_WEAPON8					= 64;
