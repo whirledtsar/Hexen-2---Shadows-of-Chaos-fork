@@ -185,7 +185,7 @@ void FireMagicMissile (float offset, float seeking)
 		}
 		else
 		{	//ws: changed so magic missile fire rate is the same across levels but homing improves
-			newmis.homerate=0.16-(self.level*0.01);
+			newmis.homerate=0.4-(intmod*0.01);	//newmis.homerate=0.16-(self.level*0.01);
 			if (newmis.homerate<0.01)
 				newmis.homerate=0.01;
 			
