@@ -57,7 +57,7 @@ void monster_werejaguar (void);
 void monster_mummy(void);
 void CorpseThink(void);
 void sickle_ready(void);
-void phase_init(void);
+float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore);
 
 void minion_solid()
 {
