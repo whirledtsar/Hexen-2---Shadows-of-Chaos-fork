@@ -216,12 +216,6 @@ void bone_removeshrapnel (void)
 void fire_bone_shrapnel ()
 {
 	vector shard_vel;
-	float intmod;
-	
-	if (self.owner.classname == "player")
-		intmod = self.owner.intelligence;
-	else
-		intmod = 12;
 	
 	newmis=spawn();
 	newmis.owner=self.owner;
@@ -323,7 +317,7 @@ void bone_turret_think ()
 	
 	local float chance;
 	
-	chance = 15+self.owner.wisdom;	//50-55 at level 3
+	chance = 18+self.owner.intelligence;
 	if (chance > 90)
 		chance = 90;
 	
@@ -350,7 +344,7 @@ void bone_turret_think ()
 		self.attack_finished = time+random(0.75,1.25);
 	}
 	
-	if (self.scale < 0.5) {
+	if (self.scale < 0.6) {
 		sound(self,CHAN_BODY,"necro/bonethit.wav",1,0.5);
 		vector randomvec, vel;
 		randomvec=randomv('-10 -10 -10','10 10 10');
@@ -488,7 +482,7 @@ void bone_smoke ()
 
 void bone_fire(float ball, float tome, vector ofs)
 {
-	float intmod, wismod;
+	float wismod;
 	
 	vector org;
 	makevectors(self.v_angle);
@@ -502,7 +496,6 @@ void bone_fire(float ball, float tome, vector ofs)
 	org=self.origin+self.proj_ofs+v_forward*8+v_right*(ofs_y+12)+v_up*ofs_z;
 	setorigin(newmis,org);
 	
-	intmod = self.intelligence;
 	wismod = self.wisdom;
 
 	if (ball)
