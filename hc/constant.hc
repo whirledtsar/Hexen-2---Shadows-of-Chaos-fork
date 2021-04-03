@@ -44,7 +44,8 @@ float FL2_ADJUST_MON_DAM		= 1;		//Do more damage to monsters
 float FL_NODAMAGE				= 2;		//Special flag put on a missle to make it not do damage- used only by mezzoman
 float FL_SMALL					= 4;		//Small enough to be crsuhed underfoot
 float FL_ALIVE					= 8;		//Dead or alive.
-float FL_FAKE_WATER				= 16;		//Fake water
+//float FL_FAKE_WATER				= 16;		//Fake water
+float FL2_MENUACTIVE			= 16;		//SoC: player has stats menu active
 float FL_SUMMONED				= 32;		//Summoned monster, stops it from precaching
 float FL_LEDGEHOLD				= 64;		//Can realistically pull yourself up over ledges, etc.
 float FL_TORNATO_SAFE			= 512;
@@ -65,6 +66,7 @@ float FL2_COLDHEAL				= 65536;	// healed by freezing
 float FL2_TEST_TRACE			= 131072;	// healed by freezing
 float FL2_POISONED				= 262144;	// healed by freezing
 float FL2_ONFIRE				= 4194304;  // on fire
+float FL2_SPAWNED				= 8388608;	// SoC: monster spawned with spawnin system
 
 float	SFL_FLUFFY					= 1;// All largish flakes
 float	SFL_MIXED					= 2;// Mixed flakes
@@ -662,13 +664,27 @@ float MAX_SUMMON = 2;
 float MAX_TOME = 2;
 float MAX_URN = 2;
 
-float PARM_RESPAWN = 1;
-float PARM_FADE = 2;
-float PARM_BUFF = 4;
-
 //GoT wandering monster respawn
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
 float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
+
+//Config flag parm system
+float PARM_RESPAWN	= 1;
+float PARM_FADE		= 2;
+float PARM_BUFF		= 4;
+float PARM_STATS	= 8;
+
+//impulse commands
+float IMPULSE_INFO = 50;
+float IMPULSE_RESPAWN = 51;
+float IMPULSE_FADE = 52;
+float IMPULSE_BUFF = 53;
+float IMPULSE_STATS = 54;
+float STATS_MENU = 80;
+float STATS_MOVEDOWN = 81;
+float STATS_MOVEUP = 82;
+float STATS_INCREASE = 83;
+float STATS_DUMP = 84;
 
 //impulse commands
 float IMPULSE_INFO = 50;

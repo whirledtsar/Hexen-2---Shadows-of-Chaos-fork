@@ -245,6 +245,13 @@ void() ImpulseCommands =
 	entity search;
 	float total;
 //	string s2;
+	
+	if (self.impulse>=STATS_MENU && self.impulse<=STATS_DUMP)	//dont open stats menu if manual stats arent enabled
+		if (CheckCfgParm(PARM_STATS)) {
+			sprint (self, "Randomized stat increases are disabled. Type impulse 54 to toggle\n");
+			self.impulse = 0;
+			return;
+		}
 
 	if(self.flags2&FL_CHAINED&&self.impulse!=23)
 		return;
@@ -468,6 +475,27 @@ void() ImpulseCommands =
 		player_everything_cheat();
 	else if(self.impulse==44)
 		DropInventoryItem();
+//stats menu, starting with impulse 80
+	else if (self.impulse==STATS_MENU)
+	{
+		StatsMenu_Toggle();
+	}
+	else if (self.impulse==STATS_MOVEDOWN)
+	{
+		StatsMenu_Choose(-1);
+	}
+	else if (self.impulse==STATS_MOVEUP)
+	{
+		StatsMenu_Choose(1);
+	}
+	else if (self.impulse==STATS_INCREASE)
+	{
+		StatsMenu_Increase();
+	}
+	else if (self.impulse==STATS_DUMP)
+	{
+		StatsMenu_Dump();
+	}
 	//config flags, starting with impulse 50
 	else if (self.impulse == IMPULSE_INFO)
 	{
@@ -484,10 +512,15 @@ void() ImpulseCommands =
 			buff="on";
 		else
 			buff="off";
+		if (CheckCfgParm(PARM_STATS))
+			stats="off";
+		else
+			stats="on";
 		
 		sprint (self, "Monster respawning is "); sprint(self, respawning); sprint(self, ". type Impulse 51 to toggle\n");
 		sprint (self, "Corpse fading is "); sprint(self, fade); sprint(self, ". type Impulse 52 to toggle\n");
 		sprint (self, "Random monster variants is "); sprint(self, buff); sprint(self, ". type Impulse 53 to toggle\n");
+		sprint (self, "Randomized stat increases are "); sprint(self, stats); sprint(self, ". Type impulse 54 to toggle\n");
 	}
 	else if (self.impulse == IMPULSE_RESPAWN)
 	{
@@ -509,6 +542,18 @@ void() ImpulseCommands =
 			sprint (self, "Random monster variations enabled\n");
 		else
 			sprint (self, "Random monster variations disabled\n");
+	}
+	else if (self.impulse == IMPULSE_STATS)
+	{
+		if (SetCfgParm(PARM_STATS)) {
+			sprint (self, "Randomized stat increases enabled\n");
+			if (self.statpoints)		//if player still has points remaining, distribute them randomly
+				StatsIncreaseRandom(self.statpoints);
+			self.statpoints = 0;
+			StatsMenu_Disable();
+		}
+		else
+			sprint (self, "Manual stat increases enabled\n");
 	}
 /*	else if (self.impulse == 99)
 	{	// RJ's test impulse
