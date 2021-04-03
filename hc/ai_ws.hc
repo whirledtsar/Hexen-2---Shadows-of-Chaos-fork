@@ -123,3 +123,58 @@ float PlayerHasMelee (entity player)
 	
 	return FALSE;
 }
+
+float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
+{
+vector dest;
+	makevectors(self.angles);
+	dest = spot + ('0 0 1' * maxs_z*1.25);
+	
+	traceline (spot, dest, TRUE, ignore);	//try simple trace first
+	if (trace_fraction != 1 || trace_allsolid)
+		return FALSE;
+	
+	tracearea (spot, dest, mins, maxs, FALSE, ignore);	//if line wasnt blocked, trace with bbox
+	
+	if (trace_fraction == 1 && !trace_allsolid)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ignore)
+{
+	vector spot,newangle;
+	float loop_cnt,forward;
+
+	trace_fraction = 0;
+	loop_cnt = 0;
+	do
+	{
+		newangle = self.angles;
+		newangle_y += random(anglemax);
+   		makevectors (newangle);
+		forward = random(rangemin,rangemax);
+		spot = self.origin + v_forward * forward;
+		traceline (spot, (spot - (v_up * 200)), TRUE, ignore);
+		if (trace_fraction == 1)	// Didn't hit anything?  There was no floor
+			return FALSE;
+		spot = trace_endpos;
+		
+		if (CanSpawnAtSpot(spot, self.orgnl_mins, self.orgnl_maxs, ignore))
+		{
+			trace_fraction = 1;
+		}
+		else
+			trace_fraction = 0;		// So it will loop
+		
+		loop_cnt += 1;
+
+		if (loop_cnt > 500)   // No endless loops
+			return VEC_ORIGIN;
+
+	} while (trace_fraction != 1);
+
+	return spot;
+}
+
