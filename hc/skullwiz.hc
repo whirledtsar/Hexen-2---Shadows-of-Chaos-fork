@@ -89,6 +89,7 @@ void monster_raiseinit (entity corpse);
 float SKULLBOOK  =0;
 float SKULLHEAD  =1;
 
+
 entity skullwiz_findcorpse ()
 {
 entity corpse;
@@ -112,7 +113,7 @@ entity risen;
 	risen = skullwiz_findcorpse();
 	if (risen==world)
 		return;
-		
+	
 	risen.enemy = self.enemy;
 	risen.controller = self;
 	monster_raiseinit(risen);
@@ -140,7 +141,7 @@ void skullwiz_raiseinit (void) [++ $skgate1..$skgate30]
 	}
 
 	if (cycle_wrapped) {
-		self.glyph_finished=time+5;		//dont raise corpses again until this timer is up
+		self.raiseTime=time+4;		//dont raise corpses again until this timer is up
 		skullwiz_run();
 	}
 }
@@ -155,46 +156,6 @@ float() SkullFacingIdeal =
 	return TRUE;
 };
 
-void phase_init (void)
-{
-	vector spot1,newangle;
-	float loop_cnt,forward;
-
-	trace_fraction =0;
-	loop_cnt = 0;
-	do
-	{
-		newangle = self.angles;
-		newangle_y = random(0,360);
-   		makevectors (newangle);
-		forward = random(40,100);
-		spot1 = self.origin + v_forward * forward;
-		tracearea (spot1,spot1 + v_up * 80,'-32 -32 -10','32 32 46',FALSE,self);
-		if ((trace_fraction == 1.0) && (!trace_allsolid)) // Check there is a floor at the new spot
-		{
-			traceline (spot1, spot1 + (v_up * -4) , FALSE, self);
-
-			if (trace_fraction ==1)   // Didn't hit anything?  There was no floor
-				trace_fraction = 0;   // So it will loop
-			else 
-				trace_fraction = 1;   // So it will end loop					
-		}
-		else
-			trace_fraction = 0;
-
-		loop_cnt += 1;
-
-		if (loop_cnt > 500)   // No endless loops
-		{
-			self.nextthink = time + 2;
-			return;
-		}
-
-	} while (trace_fraction != 1.0);
-
-	self.origin = spot1;	
-}
-
 float check_defense_blink ()
 {
 vector spot1,spot2,dangerous_dir;
@@ -208,7 +169,7 @@ float dot;
 	if(self.enemy.last_attack<time - 0.5)
 		return FALSE;
 	
-	if (self.counter > time)	//dont teleport immediately after teleporting in
+	if (self.teleportTime > time)	//dont teleport immediately after teleporting in
 		return FALSE;
 
 	spot1=self.enemy.origin+self.enemy.proj_ofs;
@@ -258,26 +219,20 @@ void skullwiz_throw(float part)
 	new.nextthink = time + HX_FRAME_TIME * 15;
 }
 
-void()skullwiz_summon;
+void()skullwiz_spiderinit;
 void spider_spawn (float spawn_side)
 {
 	newmis = spawn ();
 	newmis.cnt=spawn_side;			// Shows which side to appear on
 	newmis.flags2=FL_SUMMONED;
 	newmis.nextthink = time + .01;
-	newmis.think = skullwiz_summon;
+	newmis.think = skullwiz_spiderinit;
 	newmis.origin = self.origin;
 	newmis.controller = self;
 	newmis.owner = self;		//ws: temporary - let spider phase thru dead wizards
 	newmis.preventrespawn = TRUE;
 
 	newmis.angles = self.angles;
-	
-	entity check = spawn();		//ws: create entity that checks if spider is out of corpse's range and make them solid if so
-	check.enemy = newmis;
-	check.controller = self;
-	check.think = minion_solid;
-	thinktime check : HX_FRAME_TIME;
 }
 
 
@@ -368,41 +323,82 @@ void spider_grow(void)
 		walkmonster_start();
 }
 
-void skullwiz_summon(void)
+void skullwiz_spiderinit(void)
 {
-	vector newangle,spot1,spot2,spot3;
-	float loop_cnt;
-
-	setmodel(self, "models/spider.mdl");
-
-	self.solid = SOLID_SLIDEBOX;
+vector spot;
+	
+	//self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
-	self.drawflags=SCALE_ORIGIN_BOTTOM;
-
+	self.drawflags = SCALE_ORIGIN_BOTTOM;
+	
+	// Small spiders
+	setsize(self, '-7 -7 0', '7 7 10');
+	self.hull=HULL_CROUCH;
+	self.orgnl_mins = self.mins;
+	self.orgnl_maxs = self.maxs;
+	
+	if (self.controller.flags2&FL_ALIVE)
+	{
+		if (self.cnt)			// On one side
+			spot = FindSpawnSpot(60, 140, -45, self.controller);
+		else					// On the other side
+			spot = FindSpawnSpot(60, 140, 45, self.controller);
+		
+		if (spot==VEC_ORIGIN)	//couldnt find suitable spawn spot
+		{
+			++self.counter;
+			if (self.counter>20) {
+				remove(self);
+				return;
+			}
+			thinktime self : 0.1;
+			return;
+		}
+ 	}
+	else	// Skull Wiz is dead, spawn at his location
+	{
+		if (!CanSpawnAtSpot(self.origin, self.mins*1.25, self.maxs*1.25, self.controller))
+		{
+			++self.counter;
+			if (self.counter>20) {
+				remove(self);
+				return;
+			}
+			thinktime self : 0.1;
+			return;
+		}
+		spot = self.origin;
+	}
+	
+	self.solid = SOLID_SLIDEBOX;
+	setmodel(self, "models/spider.mdl");
+	setsize(self, '-7 -7 0', '7 7 10');
+	setorigin(self,spot + '0 0 2');
+	droptofloor();
+	
 	self.flags2=FL_SUMMONED;
 	self.yaw_speed = 10;
 	self.mass = 1;
-	self.speed=5;
-
-	// Small spiders
-	setsize(self, '-7 -7 0', '7 7 10');
-
+	self.speed = 5;
+	
 	self.lifetime = time + 30;
-
+	
 	self.skin = 1;
-	self.health = self.max_health = 5;
+	self.health = self.max_health = 10;
 	self.init_exp_val = self.experience_value = SpiderExp[1];
-
+	
 	self.drawflags = SCALE_ORIGIN_BOTTOM;
-	self.spawnflags (+) JUMP;
-
+	self.scale = 0.1;
+	self.spawnflags (+) JUMP|NO_DROP;
+	
+	self.attack_state = AS_STRAIGHT;
+	self.thingtype = THINGTYPE_FLESH;
 	self.spiderType = 1;
 	self.spiderGoPause = 35;
 	self.mintel = 10;
 	self.netname = "spider";
-
-	self.attack_state = AS_STRAIGHT;
-	self.thingtype = THINGTYPE_FLESH;
+	self.classname = "monster_spider_yellow_small";
+	
 	self.th_stand = SpiderStand;
 	self.th_walk = SpiderWalk;
 	self.th_run = SpiderRun;
@@ -410,67 +406,18 @@ void skullwiz_summon(void)
 	self.th_melee = SpiderMeleeBegin;
 	self.th_missile = SpiderJumpBegin;
 	self.th_pain = SpiderPain;
-	self.classname = "monster_spider_yellow_small";
-
+	
 	self.flags (+) FL_MONSTER;
-
-	if (self.controller.flags2&FL_ALIVE)
-	{
-		trace_fraction = 0;
-		loop_cnt =0;
-		while (trace_fraction < 1)
-		{
-			newangle = self.angles;
 	
-			if (self.cnt)			// On one side
-				newangle_y -=random(45);
-			else						// On the other side
-				newangle_y +=random(45);
-	
-			makevectors (newangle);
-	
-			spot1 = self.origin;
-			spot2 = spot1 + (v_forward * random(60,160));
-			traceline (spot1, spot2 , FALSE, self);
-			
-			if (trace_fraction == 1.0 && trace_ent == world)		// Check no one is standing where monster wants to be
-			{
-				tracearea (spot1,spot2,'-30 -30 0','30 30 64',FALSE,self);
-	
-				if (trace_fraction == 1)		// Check there is a floor at the new spot
-				{
-					spot3 = spot2 + (v_up * -4);
-					traceline (spot2, spot3 , FALSE, self);
-	
-					if (trace_fraction ==1)   // Didn't hit anything?  There was no floor
-						trace_fraction = 0;   // So it will loop
-					else 
-						trace_fraction = 1;   // So it will end loop
-						
-				}
-			}
-			loop_cnt +=1;
-			if (loop_cnt > 500)   // No endless loops
-			{
-				self.nextthink = time + 2;
-				return;
-			}
-		}
-		spot2 = spot2 + (v_forward * -16);  // Move back 16 from point to allow for side of his bounding box
- 	}
-	else
-	{
-		phase_init();
-		spot2 = self.origin;
-	}
-	self.scale = 0.1;
-
-	setorigin(self,spot2);
+	self.owner = self.controller;
+	newmis = spawn();		//create entity that checks if spider is out of controller's range and make them solid if so
+	newmis.enemy = self;
+	newmis.controller = self.controller;
+	newmis.think = minion_solid;
+	thinktime newmis : HX_FRAME_TIME;
 	
 	//CreateWhiteSmoke (self.origin+'0 0 3','0 0 8');
-
-	sound (self, CHAN_VOICE, "skullwiz/gate.wav", 1, ATTN_NORM);
-
+	
 	spider_grow();
 }
 
@@ -479,7 +426,7 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 	thinktime self : HX_FRAME_TIME*0.5;	//ws: speed up animation
 	if (self.frame == $skgate2)   // Gate in the creatures
 		sound (self, CHAN_VOICE, "skullwiz/gatespk.wav", 1, ATTN_NORM);
-
+	
 	if (self.frame == $skgate21)   // Gate in the creatures
 	{
 		spider_spawn(0);
@@ -488,6 +435,8 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 		{
 			spider_spawn(1);
 		}
+		
+		sound (self, CHAN_AUTO, "skullwiz/gate.wav", 1, ATTN_NORM);
 	}
 
 	if (cycle_wrapped)
@@ -784,8 +733,8 @@ void skullwiz_blinkin(void)
 		//restore monster effects
 		ApplyMonsterBuffEffect(self);
 		
-		self.counter = time+1;			//ws: dont teleport again immediately, give player a little time to retaliate
-		self.glyph_finished = time+1;	//also dont immediately revive corpses
+		self.teleportTime = time+1;			//ws: dont teleport again immediately, give player a little time to retaliate
+		self.raiseTime = time+1;	//also dont immediately revive corpses
 		
 		skullwiz_run();
 	}
@@ -802,7 +751,7 @@ void skullwiz_blinkin1 (void)
 
 void skullwiz_ininit (void)
 {
-vector spot1,spot2,spot3,newangle,enemy_dir;
+vector spot1,spot2,newangle,enemy_dir;
 float loop_cnt,forward,dot;
 
 	if (self.enemy != world)
@@ -842,68 +791,27 @@ float loop_cnt,forward,dot;
 			spot1 = self.enemy.origin;
 		else
 			spot1 = self.origin;
-
-		//forward = random(120,200);
-		//spot2 = spot1 + (v_forward * forward);
-		//traceline (spot1, spot2 + (v_forward * 30) , FALSE, self);
-		forward = random((self.size_x + self.size_y),200);
-		spot2 = (spot1 + (v_forward * forward) + (v_up * forward));
-		traceline (spot1, (spot2 + (v_forward * ((self.size_x + self.size_y) * 0.5))), TRUE, self);
-		if (trace_fraction == 1.0) //  Check no one is standing where monster wants to be
+		
+		forward = random(120,200);
+		spot2 = spot1 + (v_forward * forward);
+		
+		if (CanSpawnAtSpot(spot2, self.orgnl_mins*1.25, self.orgnl_maxs*1.25, self))
 		{
-			traceline (spot2, (spot2 - (v_up * (forward * 2))), TRUE, self);
-			spot2 = trace_endpos;
+			self.solid = SOLID_SLIDEBOX;
+			setsize (self, self.orgnl_mins, self.orgnl_maxs);
 			
-   			makevectors (newangle);
-			//tracearea (spot2,spot2 + v_up * 80,'-32 -32 -10','32 32 46',FALSE,self);
-			tracearea (spot2, (spot2 + (v_up * 80)), self.orgnl_mins*1.25, self.orgnl_maxs*1.25, FALSE, self);	//self.enemy
-			
-			if ((trace_fraction == 1.0) && (!trace_allsolid)) // Check there is a floor at the new spot
-			{
-				spot3 = spot2 + (v_up * -4);
-				traceline (spot2, spot3 , FALSE, self);
-
-				if (trace_fraction ==1)   // Didn't hit anything?  There was no floor
-				{
-					trace_fraction = 0;   // So it will loop
-				}
-				else
-				{
-   					makevectors (newangle);
-					traceline (spot1, spot2, FALSE, self);
-
-					if (trace_fraction == 1.0)
-					{
-						setsize (self, self.orgnl_mins, self.orgnl_maxs);
-						self.solid = SOLID_SLIDEBOX;
-						setorigin(self,spot2);
-						
-						if (walkmove(self.angles_y, .05, TRUE))		// You have to move it a little bit to make it solid
-						{
-							trace_fraction = 1;   // So it will end loop
-						}
-						else
-						{
-							trace_fraction = 0;   // So it will loop
-							self.solid = SOLID_NOT;		//ws: Unset solid to prevent player from getting stuck
-						}
-					}
-					else
-					{
-						trace_fraction = 0;   // So it will loop
-					}
-				}
-			}
+			setorigin(self,spot2);
+			if (walkmove(self.angles_y, .05, TRUE))		// You have to move it a little bit to make it solid
+				trace_fraction = 1;   // So it will end loop
 			else
 			{
-				trace_fraction = 0;
+				trace_fraction = 0;   // So it will loop
+				self.solid = SOLID_NOT;		//ws: Unset solid to prevent player from getting stuck
 			}
 		}
 		else
-		{
 			trace_fraction = 0;
-		}
-
+		
 		loop_cnt += 1;
 
 		if (loop_cnt > 500)   // No endless loops
@@ -912,7 +820,7 @@ float loop_cnt,forward,dot;
 			return;
 		}
 
-	} while (trace_fraction != 1.0);
+	} while (trace_fraction != 1);
 	
 	self.think=skullwiz_blinkin1;
 	self.nextthink = time;	
@@ -1042,7 +950,7 @@ void skullwiz_melee (void) [++ $skspel2..$skspel30]
 		}
 		else  // Only the skull wizard lord can summon
 		{
-			if (random()< 0.25)		//vanilla: 0.15
+			if (random()<0.99)// 0.15)
 				skullwiz_summoninit();
 			else
 			{
@@ -1087,7 +995,7 @@ void skullwiz_run (void) [++ $skwalk1..$skwalk24]
 			sound (self, CHAN_VOICE, "skullwiz/growl2.wav", 1, ATTN_NORM);
 	}
 	
-	if (self.classname=="monster_skull_wizard_lord" && time>self.glyph_finished)
+	if (self.classname=="monster_skull_wizard_lord" && time>self.raiseTime)
 	{	//ws: lord wizards can revive dead bodies
 		if (skullwiz_findcorpse()!=world)
 			skullwiz_raiseinit();
@@ -1102,12 +1010,12 @@ void skullwiz_run (void) [++ $skwalk1..$skwalk24]
 
 		if (self.classname == "monster_skull_wizard")
 		{
-			if (random() < .20 && self.counter < time)
+			if (random() < .20 && self.teleportTime < time)
 				skullwiz_blink();
 		}
 		else	// Skull Wizard BLINKS more often
 		{
-			if ( (random() < .30 && self.counter < time) ||self.search_time<time + 1)
+			if ( (random() < .30 && self.teleportTime < time) ||self.search_time<time + 1)
 				skullwiz_blink();
 		}
 	}
@@ -1218,7 +1126,7 @@ void skullwizard_init(void)
 	self.flags(+)FL_MONSTER;
 	self.yaw_speed = 10;
 	
-	self.counter = 0;	//counter for when to teleport
+	self.teleportTime = 0;	//counter for when to teleport
 }
 
 /*QUAKED monster_skull_wizard (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
