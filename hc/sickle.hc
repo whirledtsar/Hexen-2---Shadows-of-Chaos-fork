@@ -77,17 +77,25 @@ void minion_init()
 {
 	float level;
 	
-	//intmod = self.cnt;
+	if (!CanSpawnAtSpot(self.origin, self.mins, self.maxs, self.owner)) {
+		self.counter++;
+		if (self.counter>20) {
+			chunk_death();
+			return;
+		}
+		thinktime self : 0.1;
+		return;
+	}
+	
 	level = self.cnt + self.aflag;	//cnt is player level, aflag is monster class (0, grunt, henchman, leader, boss, final boss)
 	self.cnt = 0;
 	self.aflag = 0;
 	
-	phase_init();
 	newmis = spawn();	//create entity that makes the summoned monster solid to the player only if the player is far enough away not to be blocked
 	newmis.enemy = self;
 	newmis.controller = self.controller;
 	newmis.think = minion_solid;
-	newmis.nextthink = time + 1;
+	thinktime newmis : 1;
 	
 	if (level > 11)
 		monster_mummy();
