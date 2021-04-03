@@ -221,7 +221,6 @@ void PlayerAdvanceLevel(float NewLevel)
 	string s2;
 	float OldLevel,Diff;
 	float index,HealthInc,ManaInc;
-	float statpool, statspread, statrandom;
 
 	OldLevel = self.level;
 	self.level = NewLevel;
@@ -280,39 +279,19 @@ void PlayerAdvanceLevel(float NewLevel)
 				self.health += HealthInc;
 		}
 
-		//base stat increase of 1 for all
-		self.strength += 1;
-		self.wisdom += 1;
-		self.intelligence += 1;
-		self.dexterity += 1;
-		
-		//increase stats at random
-		statpool = STAT_POOL_COUNT; //distribute more at random, and favor highest stats
-		while(statpool > 0)
+		if (CheckCfgParm(PARM_STATS))	//randomized stat increases
 		{
-			//create a tower of existing stats
-			statspread = self.strength + self.wisdom + self.intelligence + self.dexterity;
-			statrandom = random(0, statspread - 1);
+			//base stat increase of 1 for all
+			self.strength += 1;
+			self.wisdom += 1;
+			self.intelligence += 1;
+			self.dexterity += 1;
 			
-			//assign stat depending on where it lands in the tower
-			if (statrandom < self.strength)
-			{
-				self.strength += 1;
-			}
-			else if (statrandom < self.strength + self.wisdom)
-			{
-				self.wisdom += 1;
-			}
-			else if (statrandom < self.strength + self.wisdom + self.intelligence)
-			{
-				self.intelligence += 1;
-			}
-			else
-			{
-				self.dexterity += 1;
-			}
-				
-			statpool -= 1;
+			StatsIncreaseRandom(STAT_POOL_COUNT);
+		}
+		else	//manual stat increases
+		{
+			self.statpoints += 8;
 		}
 	}
 	
@@ -577,15 +556,241 @@ void drop_level (entity loser,float number)
 	ApplyNaturalArmor(self);
 }
 
-//Classes with special magical attacks must have enough intelligence to use them
-// i.e. paladin vorpal sword lightning attack
-float HasSpecialAttackInt (entity ent)
+
+void StatsIncreaseRandom (float statpool)
 {
-	if (ent.intelligence >= 14)
+float statspread, statrandom;
+	//increase stats at random
+	while(statpool > 0)
 	{
-		return TRUE;
+		//create a tower of existing stats
+		statspread = self.strength + self.wisdom + self.intelligence + self.dexterity;
+		statrandom = random(0, statspread - 1);
+		
+		//assign stat depending on where it lands in the tower
+		if (statrandom < self.strength)
+		{
+			self.strength += 1;
+		}
+		else if (statrandom < self.strength + self.wisdom)
+		{
+			self.wisdom += 1;
+		}
+		else if (statrandom < self.strength + self.wisdom + self.intelligence)
+		{
+			self.intelligence += 1;
+		}
+		else
+		{
+			self.dexterity += 1;
+		}
+			
+		statpool -= 1;
+	}
+}
+
+void StatsMenu_Project ()
+{
+vector source, dest;
+float ofsdir;
+	makevectors(self.owner.v_angle);
+	source = self.owner.origin+self.owner.view_ofs+'0 0 2';
+	traceline(source, source+v_forward*(12+(-self.owner.v_angle_x*0.05*(self.owner.v_angle_x<15))), TRUE, self);	//if player is aiming up, spawn graphic further away
+	dest = trace_endpos;
+	
+	traceline(dest, dest+v_right*self.t_width, TRUE, self);		//check right edge of graphic
+	if (trace_fraction==1) {
+		traceline(dest, dest-v_right*self.t_width, TRUE, self);	//check left edge of graphic
+		if (trace_fraction!=1)
+			ofsdir = 1;
+		else
+			ofsdir = 0;
+	}
+	else
+		ofsdir = -1;
+	
+	if (ofsdir)
+		setorigin(self, dest+(v_right*(trace_fraction*self.t_width)*ofsdir));
+	else
+		setorigin(self, dest);
+	
+	self.angles = self.owner.v_angle;
+	self.angles_x *= -1;
+	self.angles_z = 0;
+	
+	self.think = StatsMenu_Project;
+	thinktime self : 0;
+}
+
+void StatsMenu_Enable ()
+{
+vector source;
+	if (!self.statpoints)
+	{
+		centerprint (self, "You have no remaining stat points\n");
+		sprint(self, "You have no remaining stat points\n");
+		return;
 	}
 	
-	return FALSE;
+	sprint(self, "You have "); sprint(self, ftos(self.statpoints)); sprint(self, " points remaining\n");
+	sound (self, CHAN_AUTO, "misc/barmovup.wav", 1, ATTN_STATIC);
+	self.flags2(+)FL2_MENUACTIVE;
+	
+	newmis = spawn();
+	self.menu = newmis;
+	newmis.owner = self;
+	newmis.drawflags = MLS_FULLBRIGHT;
+	newmis.scale = 0.25;
+	newmis.t_width = 16;	//half of graphic width
+	setmodel(newmis, "models/menustat.mdl");
+	
+	newmis.think = StatsMenu_Project;
+	thinktime newmis : 0;
+}
+
+void StatsMenu_Disable ()
+{
+	self.flags2(-)FL2_MENUACTIVE;
+	if (self.menu)
+		remove(self.menu);
+}
+
+void StatsMenu_Toggle ()
+{
+	if (self.flags2&FL2_MENUACTIVE)
+		StatsMenu_Disable();
+	else
+		StatsMenu_Enable();
+}
+
+void StatsMenu_Choose (float dir)
+{
+	if (!self.flags2&FL2_MENUACTIVE)
+		return;
+	
+	sound (self, CHAN_AUTO, "raven/menu3.wav", 1, ATTN_STATIC);
+	self.statselection = wrap(self.statselection+dir, 0, 3);
+	
+	switch (self.statselection)
+	{
+		case 0:
+			self.menu.skin = 0;
+			break;
+		case 1:
+			self.menu.skin = 1;
+			break;
+		case 2:
+			self.menu.skin = 2;
+			break;
+		case 3:
+			self.menu.skin = 3;
+			break;
+	}
+}
+
+void StatsMenu_Increase ()
+{
+float inc;
+string stat;
+	if (!self.statpoints)
+	{
+		sprint(self, "You have no remaining stat points\n");
+		if (self.flags2&FL2_MENUACTIVE)
+			StatsMenu_Disable();
+	}
+	if (!self.flags2&FL2_MENUACTIVE)
+		return;
+	
+	switch (self.statselection)
+	{
+		case 0:
+			inc = ++self.strength;
+			stat = "strength ";
+			break;
+		case 1:
+			inc = ++self.intelligence;
+			stat = "intelligence ";
+			break;
+		case 2:
+			inc = ++self.wisdom;
+			stat = "wisdom ";
+			break;
+		case 3:
+			inc = ++self.dexterity;
+			stat = "dexterity ";
+			break;
+	}
+	
+	--self.statpoints;
+	
+	sprint(self, "Your "); sprint(self, stat); sprint(self, " has increased to "); sprint(self, ftos(inc)); sprint(self,"\n");
+	
+	if (self.statpoints<=0)
+	{
+		self.statpoints = 0;
+		centerprint (self, "You have no remaining stat points\n");
+		sprint(self, "You have no remaining stat points\n");
+		StatsMenu_Disable();
+	}
+	else
+	{
+		sprint(self, "You have "); sprint(self, ftos(self.statpoints)); sprint(self, " points remaining\n");
+	}
+}
+
+void StatsMenu_Dump ()
+{
+float inc,orgnl_stat;
+string stat;
+	if (!self.statpoints)
+	{
+		sprint(self, "You have no remaining stat points\n");
+		if (self.flags2&FL2_MENUACTIVE)
+			StatsMenu_Disable();
+	}
+	
+	if (self.statselection==0) {
+		stat = "strength ";
+		orgnl_stat = self.strength;
+		while (self.statpoints) {
+			++inc;
+			++self.strength;
+			--self.statpoints;
+		}
+	}
+	else if (self.statselection==1) {
+		stat = "intelligence ";
+		orgnl_stat = self.intelligence;
+		while (self.statpoints) {
+			++inc;
+			++self.intelligence;
+			--self.statpoints;
+		}
+	}
+	else if (self.statselection==2) {
+		stat = "wisdom ";
+		orgnl_stat = self.wisdom;
+		while (self.statpoints) {
+			++inc;
+			++self.wisdom;
+			--self.statpoints;
+		}
+	}
+	else {	//if (self.statselection==3) {
+		stat = "dexterity ";
+		orgnl_stat = self.dexterity;
+		while (self.statpoints) {
+			++inc;
+			++self.dexterity;
+			--self.statpoints;
+		}
+	}
+	
+	inc = orgnl_stat + inc;
+	
+	sprint(self, "Your "); sprint(self, stat); sprint(self, " has increased to "); sprint(self, ftos(inc)); sprint(self,"\n");
+	centerprint (self, "You have no remaining stat points\n");
+	sprint(self, "You have no remaining stat points\n");
+	StatsMenu_Disable();
 }
 
