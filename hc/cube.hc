@@ -7,7 +7,9 @@ float cube_distance = 500;
 
 void CubeDie(void)
 {
+	CreateYRFlash(self.origin);
 	stopSound(self,0);
+	sound(self, CHAN_ITEM, "player/cubedie.wav", 1, ATTN_NORM);
 	if (self.owner != world)
 		self.owner.artifact_flags(-)self.artifact_flags;
 	remove(self);
@@ -55,23 +57,25 @@ void do_fireball(vector offset,float damg);
 void cube_dobeam(vector targ_org)
 {
 	float beam_color;
-				beam_color=rint(random(0,4));
-				WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-				WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
-				WriteEntity (MSG_BROADCAST, self);				//owner
-				WriteByte (MSG_BROADCAST, 0);					//tag + flags
-				WriteByte (MSG_BROADCAST, 1);					//time
-				WriteByte (MSG_BROADCAST, beam_color);			//color
+	beam_color=rint(random(0,4));
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);	//beam type
+	WriteEntity (MSG_BROADCAST, self);				//owner
+	WriteByte (MSG_BROADCAST, 0);					//tag + flags
+	WriteByte (MSG_BROADCAST, 1);					//time
+	WriteByte (MSG_BROADCAST, beam_color);			//color
 
-				WriteCoord (MSG_BROADCAST, self.origin_x);
-				WriteCoord (MSG_BROADCAST, self.origin_y);
-				WriteCoord (MSG_BROADCAST, self.origin_z);
+	WriteCoord (MSG_BROADCAST, self.origin_x);
+	WriteCoord (MSG_BROADCAST, self.origin_y);
+	WriteCoord (MSG_BROADCAST, self.origin_z);
 
-				WriteCoord (MSG_BROADCAST, targ_org_x);
-				WriteCoord (MSG_BROADCAST, targ_org_y);
-				WriteCoord (MSG_BROADCAST, targ_org_z);
+	WriteCoord (MSG_BROADCAST, targ_org_x);
+	WriteCoord (MSG_BROADCAST, targ_org_y);
+	WriteCoord (MSG_BROADCAST, targ_org_z);
 
-				LightningDamage (self.origin, targ_org, self, beam_color+1,"sunbeam");
+	//LightningDamage (self.origin, targ_org, self, beam_color+1,"sunbeam");
+	LightningDamage (self.origin, targ_org, self, self.owner.wisdom*0.2,"sunbeam");
+	dprint(ftos(self.owner.wisdom*0.2));dprint("\n");
 }
 
 vector CubeDirection[6] =
@@ -157,11 +161,11 @@ void cube_fire(void)
 				updateSoundPos(self,CHAN_BODY);
 				updateSoundPos(self,CHAN_WEAPON);
 				self.last_attack=time;
-				self.owner = temp;	//restore owner for check
+				self.owner = temp;		//restore owner for check
 				if (self.owner.flags&FL_CLIENT) {
 					self.shot_cnt+=1;
 					cube_dobeam(targ_org); }
-				else {
+				else {					//monsters shoot fireballs
 					self.shot_cnt=17;
 					do_fireball('0 0 0',random(9,18)); }
 			}
@@ -304,6 +308,12 @@ void CubeThinkerB(void)
 
 void cube_of_force (entity spawner)
 {
+	float intmod;
+	if (spawner.intelligence)
+		intmod = 5 + spawner.intelligence*1.5;
+	else
+		intmod = 45;
+	
 	entity cube;
 	cube = spawn();
 
@@ -319,7 +329,6 @@ void cube_of_force (entity spawner)
 
 	cube.classname = "cube_of_force";
 	cube.health = 10;
-	cube.dmg = -1;
 
 	if (spawner.artifact_flags & AFL_CUBE_LEFT)
 	{
@@ -335,9 +344,8 @@ void cube_of_force (entity spawner)
 	cube.th_die = CubeDie;
 
 	thinktime cube : 0.01;
-					   
-	cube.monster_duration = time + 45;
-									
+	
+	cube.monster_duration = time + intmod;
 	cube.shot_cnt = 0;
 
 	cube.movedir = '100 100 0';
