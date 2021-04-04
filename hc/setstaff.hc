@@ -523,7 +523,7 @@ void Drilla (float power_value)
 	newmis.dmg=power_value*(self.wisdom*0.8);	//*17
 	if(newmis.dmg<10)	//33
 		newmis.dmg=10;
-	newmis.th_die=DarkExplosion
+	newmis.th_die=DarkExplosion;
 
 	newmis.drawflags=MLS_ABSLIGHT;
 	newmis.abslight=0.5;
