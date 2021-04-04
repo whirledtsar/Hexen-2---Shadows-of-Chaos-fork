@@ -91,7 +91,20 @@ void() PlaceItem =
 		}
 	}
 	else
-		self.movetype = MOVETYPE_NONE;	
+		self.movetype = MOVETYPE_NONE;
+	
+	if (coop && !self.flags2&FL2_ITEMNOEXTRA)	//SoC
+	{
+		float r = random();
+		if (r<0.8 && self.classname=="item_mana_blue" || self.classname=="item_mana_green" || self.classname=="item_mana_both")
+			SpawnExtraItem();
+		else if (r<0.6 && (self.netname==STR_TORCH || self.netname==STR_BLAST || self.netname==STR_GLYPH || self.netname==STR_HASTE))
+			SpawnExtraItem();
+		else if (r<0.4 && (self.netname==STR_INVISIBILITY || self.netname==STR_CUBEOFFORCE || self.netname==STR_SUMMON))
+			SpawnExtraItem();
+		else if (r<0.1 && (self.netname==STR_SUPERHEALTHBOOST || self.netname==STR_MANABOOST || self.netname==STR_TOME))
+			SpawnExtraItem();
+	}
 };
 
 /*
@@ -1724,3 +1737,57 @@ void DropBackpack(void)
 	self.spawn_health=0;
 }
 
+/*
+============
+SpawnExtraItem
+
+WS: For extra mana in coop. Spawns a copy of the item a short distance away from the original.
+============
+*/
+void SpawnExtraItem ()
+{
+	entity extra;
+	vector org;
+	vector neworg;
+	vector newangle;
+	float loop_cnt;
+	
+	org = FindSpawnSpot(32, 96, 360, self);	//find spot to spawn between 32-96 units away, 360 degrees around self
+	if (org==VEC_ORIGIN)
+		return;
+	//dprint("Spawning extra "); dprint(self.classname); dprint("\n");
+	
+	extra = spawn();
+	setorigin(extra, trace_endpos);
+	extra.classname = self.classname;
+	extra.netname = self.netname;
+	extra.flags2 (+) FL2_ITEMNOEXTRA;
+	extra.spawnflags = self.spawnflags;
+	if (self.classname == "item_mana_blue")
+		extra.think = item_mana_blue;
+	else if (self.classname == "item_mana_green")
+		extra.think = item_mana_green;
+	else if (self.classname == "item_mana_both")
+		extra.think = item_mana_both;
+	else if (self.classname == "art_glyph")
+		extra.think = art_glyph;
+	else if (self.classname == "art_haste")
+		extra.think = art_haste;
+	else if (self.classname == "art_blastradius")
+		extra.think = art_blastradius;
+	else if (self.classname == "art_torch")
+		extra.think = art_torch;
+	else if (self.classname == "art_invisibility")
+		extra.think = art_invisibility;
+	else if (self.classname == "art_cubeofforce")
+		extra.think = art_cubeofforce;
+	else if (self.classname == "art_summon")
+		extra.think = art_summon;
+	else {
+		dprint("Error: can't spawn extra unrecognized item\n");
+		remove(extra);
+		return;
+	}
+	
+	thinktime extra : 0;
+}
