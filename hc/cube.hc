@@ -5,6 +5,9 @@ float cube_distance = 500;
 
 void CubeDie(void)
 {
+	CreateYRFlash(self.origin);
+	stopSound(self,0);
+	sound(self, CHAN_ITEM, "player/cubedie.wav", 1, ATTN_NORM);
 	if (self.owner != world)
 		self.owner.artifact_flags(-)self.artifact_flags;
 	
@@ -250,8 +253,13 @@ void CubeThinkerB(void)
 
 void cube_of_force (entity spawner)
 {
+	float intmod;
+	if (spawner.intelligence)
+		intmod = 5 + spawner.intelligence*1.5;
+	else
+		intmod = 45;
+	
 	entity cube;
-
 	cube = spawn();
 
 	cube.owner = spawner;
@@ -281,7 +289,8 @@ void cube_of_force (entity spawner)
 	cube.th_die = CubeDie;
 
 	thinktime cube : 0.01;
-	cube.monster_duration = time + 45;
+	
+	cube.monster_duration = time + intmod;
 	cube.shot_cnt = 0;
 
 	cube.movedir = '100 100 0';
