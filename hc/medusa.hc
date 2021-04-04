@@ -258,9 +258,9 @@ void FireSnakeArrow (vector offset)
 		if (self.skin==MEDUSA_SKIN_RED)		//red version fires less smart missiles
 		{
 			newmis.hoverz = FALSE;
-			newmis.speed = 350;
+			newmis.speed = 250;
 			newmis.velocity=newmis.o_angle*newmis.speed;
-			newmis.wait = 0.1; 
+			newmis.wait = 0.2;
 		}
 		else
 			newmis.wait = 0.05;
@@ -506,11 +506,11 @@ float r, loscheck1,loscheck2;
 	if (trace_ent != self.enemy)
 	{	// don't have a clear shot, so move to a side
 		if (self.attack_state != AS_SLIDING)
-			self.attack_state == AS_SLIDING;
+			self.attack_state = AS_SLIDING;
 		return FALSE;
 	}
 	else
-		self.attack_state == AS_STRAIGHT;
+		self.attack_state = AS_STRAIGHT;
 			
 	destiny = self.enemy.origin+self.enemy.view_ofs;
 //FIXME: account for z difference
