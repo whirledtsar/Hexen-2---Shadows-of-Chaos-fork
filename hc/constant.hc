@@ -73,6 +73,7 @@ float FL2_TEST_TRACE			= 131072;	//
 float FL2_POISONED				= 262144;	// 
 float FL2_ONFIRE				= 4194304;  // on fire
 float FL2_SPAWNED				= 8388608;	// SoC: monster spawned with spawnin system
+float FL2_ITEMNOEXTRA			= 8388608;	// SoC: item is an extra or dropped item for coop and should not spawn another extra itself
 
 float	SFL_FLUFFY					= 1;// All largish flakes
 float	SFL_MIXED					= 2;// Mixed flakes
