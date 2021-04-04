@@ -1470,13 +1470,11 @@ void precache_soc()
 //necro
 	precache_sound("skullwiz/gate.wav");	//sickle summon
 	precache_sound ("necro/attack1.wav");	//magic mis altfire
-	/*precache_sound ("necro/hum1.wav");
-	precache_sound ("necro/hum2.wav");
-	precache_sound ("necro/hum3.wav");*/
 	precache_sound ("necro/bonethit.wav");	//tomed shard ball
 
 //demoness
-	precache_sound4 ("assassin/chntear.wav");	//SoC
+	precache_sound4 ("demoness/smack.wav");		//SoC: acid orb alt
+	precache_sound4 ("succubus/miss.wav");		//SoC: acid orb alt
 	precache_sound4 ("raven/kiltorch.wav");		//SoC: firestorm
 	precache_sound4 ("misc/fburn_bg.wav");		//SoC: firestorm
 	
