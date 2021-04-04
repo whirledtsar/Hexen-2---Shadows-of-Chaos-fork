@@ -1356,6 +1356,9 @@ void precache_soc()
 //GLYPHS
 	precache_model ("models/glyphcru.mdl");	//Crusader ice cloud
 	
+//CUBE
+	precache_sound ("player/cubedie.wav");	//mageslayer
+	
 //paladin
 	precache_model("models/gauntletblood.mdl");
 	precache_model("models/axeblood.mdl");
