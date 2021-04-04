@@ -624,7 +624,6 @@ float ofsdir;
 
 void StatsMenu_Enable ()
 {
-vector source;
 	if (!self.statpoints)
 	{
 		centerprint (self, "You have no remaining stat points\n");
