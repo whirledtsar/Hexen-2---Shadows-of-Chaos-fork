@@ -107,8 +107,8 @@ entity quietus;
 	quietus.o_angle=normalize(v_forward + v_right*offset + v_up*hoff);		
 	quietus.velocity=quietus.o_angle*quietus.speed;
 	quietus.veer=30;
-	quietus.lifetime=time + 3;
-	quietus.dmg=25;
+	quietus.lifetime=time+4;
+	quietus.dmg=5+self.wisdom*1.5;	//~20 at level 1
 	quietus.movetype=MOVETYPE_FLYMISSILE;
 	offorg=self.origin;
 	org=self.origin+self.proj_ofs+(v_forward*foff)*25;
