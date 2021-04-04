@@ -134,6 +134,7 @@ void BloodMissileFade ()
 void FireBloodMissile (float offset)
 {
 float f_dist;
+float voffset;
 	makevectors(self.v_angle);
 
 	self.effects(+)EF_MUZZLEFLASH;
@@ -143,7 +144,7 @@ float f_dist;
 	newmis.drawflags(+)SCALE_ORIGIN_CENTER|MLS_FIREFLICKER;
 	newmis.scale=1.3;
 	newmis.abslight=1;
-	newmis.dmg=random(15,22);
+	newmis.dmg=8+(self.wisdom*0.75);		//newmis.dmg=random(15,22);
 	f_dist=8;
 	if(self.artifact_active&ART_TOMEOFPOWER)
 	{
@@ -151,7 +152,7 @@ float f_dist;
 		{
 			newmis.scale=2;
 			newmis.avelocity_z=1000;
-			newmis.dmg=random(20,30);
+			newmis.dmg*=1.5;
 			f_dist=16;
 			newmis.solid=SOLID_PHASE;
 		}
@@ -165,6 +166,9 @@ float f_dist;
 		newmis.frags=FALSE;
 		newmis.movetype=MOVETYPE_FLYMISSILE;
 	}
+	
+	if (self.altfiring)
+		voffset = random(-12,12);
 
 	newmis.solid=SOLID_BBOX;
 	newmis.touch=BloodMissileTouch;
@@ -178,7 +182,7 @@ float f_dist;
 	setsize(newmis,'0 0 0','0 0 0');
 
 	//setorigin(newmis,self.origin+self.proj_ofs+v_forward*f_dist-v_right*12 + v_right*(offset*3) - '0 0 6');
-	setorigin(newmis,self.origin+self.proj_ofs+v_forward*f_dist + v_right*(offset*3) + '0 0 5');	//ws: centered projectile to match crosshair
+	setorigin(newmis,self.origin+self.proj_ofs+v_forward*f_dist + v_right*(offset*3) + v_up*(voffset) + '0 0 5');	//ws: centered projectile to match crosshair
 	sound(newmis,CHAN_AUTO,"succubus/brnfire.wav",1,ATTN_NORM);
 
 	newmis.think=BloodMissileFade;
@@ -222,7 +226,7 @@ relax to ready(Fire delay?  or automatic if see someone?)
 void()bloodrain_ready;
 void Suc_Blrn_Fire (float rightclick);
 
-void bloodrain_fire (float rightclick)
+void bloodrain_fire ()
 {
 	if(self.button0&&self.weaponframe==$normal07 &&!self.artifact_active&ART_TOMEOFPOWER)
 		self.weaponframe=$normal07;
@@ -240,10 +244,7 @@ void bloodrain_fire (float rightclick)
 			blrn_power((self.weaponframe - $normal08) *3);
 	}
 	else if(self.weaponframe==$normal07)
-		if (rightclick)
-			succ_scratch();
-		else
-			blrn_normal();
+		blrn_normal();
 }
 
 void bloodrain_charge ()
@@ -273,10 +274,13 @@ void bloodrain_charge ()
 		if(self.weaponframe==$normal07) {
 			if (self.search_time < time)
 				advanceweaponframe($normal02,$normal13);
-			if (self.altfiring < 3) {
-				FireBloodMissile(random(-2,2));
-				++self.altfiring;
-			}
+			++self.altfiring;
+			if (self.altfiring==1)
+				FireBloodMissile(random(-4.5,-3));
+			else if (self.altfiring==2)
+				FireBloodMissile(random(-1,1));
+			else if (self.altfiring==3)
+				FireBloodMissile(random(3,4.5));
 		}
 		else
 			advanceweaponframe($normal02,$normal13);
