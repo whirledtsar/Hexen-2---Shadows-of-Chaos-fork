@@ -326,9 +326,9 @@ relax to ready(Fire delay?  or automatic if see someone?)
 
 void()acidorb_ready_power;
 void()acidorb_ready_normal;
-void() Suc_Aorb_Fire;
+void(float rightclick) Suc_Aorb_Fire;
 
-void acidorb_fire (void)
+void acidorb_fire ()
 {
 	if(self.button0&&self.weaponframe==$normal60 &&!self.artifact_active&ART_TOMEOFPOWER)
 		self.weaponframe=$normal58;
@@ -353,7 +353,7 @@ void acidorb_fire (void)
 		else
 			acidorb_ready_normal();
 	else if(self.weaponframe==$normal58)// &&self.attack_finished<=time)
-		aorb_normal();
+			aorb_normal();
 	else if(self.weaponframe==$powern141)
 		aorb_power();//Fixme: hold this frame for a few
 }
@@ -372,26 +372,10 @@ float damg, poisondmg, poisontime;
 	makevectors (self.v_angle);
 	source = self.origin + self.proj_ofs;
 	end = source + v_forward*56;
-	traceline (source, end, FALSE, self);
-	if (trace_fraction == 1.0) {
-		traceline (source, end - (v_up * 15), FALSE, self);
-		
-		if (trace_fraction == 1.0) {
-			traceline (source, end + v_up * 15, FALSE, self);
-		
-			if (trace_fraction == 1.0) {
-				traceline (source, end + v_right * 15, FALSE, self);
-				
-				if (trace_fraction == 1.0) {
-					traceline (source, end - v_right * 15, FALSE, self);
-					
-					if (trace_fraction == 1.0) {
-						sound(self,CHAN_AUTO,"succubus/miss.wav",0.75,ATTN_NORM);
-						return;
-					}
-				}
-			}
-		}
+	SUB_TraceRange(source, end, FALSE, self, 15, 15);
+	if (trace_fraction==1.0) {
+		sound(self,CHAN_AUTO,"succubus/miss.wav",0.75,ATTN_NORM);
+		return;
 	}
 	
 	if (trace_ent.takedamage) {
@@ -406,7 +390,7 @@ float damg, poisondmg, poisontime;
 			}
 		}
 		if (trace_ent.thingtype == THINGTYPE_FLESH)
-			sound(self,CHAN_AUTO,"assassin/chntear.wav",1,ATTN_NORM);
+			sound(self,CHAN_AUTO,"succubus/smack.wav",1,ATTN_NORM);
 		else
 			sound(self,CHAN_AUTO,"succubus/miss.wav",0.75,ATTN_NORM);
 		SpawnPuff (trace_endpos, '0 0 -4', damg, trace_ent);
