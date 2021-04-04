@@ -302,7 +302,7 @@ vector org;
 			new.avelocity_x = 0;
 			new.avelocity_z = 0;
 		}
-		new.scale=.8;
+		new.scale=self.scale*.8;
 	}
 	else if (new.model == "models/h_fangel.mdl" || new.model == "models/ZombiePal_hd.mdl" || new.model == "models/archerhd.mdl" || new.model == "models/muhead.mdl" || new.model == "models/h_imp.mdl")
 	{
@@ -333,6 +333,8 @@ vector org;
 		if (new.model == "models/archerarm.mdl")
 			new.avelocity_z = random(5);
 		new.angles_y = random(360);
+		if (self.classname == "monster_archer_lord" && new.model == "models/archerleg.mdl")	//need skin for arm gib
+			new.skin = 1;
 		if (new.owner.classname != "monster_undying")
 			new.scale=self.scale*.9;
 	}
