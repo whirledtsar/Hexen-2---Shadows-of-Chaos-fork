@@ -382,7 +382,8 @@ vector org;
 			self.wallspot='0 0 0';
 	}
 
-	setmodel (self, gibname);
+	//setmodel (self, gibname);	//crashes game
+	self.drawflags(+)EF_NODRAW;
 	self.frame = 0;
 	self.takedamage = DAMAGE_NO;
 	if(self.classname!="player")
