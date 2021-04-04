@@ -363,15 +363,21 @@ void() blizzard_think=
 {
 entity loser;
 vector dir, top, bottom, beam_angle;
-float beam_count; 
+float beam_count, wismod; 
 	if(self.lifetime<time||self.blizzcount<self.owner.blizzcount - 1)
 	{
+		stopSound(self, CHAN_WEAPON);
 		remove(self);
 		return;
 	}
 
 //	if(self.pain_finished<=time)
 //		self.effects=EF_NODRAW;
+	
+	if (self.owner.wisdom)
+		wismod = self.owner.wisdom*0.4;
+	else
+		wismod = 10;
 
 	self.color=random(15);
 	self.color=rint(self.color)+9*16+256;
@@ -423,7 +429,7 @@ float beam_count;
 			if((trace_ent.frozen<-5||trace_ent.health<=10)&&!trace_ent.artifact_active&ART_INVINCIBILITY&&trace_ent.thingtype==THINGTYPE_FLESH&&trace_ent.health<100)
 				SnowJob(trace_ent,self.owner);
 			else
-				T_Damage(trace_ent,self,self.owner,10);
+				T_Damage(trace_ent,self,self.owner,wismod);
 		}
 	}
 	if(random()<0.3)
@@ -444,7 +450,7 @@ float beam_count;
 				if((loser.frozen<-5||loser.health<15)&&loser.classname!="mjolnir"&&!loser.artifact_active&ART_INVINCIBILITY&&loser.thingtype==THINGTYPE_FLESH&&loser.health<100)
 					SnowJob(loser,self.owner);
 				else
-					T_Damage(loser,self,self.owner,5);
+					T_Damage(loser,self,self.owner,wismod*0.5);
 			}
 		loser=loser.chain;
 	}
@@ -480,13 +486,13 @@ entity found;
 
 	self.velocity=randomv('-200 -200 0','200 200 0');
   	self.movetype = MOVETYPE_FLY;
-  	self.solid = SOLID_NOT;
+  	self.solid = SOLID_PHASE;	//SOLID_NOT;
 	self.classname="blizzard";
 //	self.effects=EF_NODRAW;
 	self.angles_y=other.angles_y;
 	self.avelocity_y=500;
 	
-	self.lifetime=time + 10;
+	self.lifetime=time + 2 + self.owner.intelligence*0.5;	//~8 at level 1
 	self.think=blizzard_think;
 	thinktime self : 0;
 	
@@ -526,7 +532,8 @@ void FireBlizzard (void)
 	newmis.movetype=MOVETYPE_FLYMISSILE;
 	newmis.solid=SOLID_BBOX;
 	newmis.touch=make_blizzard;
-
+	
+	makevectors(self.v_angle);
 	newmis.velocity=normalize(v_forward)*1000;
 	newmis.effects=EF_MUZZLEFLASH;
 	
