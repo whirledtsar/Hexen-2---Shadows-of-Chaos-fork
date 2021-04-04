@@ -285,14 +285,6 @@ void vorp_shock(entity victim)
 	self.angles_y += 180;  // Because it has bounced off whatever it hit
 	makevectors(self.angles);	
 	traceline (org ,org + v_forward * 16, FALSE, self);
-
-//newent2 = spawn();
-//	CreateEntityNew(newent2,ENT_SEAWEED,"models/flag.mdl",chunk_death);
-//	setorigin(newent2,self.origin);
-
-//	newent3 = spawn();
-//	CreateEntityNew(newent3,ENT_SEAWEED,"models/skllstk1.mdl",chunk_death);
-//	setorigin(newent3,self.origin + v_forward * 32);
 	
 	if (other.classname=="worldspawn")
 	{
@@ -469,17 +461,17 @@ void vorpal_melee (float tome)
 
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
-	traceline (source, source + v_forward*80, FALSE, self);  // Straight in front
+	traceline (source, source + v_forward*64, FALSE, self);  // Straight in front
 
 	self.enemy = world;
 
 	if (trace_fraction == 1.0)	// Anything right in front ?
 	{
-		traceline (source, source + v_forward*80 - (v_up * 30), FALSE, self);  // 30 down
+		traceline (source, source + v_forward*88 - (v_up * 30), FALSE, self);  // 30 down
 	
 		if (trace_fraction == 1.0)  
 		{
-			traceline (source, source + v_forward*80 + v_up * 30, FALSE, self);  // 30 up
+			traceline (source, source + v_forward*88 + v_up * 30, FALSE, self);  // 30 up
 		
 			if (trace_fraction == 1.0)  
 				return;
@@ -554,7 +546,6 @@ void vorpal_downmissile (void)
 	vector  dir;
 	entity  victim;
 	float chance;
-	//entity hold;
 
 	if (!self.artifact_active & ART_TOMEOFPOWER)
 		return;
@@ -562,14 +553,17 @@ void vorpal_downmissile (void)
 	victim = findradius(self.origin, 150);
 	while(victim)
 	{
-		if ((victim.movetype == MOVETYPE_FLYMISSILE) && (victim.owner != self))
+		if ((victim.movetype == MOVETYPE_FLYMISSILE) && (victim.owner != self) && fov(victim,self,135))
 		{
 			victim.owner = self;
-			chance = random();
+			chance = 1-self.intelligence*0.015;
+			if (chance<0)
+				chance = 0;
+			
 			dir = victim.origin + (v_forward * -1);
 			CreateLittleWhiteFlash(dir);
 			sound (self, CHAN_WEAPON, "weapons/vorpturn.wav", 1, ATTN_NORM);
-			if (chance < 0.9)  // Deflect it
+			if (random() < chance)  // Deflect it
 			{
 				victim.v_angle = self.v_angle + randomv('-180 -180 -180', '180 180 180'); 
 
@@ -599,8 +593,6 @@ void vorpal_normal_fire (float tome)
 	wismod = self.wisdom;
 
 	vorpal_melee (tome);
-	if (tome)
-		vorpal_downmissile();
 
 	if (self.bluemana<2)   // Not enough mana to fire it
 		return;
@@ -611,7 +603,7 @@ void vorpal_normal_fire (float tome)
 	{	// Enemy would be the one that took direct melee damage so don't hurt him twice
 		if ((victim.health) && (victim!=self) && (victim!=self.enemy))
 		{
-			traceline (self.origin + self.owner.view_ofs, victim.origin, FALSE, self);  //check line of sight
+			traceline (self.origin + self.owner.view_ofs, victim.origin, FALSE, self);  // 30 up
 
 			if (trace_ent == victim)
 			{
@@ -795,6 +787,10 @@ void vorpal_a ()
 	self.wfs = advanceweaponframe($3rdSwd1,$3rdSwd24);
 	self.th_weapon = vorpal_a;
 	
+	if (tome)
+		if (self.weaponframe >= $3rdSwd12 && self.weaponframe <= $3rdSwd14)
+			vorpal_downmissile();
+	
 	if (self.weaponframe == $3rdSwd2)	// Frame 80
 		vorpal_sound();
 	
@@ -840,6 +836,10 @@ void vorpal_b ()
 	self.wfs = advanceweaponframe($2ndSwd14,$2ndSwd28);
 	
 	self.th_weapon = vorpal_b;
+	
+	if (tome)
+		if (self.weaponframe >= $2ndSwd19 && self.weaponframe <= $2ndSwd23)
+			vorpal_downmissile();
 	
 	if (self.weaponframe == $2ndSwd14)	// Frame 80
 		vorpal_sound();
@@ -887,6 +887,10 @@ void vorpal_c ()
 	self.wfs = advanceweaponframe($4thSwd1,$4thSwd28);
 	
 	self.th_weapon = vorpal_c;
+	
+	if (tome)
+		if (self.weaponframe >= $4thSwd10 && self.weaponframe <= $4thSwd14)
+			vorpal_downmissile();
 	
 	if (self.weaponframe == $4thSwd4)	// Frame 80
 		vorpal_sound();
