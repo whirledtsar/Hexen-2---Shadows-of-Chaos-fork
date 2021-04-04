@@ -797,7 +797,7 @@ void  DropInventoryItem (void)
 	item = spawn();
 
 
-
+	item.flags2(+)FL2_ITEMNOEXTRA;	//SoC
 	item.flags(+)FL_ITEM;
 	item.solid = SOLID_TRIGGER;
 	item.movetype = MOVETYPE_TOSS;
