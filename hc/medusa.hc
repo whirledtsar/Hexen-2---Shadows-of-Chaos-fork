@@ -259,6 +259,7 @@ void FireSnakeArrow (vector offset)
 		{
 			newmis.hoverz = FALSE;
 			newmis.speed = 350;
+			newmis.velocity=newmis.o_angle*newmis.speed;
 			newmis.wait = 0.1; 
 		}
 		else
@@ -289,7 +290,7 @@ float damg;
 		makevectors (self.angles+self.angle_ofs);
 		source = self.origin+self.view_ofs;
 		//traceline (source, source + v_forward*48, FALSE, self);
-		SUB_TraceRange (source, source + v_forward*48, FALSE, self, 30, 15);	//trace 30 up/down, 15 side-to-side
+		SUB_TraceRange (source, source + v_forward*56, FALSE, self, 30, 30);	//trace 30 up/down, 30 side-to-side
 		if (trace_fraction == 1.0)
 			return;
 		org = trace_endpos + (v_forward * 4);
@@ -373,13 +374,14 @@ void MedusaGaze (vector org, vector destiny, entity loser) [++ $medusa1 .. $medu
 		loser.think=loser.th_pain=loser.th_run=SUB_Null;
 		loser.attack_finished=loser.teleport_time=loser.pausetime = time+10000000000;
 		loser.nextthink=-1;
-		loser.th_die = chunk_death;
+		if (!loser.flags&FL_CLIENT)
+			loser.th_die = chunk_death;
 		loser.thingtype = THINGTYPE_GREYSTONE;
 		loser.health = 10;
 		loser.touch = obj_push;
 		loser.flags(-)FL_FLY;
 		loser.flags(-)FL_SWIM;
-		if(loser.classname!="player")
+		if (!loser.flags&FL_CLIENT)
 			loser.movetype = MOVETYPE_STEP;//step?
 		else
 			loser.o_angle=loser.v_angle;
@@ -810,9 +812,9 @@ float dot;
 	makevectors(self.angles);
 	enemy_dir=normalize(self.enemy.origin-self.origin);
 	dot=v_right*enemy_dir;
-	if(dot>0.3)
+	if(dot>0.5)
 	{
-		self.angle_ofs_y=90;
+		self.angle_ofs_y=-90;
 		if(action>=MEDUSA_HEADBUTT)
 			self.think=medusa_attack_right;
 		else if(action==MEDUSA_RATTLE)
@@ -820,9 +822,9 @@ float dot;
 		else
 			self.think=medusa_look_right;
 	}
-	else if(dot<-0.3)
+	else if(dot<-0.5)
 	{
-		self.angle_ofs_y=-90;
+		self.angle_ofs_y=90;
 		if(action>=MEDUSA_HEADBUTT)
 			self.think=medusa_attack_left;
 		else if(action==MEDUSA_RATTLE)
@@ -935,6 +937,8 @@ void medusa_jump () [++$stand1..$stand29]
 	}
 }
 
+void() monster_medusa_red;
+
 /*QUAKED monster_medusa_green (1 0.3 0) (-16 -16 0) (16 16 56) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
 
 The medusa monster with its nasty sharp pointy teeth
@@ -948,7 +952,7 @@ void monster_medusa_green (void)
 		remove(self);
 		return;
 	}
-
+	
 	if (!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 	{
 		precache_model2("models/stmedgaz.mdl");
@@ -969,7 +973,7 @@ void monster_medusa_green (void)
 		precache_sound2("medusa/hitplayr.wav");
 		precache_sound2("afrit/afrithit.wav");		//SoC
 	}
-	
+
 	self.headmodel="models/medhead.mdl";
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
