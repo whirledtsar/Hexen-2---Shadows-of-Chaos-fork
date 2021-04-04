@@ -513,9 +513,9 @@ void() ImpulseCommands =
 		else
 			buff="off";
 		if (CheckCfgParm(PARM_STATS))
-			stats="off";
-		else
 			stats="on";
+		else
+			stats="off";
 		
 		sprint (self, "Monster respawning is "); sprint(self, respawning); sprint(self, ". type Impulse 51 to toggle\n");
 		sprint (self, "Corpse fading is "); sprint(self, fade); sprint(self, ". type Impulse 52 to toggle\n");
