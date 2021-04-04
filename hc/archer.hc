@@ -310,15 +310,17 @@ void() archer_die =
 	}
 	else if (self.decap>0 && random()<0.5)	//ws: only sharp weapons will decapitate; see damage.hc
 	{
-		if (self.classname == "monster_archer_lord")
+		if (self.classname == "monster_archer_lord") {
 			setmodel (self, "models/archerdecap_lord.mdl");
+			self.skin = 0;
+		}
 		else if (self.netname == "monster_archer_ice")
 			setmodel (self, "models/archerdecap_ice.mdl");
 		else
 			setmodel (self, "models/archerdecap.mdl");
 		sound(self,CHAN_VOICE,"player/decap2.wav",1,ATTN_NORM);
 		setsize (self, '-16 -16 0', '16 16 56');
-		ThrowGib ("models/archerhd.mdl", self.health);
+		ThrowGib (self.headmodel, self.health);
 		self.headmodel = "";
 		bloodspew_create (3, 30, self.view_ofs);
 	}
