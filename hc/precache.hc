@@ -1477,6 +1477,7 @@ void precache_soc()
 	precache_sound4 ("succubus/miss.wav");		//SoC: acid orb alt
 	precache_sound4 ("raven/kiltorch.wav");		//SoC: firestorm
 	precache_sound4 ("misc/fburn_bg.wav");		//SoC: firestorm
+	precache_sound ("eidolon/flamend.wav");		//SoC: firestorm alt
 	
 //necro minions
 	precache_spider();
