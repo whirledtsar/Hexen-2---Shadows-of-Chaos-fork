@@ -1487,7 +1487,7 @@ void() WaterMove =
 		{
 			if (self.model=="models/sheep.mdl")
 				sheep_sound(1);
-			else if(self.playerclass==CLASS_ASSASSIN)
+			else if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 				sound (self, CHAN_VOICE, "player/assgasp1.wav", 1, ATTN_NORM);
 			else
 				sound (self, CHAN_VOICE, "player/palgasp1.wav", 1, ATTN_NORM);
@@ -1496,7 +1496,7 @@ void() WaterMove =
 		{
 			if (self.model=="models/sheep.mdl")
 				sheep_sound(1);
-			else if(self.playerclass==CLASS_ASSASSIN)
+			else if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 				sound (self, CHAN_VOICE, "player/assgasp2.wav", 1, ATTN_NORM);
 			else
 				sound (self, CHAN_VOICE, "player/palgasp2.wav", 1, ATTN_NORM);
