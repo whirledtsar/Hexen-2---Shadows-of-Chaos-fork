@@ -191,7 +191,7 @@ void FireMagicMissile (float offset, float seeking)
 			
 			if (tome)
 			{
-				newmis.dmg=random(45,60);		//newmis.dmg = random(40, 50) + wismod;
+				newmis.dmg = 40 + wismod;	//newmis.dmg=random(45,60);
 				newmis.scale=1.5;
 				newmis.veer = 110 - intmod;
 				if (newmis.veer < 30)
@@ -199,7 +199,7 @@ void FireMagicMissile (float offset, float seeking)
 			}
 			else
 			{
-				newmis.dmg = random(22,28);		//newmis.dmg = random(18, 24) + (wismod * 0.5);
+				newmis.dmg = 15 + (wismod * 0.75);	//newmis.dmg = random(22,28);
 				newmis.scale=1;
 				newmis.veer = 50 - intmod;
 				if (newmis.veer < 10)
