@@ -612,7 +612,7 @@ vector org;
 	tornato.scale=1.4;
 	if(visible(self.enemy)&&self.enemy.flags2&FL_ALIVE)//Infront too?
 		tornato.goalentity=self.enemy;
-	tornato.lifetime=time + 20;
+	tornato.lifetime=time + 3 + self.intelligence;	//~16 at level 1
 	tornato.think=tornato_grow;
 	thinktime tornato : 0;
 
