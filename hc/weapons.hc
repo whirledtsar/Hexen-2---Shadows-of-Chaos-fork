@@ -113,6 +113,8 @@ void() T_PhaseMissileTouch =
 			}
 		}
 	}
+	else if (self.model=="models/fablade.mdl")
+		self.angles = vectoangles(self.velocity);
 	
 	self.cnt +=1;
 
