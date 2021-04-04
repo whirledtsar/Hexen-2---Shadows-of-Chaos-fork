@@ -138,7 +138,7 @@ entity lball;//,star1,star2;
 	sound(self,CHAN_AUTO,"succubus/firelbal.wav",1,ATTN_NORM);
 
 	lball.turn_time=2;
-	lball.dmg=random(45,55);
+	lball.dmg=15+self.wisdom;	//lball.dmg=random(45,55);
 	lball.effects=EF_DIMLIGHT;
 	lball.frags=TRUE;
 	lball.veer=100;
