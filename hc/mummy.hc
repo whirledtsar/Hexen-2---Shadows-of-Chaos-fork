@@ -138,46 +138,39 @@ void mummissile_touch (void)
 }
 
 
-void mflame1_runup (void) [++ 0 .. 16 ]
+void mflame_runup (void)
 {
-	if (cycle_wrapped)
+float result;
+	if (self.style==0)
+		result = AdvanceFrame(0,16);
+	else if (self.style==1)
+		result = AdvanceFrame(17,33);
+	else
+		result = AdvanceFrame(34,50);
+	
+	if (result==AF_END)
 		if(self.cnt)
 		{
 			self.cnt-=1;
 			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
 		}
 		else
-			remove(self);
-}
-
-void mflame2_runup (void) [++ 17 .. 33 ]
-{
-	if (cycle_wrapped)
-		if(self.cnt)
 		{
-			self.cnt-=1;
-			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
-		}
-		else
 			remove(self);
-}
-
-void mflame3_runup (void) [++ 34 .. 50 ]
-{
-	if (cycle_wrapped)
-		if(self.cnt)
-		{
-			self.cnt-=1;
-			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
+			return;
 		}
-		else
-			remove(self);
+	
+	
+	if (self.aflag) {
+		makevectors(self.o_angle);
+		setorigin(self, self.controller.origin+v_forward*100);
+	}
 }
 
 void mflame_burn(void)
 {
 	float damg;
-
+	
 	if ((other.health) && (other != self.owner) && (self.pain_finished<time))
 	{
 		damg = self.dmg + random() * self.dmg;
@@ -222,13 +215,13 @@ void SpawnMummyFlame(void)
 
 	chance = random();
 	if (chance < .33)
-		new.think = mflame1_runup;
+		new.style = 0;
 	else if (chance < .66)
-		new.think = mflame2_runup;
+		new.style = 1;
 	else
-		new.think = mflame3_runup;
-
-//ew.nextthink = time + HX_FRAME_TIME;
+		new.style = 2;
+	
+	new.think = mflame_runup;
 	thinktime new : HX_FRAME_TIME;
 
 	new.touch = mflame_burn;
@@ -248,7 +241,6 @@ void SpawnMummyFlame(void)
 	{
 		particle2(new.origin,'0 0 25','0 0 25',168,7,5);
 
-	//	self.nextthink = time + .04;
 		thinktime self : .04;
 
 		self.think = SpawnMummyFlame;
