@@ -115,9 +115,12 @@ void spawn_burner (entity loser)
 		loser.fire_damage += 2;
 		return;
 	}
-
-	if (coop && loser.classname == "player" && loser.team == self.owner.team && teamplay)
+	
+	entity oself = self;
+	self = self.owner;
+	if (IsAlly(loser))
 		return;
+	self = oself;
 
 	loser.fire_damage = 2;
 
@@ -125,7 +128,8 @@ void spawn_burner (entity loser)
 	burner=spawn();
 	burner.owner=self.owner;
 	burner.enemy=loser;
-	burner.lifetime=time+random(5)+5;
+	burner.lifetime=time+random(5)+5;	//burner.lifetime=time+self.owner.intelligence*0.33;
+	
 	burner.think=burner_think;
 	burner.enemy.effects (+) EF_DIMLIGHT;
 	thinktime burner : 0;
@@ -261,7 +265,7 @@ void flamestream_touch ()
 			other.thingtype == THINGTYPE_WOOD_STONE ||
 			other.thingtype == THINGTYPE_METAL_CLOTH)
 		{
-			if (random() < 0.5 || deathmatch)
+			if (random(100) < (15 + self.owner.intelligence*2) || deathmatch)
 				spawn_burner(other);
 		}
 
@@ -396,7 +400,7 @@ void flamestream_anim()
 			trace_ent.thingtype == THINGTYPE_WOOD_STONE ||
 			trace_ent.thingtype == THINGTYPE_METAL_CLOTH)
 		{
-			if (random() < 0.5 || deathmatch)
+			if (random(100) < (15 + self.owner.intelligence*2) || deathmatch)
 				spawn_burner(trace_ent);
 		}
 
@@ -507,7 +511,7 @@ void flamestream_fire ()
 	newmis.solid=SOLID_BBOX;
 	newmis.abslight=1;
 	newmis.touch=flamestream_touch;
-	newmis.dmg=40;
+	newmis.dmg=15+self.wisdom;	//40
 	newmis.lifetime=time+2;
 	//newmis.o_angle=self.origin+self.proj_ofs+v_forward*16-v_right*16-v_up*16;
 	newmis.o_angle=self.origin+self.proj_ofs+v_forward*16-v_up*16;		//ws: centered projectile to match crosshair
