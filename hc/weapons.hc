@@ -296,7 +296,6 @@ void W_SetCurrentAmmo (void)
 	wp_deselect = 0;
 
 	self.button0=FALSE;
-//	attck_cnt=0;
 
 	if (self.oldweapon==self.weapon)		// Until we get multi skinned weapons
 		return;
@@ -698,7 +697,7 @@ void()player_sheep_baa;
 void W_Attack (float rightclick)
 {
 	if (!W_CheckNoAmmo (self.weapon))
-	{
+	{dprint("noammo\n");
 		W_BestWeapon ();
 		W_SetCurrentWeapon ();
 		return;
@@ -780,7 +779,7 @@ void W_Attack (float rightclick)
 			grenade_throw();
 		break;
 		case CLASS_SUCCUBUS:
-			Suc_Forb_Fire();
+			Suc_Forb_Fire(rightclick);
 		break;
 		case CLASS_CRUSADER:
 			Cru_Met_Attack();
@@ -810,7 +809,6 @@ void W_Attack (float rightclick)
 		break;
 		}
 	break;
-	}
 	case IT_WEAPON5:
 		switch (self.playerclass)
 		{
@@ -867,7 +865,7 @@ void W_Attack (float rightclick)
 			Cru_Wham_Fire(rightclick);
 			break;
 		case CLASS_SUCCUBUS:
-			Suc_Blrn_Fire();
+			Suc_Blrn_Fire(rightclick);
 			break;
 		}
 	break;
@@ -987,10 +985,6 @@ void W_DeselectWeapon (void)
 		break;
 		}
 	break;
-	default:
-		W_SetCurrentAmmo();
-	break;
-	}
 	case IT_WEAPON5:
 		self.weaponmodel="";
 		self.weaponframe = 0;
@@ -1134,7 +1128,6 @@ float	it, am, fl;
 		if ((self.bluemana < 1) && (self.greenmana <1))
 			am = 1;
 	break;
-	
 	case 5:
 		fl = IT_WEAPON5;
 	break;

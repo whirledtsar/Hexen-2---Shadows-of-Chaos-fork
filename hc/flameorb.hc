@@ -73,6 +73,8 @@ $frame pselon224    pselon225    pselon226    pselon227    pselon228
 $frame pselon229    pselon230    pselon231    pselon232    pselon233    
 $frame pselon234    
 
+float FLAMECIRCLE_COST = 5;
+
 void burner_think ()
 {
 	vector org,vel;
@@ -630,6 +632,166 @@ void flameswarm_fire()
 	thinktime newmis : 0.05;
 }
 
+void() fire_circ_hit;
+void() circflame_run;
+void() mflame_burn;
+
+void circflame_master()
+{
+	if (self.cnt<1) {
+		self.owner.effects(-)EF_LIGHT;
+		remove(self);
+		return;
+	}
+	
+	if (self.cnt<21 && !self.aflag) {	//flames are dissipating, play sound and let player create new flame circle
+		self.aflag = TRUE;
+		self.owner.class_weaponvar = FALSE;
+		setorigin(self, self.owner.origin);
+		sound(self, CHAN_BODY, "misc/fout.wav", 1, ATTN_NORM);
+	}
+	else {
+		setorigin(self, self.owner.origin);
+		updateSoundPos(self,CHAN_BODY);
+	}
+	
+	thinktime self : HX_FRAME_TIME*2;
+}
+
+void circflame_run (void)
+{
+float result;
+	
+	if (self.pain_finished<time && self.attack_finished<time) {	//because the touch function just randomly doesnt fucking register half the time, manually trace
+		traceline(self.origin, self.origin+'0 0 16', FALSE, self.owner);
+		if (trace_fraction==1)
+			tracearea(self.origin, self.origin+'0 0 16', self.mins, self.maxs, FALSE, self.owner);
+		if (trace_ent && trace_ent.flags2&FL_ALIVE) {
+			other = trace_ent;
+			mflame_burn();
+			self.t_width=time+0.5;
+		}
+	}
+	if (self.attack_finished<time) {	//update origin every possible frame, but animate at normal framerate
+		switch (self.style)
+		{
+		case 0:
+			result = AdvanceFrame(0,16);
+			break;
+		case 1:
+			result = AdvanceFrame(17,33);
+			break;
+		default:
+			result = AdvanceFrame(34,50);
+			break;
+		}
+		self.attack_finished = time+HX_FRAME_TIME;
+	}
+	
+	if (result==AF_END)
+		if(self.cnt)	//anim loops
+			self.cnt-=1;
+		else
+		{
+			if (self.controller)
+				self.controller.cnt -= 1;	//update current number of flames
+			remove(self);
+			return;
+		}
+	else if (result==AF_BEGINNING)
+		particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
+	
+	makevectors(self.o_angle);
+	traceline(self.owner.origin+'0 0 32', self.owner.origin+v_forward*self.t_length, TRUE, self.owner);
+	traceline(trace_endpos, trace_endpos-'0 0 1000', TRUE, self.owner);
+	setorigin(self, trace_endpos-v_forward*10);		//offset from wall
+	
+	if (pointcontents(trace_endpos)<=CONTENT_WATER) {		//dont render or burn while in water/slime/sky
+		self.effects(+)EF_NODRAW;
+		self.solid = SOLID_NOT;
+		self.aflag = TRUE;
+	}
+	else if (self.aflag) {		//make visible if out of water or thinking for first time
+		self.effects(-)EF_NODRAW;
+		self.solid = SOLID_TRIGGER;
+		self.aflag = FALSE;
+	}
+	
+	self.think = circflame_run;
+	if (deathmatch||coop||teamplay)
+		thinktime self : 0.025;
+	else
+		thinktime self : 0;
+}
+
+void flamecircle_fire ()
+{
+vector ang;
+float chance, delay, dist, i;
+entity new, master;
+	
+	dist = 40+self.intelligence*4;
+	ang = self.v_angle;
+	
+	master = spawn();
+	master.owner = self;
+	master.cnt = 24;	//number of flames spawned
+	master.think = circflame_master;
+	thinktime master : HX_FRAME_TIME*2;
+	
+	for (i=0; i<24; i++) {
+		ang_y += 15;
+		if (ang_y>360)
+			ang_y -= 360;
+		
+		makevectors(ang);
+		
+		new = spawn();
+		CreateEntityNew(new,ENT_MUMMY_FIRE,"models/mumshot.mdl",SUB_Null);
+		setorigin (new, self.origin+v_forward*dist);
+		
+		//linked entities
+		new.owner = self;
+		new.controller = master;
+		//angles
+		new.o_angle = ang;
+		new.o_angle_x = new.o_angle_z = 0;
+		new.angles = ang + '0 -90 0';
+		//appearance
+		new.scale=2.5;
+		new.drawflags=MLS_ABSLIGHT|DRF_TRANSLUCENT;
+		new.abslight=0.5;
+		new.effects(+)EF_NODRAW;	//unset by think
+		//flags & counters
+		new.aflag = TRUE;
+		new.cnt=5;		//anim loops before disappearing
+		new.t_length = dist;
+		new.dmg=1;
+		//functions
+		new.touch = mflame_burn;
+		new.think = circflame_run;
+		thinktime new : delay;
+		
+		//model type
+		chance = random();
+		if (chance < .33)
+			new.style = 0;
+		else if (chance < .66)
+			new.style = 1;
+		else
+			new.style = 2;
+		
+		delay += HX_FRAME_TIME;
+	}
+	
+	self.class_weaponvar = TRUE;
+	self.greenmana -= FLAMECIRCLE_COST;
+	if (!self.artifact_flags&AFL_TORCH)
+		self.effects(+)EF_LIGHT;
+	sound(self,CHAN_BODY,"eidolon/flamend.wav",1,ATTN_NORM);
+	sound(master,CHAN_BODY,"misc/fburn_bg.wav",0.5,ATTN_IDLE);
+}
+
 /*======================
 ACTION
 select
@@ -710,7 +872,7 @@ void flameorb_fire (void)
 				}
 			}
 			// Out of mana?
-			if((self.greenmana < 1) || ((self.greenmana < 10) && (self.artifact_active & ART_TOMEOFPOWER))) {
+			if((self.greenmana < 1) || (altfiring && self.greenmana<FLAMECIRCLE_COST) || ((self.greenmana < 10) && (self.artifact_active & ART_TOMEOFPOWER))) {
 				self.wfs = WF_NORMAL_ADVANCE;
 				self.weaponframe_cnt = 0;
 				self.ltime = -1;
@@ -722,8 +884,10 @@ void flameorb_fire (void)
 					self.th_weapon = flameorb_ready_power;
 				}
 			}
-			// Attack frame was encountered in frame advance --
-			// perform attack
+			// Attack frame was encountered in frame advance -- perform attack
+			else if (attackframe_passed && self.altfiring && !self.class_weaponvar) {
+				flamecircle_fire();
+			}
 			else if (attackframe_passed && !(self.artifact_active & ART_TOMEOFPOWER)) {
 				sound(self, CHAN_BODY, "succubus/flamstrt.wav", 0.5, ATTN_NORM);
 				flamestream_fire();
@@ -742,8 +906,12 @@ void flameorb_fire (void)
 
 }
 
-void Suc_Forb_Fire()
+void Suc_Forb_Fire(float rightclick)
 {
+	if (rightclick)
+		self.altfiring = TRUE;
+	else
+		self.altfiring = FALSE;
 	flameorb_fire();
 
 	thinktime self : 0;
