@@ -1762,9 +1762,6 @@ void SpawnExtraItem ()
 {
 	entity extra;
 	vector org;
-	vector neworg;
-	vector newangle;
-	float loop_cnt;
 	
 	org = FindSpawnSpot(32, 96, 360, self);	//find spot to spawn between 32-96 units away, 360 degrees around self
 	if (org==VEC_ORIGIN)
