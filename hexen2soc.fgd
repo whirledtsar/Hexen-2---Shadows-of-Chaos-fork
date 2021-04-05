@@ -1443,6 +1443,7 @@
 	spawnflags(Flags) =
 	[
 		1 : "Animated swaying" : 0
+		2 : "Snowy skin" : 0
 	]
 ]
 @PointClass base(Object) model(":models/webs.mdl") size(-25 -25 -25, 25 25 25) = obj_webs : "Spider web"
