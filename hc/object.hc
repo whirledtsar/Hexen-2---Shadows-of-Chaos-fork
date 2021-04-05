@@ -467,6 +467,9 @@ void obj_tree2()
 	else
 		self.mdl = "models/tree2.mdl";
 	
+	if (self.spawnflags&2)	//snowy skin
+		self.skin = 1;
+	
 	precache_model(self.mdl);
 	CreateEntityNew(self,ENT_TREE,self.mdl,tree2_death);
 
