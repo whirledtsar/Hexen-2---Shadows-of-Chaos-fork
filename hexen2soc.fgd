@@ -1443,6 +1443,7 @@
 	spawnflags(Flags) =
 	[
 		1 : "Animated swaying" : 0
+		2 : "Snowy skin" : 0
 	]
 ]
 @PointClass base(Object) model(":models/webs.mdl") size(-25 -25 -25, 25 25 25) = obj_webs : "Spider web"
@@ -2302,6 +2303,12 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		524288 : "Buried: no earth/dirt FX when rising"
 	]
 ]
+
+@PointClass base(Monster) size(-16 -16 0, 16 16 56) model(":models/roman.mdl") = monster_roman : "Legionnaire (similar to Mummy, with Roman theme)"
+[]
+
+@PointClass base(Monster) size(-16 -16 0, 16 16 56) model(":models/roman.mdl") = monster_roman_lord : "Elite Legionnaire (similar to Mummy Lord, with Roman theme)"
+[]
 
 @PointClass base(Appearflags, Targetname, Target) size(-10 -10 0, 10 10 12) model(":models/misc_mum.mdl") = obj_mummy : "Decorative mummy; use invisible breakable_brush's for collision"
 []
