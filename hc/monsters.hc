@@ -225,6 +225,9 @@ void() walkmonster_start_go =
 	if(!self.touch)
 		self.touch=obj_push;
 
+	if (self.playercontrolled)
+		self.spawnflags(+)NO_DROP;
+
 	if(!self.spawnflags&NO_DROP)
 	{
 		self.origin_z = self.origin_z + 1;	// raise off floor a bit
@@ -233,6 +236,7 @@ void() walkmonster_start_go =
 		{
 			if(self.flags2&FL_SUMMONED)
 			{
+				sdprint("Summon monster removed", FALSE);
 				remove(self);
 				return; /* THOMAS: return  was missing here */
 			}
