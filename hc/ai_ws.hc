@@ -39,6 +39,9 @@ float EnemyIsValid (entity ent)
 		&& self.classname!="monster_medusa")	return FALSE;
 	if (ent.artifact_active&ARTFLAG_ASH
 		|| ent.skin==GLOBAL_SKIN_ASH)			return FALSE;
+	if (self.playercontrolled
+		&& ent.classname=="monster_undying"
+		&& !ent.takedamage)						return FALSE;
 	
 	return TRUE;
 }
@@ -128,6 +131,10 @@ float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
 {
 vector dest;
 	makevectors(self.angles);
+	
+	if (!walkmove(0,0, FALSE))
+		return FALSE;
+	
 	dest = spot + ('0 0 1' * maxs_z*1.25);
 	
 	traceline (spot, dest, TRUE, ignore);	//try simple trace first
@@ -146,7 +153,7 @@ vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ign
 {
 	vector spot,newangle;
 	float loop_cnt,forward;
-
+	
 	trace_fraction = 0;
 	loop_cnt = 0;
 	do
@@ -157,24 +164,24 @@ vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ign
 		forward = random(rangemin,rangemax);
 		spot = self.origin + v_forward * forward;
 		traceline (spot, (spot - (v_up * 200)), TRUE, ignore);
-		if (trace_fraction == 1)	// Didn't hit anything?  There was no floor
-			return FALSE;
+		if (!self.flags&FL_FLY) {
+			if (trace_fraction == 1)	// Didn't hit anything?  There was no floor
+				return VEC_ORIGIN;
+		}
 		spot = trace_endpos;
 		
 		if (CanSpawnAtSpot(spot, self.orgnl_mins, self.orgnl_maxs, ignore))
-		{
 			trace_fraction = 1;
-		}
 		else
 			trace_fraction = 0;		// So it will loop
 		
 		loop_cnt += 1;
-
+		
 		if (loop_cnt > 500)   // No endless loops
 			return VEC_ORIGIN;
 
 	} while (trace_fraction != 1);
-
+	
 	return spot;
 }
 
