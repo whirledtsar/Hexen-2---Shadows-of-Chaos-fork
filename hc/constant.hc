@@ -651,7 +651,8 @@ float ACT_DEAD			= 8;
 float ACT_DECAP			= 9;
 
 //map spawnflags
-float SLIME_UNINHIBITIVE = 4;	//Slime doesn't slow player down more than water
+float WSF_SLIME_UNINHIBITIVE = 4;	//Slime doesn't slow player down more than water
+float WSF_WELCOMEMESSAGE = 8;		//Show SOC welcome message when this level begins
 
 //Inventory maximums
 float MAX_CUBE = 2;
