@@ -697,7 +697,7 @@ void()player_sheep_baa;
 void W_Attack (float rightclick)
 {
 	if (!W_CheckNoAmmo (self.weapon))
-	{dprint("noammo\n");
+	{
 		W_BestWeapon ();
 		W_SetCurrentWeapon ();
 		return;
