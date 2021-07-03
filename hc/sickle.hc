@@ -61,9 +61,14 @@ float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore);
 
 void minion_solid()
 {
+	if (!self.enemy || !self.controller) {
+		remove(self);
+		return;
+	}
+	
 	float dist;
 	dist = vlen(self.enemy.origin - self.controller.origin);
-	if (dist > 80)
+	if (dist > 60)
 	{
 		self.enemy.owner = world;	//enemy is the minion in question; owner was the player who summoned it
 		remove(self);
@@ -75,44 +80,43 @@ void minion_solid()
 
 void minion_init()
 {
-	float level;
+	self.flags2 (+) FL_SUMMONED;
+	self.flags2 (+) FL_ALIVE;
+	self.preventrespawn = TRUE;	// mark so summoned monster cannot respawn
+	self.playercontrolled = TRUE;
+	dprint("minion init\n");
+	
+	self.th_init();
+	dprint("minion spawnfunc ran\n");
 	
 	if (!CanSpawnAtSpot(self.origin, self.mins, self.maxs, self.owner)) {
-		self.counter++;
-		if (self.counter>20) {
-			chunk_death();
+		dprint("minion finding newspot\n");
+		vector newspot;
+		newspot = FindSpawnSpot(0, 64, 360, self.controller);
+		if (newspot != VEC_ORIGIN)
+			self.origin = newspot;
+		else {
+			self.counter++;
+			if (self.counter>20) {dprint("minion couldnt spawn\n");
+				chunk_death();
+				return;
+			}
+			self.think = minion_init;
+			thinktime self : 0.1;
 			return;
 		}
-		thinktime self : 0.1;
-		return;
 	}
-	
-	level = self.cnt + self.aflag;	//cnt is player level, aflag is monster class (0, grunt, henchman, leader, boss, final boss)
-	self.cnt = 0;
-	self.aflag = 0;
+	setorigin(self, self.origin);
+	dprint("minion spawned at "); dprint(vtos(self.origin)); dprint("\n");
 	
 	newmis = spawn();	//create entity that makes the summoned monster solid to the player only if the player is far enough away not to be blocked
 	newmis.enemy = self;
 	newmis.controller = self.controller;
 	newmis.think = minion_solid;
-	thinktime newmis : 1;
-	
-	if (level > 11)
-		monster_mummy();
-	else if (level > 8)
-		monster_death_knight();		//monster_werejaguar(); does not work! probably uses .enemy field in way that interferes w/ summoned monster logic
-	else if (level > 5)
-		monster_scorpion_black();
-	else if (level > 3)
-		monster_scorpion_yellow();
-	else if (level > 2)
-		monster_spider_yellow_large();
-	else if (level > 1)
-		monster_spider_red_small();
-	else
-		monster_spider_yellow_small();
+	thinktime newmis : 0.5;
 	
 	self.init_exp_val = self.experience_value = 0; //no XP for summoned monsters
+	self.drawflags(+)MLS_CRYSTALGOLEM;
 	self.th_die = chunk_death; //summoned monsters explode, don't respawn
 	thinktime self : 0;
 }
@@ -133,20 +137,14 @@ void minion_summon(entity body, float intmod, float level)
 	starteffect(CE_GHOST, body.origin,'0 0 30', 0.1);
 	
 	//spawn monster
-	
 	newmis = spawn ();
-	newmis.origin = newpos + '0 0 7';
+	newmis.origin = newpos + '0 0 6';
 	newmis.angles = newangles;
 	
-	newmis.flags2 (+) FL_SUMMONED;
-	newmis.flags2 (+) FL_ALIVE;
-	//newmis.lifetime = time + (intmod * 2);	only affects spiders
 	newmis.think = minion_init;
-	newmis.nextthink = time + 0.05;
+	newmis.nextthink = time;
 	newmis.controller = self;
 	newmis.owner = self;
-	newmis.preventrespawn = TRUE;// mark so summoned monster cannot respawn
-	newmis.playercontrolled = TRUE;
 	
 	if(self.enemy!=world&&self.enemy.flags2&FL_ALIVE&&visible2ent(self.enemy,self))
 	{
@@ -159,11 +157,43 @@ void minion_summon(entity body, float intmod, float level)
 	newmis.monster_awake=TRUE; //start awake
 	newmis.team=self.team;
 	
-	//User count property to choose spawn type
-	newmis.aflag = body.monsterclass;
-	newmis.cnt = level;		//ws: changed from int to level for perfectly consistent level scaling results (since attribute raising is randomized)
+	//ws: changed from int to level for perfectly consistent level scaling results (since attribute raising is randomized)
 	if (self.artifact_active&ART_TOMEOFPOWER)
-		newmis.cnt *= 2;		//monster tier will be higher when tomed
+		level *= 2;		//monster tier will be higher when tomed
+	
+	float type = body.monsterclass + level;
+	
+	if (type > 10) {
+		newmis.th_init = monster_mummy;
+		newmis.classname = "monster_mummy";
+	}
+	/*else if (type > 8) {
+		monster_werejaguar; 	//does not work! probably uses .enemy field in way that interferes w/ summoned monster logic
+	}*/
+	else if (type > 7) {
+		newmis.th_init = monster_scorpion_black;
+		newmis.classname = "monster_scorpion_black";
+	}
+	else if (type > 5) {
+		newmis.th_init = monster_scorpion_yellow;
+		newmis.classname = "monster_scorpion_yellow";
+	}
+	else if (type > 4) {
+		newmis.th_init = monster_spider_red_large;
+		newmis.classname = "monster_spider_red_large";
+	}
+	else if (type > 2) {
+		newmis.th_init = monster_spider_yellow_large;
+		newmis.classname = "monster_spider_yellow_large";
+	}
+	else if (type > 1) {
+		newmis.th_init = monster_spider_red_small;
+		newmis.classname = "monster_spider_red_small";
+	}
+	else {
+		newmis.th_init = monster_spider_yellow_small;
+		newmis.classname = "monster_spider_yellow_small";
+	}
 }
 
 void sickle_lightning_fire ()
@@ -289,7 +319,8 @@ void sickle_fire (float altfire)
 			if (visible(risen) && risen.takedamage && !risen.flags2&FL_ALIVE && risen.think == CorpseThink && !risen.playercontrolled && !risen.preventrespawn)
 			{
 				minion_summon(risen, intmod, self.level);
-				CreateRedFlash(risen.origin + '0 0 8');
+				//CreateRedFlash(risen.origin + '0 0 8');
+				particle2(risen.origin,'-35 -35 20','35 35 140',1,PARTICLETYPE_SPIT,200);
 				
 				minions+=1;
 			}
