@@ -290,7 +290,7 @@ float damg;
 		makevectors (self.angles+self.angle_ofs);
 		source = self.origin+self.view_ofs;
 		//traceline (source, source + v_forward*48, FALSE, self);
-		SUB_TraceRange (source, source + v_forward*56, FALSE, self, 30, 30);	//trace 30 up/down, 30 side-to-side
+		SUB_TraceRange (source, source + v_forward*48, FALSE, self, 30, 15);	//trace 30 up/down, 30 side-to-side
 		if (trace_fraction == 1.0)
 			return;
 		org = trace_endpos + (v_forward * 4);
@@ -973,7 +973,7 @@ void monster_medusa_green (void)
 		precache_sound2("medusa/hitplayr.wav");
 		precache_sound2("afrit/afrithit.wav");		//SoC
 	}
-
+	
 	self.headmodel="models/medhead.mdl";
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
