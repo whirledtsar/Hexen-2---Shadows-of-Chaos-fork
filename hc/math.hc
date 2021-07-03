@@ -165,3 +165,12 @@ float(float value, float minValue, float maxValue) wrap = {
 
     return mod(value - minValue, range + 1) + minValue;
 };
+
+//ws: returns either -1 or 1
+float randomsign ()
+{
+	if (random()<0.5)
+		return -1;
+	
+	return 1;
+}
