@@ -13,6 +13,28 @@ void(entity client) ResetInventory;
 
 float EXIT_RESETINV = 16;		//ws: trigger_changelevel spawnflag
 
+void MinionEnterMap ()
+{
+	entity minion;
+	makevectors(self.angles);
+	dprint("spawning minion "); dprint(self.minionname); dprint("\n");
+	minion = spawn();
+	minion.controller = minion.owner = self;
+	minion.enemy = minion.goalentity = self;
+	minion.th_init = self.minionfunc;
+	minion.classname = self.minionname;
+	minion.origin = self.origin+v_forward*32+'0 0 6';
+	self.angles_y = self.ideal_yaw = self.controller.angles_y;
+	
+	entity oself = self;
+	self = minion;
+	self.think = minion_init;
+	thinktime self : 0;
+	minion_init();
+	self.health = self.controller.minionhealth;
+	self = oself;
+}
+
 void FreezeAllEntities(void)
 {
 	entity search;
@@ -412,6 +434,37 @@ entity found;
 			search=find(search,classname,"player");
 		}
 	}
+	
+	search=find(world,classname,"player");
+	while(search && !self.spawnflags&EXIT_RESETINV) {	dprint("start search\n");
+		if (search.playerclass == CLASS_NECROMANCER) {	dprint("found necro\n");
+			entity minion, found;
+			minion = nextent(world);
+			found = world;
+			while (minion) {
+				if (minion.playercontrolled && minion.flags2&FL_ALIVE && (vlen(minion.origin - search.origin)<300)) {
+					traceline(search.origin+search.proj_ofs, minion.origin+minion.proj_ofs, TRUE, self);
+					if (trace_fraction==1) {	dprint("minion seen\n");
+						if (!found)
+							found = minion;
+						else if (minion.monsterclass > found.monsterclass || (minion.health - found.health > 15))
+							found = minion;
+					}
+				}
+				minion = nextent(minion);
+			}
+			if (found) {dprint("found minion\n");
+				search.minionfunc = found.th_init;
+				search.minionname = found.classname;
+				search.minionhealth = found.health;
+				eprint(found);
+				remove(found);
+			}
+			else
+				search.minionfunc = SUB_Null;
+		}
+		search=find(search,classname,"player");
+	}
 
 /*	if (self.spawnflags & 2)
 	{
@@ -715,10 +768,11 @@ float pclass;
 		self.items(-)IT_WEAPON4|IT_WEAPON3|IT_WEAPON4_1|IT_WEAPON4_2|IT_WEAPON2;
 		self.skin=0;
 	}
-//	else if(self.sv_flags)
-//		serverflags=self.sv_flags;
+	
 	parm16 = self.state;	//ws: config parm flags system
 	client_ready = TRUE;	//ws: monsters check this to know when to check client config parm flags
+//	else if(self.sv_flags)
+//		serverflags=self.sv_flags;
 
 	self.classname = "player";
 	self.takedamage = DAMAGE_YES;
@@ -782,9 +836,9 @@ float pclass;
 	self.friction=self.gravity=self.standard_grav = 1;
 	self.artifact_active(-)ARTFLAG_FROZEN|ARTFLAG_STONED;
 
-	self.whiptime = 
-	self.movetime =
-	self.glyph_finished = 0;
+	self.whiptime =
+	self.movetime = 	/*timer for blood footsteps sound effect*/
+	self.glyph_finished = 0; /*delay between glyph uses*/
 	
 	/*	if(spot.playerclass)  
 	{
@@ -1015,7 +1069,6 @@ entity spot;
 		self.items(-)IT_WEAPON4|IT_WEAPON2|IT_WEAPON3|IT_WEAPON4_1|IT_WEAPON4_2;
 		self.skin=0;
 	}
-	
 //	else if(self.sv_flags)
 //		serverflags=self.sv_flags;
 
@@ -1070,9 +1123,9 @@ entity spot;
 	self.camptime+= TimeDiff;
 	self.last_attack= self.attack_finished=0;
 	
-	self.glyph_finished =
-	self.movetime =
-	self.whiptime = 0;
+	self.whiptime =
+	self.movetime = 	/*timer for blood footsteps sound effect*/
+	self.glyph_finished = 0; /*delay between glyph uses*/
 
 	self.light_level = 128;		// So the assassin doesn't go invisible coming out of the teleporter
 
@@ -1122,6 +1175,10 @@ entity spot;
 		self.cnt_cubeofforce+=1;
 		self.artifact_flags(-)AFL_CUBE_RIGHT;
 		UseCubeOfForce();
+	}
+	
+	if (self.minionfunc && self.minionfunc != SUB_Null) {
+		MinionEnterMap();
 	}
 }
 
@@ -1894,7 +1951,6 @@ void() PlayerPreThink =
 			self.flags = self.flags | FL_JUMPRELEASED;
 			self.velocity = 0.9 * self.velocity;
 			self.velocity_z = 0;
-			self.gravity = 0.0000001;	//necessary to keep player from sliding down if they start climbing from jump
 		}
 	}
 	else {
@@ -1904,7 +1960,7 @@ void() PlayerPreThink =
 		if (self.button2)
 			PlayerJump ();
 		else
-			self.flags = self.flags(+)FL_JUMPRELEASED;
+			self.flags(+)FL_JUMPRELEASED;
 	}
 
 // teleporters can force a non-moving pause time
@@ -2942,15 +2998,15 @@ string deathstring, deathstring2,iclass;
 				bprint (" was exterminated by a Legionnaire!");
 			if (attacker.classname == "monster_roman_lord")
 				bprint (" was felt the sting of an Elite Legionnaire's spear!");
-			if (attacker.classname == "reiver")
-				bprint (" joined a Reiver in the graveyard");
+			if (attacker.classname == "monster_reiver")
+				bprint (" joined a Reiver in the graveyard!");
 			if (attacker.netname == "maulotaur")
 			{
 				local string name;
 				if (attacker.classname == "monster_maulotaur")
-					name = "a Maulotaur";
+					name = "a Maulotaur!";
 				else
-					name = "the Maulotaur Lord";
+					name = "the Maulotaur Lord!";
 				
 				if (targ.deathtype == "maul_quake")
 					bprint (" is quaking in their boots!");
@@ -2964,20 +3020,22 @@ string deathstring, deathstring2,iclass;
 					bprint (" was smited by "); bprint (name); }
 			}
 			if(attacker.classname == "monster_undying")
-				bprint (" became one with the Undying");
+				bprint (" became one with the Undying!");
 			if(attacker.classname == "monster_afrit")
-				bprint (" tasted an Afrit's fire volley");
+				bprint (" tasted an Afrit's fire volley!");
 			if(attacker.classname == "monster_death_knight")
 			{
 				if(targ.decap==1)
-					bprint ("'s head was unceremoniously separated by a Berserker Knight");
+					bprint ("'s head was unceremoniously separated by a Berserker Knight!");
 				else
-					bprint (" was hacked to pieces by a Berserker Knight");
+					bprint (" was hacked to pieces by a Berserker Knight!");
 			}
 			if(attacker.classname == "monster_disciple")
-				bprint (" couldn't dodge a Disciple");
+				bprint (" couldn't dodge a Disciple!");
 			if(attacker.classname == "monster_bishop")
-				bprint (" was tracked down by a Dark Bishop's magic");
+				bprint (" was tracked down by a Dark Bishop's magic!");
+			if(attacker.classname == "monster_wendigo")
+				bprint (" is an ice cube thanks to a Wendigo!");
 			if(attacker.model=="models/sheep.mdl")
 			{
 				if(random()<0.5)
@@ -3239,6 +3297,7 @@ string deathstring, deathstring2,iclass;
 	}
 };
 
+
 float CheckCfgParm (float parm)	//returns value of config flag
 {
 	if (parm16&parm)
@@ -3247,7 +3306,7 @@ float CheckCfgParm (float parm)	//returns value of config flag
 		return FALSE;
 }
 
-float SetCfgParm (float parm)	//toggle config flag and returns true if enabled, false if disabled
+float SetCfgParm (float parm)	//toggles config flag and returns true if enabled, false if disabled
 {
 float retval;
 	if (self.state&parm) {
