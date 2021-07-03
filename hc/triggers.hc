@@ -1175,6 +1175,8 @@ void() tdeath_touch =
 float force_frag;
 	if (other == self.owner)
 		return;
+	if (other.playercontrolled && other.owner==self.owner)
+		return;
 
 // frag anyone who teleports in on top of an invincible player
 	if(self.frags)
