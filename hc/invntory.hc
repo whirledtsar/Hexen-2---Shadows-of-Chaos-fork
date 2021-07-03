@@ -404,7 +404,7 @@ void UseBlast (void)
 
 				if (trace_fraction == 1)  // No walls in the way
 				{	//ws: changed from chan_weapon
-					sound (self, CHAN_ITEM, "raven/blast.wav", 1, ATTN_NORM);
+					sound (self, 5, "raven/blast.wav", 1, ATTN_NORM);
 					
 					if (((victim.movetype != MOVETYPE_FLYMISSILE) && (victim.movetype != MOVETYPE_BOUNCEMISSILE)) || (victim.classname =="chain_head" ))
 					{	
@@ -456,7 +456,7 @@ void UseBlast (void)
 					if (points > 10)
 						points = 10;
 
-					T_Damage (victim, self, blaster, points);
+					T_Damage (victim, blaster, self, points);
 				}
 			}
 		}
