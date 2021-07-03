@@ -3,7 +3,7 @@
 	Code by Whirledtsar, model by Razumen
 	
 	Custom/edited functions used:
-	ai.hc:		void ChangePitch ()
+	ai_ws.hc:		void ChangePitch ()
 	fx.hc:		void fx_light (vector org, float effect)
 	weapons.hc:	void Knockback (entity victim, entity attacker, entity inflictor, float force, float zmod)
 */
@@ -48,6 +48,7 @@ void() reiv_melee;
 void() reiv_meleedrain;
 void() reiv_mis;
 void(entity attacker, float damg) reiv_pain;
+void() reiv_blasted;
 void() reiv_run;
 void() reiv_stand;
 
@@ -117,6 +118,7 @@ void reiv_rise () [++ $001rise .. $024rise]
 		self.attack_finished = time+2;
 		self.movetype = MOVETYPE_STEP;
 		self.th_pain = reiv_pain;
+		self.th_blasted = reiv_blasted;
 		setsize (self, REIV_MINS, REIV_MAXS);
 		//self.solid = SOLID_SLIDEBOX;		//handled in reiv_check
 		self.takedamage = DAMAGE_YES;
@@ -577,6 +579,20 @@ float enemy_range;
 	thinktime self : 0;
 }
 
+void reiv_blasted () [++ $127stun .. $137stun]
+{
+	if (self.blasted > 1) {
+		ai_backfromenemy(self.blasted);
+		self.blasted -= BLAST_DECEL;
+	}
+	
+	if (self.frame == $137stun)
+		self.think = reiv_run;
+	else
+		self.think = reiv_blasted;
+	thinktime self : HX_FRAME_TIME;
+}
+
 void reiv_run () [++ $025idle .. $038idle]
 {
 	self.think = reiv_run;
@@ -696,6 +712,7 @@ void monster_reiver ()
 		self.th_stand = reiv_stand;
 		self.th_run = reiv_run;
 		self.th_pain = reiv_pain;
+		self.th_blasted = reiv_blasted;
 	}
 	
 	self.th_walk = reiv_walk;

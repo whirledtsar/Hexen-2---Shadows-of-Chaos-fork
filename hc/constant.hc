@@ -692,3 +692,12 @@ float IMPULSE_INFO = 50;
 float IMPULSE_RESPAWN = 51;
 float IMPULSE_FADE = 52;
 float IMPULSE_BUFF = 53;
+
+//possible extra weapons
+float IT_WEAPON5					= 8;
+float IT_WEAPON6					= 16;
+float IT_WEAPON7					= 32;
+float IT_WEAPON8					= 64;
+
+//rate of decceleration for effect of disc of repulsion on fly monsters
+float BLAST_DECEL = 4;
