@@ -1137,7 +1137,7 @@ void() W_WeaponFrame =
 {
 if (!(deathmatch))
 {
-	if (world.model == "maps/demo1.bsp" || world.model == "maps/vil1.bsp")
+	if (world.model == "maps/demo1.bsp" || world.model == "maps/vil1.bsp" || world.spawnflags&WSF_WELCOMEMESSAGE)
 	{
 	if (self.welcomeshown <= 12)		// set endtime of welcome message here
 			{
