@@ -1395,7 +1395,7 @@ void() WaterMove =
 	}
 
 	if (! (self.flags & FL_WATERJUMP) )
-		self.velocity = self.velocity - 0.8*self.waterlevel*frametime*self.velocity*((self.watertype==CONTENT_SLIME&&!world.spawnflags&SLIME_UNINHIBITIVE)*5);
+		self.velocity = self.velocity - 0.8*self.waterlevel*frametime*self.velocity* ((self.watertype==CONTENT_SLIME&&!world.spawnflags&WSF_SLIME_UNINHIBITIVE)*5);
 };
 
 void CheckCrouch (void)
