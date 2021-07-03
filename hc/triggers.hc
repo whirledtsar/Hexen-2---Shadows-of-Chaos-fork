@@ -1006,6 +1006,8 @@ void() tdeath_touch =
 {
 	if (other == self.owner)
 		return;
+	if (other.playercontrolled && other.owner==self.owner)
+		return;
 
 // frag anyone who teleports in on top of an invincible player
 	if (other.classname == "player")
