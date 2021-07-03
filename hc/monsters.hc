@@ -95,6 +95,7 @@ void() walkmonster_start_go =
 		{
 			if(self.flags2&FL_SUMMONED)
 			{
+				sdprint("Summon monster removed", FALSE);
 				remove(self);
 				return; /* THOMAS: return  was missing here */
 			}
