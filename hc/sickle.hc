@@ -81,24 +81,28 @@ void minion_solid()
 void minion_init()
 {
 	self.flags2 (+) FL_SUMMONED;
-	self.flags2 (+) FL_ALIVE;
 	self.preventrespawn = TRUE;	// mark so summoned monster cannot respawn
 	self.playercontrolled = TRUE;
 	dprint("minion init\n");
 	
 	self.th_init();
-	dprint("minion spawnfunc ran\n");
 	
-	if (!CanSpawnAtSpot(self.origin, self.mins, self.maxs, self.owner)) {
-		dprint("minion finding newspot\n");
+	self.orgnl_mins = self.mins;
+	self.orgnl_maxs = self.maxs;
+	setsize(self, self.mins, self.maxs);
+	setorigin(self, self.origin);
+	
+	if (!CanSpawnAtSpot(self.origin, self.mins, self.maxs, self.controller)) {
+		dprint("minion finding new spot\n");
 		vector newspot;
 		newspot = FindSpawnSpot(0, 64, 360, self.controller);
 		if (newspot != VEC_ORIGIN)
-			self.origin = newspot;
+			self.origin = newspot+'0 0 1';
 		else {
+			self.drawflags(+)EF_NODRAW;
 			self.counter++;
 			if (self.counter>20) {dprint("minion couldnt spawn\n");
-				chunk_death();
+				remove(self);
 				return;
 			}
 			self.think = minion_init;
@@ -107,7 +111,7 @@ void minion_init()
 		}
 	}
 	setorigin(self, self.origin);
-	dprint("minion spawned at "); dprint(vtos(self.origin)); dprint("\n");
+	//dprint("minion spawned at "); dprint(vtos(self.origin)); dprint("\n");
 	
 	newmis = spawn();	//create entity that makes the summoned monster solid to the player only if the player is far enough away not to be blocked
 	newmis.enemy = self;
@@ -116,6 +120,7 @@ void minion_init()
 	thinktime newmis : 0.5;
 	
 	self.init_exp_val = self.experience_value = 0; //no XP for summoned monsters
+	self.drawflags(-)EF_NODRAW;
 	self.drawflags(+)MLS_CRYSTALGOLEM;
 	self.th_die = chunk_death; //summoned monsters explode, don't respawn
 	thinktime self : 0;
@@ -138,7 +143,7 @@ void minion_summon(entity body, float intmod, float level)
 	
 	//spawn monster
 	newmis = spawn ();
-	newmis.origin = newpos + '0 0 6';
+	newmis.origin = newpos + '0 0 14';
 	newmis.angles = newangles;
 	
 	newmis.think = minion_init;
