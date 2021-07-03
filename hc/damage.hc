@@ -806,6 +806,11 @@ entity holdent;
 		if (skill == 3)
 			self.pain_finished = time + 5;		
 	}
+	if (inflictor.classname=="blast" && self.th_blasted)
+	{
+		self.blasted = damage*4;
+		self.th_blasted();
+	}
 
 	self = oldself;
 };
