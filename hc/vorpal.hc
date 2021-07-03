@@ -543,9 +543,7 @@ Deflect missiles
 
 void vorpal_downmissile (void)
 {
-	vector  dir;
 	entity  victim;
-	float chance;
 
 	if (!self.artifact_active & ART_TOMEOFPOWER)
 		return;
@@ -553,25 +551,21 @@ void vorpal_downmissile (void)
 	victim = findradius(self.origin, 150);
 	while(victim)
 	{
-		if ((victim.movetype == MOVETYPE_FLYMISSILE) && (victim.owner != self) && fov(victim,self,135))
+		if (fov(victim,self,135) && IsMissile(victim))
 		{
-			victim.owner = self;
-			chance = 1-self.intelligence*0.015;
+			float chance, result;
+			chance = 1-self.wisdom*0.015;
+			dprint(ftos(chance*100));dprint("\n");
 			if (chance<0)
 				chance = 0;
 			
-			dir = victim.origin + (v_forward * -1);
-			CreateLittleWhiteFlash(dir);
-			sound (self, CHAN_WEAPON, "weapons/vorpturn.wav", 1, ATTN_NORM);
 			if (random() < chance)  // Deflect it
-			{
-				victim.v_angle = self.v_angle + randomv('-180 -180 -180', '180 180 180'); 
-
-				makevectors (victim.v_angle);
-				victim.velocity = v_forward * 1000;
-			}
+				result = ReflectMissile (victim, REFLECT_DEFLECT, CE_SM_WHITE_FLASH, 1, 0, 180, TRUE, CLASS_BOSS);
 			else  // reflect missile
-				victim.velocity = '0 0 0' - victim.velocity;
+				result = ReflectMissile (victim, REFLECT_REFLECT, CE_SM_WHITE_FLASH, 1, 0, 0, TRUE, CLASS_BOSS);
+			
+			if (result)
+				sound (self, CHAN_WEAPON, "weapons/vorpturn.wav", 1, ATTN_NORM);
 		}
 		victim = victim.chain;
 	}
