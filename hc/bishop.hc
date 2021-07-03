@@ -23,7 +23,7 @@ void()	dark_bishop_pdie1	=[	0,	dark_bishop_pdie2	] {};
 void()	dark_bishop_pdie2	=[	1,	dark_bishop_pdie3	] {};
 void()	dark_bishop_pdie3	=[	2,	dark_bishop_pdie4	] {};
 void()	dark_bishop_pdie4	=[	3,	dark_bishop_pdie5	] {};
-void()	dark_bishop_pdie5	=[	4,	dark_bishop_pdie5	] {remove(self);};
+void()	dark_bishop_pdie5	=[	4,	SUB_Remove	] {};
 
 void()	dark_bishop_dsprite9		=[	8,	dark_bishop_dsprite10	] {};
 void()	dark_bishop_dsprite10	=[	9,	dark_bishop_dsprite11	] {};
@@ -111,7 +111,8 @@ void()	dark_bishop_warp5	=[	17,		dark_bishop_warp6	] {ai_charge(19);};
 void()	dark_bishop_warp6	=[	16,		dark_bishop_warp7	] {ai_charge(19);CreateGreenSmoke(self.origin,'0 0 0',HX_FRAME_TIME);};
 void()	dark_bishop_warp7	=[	17,		dark_bishop_run1	] {ai_charge(19);self.drawflags(-)DRF_TRANSLUCENT;};
 
-void() FireBishopMissile;
+void(float total) InitBishopVolley;
+void(entity newmis, vector dir) FireBishopMissile;
 
 void()	dark_bishop_atk1	=[	11,		dark_bishop_atk2	] {
 	sound(self,CHAN_AUTO,"bishop/atk.wav",0.7,ATTN_NORM);
@@ -121,22 +122,28 @@ void()	dark_bishop_atk3	=[	13,		dark_bishop_atk4	] {ai_face(); };
 void()	dark_bishop_atk4	=[	14,		dark_bishop_atk5	] {ai_face(); };
 void()	dark_bishop_atk5	=[	15,		dark_bishop_atk6	] {ai_face(); };
 void()	dark_bishop_atk6	=[	19,		dark_bishop_atk7	] {ai_face(); };
-void()	dark_bishop_atk7	=[	16,		dark_bishop_atk8	] {ai_face(); FireBishopMissile(); };
+void()	dark_bishop_atk7	=[	16,		dark_bishop_atk8	] {ai_face(); 
+InitBishopVolley(4);
+if (self.enemy)
+	self.movedir = normalize((self.enemy.origin+self.enemy.proj_ofs) - (self.origin+self.proj_ofs));
+else
+	self.movedir = self.v_angle;
+FireBishopMissile(self.path_current, self.movedir); };
 void()	dark_bishop_atk8	=[	17,		dark_bishop_atk9	] {};
 void()	dark_bishop_atk9	=[	18,		dark_bishop_atk10	] {};
 void()	dark_bishop_atk10	=[	19,		dark_bishop_atk11	] {};
-void()	dark_bishop_atk11	=[	16,		dark_bishop_atk12	] {FireBishopMissile(); };
+void()	dark_bishop_atk11	=[	16,		dark_bishop_atk12	] {FireBishopMissile(self.path_current.path_current, self.movedir); };
 void()	dark_bishop_atk12	=[	17,		dark_bishop_atk13	] {};
 void()	dark_bishop_atk13	=[	18,		dark_bishop_atk14	] {};
 void()	dark_bishop_atk14	=[	19,		dark_bishop_atk15	] {};
-void()	dark_bishop_atk15	=[	16,		dark_bishop_atk16	] {FireBishopMissile(); };
+void()	dark_bishop_atk15	=[	16,		dark_bishop_atk16	] {FireBishopMissile(self.path_current.path_current.path_current, self.movedir); };
 void()	dark_bishop_atk16	=[	17,		dark_bishop_atk17	] {};
 void()	dark_bishop_atk17	=[	18,		dark_bishop_atk18	] {};
 void()	dark_bishop_atk18	=[	19,		dark_bishop_atk19	] {};
-void()	dark_bishop_atk19	=[	16,		dark_bishop_atk20	] {FireBishopMissile(); };
+void()	dark_bishop_atk19	=[	16,		dark_bishop_atk20	] {FireBishopMissile(self.path_current.path_current.path_current.path_current, self.movedir); };
 void()	dark_bishop_atk20	=[	17,		dark_bishop_atk21	] {};
 void()	dark_bishop_atk21	=[	18,		dark_bishop_atk22	] {};
-void()	dark_bishop_atk22=[	20,		dark_bishop_atk23	] {SUB_AttackFinished(1); if (random() < 0.25) dark_bishop_dodge1();};
+void()	dark_bishop_atk22=[	20,		dark_bishop_atk23	] {SUB_AttackFinished(6); if (random() < 0.25) dark_bishop_dodge1();};
 void()	dark_bishop_atk23=[	21,		dark_bishop_atk24	] {};
 void()	dark_bishop_atk24=[	22,		dark_bishop_atk25	] {};
 void()	dark_bishop_atk25=[	23,		dark_bishop_atk26	] {};
@@ -146,15 +153,35 @@ void()	dark_bishop_atk26=[	24,		dark_bishop_run1	] {};
 
 void()	dark_bishop_pain1	=[	25,	dark_bishop_pain2	] {};
 void()	dark_bishop_pain2	=[	26,	dark_bishop_pain3	] {if (random() > 0.5) dark_bishop_dodge1(); };
-void()	dark_bishop_pain3	=[	27,	dark_bishop_pain4	] {};
-void()	dark_bishop_pain4	=[	28,	dark_bishop_pain5	] {};
-void()	dark_bishop_pain5	=[	29,	dark_bishop_pain6	] {ai_pain(2);};
-void()	dark_bishop_pain6	=[	30,	dark_bishop_pain7	] {if (random() > 0.5) dark_bishop_dodge1(); };
+void()	dark_bishop_pain3	=[	27,	dark_bishop_pain4	] {ai_pain(1); };
+void()	dark_bishop_pain4	=[	28,	dark_bishop_pain5	] {ai_pain(2); };
+void()	dark_bishop_pain5	=[	29,	dark_bishop_pain6	] {ai_pain(4); };
+void()	dark_bishop_pain6	=[	30,	dark_bishop_pain7	] {if (random() > 0.25) dark_bishop_dodge1(); };
 void()	dark_bishop_pain7	=[	31,	dark_bishop_pain8	] {};
 void()	dark_bishop_pain8	=[	32,	dark_bishop_pain9	] {};
 void()	dark_bishop_pain9	=[	33,	dark_bishop_pain10	] {};
 void()	dark_bishop_pain10	=[	34,	dark_bishop_pain11	] {};
 void()	dark_bishop_pain11	=[	35,	dark_bishop_run1	] {};
+
+void dark_bishop_blasted ()
+{
+	float result = AdvanceFrame(25, 35);
+	
+	if (self.blasted > 1) {
+		ai_backfromenemy(self.blasted);
+		self.blasted -= BLAST_DECEL;
+	}
+	
+	if (result == AF_END)
+		self.think = bishop_run1;
+	else if (self.frame == 32) {
+		if (random() > 0.25)
+			dark_bishop_dodge1();
+	}
+	else
+		self.think = bishop_blasted;
+	thinktime self : HX_FRAME_TIME;
+}
 
 void(entity attacker, float damage)	dark_bishop_pain =
 {
@@ -163,9 +190,8 @@ void(entity attacker, float damage)	dark_bishop_pain =
 
 	sound (self, CHAN_VOICE, "bishop/pain.wav", 1, ATTN_NORM);
 	ThrowGib ("models/blood.mdl", self.health);
-	dark_bishop_pain1 ();
 	self.pain_finished = time + 1;
-	
+	dark_bishop_pain1();
 };
 
 /*
@@ -193,10 +219,10 @@ void()	dark_bishop_die6	=[	41,	dark_bishop_die7	] {};
 void()	dark_bishop_die7	=[	42,	dark_bishop_die8	] {};
 void()	dark_bishop_die8	=[	43,	dark_bishop_die9	] {};
 void()	dark_bishop_die9	=[	44,	dark_bishop_die10] {};
-void()	dark_bishop_die10=[	45,	dark_bishop_die11] {CreateFog(self.origin+'0 0 8'); };
-void()	dark_bishop_die11=[	46,	dark_bishop_die12] {CreateFog(self.origin+'0 0 8'); };
-void()	dark_bishop_die12=[	47,	dark_bishop_die13] {CreateFog(self.origin+'0 0 8'); };
-void()	dark_bishop_die13=[	48,	dark_bishop_die14] {CreateFog(self.origin+'0 0 8'); };
+void()	dark_bishop_die10=[	45,	dark_bishop_die11] {self.finaldest = self.origin+'0 0 8'; CreateFog(self.finaldest); };
+void()	dark_bishop_die11=[	46,	dark_bishop_die12] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(16); CreateFog(self.finaldest); };
+void()	dark_bishop_die12=[	47,	dark_bishop_die13] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(8,24); CreateFog(self.finaldest); };
+void()	dark_bishop_die13=[	48,	dark_bishop_die14] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(16,32); CreateFog(self.finaldest); };
 void()	dark_bishop_die14=[	49,	dark_bishop_die15] {};
 void()	dark_bishop_die15=[	50,	dark_bishop_die15] {
 	ThrowGib ("models/blood.mdl", self.health);
@@ -217,28 +243,46 @@ void() bmis_touch =
 {
 	if (other.solid == SOLID_TRIGGER)
 		return;	// trigger field, do nothing
-
+	
+	if (self.aflag) {	//if we are lead missile, try to make previous missile in chain the new lead
+		entity next, newlead;
+		next = self.path_current;
+		newlead = world;
+		while (next) {
+			if (next.path_last == self) {
+				newlead = next;
+				next = world;	//end loop
+			}
+			else
+				next = next.path_current;
+		}
+		if (newlead) {dprint("newlead\n");
+			newlead.aflag = TRUE;
+			newlead.path_last = world;
+		}
+		
+		self.aflag = FALSE;
+	}
+	
 	if (pointcontents(self.origin) == CONTENT_SKY)
 	{
 		remove(self);
 		return;
 	}
 	
-	if (other.classname == "worldspawn")
-		sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);
+	sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);
 	
 	if (other.takedamage)
 	{
-		sound (self, CHAN_AUTO, "bishop/tdam.wav", 1, ATTN_NORM);
 		if (other.classname == "monster_bishop")
 		{
-			T_RadiusDamage (self, self.owner, 7, other);
+			T_RadiusDamage (self, self.owner, self.dmg, other);
 			remove(self);
 		}
 		else
 		{
 			spawn_touchpuff (6,other);
-			T_Damage (other, self, self.owner, 7);
+			T_Damage (other, self, self.owner, self.dmg);
 			remove(self);
 		}
 		return;
@@ -249,14 +293,67 @@ void() bmis_touch =
 	dark_bishop_pdie1();
 };
 
-void FireBishopMissile ()
+void bmis_fly ()
 {
+	AdvanceFrame(0,4);
+	thinktime self : 0.1;
+	
+	if (time > self.lifetime) {
+		self.scale = 1;
+		SpiralThink();
+		return;
+	}
+	
+	if (self.aflag) {
+		self.scale = 2;
+		HomeThink();
+		vector newangles;
+		newangles=vectoangles(self.velocity);
+		self.angles_y=newangles_y;
+		self.angles_x=newangles_x;
+		dprint(ftos(self.count)); dprint(" homing\n");
+		return;
+	}
+	
+	entity lead, last;
+	last = self.path_last;
+	lead = world;
+	while (last) {			//find lead missile
+		if (last.aflag) {
+			lead = last;
+			last = world;	//end loop
+		}
+		else if (!last.path_last) {		//no more missiles in chain past this one
+			lead = last;
+			lead.aflag = TRUE;
+			last = world;	//end loop
+		}
+		else
+			last = last.path_last;
+	}
+	if (!lead) {		//lead missile is gone, become new lead missile
+		dprint("no lead found\n");
+		self.aflag = TRUE;
+		HomeThink();
+		return;
+	}
+	
+	self.scale = 1;//dprint(ftos(lead.count));dprint("\n");
+	self.movedir = lead.movedir;		//follow direction of lead missile
+	SpiralThink();
+}
+
+void FireBishopMissile (entity newmis, vector dir)
+{
+	if (!newmis)
+		return;
+	
 	makevectors(self.angles);
 	v_forward=self.v_angle;
-
+	
 	self.effects(+)EF_MUZZLEFLASH;
 //identity
-	newmis=spawn();
+	//newmis=spawn();
 	newmis.owner=self;
 	newmis.classname = "bishop star";
 //physics
@@ -266,7 +363,7 @@ void FireBishopMissile ()
 	newmis.drawflags(+)MLS_ABSLIGHT;
 	newmis.effects(+)EF_DIMLIGHT;
 	newmis.abslight=0.6;
-	newmis.scale=0.8;
+	newmis.scale=0.5;
 //appearance, size, origin
 	setmodel(newmis,"models/bishop_proj.mdl");
 	setsize(newmis,'0 0 0','0 0 0');
@@ -274,25 +371,51 @@ void FireBishopMissile ()
 //impact
 	newmis.touch=bmis_touch;
 //velocity
-	newmis.speed=500;
-	newmis.velocity = normalize((self.enemy.origin+self.enemy.proj_ofs) - (self.origin+self.proj_ofs));
-	newmis.velocity = newmis.velocity * 50;
+	newmis.speed=300;
+	newmis.velocity = dir * newmis.speed;
 	newmis.movedir = normalize(newmis.velocity);
 	newmis.angles = vectoangles(newmis.velocity);
-	newmis.avelocity_z=random(300,600);
+	newmis.avelocity_z=500;
 //behavior
-	newmis.dmg=random(3,7);
+	newmis.dmg=random(4,6);
 //homing
 	newmis.enemy=newmis.lockentity=self.enemy;
-	newmis.homerate=0.05;
+	newmis.homerate=0.1;
 	newmis.hoverz=TRUE;
-	newmis.lifetime=time+1.5;		//stop homing at this time
-	newmis.turn_time=8;//12;
-	newmis.th_die=SUB_Null;	//SUB_Remove
-	newmis.veer=10;
-//think	
-	newmis.think=HomeThink;
+	newmis.lifetime=time+2.5;		//stop homing at this time
+	newmis.turn_time=8;
+	//newmis.th_die=SUB_Null;		//do this after lifetime expires
+	newmis.veer=0;	//10
+//spiraling
+	newmis.anglespeed = 40;
+//think
+	newmis.think=bmis_fly;
 	thinktime newmis : 0;
+}
+
+void InitBishopVolley (float total)
+{
+	float i;
+	entity firstmis, lastmis;
+	
+	i = 0;
+	firstmis = lastmis = world;
+	//path_last = previous entity in chain
+	//path_current = next entity in chain
+	while (i < total) {		//create chain of missiles in order of spawning
+		newmis = spawn();
+		if (lastmis) {
+			lastmis.path_current = newmis;
+			newmis.path_last = lastmis;
+		}
+		else {
+			self.path_current = newmis;		//remember head missile in chain for bishop
+			newmis.aflag = TRUE;
+		}
+		lastmis = newmis;
+		newmis.count = i+1;
+		i++;
+	}
 }
 
 /*QUAKED monster_bishop (1 0 0) (-16 -16 -24) (16 16 40) Ambush
@@ -304,7 +427,7 @@ void() monster_bishop =
 		remove(self);
 		return;
 	}
-	if (!self.flags2 & FL_SUMMONED && !self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_bishop();
 	
 	//self.skin = 1;
@@ -343,6 +466,7 @@ void() monster_bishop =
 	self.th_missile = dark_bishop_atk1;
 	self.th_pain = dark_bishop_pain;
 	self.th_die = dark_bishop_die;
+	self.th_blasted = dark_bishop_blasted;
 	self.th_init = monster_bishop;
 	
 	self.buff=2;
