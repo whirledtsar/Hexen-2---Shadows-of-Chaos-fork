@@ -20,6 +20,7 @@ float AFRIT_STAGE_SLIDE = 2;
 
 void() AfritCheckDodge;
 void() afrit_wake1;
+void() afrit_blasted;
 void(entity attacker, float damage)	afrit_pain;
 
 void afrit_raise()
@@ -246,6 +247,7 @@ void() afrit_run =
 {
 	if (self.spawnflags & AFRIT_COCOON) {
 		self.spawnflags (-) AFRIT_COCOON;
+		self.th_blasted = afrit_blasted;
 		self.th_pain = afrit_pain;
 		self.th_stand = afrit_hover1;
 		self.th_run = afrit_fly1;
@@ -347,6 +349,27 @@ void()	afrit_pain11	=[	72,	afrit_pain12	] {AfritEffects();};
 void()	afrit_pain12	=[	73,	afrit_pain13	] {};
 void()	afrit_pain13	=[	74,	afrit_pain14	] {};
 void()	afrit_pain14	=[	75,	afrit_fly1	] {AfritCheckDodge();};
+
+void afrit_blasted ()
+{
+	float result = AdvanceFrame(62, 75);
+	
+	if (self.blasted > 1) {
+		ai_backfromenemy(self.blasted);
+		self.blasted -= BLAST_DECEL;
+	}
+	
+	if (random()<0.33)
+		AfritCheckDodge();
+	if (random()<0.2)
+		AfritEffects();
+	
+	if (result == AF_END)
+		self.think = afrit_fly1;
+	else
+		self.think = afrit_blasted;
+	thinktime self : HX_FRAME_TIME;
+}
 
 void()	afrit_wake1	=[	54,	afrit_wake2	] {};
 void()	afrit_wake2	=[	55,	afrit_wake3	] {};
@@ -491,8 +514,6 @@ void() monster_afrit =
 		
 	if (self.flags2&FL_SUMMONED || self.flags2&FL2_RESPAWN)
 		self.spawnflags(-)AFRIT_COCOON;
-	
-	self.init_org = self.origin;
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
@@ -518,6 +539,7 @@ void() monster_afrit =
 	
 	if(!self.experience_value)
 		self.experience_value = 40;
+	self.init_exp_val = self.experience_value;
 	if(!self.mass)
 		self.mass = 6;
 	
@@ -529,10 +551,12 @@ void() monster_afrit =
 	self.th_missile = afrit_atk1;
 	self.th_pain = afrit_pain;
 	self.th_die = afrit_die;
+	self.th_blasted = afrit_blasted;
 	self.th_init = monster_afrit;
 	self.th_raise = afrit_raise;
 	
 	if (self.spawnflags&AFRIT_COCOON) {
+		self.th_blasted = SUB_Null;
 		if (self.spawnflags&AFRIT_DORMANT) {
 			self.th_stand = afrit_dormant;
 			self.th_pain = SUB_Null;

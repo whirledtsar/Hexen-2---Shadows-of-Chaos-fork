@@ -827,6 +827,8 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float statselection;	//indicates current selection (wraps between 0 and 3)
 .float statpoints; 		//counts stat points remaining
 .entity menu;			//player stats menu entity
+.void() th_blasted;		//flymonsters: function to run when hit by disc of repulsion to simulate effect
+.float blasted;			//flymonsters: distance to move back after being blasted
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;

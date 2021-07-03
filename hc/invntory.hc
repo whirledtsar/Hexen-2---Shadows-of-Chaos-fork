@@ -426,8 +426,8 @@ void UseBlast (void)
 				traceline(self.origin,victim.origin,TRUE,self);
 
 				if (trace_fraction == 1)  // No walls in the way
-				{
-					sound (self, CHAN_WEAPON, "raven/blast.wav", 1, ATTN_NORM);
+				{	//ws: changed from chan_weapon
+					sound (self, 5, "raven/blast.wav", 1, ATTN_NORM);
 
 					if (((victim.movetype != MOVETYPE_FLYMISSILE)
 						&& (victim.movetype != MOVETYPE_BOUNCEMISSILE)
@@ -482,7 +482,7 @@ void UseBlast (void)
 						points = 1;
 
 
-					T_Damage (victim, self, blaster, points);
+					T_Damage (victim, blaster, self, points);
 				}
 			}
 		}
