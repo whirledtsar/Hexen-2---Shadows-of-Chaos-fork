@@ -578,6 +578,10 @@ float ReflectMissile (entity other, float mode, float effect, float speedmod, fl
 vector org, vec, dir;//, endspot,endplane, dif;
 float magnitude;//remainder, reflect_count,
 entity us;
+	if (self.owner)		//self is trigger field owned by monster, owner is monster
+		us = self.owner;
+	else
+		us = self;
 
 	if (!other || other == self)	return FALSE;
 	if (self.owner && other.owner == self.owner)	return FALSE;
@@ -598,7 +602,7 @@ entity us;
 		org = other.origin;
 		vec = org + dir*100;
 		traceline (org, vec, FALSE, other);
-		if(trace_ent!=self.owner)
+		if(trace_ent!=us)
 			return FALSE;
 		org = trace_endpos;
 	}
@@ -623,6 +627,9 @@ entity us;
 	}
 	
 	if (maxangofs<=0 && mode!=REFLECT_AIMED)
+		mode = REFLECT_REFLECT;
+	
+	if (mode == REFLECT_AIMED && !other.owner)
 		mode = REFLECT_REFLECT;
 	
 	if (mode == REFLECT_AIMED) {	//fallen angel lord
@@ -650,11 +657,6 @@ entity us;
 	
 	if (other.effects&EF_NODRAW && other.touch==bone_shard_touch)		//ws: don't know why bone shards become invisible, but they do
 		other.effects(-)EF_NODRAW;
-	
-	if (self.owner)		//self is trigger field owned by monster, owner is monster
-		us = self.owner;
-	else
-		us = self;
 	
 	if(!other.controller)
 		other.controller=other.owner;
