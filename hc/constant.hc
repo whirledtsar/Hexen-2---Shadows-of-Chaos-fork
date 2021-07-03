@@ -743,3 +743,6 @@ float IT_WEAPON5					= 8;
 float IT_WEAPON6					= 16;
 float IT_WEAPON7					= 32;
 float IT_WEAPON8					= 64;
+
+//rate of decceleration for effect of disc of repulsion on fly monsters
+float BLAST_DECEL = 4;
