@@ -27,9 +27,11 @@ void()	bishop_dsprite12	=[	11,	bishop_dsprite12	] {remove(self);};
 void()	bishop_float1	=[	0,	bishop_float2	] {ai_stand();};
 void()	bishop_float2	=[	1,	bishop_float3	] {ai_stand();};
 void()	bishop_float3	=[	2,	bishop_float4	] {ai_stand();};
-void()	bishop_float4	=[	3,	bishop_float5	] {ai_stand();if (random() < 0.01)
-{
-	sound (self, CHAN_VOICE, "disciple/idle.wav", 1,  ATTN_IDLE); }else if (random () > 0.01 && random() < 0.02) sound (self, CHAN_VOICE, "disciple/idle2.wav", 1,  ATTN_IDLE);};
+void()	bishop_float4	=[	3,	bishop_float5	] {ai_stand();
+if (random() < 0.01)
+	sound (self, CHAN_VOICE, "disciple/idle.wav", 1,  ATTN_IDLE);
+else if (random () > 0.01 && random() < 0.02)
+	sound (self, CHAN_VOICE, "disciple/idle2.wav", 1,  ATTN_IDLE); };
 void()	bishop_float5	=[	4,	bishop_float6	] {ai_stand();};
 void()	bishop_float6	=[	5,	bishop_float7	] {ai_stand();};
 void()	bishop_float7	=[	6,	bishop_float8	] {ai_stand();};
@@ -120,10 +122,26 @@ void(entity attacker, float damage)	bishop_pain =
 	else
 		sound (self, CHAN_VOICE, "disciple/pain2.wav", 1, ATTN_NORM);
 	ThrowGib ("models/blood.mdl", self.health);
+	
 	bishop_pain1 ();
 	self.pain_finished = time + 1.5;
-	
 };
+
+void bishop_blasted ()
+{
+	float result = AdvanceFrame(25, 35);
+	
+	if (self.blasted > 1) {
+		ai_backfromenemy(self.blasted);
+		self.blasted -= BLAST_DECEL;
+	}
+	
+	if (result == AF_END)
+		self.think = bishop_run1;
+	else
+		self.think = bishop_blasted;
+	thinktime self : HX_FRAME_TIME;
+}
 
 //===========================================================================
 void() discip_fx =
@@ -151,7 +169,13 @@ void()	bishop_die11=[	46,	bishop_die12] {};
 void()	bishop_die12=[	47,	bishop_die13] {};
 void()	bishop_die13=[	48,	bishop_die14] {};
 void()	bishop_die14=[	49,	bishop_die15] {};
-void()	bishop_die15=[	50,	bishop_die15] {discip_fx();chunk_death();sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);ThrowGib ("models/blood.mdl", self.health);ThrowGib ("models/blood.mdl", self.health);};
+void()	bishop_die15=[	50,	bishop_die15] {
+	discip_fx();
+	chunk_death();
+	sound (self, CHAN_VOICE, "death_knight/gib2.wav", 1, ATTN_NORM);
+	ThrowGib ("models/blood.mdl", self.health);
+	ThrowGib ("models/blood.mdl", self.health);
+};
 
 
 void() bishop_die =
@@ -264,9 +288,7 @@ void() monster_disciple =
 	}
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_disciple();
-	
-	self.init_org = self.origin;
-	
+
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 	//self.movetype = MOVETYPE_FLY;
@@ -297,6 +319,7 @@ void() monster_disciple =
 	self.th_missile = bishop_atk1;
 	self.th_pain = bishop_pain;
 	self.th_die = bishop_die;
+	self.th_blasted = bishop_blasted;
 	self.th_init = monster_disciple;
 	
 	self.buff=2;
