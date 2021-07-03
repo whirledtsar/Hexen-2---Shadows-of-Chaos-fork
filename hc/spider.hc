@@ -359,8 +359,12 @@ void SpiderInit(float type)
 	self.mintel = 10;
 	self.netname = "spider";
 
-	self.health = SpiderHealth[type];
-	self.experience_value = SpiderExp[type];
+	if (!self.health)
+		self.health = SpiderHealth[type];
+	self.max_health = self.health;
+	if (!self.experience_value)
+		self.experience_value = SpiderExp[type];
+	self.init_exp_val = self.experience_value;
 
 	self.attack_state = AS_STRAIGHT;
 	self.thingtype = THINGTYPE_FLESH;
@@ -629,7 +633,7 @@ void SpiderRun(void) [++ $swalk1..$swalk16]
 	sdprint("Spider Running", TRUE);
 	if((self.spiderActiveCount += 1) > self.spiderGoPause && random()>skill/5)
 	{ // Pause for a bit
-		sdprint("Sprider Pausing", TRUE);
+		sdprint("Spider Pausing", TRUE);
 		SpiderPauseInit();
 		return;
 	}
