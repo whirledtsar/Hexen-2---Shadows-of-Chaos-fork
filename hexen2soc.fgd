@@ -29,7 +29,8 @@
 	[
 		1 : "Use PoP trains, doors, trigger_push"
 		2 : ""
-		4 : "SoC sludge doesn't slow player down"
+		4 : "SoC sludge (slime textured brush) doesn't slow player down"
+		8 : "Show SoC welcome message when map starts"
 	]
 	netname(string) : "Level name as string"
 	
