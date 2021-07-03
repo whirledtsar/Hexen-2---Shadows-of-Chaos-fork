@@ -13,8 +13,8 @@ Issues: Behaves oddly with thrown Warhammer; doesn't account for Tornado
 
 void reflect_touch ()
 {
-	if (self.inactive || !IsMissile(other) || (other.safe_time && other.safe_time>time))	//IsMissile is in ai.hc
-		return;		//use safe_time to check if missile was already just reflected, or else it can get stuck in back & forth loop
+	if (self.inactive)
+		return;
 	
 	/*if (self.movedir != '0 0 0')
 	{
@@ -22,35 +22,14 @@ void reflect_touch ()
 		if (v_forward * self.movedir < 0)
 			return;		// not facing the right way
 	}*/
-	if (other.classname=="tornato"||other.classname=="funnal"||other.classname=="chain_head")
-		return;		//don't know how to handle these yet
-	other.velocity *= (-self.speed);
-	makevectors(other.velocity);
-	other.velocity += (v_up*random(-60,60) + v_right*random(-60,60));
-	other.angles = vectoangles(other.velocity);
-	if(other.movedir) {
-		other.movedir=other.angles;
-		other.movedir=normalize(other.velocity);
-	}
-	if(other.o_angle)
-		other.o_angle=other.angles;
 	
-	other.owner = other.controller = self.goalentity;
-	if (other.owner && other.enemy)
-		other.enemy = other.owner;
-	else if (other.controller && other.enemy)
-		other.enemy = other.controller;
-	else if (other.enemy)
-		other.enemy = world;
-	other.safe_time = time+1;
-	if (other.effects & EF_NODRAW && other.touch==bone_shard_touch)		//don't know why bone shards become invisible, but they do
-		other.effects (-) EF_NODRAW;
+	if (!ReflectMissile (other, self.style, CE_BLUE_FLASH, self.speed, 40, 160, FALSE, 0))
+		return;
 	
-	CreateBlueFlash(other.origin);
 	if (self.pain_finished <= time)
 	{
 		setorigin (self.goalentity, other.origin);
-		sound (self.goalentity, CHAN_AUTO, "raven/blast.wav", 1, ATTN_NORM);
+		sound (self.goalentity, CHAN_AUTO, "raven/blast.wav", 0.75, ATTN_NORM);
 		self.pain_finished = time+0.3;
 	}
 }
@@ -71,6 +50,11 @@ void trigger_reflect ()
 		self.speed = 1;
 	else
 		self.speed = fabs(self.speed);
+	
+	if (self.style < REFLECT_REFLECT || self.style > REFLECT_AIMED) {
+		dprint("*Error: trigger_reflect with invalid style*\n");
+		self.style = REFLECT_REFLECT;
+	}
 	
 	entity reflector;
 	reflector = spawn();
