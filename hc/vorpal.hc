@@ -461,17 +461,17 @@ void vorpal_melee (float tome)
 
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
-	traceline (source, source + v_forward*64, FALSE, self);  // Straight in front
+	traceline (source, source + v_forward*80, FALSE, self);  // Straight in front
 
 	self.enemy = world;
 
 	if (trace_fraction == 1.0)	// Anything right in front ?
 	{
-		traceline (source, source + v_forward*88 - (v_up * 30), FALSE, self);  // 30 down
+		traceline (source, source + v_forward*80 - (v_up * 30), FALSE, self);  // 30 down
 	
 		if (trace_fraction == 1.0)  
 		{
-			traceline (source, source + v_forward*88 + v_up * 30, FALSE, self);  // 30 up
+			traceline (source, source + v_forward*80 + v_up * 30, FALSE, self);  // 30 up
 		
 			if (trace_fraction == 1.0)  
 				return;
