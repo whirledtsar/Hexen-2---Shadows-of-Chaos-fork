@@ -83,7 +83,10 @@ void() walkmonster_start_go =
 	
 	if(!self.touch)
 		self.touch=obj_push;
-
+	
+	if (self.playercontrolled)
+		self.spawnflags(+)NO_DROP;
+	
 	if(!self.spawnflags&NO_DROP)
 	{
 		self.origin_z = self.origin_z + 1;	// raise off floor a bit
