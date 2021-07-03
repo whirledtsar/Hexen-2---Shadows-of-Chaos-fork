@@ -666,7 +666,7 @@ void SUB_TraceRange(vector v1, vector v2, float nomonsters, entity forent, float
 			return;
 	
 	if (trace_fraction==1.0) {
-		traceline(v1, v2+(v_right*vrange), nomonsters, forent);
+		traceline(v1, v2+(v_right*hrange), nomonsters, forent);
 		if (trace_fraction==1.0)
 			traceline(v1, v2-(v_right*hrange), nomonsters, forent);
 	}
