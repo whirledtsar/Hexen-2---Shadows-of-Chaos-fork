@@ -179,3 +179,14 @@ vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ign
 	return spot;
 }
 
+void(float dist) ai_backfromenemy =
+{
+float	away;
+	if (!self.enemy)
+		away = -self.angles_y;
+	else
+		away = vectoyaw (self.origin - self.enemy.origin);
+	
+	walkmove (away, dist,FALSE);
+};
+
