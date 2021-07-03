@@ -640,13 +640,7 @@ vector punchdir;
 
 void mezzo_reflect_trig_touch ()
 {
-//vector newv;
-vector  org, vec, dir;//, endspot,endplane, dif;
-float magnitude;//remainder, reflect_count, 
-
-	if (!other || other == self) return;
-	if (!IsMissile(other))	return;
-	if (other.safe_time>time) return;
+float result;
 
 	if(!self.owner)	// fix the "assignment to world entity" bug
 	{
@@ -661,82 +655,28 @@ float magnitude;//remainder, reflect_count,
 		remove(self);
 	//	return;	// fix the "assignment to world entity" bug
 	}
-
-	if(other.classname=="funnal"||other.classname=="tornato")
-		return;
-
-	dir = normalize(other.velocity);
-	magnitude=vlen(other.velocity);
-	org = other.origin;
-	vec = org + dir*100;
-	traceline (org, vec, FALSE, other);	
-
-	if(trace_ent!=self.owner)
-		return;
-
-	if(self.owner.classname=="monster_mezzoman")
-		sound(self,CHAN_AUTO,"mezzo/slam.wav",1,ATTN_NORM);
-
-	if(!self.owner.skin&&self.owner.classname=="monster_mezzoman")
-	{//Just block it
-		if(!other.flags2&FL_ALIVE)
-			other.flags2(+)FL_NODAMAGE;
-	}
+	
+	if (self.owner.classname=="monster_fallen_angel")
+		result = ReflectMissile (other, REFLECT_DEFLECT, CE_WHITE_FLASH, 1, 0, 90, TRUE, 0);
+	if (self.owner.classname=="monster_fallen_angel_lord")
+		result = ReflectMissile (other, REFLECT_AIMED, CE_WHITE_FLASH, 1, 0, 0, TRUE, 0);
+	else if(!self.owner.skin && self.owner.classname=="monster_mezzoman")	//Just block it
+		result = ReflectMissile (other, REFLECT_BLOCK, 0, 1, 0, 0, TRUE, 0);
 	else
-	{//reflect!
-		if(self.owner.classname!="monster_mezzoman")
-		{
-			sound (self, CHAN_WEAPON, "fangel/deflect.wav", 1, ATTN_NORM);
-			CreateWhiteFlash(trace_endpos);
-			if(self.owner.classname=="monster_fallen_angel")
-			{
-				dir=dir*-1;
-				makevectors(dir);
-				dir=v_forward + v_up*random(-0.75,.75) + v_right*random(-0.75,.75);
-				dir=normalize(dir);
-			}
-			else	//if(self.owner.classname=="monster_fallen_angel_lord")
-			{
-				v_forward=normalize(other.owner.origin+other.owner.view_ofs-other.origin);
-				dir+= 2*v_forward;
-				dir=normalize(dir);
-			}
-//			else
-//				dir=dir*-1;
-		}
-		else
-		{
-			sound(self,CHAN_AUTO,"mezzo/reflect.wav",1,ATTN_NORM);
-			starteffect(CE_MEZZO_REFLECT,self.origin);
-			makevectors(trace_ent.angles);
-			dir+= 2*v_forward;
-			dir=normalize(dir);
-		}
-
-		if(other.movedir)
-			other.movedir=dir;
-		if(other.o_angle)
-			other.o_angle=dir;
-
-		if(magnitude<other.speed)
-		{
-//			dprintf("Low mag : %s\n",magnitude);
-			magnitude=other.speed;
-		}
-		other.velocity = dir*magnitude;
-		other.angles = vectoangles(other.velocity);
-
-		self.owner.last_attack=time;
-		other.safe_time=time+100/magnitude;
-
-		if(!other.controller)
-			other.controller=other.owner;
-		if(other.enemy==self.owner)
-			other.enemy=other.owner;
-		if(other.goalentity==self.owner)
-			other.goalentity=other.owner;
-		other.owner=self.owner;
+		result = ReflectMissile (other, REFLECT_REFLECT, CE_MEZZO_REFLECT, 1, 0, 0, TRUE, 0);
+	
+	if (!result)
+		return;
+	
+	if(self.owner.classname=="monster_mezzoman") {
+		sound(self.owner,5,"mezzo/slam.wav",1,ATTN_NORM);
+		sound(self,CHAN_AUTO,"mezzo/reflect.wav",1,ATTN_NORM);
 	}
+	else {
+		sound (self, CHAN_WEAPON, "fangel/deflect.wav", 1, ATTN_NORM);
+	}
+	
+	self.owner.last_attack=time;
 }
 
 void reflect_think ()

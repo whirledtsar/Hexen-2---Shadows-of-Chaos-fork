@@ -2061,6 +2061,12 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	[
 		8 : "Deactivated" : 0 : "Trigger to activate, trigger again to remove if needed"
 	]
+	style(choices) : "Reflection mode" : 0 =
+	[
+		0 : "Reflect straight back"
+		1 : "Deflect randomly"
+		2 : "Aim at missile owner"
+	]
 ]
 
 @PointClass base(Appearflags, Targetname, Target) size(-8 -8 -8, 8 8 8) = trigger_relay : "Relay"
