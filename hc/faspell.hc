@@ -96,7 +96,7 @@ void() faspell_frames =
 		remove(self);
 };
 
-void(vector offset, float set_speed) do_faSpell =
+void(vector offset, float lead) do_faSpell =
 {
 entity missile;
 vector vec, dest;
@@ -118,20 +118,26 @@ float tspeed;
 
 	makevectors (self.angles);
 	setorigin (missile, self.origin + v_factor(offset));
+	
 	//lead shot
-	tspeed=vlen(self.enemy.velocity);
-	if(tspeed>100) {
-		dest = extrapolate_pos_for_speed(missile.origin,500,self.enemy,0);	//dont use set_speed because the 2 missiles have different speeds
-		if (dest=='0 0 0') 
+	if (lead) {
+		tspeed=vlen(self.enemy.velocity);
+		if(tspeed>100) {
+			dest = extrapolate_pos_for_speed(missile.origin,600,self.enemy,0);
+			if (dest=='0 0 0') 
+				dest = self.enemy.origin+self.enemy.proj_ofs;
+		}
+		else
 			dest = self.enemy.origin+self.enemy.proj_ofs;
 	}
 	else
 		dest = self.enemy.origin+self.enemy.proj_ofs;
+	
 
     vec = dest - missile.origin;
 	vec = normalize(vec);
 
-	missile.velocity = (vec+aim_adjust(self.enemy))*set_speed;
+	missile.velocity = (vec+aim_adjust(self.enemy))*600;
 	missile.angles = vectoangles(missile.velocity);
 	missile.spell_angle = random(360);
 	missile.count = 1;
