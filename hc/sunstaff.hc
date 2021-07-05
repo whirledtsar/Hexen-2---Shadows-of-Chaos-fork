@@ -282,7 +282,7 @@ void sun_think ()
 		thinktime dummy : 0;
 		
 		if (self.sunHomeTimer < time) {
-			local entity find, oself;
+			local entity find;
 			find = findradius(self.origin,1000);
 			
 			while (find) {
