@@ -497,6 +497,7 @@ void end_sys_fields;
 	{	// Skull Wizard
 		float teleportTime;
 		float raiseTime;
+		float summonTime;
 	};
 };
 
