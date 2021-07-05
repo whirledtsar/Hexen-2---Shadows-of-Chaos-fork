@@ -530,6 +530,12 @@ void end_sys_fields;
 		float maulAtten;
 		float maulRange;
 	};
+	struct
+	{	// Skull Wizard
+		float teleportTime;
+		float raiseTime;
+		float summonTime;
+	};
 };
 
 //Needed to remember set gravity compared to other grav changes
