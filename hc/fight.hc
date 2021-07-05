@@ -102,6 +102,9 @@ float CheckAttack()
 	}
 	else
 		chance = 0;
+	
+	if (self.enemy.playerclass==CLASS_NECROMANCER && self.enemy.class_weaponvar && fov(self,self.enemy,45))
+		chance *= 0.5;	//player has projectile blocking spell active
 
 	if (random () < chance)
 	{
