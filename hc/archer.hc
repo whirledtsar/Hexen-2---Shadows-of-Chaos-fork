@@ -146,11 +146,7 @@ float archer_check_shot(void)
 	spot1 = self.origin + v_right * 10 + v_up * 36;
 	spot2 = self.enemy.origin + self.enemy.view_ofs;
 
-	traceline (spot1, spot2, FALSE, self);
-
-	if (trace_ent.thingtype >= THINGTYPE_WEBS)
-		traceline(trace_endpos, spot2, FALSE, trace_ent);
-
+	SUB_TraceThroughObstacles(spot1, spot2, FALSE, self, self.enemy);
 	if (trace_ent != self.enemy)
 	{
 		if ((trace_ent.thingtype!=THINGTYPE_GLASS) || !trace_ent.takedamage || 
