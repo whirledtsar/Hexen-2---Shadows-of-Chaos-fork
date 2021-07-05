@@ -1,4 +1,4 @@
-This is a modification of the Shadows Of Chaos mod by Bloodshot, which itself is based on Game Of Tomes by peeweeRotA. It adds alternate fire modes, increases the importance of stats, and adds new enemies & features for mappers. Melee weapons' power scales with strength, magic damage scales with intelligence, secondary magic effects scale with wisdom, and thrown weapons (plus the crossbow) scale with dexterity. There are various features that can be toggled on/off - use console command "impulse 50".
+This is a modification of the Shadows Of Chaos mod by Bloodshot, which itself is based on Game Of Tomes by peeweeRotA. It adds alternate fire modes, increases the importance of stats, and adds new enemies & features for mappers. Melee weapons' power scales with strength, magic damage scales with wisdom, secondary magic effects scale with intelligence, and thrown weapons (plus the crossbow) scale with dexterity. There are various features that can be toggled on/off - use console command "impulse 50".
 Don't delete the autoexec.cfg file (unless you know what you're doing) - it's necessary to bind keys for altfire and stats menu.
 
 ============
@@ -65,9 +65,9 @@ Tomed altfire: Resurrection with increased monster tier
 
 	Magic missile
 Main: standard
-Altfire: Short-range attack that drains health if your health is low
+Altfire: Star wall that blocks projectiles in your field of view and disappears after a few seconds
 Tomed: standard
-Tomed altfire: Stronger altfire that always drains health
+Tomed altfire: Spinning star that passes through multiple enemies
 
 	Bone shards
 Main: standard
@@ -110,8 +110,9 @@ Tomed altfire: same as tomed
 Attribute effects
 =================
 
-		=All=
-Intelligence: Cube Of Force lifetime
+		=General=
+Dexterity: effectiveness of armor
+Intelligence: Cube Of Force lifetime, mana capacity increase when levelling up
 Wisdom: Cube Of Force damage
 
 		=Paladin=
@@ -138,7 +139,6 @@ Intelligence: None
 Wisdom: Set Staff scarab damage
 Dexterity: Katar backstab chance, Crossbow spread
 
-		
 		=Demoness=
 Strength: None
 Intelligence: Acid Orb poison time, Flame Orb burning chance, Flame Orb flame circle radius
@@ -149,21 +149,25 @@ Dexterity: None
 Changes
 =======
 
-	Changes to the SoC mod
+	Changes
 -Various balance tweaks & bugfixes
 -Corpses fading out, monsters respawning, & random monster variations are disabled by default but can be toggled in the console. Type "impulse 50" to see your current settings and how to toggle them.
--All classes receive mana & health upon leveling up (only the amount added to their maximum pool)
+-All classes receive mana & health upon leveling up (only the amount added to their capacity)
+-Inventory maximum amounts reduced to encourage use over hoarding - you can only carry 5 Quartz Flasks, and 2 each of powerful artifacts such as the Mystic Urn
 -Glyph artifact has a small delay between firing (length depends on class)
+-Disc Of Repulsion works on flying enemies
+-Disc of repulsion puts some monsters into jump state so they can't attack in the air
 -All melee attacks knock enemies back
 -Most explosions have dynamic light effects
 -Assassin's Set Staff doesn't drain mana continuously after charging
--Inventory maximum amounts reduced to encourage use over hoarding - you can only carry 5 Quartz Flasks, and 2 each of powerful artifacts such as the Mystic Urn
--Disc of repulsion puts some monsters into jump state so they can't attack in the air
+-Necromancer's minions can follow player between maps if theyre close enough to exit
 -Afrits & Disciples no longer phase through geometry
+-Bishop attack works more like their Hexen 1 counterpart
 -Archer Lord health (and experience points given) reduced by 1/3rd
 -Mummies make a sound and light up when firing arrows
 -Skull Wizard Lord can resurrect nearby corpses
 -Fallen Angels rebalanced across the board
+-Raven entity works (randomly wanders and cycles through animations)
 
 	Mapping features
 -Instead of trigger messages using an index in strings.txt, messages (except for plaques) can use a plain string instead
@@ -171,7 +175,7 @@ Changes
 -Monsters can use "waketarget" field; they will trigger that entity upon sighting the player (eg. waketarget a button to simulate them pressing it); uses "delay" field if non-zero
 -Path corners can also use "waketarget"; this target will be used when a monster or train reaches the path corner
 -Monsters will wait at a path corner if it has a wait value
--Monster spawner func's can spawn more types of monsters (see spawnflags for full list); use SPAWN_SUPER (8388608) to spawn monster's super variant if applicable
+-Monster spawner func's can spawn more types of monsters (see spawnflags for full list); use SPAWN_SUPER spawnflag to use strong variant if applicable
 -Torches & flames can use alternate sounds & volumes, determined by soundtype field
 -Torches can emit ambient sounds (in vanilla they don't - use spawnflag 4 to enable) and the sounds will be toggled if the torch is triggered or shootable
 -Relays can have a random delay; minimum and maximum seconds determined by cnt & lifetime fields
@@ -181,12 +185,12 @@ Changes
 -If a texture's name starts with *slime, it will behave like swamp sludge (slowed movement and unique effects)
 
 	New entities - see FGD for further documentation
--monster_maulotaur/monster_maulotaur_lord: maulotaur from Heretic; model by Razumen, code by Whirledtsar
--monster_reiver: reiver from Hexen; model by Razumen, code by Whirledtsar
+-monster_maulotaur/monster_maulotaur_lord: maulotaur from Heretic; model by Razumen, code by whirledtsar
+-monster_reiver: reiver from Hexen; model by Razumen, code by whirledtsar
 -monster_roman/monster_roman_lord: Roman-style monster that behaves like the Mummy enemy
--monster_undying: reanimated corpse; model by Bloodshot, code by Bloodshot & Whirledtsar
--medusa_red: weaker variant of the Medusa with lower health and less aggressive missiles
--custom_model: non-interactive entity that can use any model; code by Joshua Skelton & Inky
+-monster_undying: reanimated corpse; model by Bloodshot, code by Bloodshot & whirledtsar
+-monster_medusa_red: weaker variant of the Medusa with lower health and less aggressive missiles
+-misc_model: decorative entity that can use any model; can be breakable, and triggered on/off/killed depending on spawnflags; code by Joshua Skelton, Inky, and whirledtsar
 -custom_sound_ambient: ambient sound maker that can use any sound file; code by Shanjaq
 -custom_sound_maker: triggered sound maker that can use any sound file; code by Shanjaq
 -light_chan: hanging chandelier
@@ -196,7 +200,7 @@ Changes
 -misc_portal: portal sprite from Hexen 1
 -misc_portal_big: blue circular portal sprite
 -misc_starwall: magic particle effect
--misc_waterfall: waterfall model; can start off, be triggered off/on, make noise, be scaled, and be translucent
+-misc_waterfall: waterfall model; can start off, be triggered off/on, make noise, be scaled, use alternate skins, and be translucent
 -obj_hang_corpse: hanging skeleton or corpse
 -obj_skeleton_body: skeleton decoration
 -obj_treecluster: cluster of dead trees
@@ -210,14 +214,19 @@ Changes
 Additional credits
 ==================
 	Incomplete list; most models can be assumed credit to Bloodshot
+Afrit sounds: Hexen 1
 Bishop sounds: Hexen 1
+Blood pool step sounds: Heretic 2
 Chandelier model: Heretic 2
+Cube Of Force disappear sound: Mageslayer
 Disciple sounds: Heretic
 Fog sprites: Hexen 1
 Legionnaire model: Rogue Software (Dissolution Of Eternity)
 Maulotaur model: Razumen
+Necromancer star wall sound: Mageslayer
 Portal sprite: Hexen 1
 Reiver model: Razumen
+Sludge enter sound: Hexen 1
 Tree (swaying) model: Hexen 2 beta
 Tree snowy skin: whirledtsar
 Waterfall models: originally by Preach, modified by Bloodshot & whirledtsar

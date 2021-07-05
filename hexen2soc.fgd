@@ -1189,7 +1189,14 @@
 	]
 ]
 @PointClass base(monster_rat) size(-20 -20 0, 20 20 10) = monster_ratnest : "Rat's nest" []
-@PointClass base(Monster) size(-16 -16 0, 16 16 32) = monster_raven : "Raven" []
+
+@PointClass base(Monster) size(-8 -8 0, 8 8 20) = monster_raven : "Decorative raven. Will wander randomly unless it has a target or the 'stay put' spawnflag."
+[
+	spawnflags(Flags) =
+	[
+		2 : "Stay put"
+	]
+]
 
 @PointClass base(Appearflags, Targetname, Target) model(":models/snake.mdl") size(-80 -80 0, 80 80 200) = monster_snake : "Snake"
 [
@@ -2061,6 +2068,12 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	[
 		8 : "Deactivated" : 0 : "Trigger to activate, trigger again to remove if needed"
 	]
+	style(choices) : "Reflection mode" : 0 =
+	[
+		0 : "Reflect straight back"
+		1 : "Deflect randomly"
+		2 : "Aim at missile owner"
+	]
 ]
 
 @PointClass base(Appearflags, Targetname, Target) size(-8 -8 -8, 8 8 8) = trigger_relay : "Relay"
@@ -2381,7 +2394,7 @@ Will not work well with a func_rotating that already has the TOGGLE_REVERSE spaw
 	targetname(target_source) : "Name. Don't killtarget to remove, just use."
 ]
 
-@PointClass size(-8 -8 -8, 8 8 8) model ({"path": model, "scale": scale, "skin": skin, "frame": frame })= custom_model : "External model"
+@PointClass size(-8 -8 -8, 8 8 8) model ({"path": model, "scale": scale, "skin": skin, "frame": frame })= misc_model : "External model"
 [
     abslight(integer) : "Absolute light value"
     model(string):   "External model path"
@@ -2437,6 +2450,6 @@ Will not work well with a func_rotating that already has the TOGGLE_REVERSE spaw
 		2 : "Non-solid"
 		4 : "Breakable"
 		8 : "Starts off"
-		16 : "Using breaks instead of toggleing"
+		16 : "Using breaks instead of toggling"
 	]
 ]
