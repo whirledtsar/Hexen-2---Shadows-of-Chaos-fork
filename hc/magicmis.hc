@@ -62,6 +62,8 @@ $frame select6      select7
 
 float MMIS_COST = 2;
 float MMIS_TOME_COST = 8;
+float MMIS_ALT_COST = 1;
+float MMIS_ALT_TOME_COST = 12;
 float MMIS_SHOCK_COST = 0.5;
 float MMIS_SHOCK_ANGLE = 37;
 
@@ -262,83 +264,6 @@ void FireMagicMissile (float offset, float seeking)
 	thinktime star2 : 0;
 }
 
-void DrawShockEffect (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2)
-{
-	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-	//WriteByte (MSG_BROADCAST, TE_STREAM_ICECHUNKS);
-	WriteByte (MSG_BROADCAST, TE_STREAM_FAMINE);
-	WriteEntity (MSG_BROADCAST, lowner);
-	WriteByte (MSG_BROADCAST, tag+lflags);
-	WriteByte (MSG_BROADCAST, duration);
-
-	WriteCoord (MSG_BROADCAST, spot1_x);
-	WriteCoord (MSG_BROADCAST, spot1_y);
-	WriteCoord (MSG_BROADCAST, spot1_z);
-
-	WriteCoord (MSG_BROADCAST, spot2_x);
-	WriteCoord (MSG_BROADCAST, spot2_y);
-	WriteCoord (MSG_BROADCAST, spot2_z);
-}
-
-float FireShockingGrasp (float intmod, float damg)
-{
-	vector targetOrg, diff, forwardDiff;
-	vector beamOrg;
-	entity found;
-	float radius, shockangle, shocksuccess;
-	float beamcount;
-	
-	shocksuccess = FALSE;
-	
-	//intmod starts at about 18 and grows to over 30 by level 7. 
-	//at 18 this is 225 and at 30 this is 285
-	radius = 65 + (2 * intmod); 
-	
-	makevectors(self.v_angle);
-	
-	beamcount = 0;
-	
-	beamOrg = self.origin + self.proj_ofs + (normalize(v_forward) * 40) + (normalize(v_up) * 6) + (normalize(v_right) * 12);
-
-	found=findradius(beamOrg,radius);
-	while(found)
-	{
-		if(found!=self && found.takedamage && !found.playercontrolled && found.health && beamcount < 11)
-		{
-			beamcount += 1; //Capping total beams at 10 for performance and issue with applying flags to number of beams
-			
-			targetOrg = found.origin + ('0 0 1' * (found.maxs_y));
-			
-			//make sure there are no walls in the way
-			traceline (beamOrg, targetOrg, FALSE, self);
-			if (trace_fraction != 1.0 && trace_ent == found)
-			{
-				//get angle
-				diff = found.origin - self.origin; //use origin for angles to make sure beams spawned inside monsters still hit				
-				forwardDiff = normalize(v_forward) * radius;
-				shockangle = AngleBetween(diff, forwardDiff);
-				
-				dprint("Shock angle: "); dprint(ftos(shockangle)); dprint("\n");
-				
-				if (shockangle < MMIS_SHOCK_ANGLE)
-				{
-					shocksuccess = TRUE;
-
-					//draw effect				
-					DrawShockEffect (self,beamcount,0, 7, beamOrg, targetOrg); //STREAM_TRANSLUCENT
-
-					//Damage target
-					T_Damage(found,self,self,damg);
-					SpawnPuff(targetOrg, '0 0 8', damg, found);
-				}	
-			}
-		}
-		found=found.chain;
-	}
-	
-	return shocksuccess;
-}
-
 void flash_think ()
 {
 	makevectors(self.owner.v_angle);
@@ -376,185 +301,7 @@ void FireFlash ()
 	thinktime newmis : 0;
 }
 
-/*
-
-void() BloodTouch =
-{
-	if (other.health && other.classname != "player")
-		T_Damage (other, self, self, 3);
-	self.think = SUB_Remove;
-	self.nextthink = time + 0.2;
-};
-
-void(vector dir) FireBloodSpike =
-{
-	newmis = spawn ();
-	newmis.owner = self;
-	newmis.movetype = MOVETYPE_FLYMISSILE;
-	newmis.solid = SOLID_BBOX;
-	//local vector dir;
-	//dir = aim (self, v_forward, 0);
-	//makevectors(newmis.angles);
-	
-	//newmis.angles = self.angles;
-	newmis.velocity= dir * 300;
-	
-	//newmis.velocity = newmis.velocity * 390;
-	newmis.angles = vectoangles(newmis.velocity);
-	
-	newmis.touch = BloodTouch;
-	newmis.classname = "bloodspike";
-	newmis.think = SUB_Remove;
-	newmis.nextthink = time + 1;
-	setmodel(newmis,"models/faspell.mdl");
-	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);		
-	setorigin (newmis, self.origin + '0 0 10');
-
-	//newmis.speed = 700;
-};
-
-void  mmis_bloodring()
-{
-	float cost;
-	float tome;
-	
-	self.think = SUB_Remove;
-	self.nextthink = 0.01;
-	
-	if(self.attack_finished>time)
-		return;
-
-	tome = self.artifact_active&ART_TOMEOFPOWER;
-	
-	cost = MMIS_COST;
-	sound(self,CHAN_AUTO,"fangel/deflect.wav",1,ATTN_NORM);
-	
-	FireBloodSpike('25 25 0');
-	FireBloodSpike('50 0 0');
-	FireBloodSpike('-25 -25 0');
-	FireBloodSpike('-50 0 0');
-	FireBloodSpike('0 25 0');
-	FireBloodSpike('0 50 0');
-	FireBloodSpike('25 -25 0');
-	FireBloodSpike('-25 -50 0');
-	
-	//setmodel(self,"models/ball.mdl");
-	
-	if (tome)
-	{
-		FireMagicMissile(-3, TRUE);
-		FireMagicMissile(3, TRUE);
-		FireMagicMissile(6, TRUE);
-		FireMagicMissile(-6, TRUE);
-		cost = MMIS_TOME_COST;
-	}
-	
-	//self.bluemana-=cost;
-	//self.attack_finished=time+0.6;
-}
-
-void() launch_bloodparent =
-{
-	newmis = spawn ();
-	newmis.owner = self;
-	newmis.movetype = MOVETYPE_BOUNCE;
-	newmis.solid = SOLID_BBOX;
-	//local vector dir;
-	//dir = aim (self, v_forward, 0);
-	//makevectors(newmis.angles);
-	
-	//newmis.angles = self.angles;
-	newmis.velocity=normalize(v_forward);
-	
-	newmis.velocity = newmis.velocity * 1390;
-	newmis.angles = vectoangles(newmis.velocity);
-	
-	newmis.touch = mmis_bloodring;
-	newmis.classname = "bloodfire";
-	newmis.think = SUB_Remove;
-	newmis.nextthink = time + 6;
-	setmodel(newmis,"models/faspell.mdl");
-	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);		
-	setorigin (newmis, self.origin + '0 0 30');
-
-	newmis.speed = 700;
-};
-
-*/
-
-void  mmis_power()	//ws: buffed, because it should make up for short range with power (otherwise theres no incentive not to use regular missiles)
-{
-	float wismod, intmod, damg, shocksuccess, tome;
-	
-	if(self.attack_finished>time)
-		return;
-	
-	wismod = self.wisdom;
-	intmod = self.intelligence;
-	damg = random(wismod, wismod * 1.2);
-
-	tome = self.artifact_active&ART_TOMEOFPOWER;
-	if (tome)
-		damg *= 2;
-	
-	FireFlash();
-	shocksuccess = FireShockingGrasp(intmod, damg);
-	
-	if (shocksuccess)
-	{
-		sound(self,CHAN_AUTO,"necro/attack1.wav",1,ATTN_NORM);
-		if (self.bluemana>=MMIS_SHOCK_COST)
-		{
-			self.bluemana-=MMIS_SHOCK_COST;
-			if (tome && self.bluemana>=MMIS_SHOCK_COST*2)
-			{
-				if (self.health<self.max_health) {	//dont negate Mystic Urn bonus
-					self.health += intmod * 0.18;
-					if (self.health>self.max_health)
-						self.health = self.max_health;
-				}
-				self.bluemana-=MMIS_SHOCK_COST*2;
-			}
-			else if (self.health < 60)
-			{
-				self.health = self.health + intmod * 0.05;
-			}
-		}
-	}
-	
-	self.attack_finished=time+0.23;
-}
-
-/*
-void  mmis_power()
-{
-	float wismod, intmod, damg, tome;
-	
-	if(self.attack_finished>time)
-		return;
-	
-	wismod = self.wisdom;
-	intmod = self.intelligence;
-	damg = random(wismod * 1.5, wismod * 2.25);
-
-	tome = self.artifact_active&ART_TOMEOFPOWER;
-	if (tome)
-		damg *= 2;
-	
-	//FireFlash();
-	launch_bloodparent(35);
-	launch_bloodparent(0);
-	launch_bloodparent(-35);
-	//sound(self,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
-	sound(self,CHAN_AUTO,"fangel/deflect.wav",1,ATTN_NORM);
-
-		self.bluemana-=MMIS_SHOCK_COST;
-	
-	self.attack_finished=time+0.4;
-}
-*/
-
-void  mmis_normal()
+void mmis_normal()
 {
 	float cost;
 	float tome;
@@ -576,10 +323,320 @@ void  mmis_normal()
 	}
 	
 	self.bluemana-=cost;
-	self.attack_finished = time+0.3;
+	if (tome)
+		self.attack_finished = time+0.7;
+	else
+		self.attack_finished = time+0.3;
+	
 	/*self.attack_finished = time+(0.625 - self.level*0.025);
 	if (self.attack_finished<time+0.2)	//vanilla magic missile delay
 		self.attack_finished = time+0.2;*/
+}
+
+//==========
+//Star Wall
+//==========
+
+void starwall_field_touch()
+{
+	//if (time < self.attack_finished)
+	//	return;
+	
+	if (!fov(other, self.owner, 150))
+		return;
+	
+	if !(ReflectMissile (other, REFLECT_BLOCK, 0, 0.9, 40, 180, TRUE, CLASS_BOSS))
+		return;
+	
+	sound(self,5,"mezzo/reflect.wav",1,ATTN_NORM);
+	
+	//self.attack_finished = time+0.1;
+}
+
+void starwall_field_think()
+{
+	setorigin (self, self.owner.origin);
+	
+	if (!EnemyIsValid(self.owner) || self.owner.bluemana < MMIS_ALT_COST || time > self.lifetime) {
+		sound(self,CHAN_VOICE,"necro/hum3.wav",1,ATTN_NORM);
+		
+		if (self.owner.flags&FL_CLIENT)
+			self.owner.class_weaponvar = FALSE;		//allow player to cast another star wall
+		
+		entity ent;
+		ent = self.enemy;
+		while (ent.controller==self) {
+			ent.aflag = TRUE;	//tracked by starwall_think
+			ent = ent.enemy;	//navigate linked list
+		}
+		
+		self.think = SUB_Remove;
+		thinktime self : HX_FRAME_TIME*2;
+		return;
+	}
+	
+	if (time > self.pain_finished) {
+		self.pain_finished = time+1;
+		self.owner.bluemana -= MMIS_ALT_COST;
+	}
+	
+	self.think = starwall_field_think;
+	thinktime self : 0;
+}
+
+void starwall_think()
+{
+	makevectors(self.owner.v_angle);
+	self.finaldest = self.owner.origin + v_forward*36 + v_right*self.oldangles_y + v_up*self.oldangles_z;
+	
+	traceline (self.owner.origin, self.finaldest, TRUE, self.owner);
+	setorigin (self, trace_endpos);
+	
+	if (pointcontents(trace_endpos)==CONTENT_SOLID)
+		trace_endpos += v_forward*-8;	//offset sprite from wall
+	
+	//self.angles = self.owner.v_angle;
+	self.angles_x = self.owner.v_angle_x;
+	self.angles_y = self.owner.v_angle_y;
+	
+	if (self.pain_finished) {
+		self.pain_finished = time+HX_FRAME_TIME;
+		if (self.abslight>=1)
+			self.lefty = -1;
+		else if (self.abslight<=0.5)
+			self.lefty = 1;
+		
+		self.abslight += 0.02*self.lefty;
+		
+		if (self.aflag) {
+			self.scale -= 0.01;
+			particle4(self.origin,7,random(148,159),PARTICLETYPE_STATIC,1);
+		}
+		if (self.scale<=0.05) {
+			remove(self);
+			return;
+		}
+	}
+	
+	thinktime self : 0;
+}
+
+float StarwallVertOfs[11] =
+{
+	10,
+	20,
+	30,
+	35,
+	40,
+	45,
+	50,
+	55,
+	60,
+	65,
+	70
+};
+
+float StarwallHorOfs[11] =
+{
+	-16,
+	16,
+	-16,
+	16,
+	-16,
+	16,
+	-16,
+	16,
+	-16,
+	16,
+	-16
+};
+
+void mmis_wall()
+{
+	entity field, star, laststar, firststar;
+	float i;
+	
+	if (self.attack_finished>time)
+		return;
+	if (self.class_weaponvar)	//if we already have an active star wall
+		return;
+	
+	FireFlash();
+	self.bluemana -= MMIS_ALT_COST;
+	self.attack_finished = time+0.4;
+	self.class_weaponvar = TRUE;
+	if (random()<0.5)
+		sound(self,5,"necro/hum1.wav",1,ATTN_NORM);
+	else
+		sound(self,5,"necro/hum2.wav",1,ATTN_NORM);
+	
+	field = spawn();
+	field.owner = self;
+	
+	setmodel (field, "models/null.spr");
+	//setsize (field, '-24 -24 0', '24 24 60');
+	setsize (field, '-48 -48 0', '48 48 60');
+	setorigin (field, self.origin);
+	
+	field.effects = EF_NODRAW;
+	field.movetype = MOVETYPE_NONE;
+	field.solid = SOLID_TRIGGER;
+	
+	field.lifetime = time+6;
+	field.pain_finished = time+1;	//drain mana at this time
+	
+	field.touch = starwall_field_touch;
+	field.think = starwall_field_think;
+	thinktime field : 0;
+	
+	for (i = 0; i < 11; i++) {
+		float side, up;
+		
+		star = spawn();
+		star.owner = self;
+		star.controller = field;
+		
+		setmodel(star,"models/star.mdl");
+		setsize(star, VEC_ORIGIN, VEC_ORIGIN);
+		
+		star.movetype = MOVETYPE_NOCLIP;
+		star.solid = SOLID_NOT;
+		
+		star.drawflags(+)MLS_ABSLIGHT|DRF_TRANSLUCENT;
+		star.abslight=0.5;
+		star.avelocity_z=150;
+		star.avelocity_z*=randomsign();
+		star.scale=random(0.15,0.3);
+		
+		star.lefty = 1;
+		star.pain_finished = time+random();		//light phase
+		
+		star.think = starwall_think;
+		thinktime star : 0;
+		/*
+		side = random(0.25,3)*(i+1);
+		up = random(4,6)*(i+2);*/
+		side = StarwallHorOfs[i]+random(-6,6);
+		up = StarwallVertOfs[i]+random(-4,4);
+		star.oldangles_y = side;
+		star.oldangles_z = up;
+		//lastoffset = up;
+		
+		if (laststar)
+			laststar.enemy = star;
+		else
+			firststar = star;
+		
+		laststar = star;	//create linked list of stars
+	}
+	field.enemy = firststar;
+}
+
+void starproj_die ()
+{
+	sound(self,CHAN_AUTO,"weapons/explode.wav",1,ATTN_NORM);
+	starteffect(CE_MAGIC_MISSILE_EXPLOSION,self.origin-self.movedir*8,0.05);
+	particleexplosion(self.origin,COLOR_PURPLE_BRIGHT,10,60);
+	remove(self);
+}
+
+void starproj_think ()
+{
+	if (self.flags&FL_ONGROUND) {
+		starproj_die();
+		return;
+	}
+	
+	if (self.scale>1.75)
+		self.lefty = -1;
+	else if (self.scale<0.5)
+		self.lefty = 1;
+	self.scale+=0.075*self.lefty;
+	
+	if(self.velocity!=self.movedir*self.speed)
+		self.velocity=self.movedir*self.speed;
+	
+	self.think=starproj_think;
+	thinktime self : 0.025;
+}
+
+void starproj_touch ()
+{
+	if (pointcontents(self.origin)==CONTENT_SKY) {
+		remove(self);
+		return;
+	}
+	
+	if (self.enemy && other==self.enemy)
+		return;
+	
+	if (other==world
+		||(!other.takedamage)
+		||(other.solid==SOLID_BSP&&other.thingtype!=THINGTYPE_GLASS&&other.thingtype!=THINGTYPE_CLEARGLASS&&other.thingtype!=THINGTYPE_REDGLASS&&other.thingtype!=THINGTYPE_WEBS) 
+		|| other.mass>300
+		|| self.frags>=self.count) {
+		starproj_die();
+		return;
+	}
+	
+	self.enemy=other;
+	self.owner=other;
+	self.frags+=1+other.monsterclass;
+	makevectors(self.velocity);
+	
+	SpawnPuff (self.origin - v_forward*8, self.velocity, 8, other);
+	if(other.thingtype==THINGTYPE_FLESH) {
+		MeatChunks (self.origin,self.velocity+'0 0 20', 2, other);
+		sound(self,CHAN_VOICE,"assassin/core.wav",0.75,ATTN_NORM);
+	}
+	
+	if(other.flags&FL_CLIENT)
+		T_Damage(other,self,self.owner,self.dmg*0.5);
+	else
+		T_Damage(other,self,self.owner,self.dmg);
+}
+
+void mmis_starproj ()
+{
+	if (self.attack_finished>time)
+		return;
+	
+	FireFlash();
+	self.effects(+)EF_MUZZLEFLASH;
+	self.bluemana -= MMIS_ALT_TOME_COST;
+	self.attack_finished = time+0.5;
+	//sound(self,5,"necro/hum1.wav",1,ATTN_NORM);
+	makevectors(self.v_angle);
+	
+	newmis = spawn();
+	newmis.owner = self;
+	
+	setmodel(newmis,"models/star.mdl");
+	setsize(newmis, '4 4 0', '4 4 0');
+	//setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
+	setorigin(newmis, self.origin+self.proj_ofs + v_forward*8);
+	
+	newmis.movetype = MOVETYPE_FLYMISSILE;
+	newmis.solid = SOLID_BBOX;
+	
+	newmis.speed = 1000;
+	newmis.velocity = v_forward*newmis.speed;
+	newmis.angles = vectoangles(newmis.velocity);
+	newmis.movedir = v_forward;
+	newmis.angles_x = 100;
+	newmis.o_angle = newmis.angles;
+	
+	newmis.scale = 0.5;
+	newmis.drawflags(+)MLS_ABSLIGHT;
+	newmis.drawflags(+)SCALE_TYPE_XYONLY;
+	newmis.abslight = 0.5;
+	newmis.avelocity_z = 400;
+	
+	newmis.count = 12;
+	newmis.dmg = 40;
+	newmis.touch = starproj_touch;
+	newmis.think = starproj_think;
+	thinktime newmis : HX_FRAME_TIME;
 }
 
 
@@ -599,24 +656,23 @@ relax to ready(Fire delay?  or automatic if see someone?)
 void()magicmis_ready;
 void() Nec_Mis_Attack;
 
-void magicmis_shock_fire (void)
+void magicmis_altfire (void)
 {
 	float tome, cost;
 	
 	tome = self.artifact_active&ART_TOMEOFPOWER;
 	
-	if(self.button1&&self.weaponframe==$mfire5 &&!self.artifact_active&ART_TOMEOFPOWER)
+	if(self.button1 && self.weaponframe==$mfire5 && !self.artifact_active&ART_TOMEOFPOWER)
 		self.weaponframe=$mfire5;
 	else
 		self.wfs = advanceweaponframe($mfire1,$mfire8);
-	self.th_weapon=magicmis_shock_fire;
+	self.th_weapon=magicmis_altfire;
 	self.last_attack=time;
-
-	cost = MMIS_SHOCK_COST;
-	if (tome)
-	{
-		cost += MMIS_SHOCK_COST*2;
-	}
+	
+	if (self.class_weaponvar)	//if we cant create another star wall, we can only do the main fire
+		cost = MMIS_ALT_TOME_COST;
+	else
+		cost = MMIS_ALT_COST;
 	
 	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<cost)
 	{
@@ -624,7 +680,10 @@ void magicmis_shock_fire (void)
 	}
 	else if(self.weaponframe==$mfire5)
 	{
-		mmis_power();
+		if (tome && self.bluemana >= MMIS_ALT_TOME_COST)
+			mmis_starproj();
+		else
+			mmis_wall();
 	}
 }
 
@@ -662,7 +721,7 @@ void magicmis_fire (void)
 void() Nec_Mis_Attack =
 {
 	if (self.button1 && self.bluemana >= MMIS_SHOCK_COST)
-		magicmis_shock_fire();
+		magicmis_altfire();
 	else
 		magicmis_fire();
 
