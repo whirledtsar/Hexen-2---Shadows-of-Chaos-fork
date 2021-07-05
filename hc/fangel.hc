@@ -255,7 +255,7 @@ void() fangel_init =
 
 void fangel_wait (void)
 {
-	self.frame = $fhand1;;
+	self.frame = $fhand1;
 	thinktime self : 0.15;
 	LocateTarget();
 	if(EnemyIsValid(self.enemy)) // We found a target
