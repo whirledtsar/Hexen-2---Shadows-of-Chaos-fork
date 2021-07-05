@@ -199,7 +199,8 @@ void() walkmonster_start =
 
 	self.nextthink+=random(0.5);
 	self.think = walkmonster_start_go;
-	total_monsters = total_monsters + 1;
+	if (!self.playercontrolled)
+		total_monsters = total_monsters + 1;
 };
 
 
@@ -283,7 +284,8 @@ void() flymonster_start =
 	self.flags2(+)FL_ALIVE;
 	self.nextthink+=random(0.5);
 	self.think = flymonster_start_go;
-	total_monsters = total_monsters + 1;
+	if (!self.playercontrolled)
+		total_monsters = total_monsters + 1;
 };
 /*
 void() swimmonster_start_go =
