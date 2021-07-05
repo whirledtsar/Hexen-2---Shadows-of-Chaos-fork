@@ -1622,13 +1622,9 @@ void() WaterMove =
 		else if (self.watertype == CONTENT_WATER || self.watertype == CONTENT_SLIME || pointcontents(self.origin)==CONTENT_SLIME)
 		{
 			vector org;
-			float neg;
-			float i;
 			
 			makevectors(self.angles);
 			org = self.origin + '0 0 10' + v_forward*30 + v_right*10;
-			
-			neg = 1;
 			
 			if (self.watertype == CONTENT_SLIME) {
 				sound (self, CHAN_BODY, "player/MUCK5.wav", 1, ATTN_NORM);
