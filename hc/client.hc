@@ -1431,7 +1431,6 @@ void() WaterMove =
 		{
 			vector org;
 			float neg;
-			float i;
 			
 			makevectors(self.angles);
 			org = self.origin + '0 0 10' + v_forward*30 + v_right*10;
