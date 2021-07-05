@@ -747,3 +747,27 @@ float IT_WEAPON8					= 64;
 
 //rate of decceleration for effect of disc of repulsion on fly monsters
 float BLAST_DECEL = 4;
+
+//palette indices
+float COLOR_BLUE_DARK = 32;
+float COLOR_BLUE_MID = 40;
+float COLOR_BLUE_BRIGHT = 47;
+float COLOR_GREEN_DARK = 96;
+float COLOR_GREEN_MID = 104;
+float COLOR_GREEN_BRIGHT = 111;
+float COLOR_RED_DARK = 128;
+float COLOR_RED_MID = 136;
+float COLOR_RED_BRIGHT = 143;
+float COLOR_PURPLE_DARK = 144;
+float COLOR_PURPLE_MID = 152;
+float COLOR_PURPLE_BRIGHT = 159;
+float COLOR_YELLOW_DARK = 160;
+float COLOR_YELLOW_MID = 168;
+float COLOR_YELLOW_BRIGHT = 175;
+float COLOR_GREENSAT_DARK = 176;
+float COLOR_GREENSAT_MID = 184;
+float COLOR_GREENSAT_BRIGHT = 191;
+float COLOR_FB_BLUE1 = 247;
+float COLOR_FB_BLUE2 = 248;
+float COLOR_FB_BLUE3 = 249;
+float COLOR_FB_BLUE4 = 250;
