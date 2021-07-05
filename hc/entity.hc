@@ -716,7 +716,6 @@ void end_sys_fields;
 
 .float inactive;
 .float msg2;
-.string msg3;			//only used by raven staff
 .string nexttarget;		//For target transferral
 .float gravity;			//Gravity, duh
 //.float upside_down;	unused
