@@ -132,7 +132,7 @@ float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
 vector dest;
 	makevectors(self.angles);
 	
-	if (!walkmove(0,0, FALSE))
+	if (!self.flags&FL_SWIM && (pointcontents(spot)==CONTENT_WATER || pointcontents(spot)==CONTENT_SLIME))
 		return FALSE;
 	
 	dest = spot + ('0 0 1' * maxs_z*1.25);
@@ -154,6 +154,16 @@ vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ign
 	vector spot,newangle;
 	float loop_cnt,forward;
 	
+	vector min, max;
+	if (self.orgnl_mins)
+		min = self.orgnl_mins;
+	else
+		min = self.mins;
+	if (self.orgnl_maxs)
+		max = self.orgnl_maxs;
+	else
+		max = self.maxs;
+	
 	trace_fraction = 0;
 	loop_cnt = 0;
 	do
@@ -163,14 +173,14 @@ vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ign
    		makevectors (newangle);
 		forward = random(rangemin,rangemax);
 		spot = self.origin + v_forward * forward;
-		traceline (spot, (spot - (v_up * 200)), TRUE, ignore);
 		if (!self.flags&FL_FLY) {
+			traceline (spot, (spot - (v_up * 200)), TRUE, ignore);
 			if (trace_fraction == 1)	// Didn't hit anything?  There was no floor
 				return VEC_ORIGIN;
 		}
 		spot = trace_endpos;
 		
-		if (CanSpawnAtSpot(spot, self.orgnl_mins, self.orgnl_maxs, ignore))
+		if (CanSpawnAtSpot(spot, min, max, ignore))
 			trace_fraction = 1;
 		else
 			trace_fraction = 0;		// So it will loop
