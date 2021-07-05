@@ -578,10 +578,6 @@ float ReflectMissile (entity other, float mode, float effect, float speedmod, fl
 vector org, vec, dir;//, endspot,endplane, dif;
 float magnitude;//remainder, reflect_count,
 entity us;
-	if (self.owner)		//self is trigger field owned by monster, owner is monster
-		us = self.owner;
-	else
-		us = self;
 
 	if (!other || other == self)	return FALSE;
 	if (self.owner && other.owner == self.owner)	return FALSE;
@@ -591,6 +587,11 @@ entity us;
 	
 	if(other.classname=="funnal"||other.classname=="tornato")
 		return FALSE;
+	
+	if (self.owner)		//self is trigger field owned by monster, owner is monster
+		us = self.owner;
+	else
+		us = self;
 	
 	if (!speedmod)
 		speedmod = 1;
@@ -609,9 +610,6 @@ entity us;
 	else
 		org = other.origin;
 	
-	if (effect)
-		starteffect(effect, org);
-	
 	//new direction
 	dir *= (-1);
 	if(magnitude<other.speed)
@@ -626,10 +624,10 @@ entity us;
 			return FALSE;
 	}
 	
-	if (maxangofs<=0 && mode!=REFLECT_AIMED)
-		mode = REFLECT_REFLECT;
+	if (effect)
+		starteffect(effect, org);
 	
-	if (mode == REFLECT_AIMED && !other.owner)
+	if (maxangofs<=0 && mode==REFLECT_DEFLECT)
 		mode = REFLECT_REFLECT;
 	
 	if (mode == REFLECT_AIMED) {	//fallen angel lord
