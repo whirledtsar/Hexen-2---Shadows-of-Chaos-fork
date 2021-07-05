@@ -430,6 +430,9 @@ float		r;
 		//return FALSE;
 	}
 	
+	if(self.classname=="monster_raven")
+		return FALSE;
+	
 	sdprint("Summon monster finding Player target", TRUE);
 	if (sight_entity_time >= time && sight_entity!=world && !(self.spawnflags & 1))
 	{
