@@ -30,7 +30,7 @@ button2: The last frame of the animation.
 speed:   How long the animation frames last; default 0.05
 wait:	 Delay before beginning animation
 */
-void() custom_model = {
+void() misc_model = {
     precache_model(self.model);
     setmodel(self, self.model);
 	self.mins = self.orgnl_mins;
@@ -125,4 +125,10 @@ void misc_model_toggle ()
 		self.nextthink = time + 99999;
 		self.use = misc_model_toggle;
 	}
+}
+
+void custom_model ()
+{ 
+	self.classname = "misc_model";
+	misc_model();
 }
