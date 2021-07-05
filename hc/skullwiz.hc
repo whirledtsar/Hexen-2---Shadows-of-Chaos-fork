@@ -346,6 +346,7 @@ vector spot;
 		
 		if (spot==VEC_ORIGIN)	//couldnt find suitable spawn spot
 		{
+			self.effects(+)EF_NODRAW;
 			++self.counter;
 			if (self.counter>20) {
 				remove(self);
@@ -354,11 +355,16 @@ vector spot;
 			thinktime self : 0.1;
 			return;
 		}
+		self.effects(-)EF_NODRAW;
  	}
 	else	// Skull Wiz is dead, spawn at his location
 	{
 		if (!CanSpawnAtSpot(self.origin, self.mins*1.25, self.maxs*1.25, self.controller))
 		{
+			self.effects(+)EF_NODRAW;
+			spot = FindSpawnSpot(1, 30, 360, self.controller);
+			if (spot!=VEC_ORIGIN)
+				self.origin = spot;
 			++self.counter;
 			if (self.counter>20) {
 				remove(self);
@@ -367,6 +373,7 @@ vector spot;
 			thinktime self : 0.1;
 			return;
 		}
+		self.effects(-)EF_NODRAW;
 		spot = self.origin;
 	}
 	
@@ -384,7 +391,7 @@ vector spot;
 	self.lifetime = time + 30;
 	
 	self.skin = 1;
-	self.health = self.max_health = 10;
+	self.health = self.max_health = 10 + ((skill>2)*15);	//extra health on nightmare
 	self.init_exp_val = self.experience_value = SpiderExp[1];
 	
 	self.drawflags = SCALE_ORIGIN_BOTTOM;
@@ -424,7 +431,7 @@ vector spot;
 void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 {
 	thinktime self : HX_FRAME_TIME*0.5;	//ws: speed up animation
-	if (self.frame == $skgate2)   // Gate in the creatures
+	if (self.frame == $skgate2)
 		sound (self, CHAN_VOICE, "skullwiz/gatespk.wav", 1, ATTN_NORM);
 	
 	if (self.frame == $skgate21)   // Gate in the creatures
@@ -439,8 +446,10 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 		sound (self, CHAN_AUTO, "skullwiz/gate.wav", 1, ATTN_NORM);
 	}
 
-	if (cycle_wrapped)
+	if (cycle_wrapped) {
+		self.summonTime = time+1;	//dont immediately summon another spider
 		skullwiz_run();
+	}
 }
 
 /*-----------------------------------------
@@ -694,6 +703,8 @@ void skullwiz_missile_init (void) [++ $skredi1..$skredi12]
 {
 	if (self.classname=="monster_skull_wizard_lord" && skullwiz_findcorpse()!=world)
 		skullwiz_raiseinit();
+	else if (self.classname=="monster_skull_wizard_lord" && vlen(self.enemy.origin-self.origin)<300 && random()<0.4 && time>self.summonTime)
+		skullwiz_summoninit();
 	
 	self.frame += 2;
 
@@ -950,7 +961,7 @@ void skullwiz_melee (void) [++ $skspel2..$skspel30]
 		}
 		else  // Only the skull wizard lord can summon
 		{
-			if (random()<0.2)
+			if (random()<0.2 && time>self.summonTime)
 				skullwiz_summoninit();
 			else
 			{
@@ -1125,8 +1136,6 @@ void skullwizard_init(void)
 
 	self.flags(+)FL_MONSTER;
 	self.yaw_speed = 10;
-	
-	self.teleportTime = 0;	//counter for when to teleport
 }
 
 /*QUAKED monster_skull_wizard (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
@@ -1144,9 +1153,13 @@ void monster_skull_wizard (void)
 	}
 
 	skullwizard_init();
-
-	self.health = 150;
-	self.experience_value = 100;
+	
+	if (!self.health)
+		self.health = 150;
+	if (!self.experience_value)
+		self.experience_value = 100;
+	self.max_health=self.health;
+	self.init_exp_val = self.experience_value;
 	self.monsterclass = CLASS_GRUNT;
 	self.th_init = monster_skull_wizard;
 	
@@ -1169,13 +1182,16 @@ void monster_skull_wizard_lord (void)
 	}
 
 	skullwizard_init();
-
-	self.health = 600;				//vanilla: 650
-	self.experience_value = 300;	//vanilla: 325
+	
+	if(!self.health)
+		self.health = 600;				//vanilla: 650
+	self.max_health=self.health;
+	if (!self.experience_value)
+		self.experience_value = 300;	//vanilla: 325
+	self.init_exp_val = self.experience_value;
 	self.monsterclass = CLASS_LEADER;
 	self.skin = 1;
 	self.scale = 1.20;
-	//setsize (self, self.mins*self.scale, self.maxs*self.scale);
 	self.th_init = monster_skull_wizard_lord;
 	
 	self.buff=1;
