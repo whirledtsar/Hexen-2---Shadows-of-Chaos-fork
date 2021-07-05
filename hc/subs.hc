@@ -668,3 +668,23 @@ entity us;
 	return TRUE;
 }
 
+/*
+ * SUB_TraceThroughObstacles -- Traces a line like normal, but continues the trace if it hits a weak or see-through breakable entity, so monsters can shoot them out of the way
+ */
+void SUB_TraceThroughObstacles (vector source, vector dest, float ignoremonsters, entity ignore, entity victim)
+{
+	float end;
+	end = FALSE;
+	trace_ent = world;
+	
+	traceline(source,dest,ignoremonsters,ignore);
+	while (trace_ent != victim && !end) {
+		if (trace_ent!=victim && trace_ent.takedamage && (trace_ent.thingtype==THINGTYPE_WEBS||trace_ent.thingtype==THINGTYPE_GLASS||trace_ent.thingtype==THINGTYPE_CLEARGLASS||trace_ent.thingtype==THINGTYPE_REDGLASS||trace_ent.thingtype==THINGTYPE_ICE || (trace_ent.thingtype==THINGTYPE_CLAY && trace_ent.solid!=SOLID_BSP)))
+		{
+		//	makevectors(dest-source);
+			traceline(trace_endpos,dest,ignoremonsters,trace_ent);
+		}
+		if (trace_ent != victim)
+			end = TRUE;
+	}
+}
