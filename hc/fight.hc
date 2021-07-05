@@ -14,6 +14,7 @@ float anglemod(float v);
 //void  ChooseTurn(vector dest);
 void  ai_face();
 float CheckMonsterAttack(float AttackType, float ChanceModifier);
+float fov(entity targ,entity from,float scope);
 
 float enemy_vis, enemy_infront, enemy_range;
 float enemy_yaw;
