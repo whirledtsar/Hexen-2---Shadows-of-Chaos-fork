@@ -916,6 +916,9 @@ entity holdent,lastleader,newking;
 				return;
 			}
 	}
+	else if(targ.playerclass==CLASS_NECROMANCER && targ.class_weaponvar && inflictor.flags2&FL_NODAMAGE) {
+		return;		//necromancer has projectile-blocking spell active
+	}
 
 	// Nothing but melee weapons hurt the snake
 //	if ((targ.classname == "monster_snake") && 
