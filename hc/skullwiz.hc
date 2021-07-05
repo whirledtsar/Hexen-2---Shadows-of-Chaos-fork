@@ -111,7 +111,7 @@ entity risen;
 	risen = skullwiz_findcorpse();
 	if (risen==world)
 		return;
-		
+	
 	risen.enemy = self.enemy;
 	risen.controller = self;
 	monster_raiseinit(risen);
@@ -166,6 +166,7 @@ float dot;
 
 	if(self.enemy.last_attack<time - 0.5)
 		return FALSE;
+	
 	if (self.teleportTime > time)	//dont teleport immediately after teleporting in
 		return FALSE;
 
@@ -215,7 +216,6 @@ void skullwiz_throw(float part)
 	new.think=MakeSolidCorpse;
 	new.nextthink = time + HX_FRAME_TIME * 15;
 }
-
 
 void()skullwiz_spiderinit;
 void spider_spawn (float spawn_side)
@@ -321,7 +321,6 @@ void spider_grow(void)
 		walkmonster_start();
 }
 
-
 void skullwiz_spiderinit(void)
 {
 vector spot;
@@ -345,6 +344,7 @@ vector spot;
 		
 		if (spot==VEC_ORIGIN)	//couldnt find suitable spawn spot
 		{
+			self.effects(+)EF_NODRAW;
 			++self.counter;
 			if (self.counter>20) {
 				remove(self);
@@ -353,11 +353,16 @@ vector spot;
 			thinktime self : 0.1;
 			return;
 		}
+		self.effects(-)EF_NODRAW;
  	}
 	else	// Skull Wiz is dead, spawn at his location
 	{
 		if (!CanSpawnAtSpot(self.origin, self.mins*1.25, self.maxs*1.25, self.controller))
 		{
+			self.effects(+)EF_NODRAW;
+			spot = FindSpawnSpot(1, 30, 360, self.controller);
+			if (spot!=VEC_ORIGIN)
+				self.origin = spot;
 			++self.counter;
 			if (self.counter>20) {
 				remove(self);
@@ -366,6 +371,7 @@ vector spot;
 			thinktime self : 0.1;
 			return;
 		}
+		self.effects(-)EF_NODRAW;
 		spot = self.origin;
 	}
 	
@@ -383,7 +389,7 @@ vector spot;
 	self.lifetime = time + 30;
 	
 	self.skin = 1;
-	self.health = self.max_health = 10;
+	self.health = self.max_health = 10 + ((skill>2)*15);	//extra health on nightmare
 	self.init_exp_val = self.experience_value = SpiderExp[1];
 	
 	self.drawflags = SCALE_ORIGIN_BOTTOM;
@@ -423,7 +429,7 @@ vector spot;
 void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 {
 	thinktime self : HX_FRAME_TIME*0.5;	//ws: speed up animation
-	if (self.frame == $skgate2)   // Gate in the creatures
+	if (self.frame == $skgate2)
 		sound (self, CHAN_VOICE, "skullwiz/gatespk.wav", 1, ATTN_NORM);
 	
 	if (self.frame == $skgate21)   // Gate in the creatures
@@ -438,8 +444,10 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 		sound (self, CHAN_AUTO, "skullwiz/gate.wav", 1, ATTN_NORM);
 	}
 
-	if (cycle_wrapped)
+	if (cycle_wrapped) {
+		self.summonTime = time+1;	//dont immediately summon another spider
 		skullwiz_run();
+	}
 }
 
 /*-----------------------------------------
@@ -448,10 +456,7 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 void skullwiz_transition (void) [++ $sktran1.. $sktran7]
 {
 	if (self.frame == $sktran1)
-		if(skill>=4)
-			self.attack_finished=0;
-		else
-			self.attack_finished = time + random(0.5,3.5);
+		self.attack_finished = time + random(0.5,3.5);
 
 	if (cycle_wrapped)
 		skullwiz_run();
@@ -471,7 +476,7 @@ void skullwiz_pain_anim () [++ $skpain1 .. $skpain12]
 		else
 			sound (self, CHAN_BODY, "skullwiz/pain2.wav", 1, ATTN_NORM);
 	}
-	//ws: frame advance is handled automatically by the function, so the following skips most frames (including the frame with pain sound)
+	//ws: frame advance is handled automatically by the function, so the following skipped most frames (including the frame with pain sound)
 	//if (self.frame < $skpain11)
 		//self.frame += 1;
 
@@ -572,6 +577,7 @@ void SkullMissile_Twist(void)
 		sound (self, CHAN_BODY, "skullwiz/scream.wav", 1, ATTN_NORM);
 		self.scream_time = time + random(.50,1);
 	}
+	
 	if (self.owner.bufftype & BUFFTYPE_LEADER)
 		HomeThink();
 }
@@ -695,6 +701,8 @@ void skullwiz_missile_init (void) [++ $skredi1..$skredi12]
 {
 	if (self.classname=="monster_skull_wizard_lord" && skullwiz_findcorpse()!=world)
 		skullwiz_raiseinit();
+	else if (self.classname=="monster_skull_wizard_lord" && vlen(self.enemy.origin-self.origin)<300 && random()<0.4 && time>self.summonTime)
+		skullwiz_summoninit();
 	
 	self.frame += 2;
 
@@ -716,6 +724,7 @@ void skullwiz_blinkin(void)
 		max_scale = 1;
 	else
 		max_scale = 1.20;
+	
 	if (self.bufftype & BUFFTYPE_LARGE)
 		max_scale = self.tempscale;
 
@@ -724,6 +733,7 @@ void skullwiz_blinkin(void)
 		self.scale=max_scale;
 		self.th_pain=skullwiz_pain;
 		self.takedamage = DAMAGE_YES;
+		
 		//reset scale type to normal
 		self.drawflags (-) SCALE_TYPE_MASKOUT;
 		self.drawflags (-) SCALE_TYPE_XYONLY;
@@ -949,7 +959,7 @@ void skullwiz_melee (void) [++ $skspel2..$skspel30]
 		}
 		else  // Only the skull wizard lord can summon
 		{
-			if (random()<0.2)
+			if (random()<0.2 && time>self.summonTime)
 				skullwiz_summoninit();
 			else
 			{
@@ -1127,8 +1137,6 @@ void skullwizard_init(void)
 
 	self.flags(+)FL_MONSTER;
 	self.yaw_speed = 10;
-
-	self.teleportTime = 0;	//timer for when to teleport
 }
 
 
@@ -1157,9 +1165,10 @@ void monster_skull_wizard (void)
 		self.health = 150;
 	if(!self.max_health)
 		self.max_health=self.health;
-	self.experience_value = 100;
-	self.monsterclass = CLASS_GRUNT;
+	if (!self.experience_value)
+		self.experience_value = 100;
 	self.init_exp_val = self.experience_value;
+	self.monsterclass = CLASS_GRUNT;
 
 	self.buff=2;
 	walkmonster_start();
@@ -1187,14 +1196,15 @@ void monster_skull_wizard_lord (void)
 	skullwizard_init();
 
 	if(!self.health)
-		self.health = 600;
+		self.health = 600;				//vanilla: 650
 	if(!self.max_health)
 		self.max_health=self.health;
-	self.experience_value = 300;
+	if (!self.experience_value)
+		self.experience_value = 300;	//vanilla: 325
+	self.init_exp_val = self.experience_value;
 	self.monsterclass = CLASS_LEADER;
 	self.skin = 1;
 	self.scale = 1.20;
-	self.init_exp_val = self.experience_value;
 	
 	self.buff=1;
 	walkmonster_start();
