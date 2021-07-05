@@ -4,6 +4,7 @@
 void ThrowSolidHead (float dm);
 void MarkForRespawn (void);
 void () CorpseThink;
+void () feathers;
 
 void blood_splatter()
 {
@@ -696,6 +697,11 @@ void chunk_death (void)
 			afrit_gibs();
 		if (self.netname == "footsoldier")
 			death_knight_gibs();
+		if (self.classname == "monster_raven") {
+			local float i;
+			for (i = 0; i < 10*self.scale; i++)
+				feathers();
+		}
 		//Made temporary changes to make weapons look and sound
 		//better, more blood and gory sounds.
 		if(self.enemy.playerclass==CLASS_ASSASSIN && (self.enemy.weapon == IT_WEAPON4))
