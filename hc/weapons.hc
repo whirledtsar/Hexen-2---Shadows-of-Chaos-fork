@@ -606,6 +606,9 @@ float W_CheckNoAmmo (float check_weapon)
 		case IT_WEAPON2:
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
+				if (self.button1)
+					if (self.bluemana >= MMIS_ALT_COST)
+						return TRUE;
 				if(self.bluemana >= MMIS_TOME_COST)
 					return TRUE;
 			}
