@@ -713,6 +713,14 @@ entity holdent;
 		dir = normalize(dir);
 		targ.velocity = targ.velocity + dir*damage*8;
 	}
+	
+//when player takes damage, hide menu so they can quickly react
+	if (targ.flags&FL_CLIENT && targ.flags2&FL2_MENUACTIVE) {
+		holdent = self;
+		self = targ;
+		StatsMenu_Disable();
+		self = holdent;
+	}
 
 // check for godmode or invincibility
 // do the damage
