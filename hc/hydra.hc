@@ -816,8 +816,7 @@ NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, play_dead, no
 void monster_hydra(void)
 {
 	self.th_init=monster_hydra;
-	init_hydra();
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 	{
 		precache_sound("hydra/pain.wav");
 		precache_sound("hydra/die.wav");
@@ -828,5 +827,10 @@ void monster_hydra(void)
 		precache_sound("hydra/tent.wav");
 		precache_sound("hydra/spit.wav");
 	}
+	
+	if (self.spawnflags&SPAWNIN)
+		monster_dormant();
+	else
+		init_hydra();
 }
 
