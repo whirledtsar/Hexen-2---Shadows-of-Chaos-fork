@@ -14,7 +14,7 @@
 // };
 
 void() impmonster_start;
-void() hydra_init;
+void() init_hydra;
 void() monster_dormant;
 void() monster_spawn;
 
