@@ -248,7 +248,7 @@ void() ImpulseCommands =
 	
 	if (self.impulse>=STATS_MENU && self.impulse<=STATS_DUMP)	//dont open stats menu if manual stats arent enabled
 		if (CheckCfgParm(PARM_STATS)) {
-			sprint (self, "Randomized stat increases are disabled. Type impulse 54 to toggle\n");
+			sprint (self, "Manual stat increases are disabled. Type impulse 54 to toggle\n");
 			self.impulse = 0;
 			return;
 		}
