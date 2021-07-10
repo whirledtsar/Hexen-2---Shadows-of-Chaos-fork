@@ -14,6 +14,7 @@
 // };
 
 void() impmonster_start;
+void() hydra_init;
 void() monster_dormant;
 void() monster_spawn;
 
@@ -569,10 +570,12 @@ void() monster_spawn =
 	
 	if (self.model=="models/imp.mdl")
 		impmonster_start();
-	else if (self.flags & FL_FLY)
-		flymonster_start();
+	else if (self.classname=="monster_hydra")
+		init_hydra();
+	else if (self.flags&FL_FLY)
+		flymonster_start_go();
 	else
-		walkmonster_start();
+		walkmonster_start_go();
 }
 
 void() monster_dormant =
