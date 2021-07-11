@@ -593,9 +593,17 @@ void StatsMenu_Project ()
 {
 vector source, dest;
 float ofsdir;
+	if (!self.owner) {
+		remove(self);
+		return;
+	}
+	
 	makevectors(self.owner.v_angle);
 	source = self.owner.origin+self.owner.view_ofs+'0 0 2';
-	traceline(source, source+v_forward*(12+(-self.owner.v_angle_x*0.05*(self.owner.v_angle_x<15))), TRUE, self);	//if player is aiming up, spawn graphic further away
+	dest = source+v_forward*25.5;		//12 is perfect without fov compensation
+	dest -= v_forward*(cvar("fov")*0.15);		//compensate for fov
+	dest += v_forward*(-self.owner.v_angle_x*0.04*(self.owner.v_angle_x<15));	//if player is aiming up, spawn graphic further away
+	traceline(source, dest, TRUE, self);
 	dest = trace_endpos;
 	
 	traceline(dest, dest+v_right*self.t_width, TRUE, self);		//check right edge of graphic
@@ -610,7 +618,7 @@ float ofsdir;
 		ofsdir = -1;
 	
 	if (ofsdir)
-		setorigin(self, dest+(v_right*(trace_fraction*self.t_width)*ofsdir));
+		setorigin(self, dest+(v_right*(trace_fraction*self.t_width)*ofsdir));	//adjust destination so edges arent clipped
 	else
 		setorigin(self, dest);
 	
