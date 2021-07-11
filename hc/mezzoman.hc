@@ -637,7 +637,7 @@ float result;
 		return;
 	
 	if(self.owner.classname=="monster_mezzoman") {
-		sound(self.owner,5,"mezzo/slam.wav",1,ATTN_NORM);
+		//sound(self.owner,5,"mezzo/slam.wav",1,ATTN_NORM);
 		sound(self,CHAN_AUTO,"mezzo/reflect.wav",1,ATTN_NORM);
 	}
 	else {
