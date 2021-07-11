@@ -126,7 +126,10 @@ void() StartItem =
 		if(self.think!=SUB_Remove&&self.owner.classname=="player"&&self.model!="models/bag.mdl")
 		{
 			self.think=SUB_Remove;
-			thinktime self : 30;//Go away after 30 sec if thrown by player & not a backpack
+			if (coop)
+				thinktime self : 90;	//ws: increased delay in coop to give players time
+			else
+				thinktime self : 30;//Go away after 30 sec if thrown by player & not a backpack
 		}
 	}
 	else
