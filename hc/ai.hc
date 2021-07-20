@@ -447,8 +447,10 @@ float		r;
 			return FALSE;	// current check entity isn't in PVS
 	}
 
-	if (self.playercontrolled && (client==self.controller || client==self.owner))	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
+if (self.playercontrolled && (client==self.controller || client==self.owner))	//if minion, follow enemy (player controller) but dont alert monsters or play sight sound
 	{
+		if (range(client)<=RANGE_MELEE && visible(client))	//ws: if summoned minion and already close to player, dont move further
+			return FALSE;
 		HuntTarget();
 		return TRUE;
 	}
@@ -635,11 +637,6 @@ void() ai_stand =
 	CheckMonsterBuff();
 	
 	MonsterCheckContents();
-	
-	sdprint("Summon monster contents are ok", FALSE);
-	if (self.playercontrolled && self.enemy==self.controller)	//ws: if summoned minion and already close to player, dont move further
-			if (range(self.controller)<=RANGE_MELEE && visible(self.controller))
-				return;
 	
 //THE PIT!
 	if(world.model=="maps/monsters.bsp")
