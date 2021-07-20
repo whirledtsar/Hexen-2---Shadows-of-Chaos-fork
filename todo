@@ -1,8 +1,9 @@
-fix imps: imps using the spawn-in system get stuck in swoop animation for some reason.
-this doesnt affect any maps retroactively since its a new feature. just dont use spawnflag 128 with them for now
+imps using the spawn-in system get stuck in swoop animation for some reason
 
-make tomed altfire mode for meteor staff
+altfire mode for meteor staff
 
 skull wizards start floating after teleporting back in; present in uhexen2 progs as well (and assumably vanilla)
 
-think of better altfire for magic missiles - current is redundant
+summoned minions dont attack enemies in coop
+
+config flags dont work right in coop
