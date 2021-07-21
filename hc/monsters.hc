@@ -819,3 +819,23 @@ void CheckMonsterBuff ()
 	
 	return;
 }
+
+void minionfx ()
+{
+	if (!self.playercontrolled)
+		return;
+	if (deathmatch)
+		return;
+	if (random()<0.75)
+		return;
+	
+	vector area, spot;
+	area = randomv('-16 -16 0', '16 16 0');
+	spot = self.origin;
+	if (self.model=="models/scorpion.mdl")
+		spot += self.view_ofs+'0 0 4';	//account for huge scorpion hitbox
+	else
+		spot_z += self.maxs_z;
+	
+	particle2(spot,area,area+randomv('0 0 0', '0 0 24'),COLOR_YELLOW_MID,PARTICLETYPE_STATIC,random(1, 3));
+}
