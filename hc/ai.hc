@@ -57,6 +57,7 @@ float(float move_speed)eidolon_riderpath_move;
 void()hive_die;
 float(entity ent) EnemyIsValid;
 float(entity ent) IsAlly;
+void() minionfx;
 
 //void()check_climb;
 
@@ -561,6 +562,7 @@ The monster is staying in one place for a while, with slight angle turns
 void() ai_stand =
 {
 	sdprint("Summon monster standing", FALSE);
+	minionfx();
 	CheckMonsterBuff();
 	MonsterCheckContents();
 	
@@ -756,6 +758,7 @@ The monster has an enemy it is trying to kill
 void(float dist) ai_run =
 {
 	sdprint("Doing AI run... ", FALSE);
+	minionfx();
 	CheckMonsterBuff();
 	MonsterCheckContents();
 	self.flags2(-)FL2_MOVING;
