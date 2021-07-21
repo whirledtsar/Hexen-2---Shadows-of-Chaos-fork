@@ -58,6 +58,7 @@ void()hive_die;
 float()eidolon_check_attack;
 float(entity ent) EnemyIsValid;
 float(entity ent) IsAlly;
+void() minionfx;
 
 //void()check_climb;
 
@@ -633,7 +634,7 @@ void ApplyMonsterBuff(entity monst, float canBeLeader);
 void() ai_stand =
 {
 	sdprint("Summon monster standing", FALSE);
-	
+	minionfx();
 	CheckMonsterBuff();
 	
 	MonsterCheckContents();
@@ -844,6 +845,7 @@ The monster has an enemy it is trying to kill
 void(float dist) ai_run =
 {
 	sdprint("Doing AI run... ", FALSE);
+	minionfx();
 	CheckMonsterBuff();
 	MonsterCheckContents();
 	self.flags2(-)FL2_MOVING;
