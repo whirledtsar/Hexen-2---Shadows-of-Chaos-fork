@@ -654,3 +654,35 @@ entity new;		//create new entity to avoid inheriting anything weird from corpse
 	thinktime corpse : 0;*/
 }
 
+void CheckMonsterBuff ()
+{
+	/*ws: monsters are spawned before player, so they cant check client's config flags immediately (as they arent initialized).
+	instead, use ai_run, ai_walk, & ai_stand to check once player is ready (indicated by global var client_ready, set in client.hc). */
+	if (!self.state && client_ready) {
+		self.state = TRUE;	//dont check again
+		if (CheckCfgParm(PARM_BUFF) && self.buff)
+			ApplyMonsterBuff(self, self.buff);
+	}
+	
+	return;
+}
+
+void minionfx ()
+{
+	if (!self.playercontrolled)
+		return;
+	if (deathmatch)
+		return;
+	if (random()<0.75)
+		return;
+	
+	vector area, spot;
+	area = randomv('-16 -16 0', '16 16 0');
+	spot = self.origin;
+	if (self.model=="models/scorpion.mdl")
+		spot += self.view_ofs+'0 0 4';	//account for huge scorpion hitbox
+	else
+		spot_z += self.maxs_z;
+	
+	particle2(spot,area,area+randomv('0 0 0', '0 0 24'),COLOR_YELLOW_MID,PARTICLETYPE_STATIC,random(1, 3));
+}
