@@ -1695,13 +1695,14 @@
 // Traps!
 //
 
-@PointClass base(Appearflags, Targetname, Target) size(-8 -8 -8, 8 8 8) = trap_fireball : "Triggerable fireball"
+@PointClass base(Appearflags, Targetname) size(-8 -8 -8, 8 8 8) = trap_fireball : "Triggerable fireball"
 [
 	spawnflags(Flags) =
 	[
 		1 : "Once per trigger" : 0 //(aka trigger only)
 	]
-        wait(integer) : "Time between firings" : 1
+	target(target_destination) : "Aiming target"
+    wait(integer) : "Time between firings" : 0.5
 	dmg(integer) : "Damage" : 10
 ]
 @PointClass base(Appearflags, Targetname, Target) size(-8 -8 -8, 8 8 8) = trap_lightning : "Lightning"
