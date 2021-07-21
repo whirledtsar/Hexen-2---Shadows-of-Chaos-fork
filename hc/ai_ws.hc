@@ -195,7 +195,7 @@ vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ign
 	return spot;
 }
 
-void(float dist) ai_backfromenemy =
+float (float dist) ai_backfromenemy =
 {
 float	away;
 	if (!self.enemy)
@@ -203,7 +203,7 @@ float	away;
 	else
 		away = vectoyaw (self.origin - self.enemy.origin);
 	
-	walkmove (away, dist,FALSE);
+	return (walkmove (away, dist,FALSE));
 };
 
 void(float mindist, float maxdist) SetNewWanderPoint;
