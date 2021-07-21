@@ -32,7 +32,7 @@ float(float AttackType, float ChanceModifier) CheckMonsterAttack =
 	targ = self.enemy;
 
 	if (self.classname == "monster_hydra")
-		if (self.enemy.watertype != CONTENT_WATER && self.enemy.watertype != CONTENT_SLIME)
+		if (self.enemy.watertype != CONTENT_WATER && self.enemy.watertype != CONTENT_SLIME && vlen(self.origin-self.enemy.origin)>64)
 		{
 			if (self.search_time < time)
 			{
