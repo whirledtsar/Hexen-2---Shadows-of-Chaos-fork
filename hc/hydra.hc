@@ -190,7 +190,7 @@ float hydra_check_blind_melee(void)
 {
 	float dist, c1;//, c2;
 
-	if (self.enemy.watertype != CONTENT_WATER && self.enemy.watertype != CONTENT_SLIME) return 0;
+	if (self.enemy.watertype!=CONTENT_WATER && self.enemy.watertype!=CONTENT_SLIME) return 0;
 	if (self.cnt > time) return 0;
 
 	dist = vhlen(self.enemy.origin - self.origin);
@@ -333,26 +333,25 @@ void hydra_float(void)
 	CheckMonsterAttack(MA_MISSILE,8.0);
 }
 
-void hydra_reverse(void)
+
+void hydra_reverse()
 {
 	float retval;
 	float dist;
 
 	self.monster_duration -= 1;
-	dist = 4.0;  // Movement distance this turn
+	dist = self.blasted*2;  // Movement distance this turn
+	self.blasted*=0.8;
 
-	retval = walkmove(self.angles_y + 180, dist, FALSE);
-	/*if (!retval)
-	{
-		self.ideal_yaw = FindDir();
-		self.monster_duration = 0;//random(40,70);
-		self.monster_stage = HYDRA_STAGE_STRAIGHT;
-		ChangeYaw();//hydra_turn(200);
-		return;
-	}*/
+	retval = ai_backfromenemy(dist);
 	
-	//self.monster_stage = HYDRA_STAGE_FLOAT;
+	if (self.monster_duration<1)
+		retval = FALSE;
+	if (self.blasted<=0.1)
+		retval = FALSE;
 	
+	if (!retval)
+		self.monster_stage = HYDRA_STAGE_FLOAT;
 }
 
 void hydra_move(float thrust) 
@@ -376,7 +375,7 @@ void hydra_move(float thrust)
 	}
 	else if (self.monster_stage == HYDRA_STAGE_REVERSE)
 	{
-//		hydra_reverse();
+		hydra_reverse();
 		return;
 	}
 }
@@ -410,7 +409,13 @@ void hydra_tent(float TryHit)
 	if (TryHit)
 	{
 		makevectors(self.angles);
-		traceline(self.origin,self.origin+v_forward*128,FALSE,self);
+		//traceline(self.origin,self.origin+v_forward*128,FALSE,self);
+		SUB_TraceRange(self.origin,self.origin+v_forward*128,FALSE,self,35,35);
+		if (self.enemy && trace_ent!=self.enemy && self.enemy.watertype!=self.watertype) {		//enemy above, likely on ledge or standing on me
+			traceline(self.origin+'0 0 24', self.enemy.origin, FALSE, self);
+			if (trace_ent && vlen(trace_endpos-self.origin)>32)		//too far away
+				trace_ent = world;
+		}
 
 		if (trace_ent.takedamage)
 		{
@@ -510,24 +515,6 @@ float hydra_TentAttacks[24] =
 	0
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Attacking others
 void hydra_AttackDieFrames(void)
 {
@@ -594,8 +581,8 @@ void hydra_OpenFrames(void)
 	self.think = hydra_OpenFrames;
 	thinktime self : HX_FRAME_TIME;
 
-	if (self.enemy.watertype != CONTENT_WATER && self.enemy.watertype != CONTENT_SLIME) 
-	{			
+	if (self.enemy.watertype!=CONTENT_WATER && self.enemy.watertype!=CONTENT_SLIME && vlen(self.enemy.origin-self.origin)>64) 
+	{
 		self.monster_stage = HYDRA_STAGE_FLOAT;
 		self.think = self.th_run;
 		thinktime self : 0.1;
@@ -733,12 +720,15 @@ void do_hydra_die(void)
 		hydra_SwimDieFrames();
 }
 
+
 void hydra_retreat()
 {
 	self.monster_stage = HYDRA_STAGE_REVERSE;
+	self.monster_duration = 16;
 	self.think = self.th_run;
-	thinktime self : 0.1;
+	self.th_run();
 }
+
 	
 void hydra_pain(entity attacker, float damage) 
 {
@@ -755,12 +745,6 @@ void init_hydra(void)
 
 	self.monster_stage = HYDRA_STAGE_WAIT;
 
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
-	{
-		precache_model ("models/hydra.mdl");
-		precache_model ("models/spit.mdl");
-	}
-
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_SWIM;
 	self.thingtype=THINGTYPE_FLESH;
@@ -773,8 +757,12 @@ void init_hydra(void)
 	setsize (self, '-30 -30 -24', '30 30 24');
 	self.hull = HULL_SCORPION;
 //self.hull = HULL_HYDRA;
-	self.health = 125;
-	self.experience_value = 75;
+	if(!self.health)
+		self.health = 125;
+	if(!self.max_health)
+		self.max_health=self.health;
+	if (!self.experience_value)
+		self.experience_value = 50;
 	self.mintel = 4;
 
 	self.th_stand = hydra_SwimFrames;
@@ -784,6 +772,7 @@ void init_hydra(void)
 	self.th_die = do_hydra_die;
 	self.th_missile = do_hydra_spit;
 	self.th_melee = do_hydra_tent;
+	self.th_blasted = hydra_retreat;
 
 	self.takedamage = DAMAGE_YES;
 	self.flags2 (+) FL_ALIVE;
@@ -800,24 +789,29 @@ void init_hydra(void)
 
 	total_monsters += 1;
 
+	self.init_exp_val = self.experience_value;
+
 	thinktime self : random(0.5);
 	self.think = self.th_stand;
 }
 
 
-/*QUAKED monster_hydra (1 0.3 0) (-40 -40 -42) (40 40 42) STAND HOVER JUMP PLAY_DEAD DORMANT
+/*QUAKED monster_hydra (1 0.3 0) (-40 -40 -42) (40 40 42) STAND HOVER JUMP x DORMANT
 New item for QuakeEd
 
 -------------------------FIELDS-------------------------
-NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, play_dead, no_drop)
+NOTE:  Normal QuakEd monster spawnflags don't apply here (no_jump, x, no_drop)
 --------------------------------------------------------
 
 */
 void monster_hydra(void)
 {
 	self.th_init=monster_hydra;
+
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 	{
+		precache_model ("models/hydra.mdl");
+		precache_model ("models/spit.mdl");
 		precache_sound("hydra/pain.wav");
 		precache_sound("hydra/die.wav");
 		precache_sound("hydra/open.wav");
@@ -833,4 +827,3 @@ void monster_hydra(void)
 	else
 		init_hydra();
 }
-
