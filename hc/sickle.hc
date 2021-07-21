@@ -201,6 +201,54 @@ void minion_summon(entity body, float intmod, float level)
 	}
 }
 
+void minion_teleport ()		//teleport faraway minions to players location
+{
+	if (!self.flags&FL_CLIENT)
+		return;
+	
+	entity minion, find;
+	entity oself;
+	vector oldorigin, neworigin;
+	
+	find = nextent(world);
+	while (find) {
+		if (find.playercontrolled && (find.controller==self || find.owner==self)) {
+			if (!visible2ent(self, find)) {
+				if (vlen(find.origin-self.origin)>80)
+					minion = find;
+			}
+			else if (vlen(find.origin-self.origin)>384)
+				minion = find;
+			else if (find.watertype != self.watertype)
+				minion = find;
+			
+			if (minion.think==minion.th_melee||minion.think==minion.th_missile)
+				minion = world;		//dont choose minion currently attacking
+		}
+		if (!minion)
+			find = nextent(find);
+		else
+			find = world;	//end loop
+	}
+	if (!minion)
+		return;
+	
+	oself = self;
+	self = minion;
+	oldorigin = self.origin;
+	self.origin = oself.origin;			//move to player position
+	neworigin = FindSpawnSpot(32, 192, 360, self);	//find random spot near player
+	if (neworigin==VEC_ORIGIN) {		//couldnt find suitable spot
+		self.origin = oldorigin;
+		return;
+	}
+	self.origin = neworigin;
+	setorigin(self, self.origin);
+	spawn_tfog(self.origin);
+	
+	self = oself;
+}
+
 void sickle_lightning_fire ()
 {
 	vector	source;
@@ -289,7 +337,6 @@ void shockwave ()
 	thinktime self : .05;
 }
 
-
 void sickle_fire (float altfire)
 {
 	vector	source;
@@ -304,21 +351,21 @@ void sickle_fire (float altfire)
 	
 	if (altfire)
 	{
-		sound(self,CHAN_BODY,"skullwiz/gate.wav",1,ATTN_NORM);
+		sound(self,5,"skullwiz/gate.wav",1,ATTN_NORM);
 		newmis = spawn();
 		newmis.origin = self.origin;
 		newmis.owner = self;
-		newmis.lifetime = time + .8;
+		newmis.lifetime = time + HX_FRAME_TIME*9;
 		setmodel(newmis, "models/proj_ringshock.mdl");
 		newmis.think = shockwave;
-		thinktime newmis : .1;
+		thinktime newmis : HX_FRAME_TIME;
 		
 		float minions;
 		entity risen;
-		risen = findradius(self.origin, 360);
+		risen = findradius(self.origin, 384);
 		while(risen)
 		{
-			if ((risen.flags & FL_MONSTER) && risen.health > 0 && risen.team != self.team)
+			if ((risen.flags & FL_MONSTER) && risen.health > 0 && risen.team != self.team && !risen.playercontrolled)
 				self.enemy = risen;
 			
 			if (visible(risen) && risen.takedamage && !risen.flags2&FL_ALIVE && risen.think == CorpseThink && !risen.playercontrolled && !risen.preventrespawn)
@@ -334,10 +381,16 @@ void sickle_fire (float altfire)
 		
 		if (minions) {
 			local float drain;
-			drain = random(3,6)+minions+(rint(self.level*0.5));
+			drain = random(2,5)+minions+(rint(self.level*0.5));
 			T_Damage (self, world, world, drain);
 			SpawnPuff (self.origin + self.proj_ofs, '0 0 0', drain*2, self);
+			
+			msg_entity=self;
+			WriteByte (MSG_ONE, SVC_SET_VIEW_TINT);
+			WriteByte (MSG_ONE, COLOR_RED_MID);
 		}
+		else	//if were not raising a corpse, teleport existing faraway minions to our location
+			minion_teleport();
 	}
 
 	makevectors (self.v_angle);
