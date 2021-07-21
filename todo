@@ -11,3 +11,7 @@ config flags dont work right in coop
 move config flags from impulses to menu system
 
 make sickle altfire summon faraway minions to you if theres no corpse to raise
+
+support switchable shadows
+
+let hydras shoot player if player is out of water but still close
