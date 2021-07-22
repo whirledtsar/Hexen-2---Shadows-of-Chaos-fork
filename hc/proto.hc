@@ -88,3 +88,9 @@ void() StatsMenu_Dump;
 void(float statpool) StatsIncreaseRandom;
 
 void() SUB_ResetTarget;
+
+//shadow.hc
+void() misc_shadowcontroller;
+void() shadow_fade_out;
+void() shadow_fade_in;
+void() spawn_shadowcontroller;

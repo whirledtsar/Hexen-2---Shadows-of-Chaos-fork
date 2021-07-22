@@ -10,6 +10,7 @@ float DOOR_SLIDE		= 16;
 float DOOR_NORMAL		= 32;
 float DOOR_REMOVE_PP	= 64;
 float DOOR_NO_PP		= 128;
+float DOOR_ALWAYSTOUCH	= 65536;
 
 /*
 Doors are similar to buttons, but can spawn a fat trigger field around them
@@ -140,7 +141,7 @@ void door_crash_next()
 
 	if(len < 0.1 || nextlen > testlen)
 	{
-		door_hit_bottom;
+		door_hit_bottom();	//ws: made actual function call
 		return;
 	}
 	else 
@@ -419,6 +420,23 @@ string hold_target;
 		SUB_UseTargets();
 		self.target=hold_target;
 	}
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		if(oldself.spawnflags & DOOR_START_OPEN) {
+			shadow_fade_out();
+			shadow.shadowoff = 1;
+		} else {
+			shadow_fade_in();
+			shadow.shadowoff = 0;
+		}
+		
+		self = oldself;
+	}
 }
 
 
@@ -478,6 +496,23 @@ void door_go_up()
 		SUB_CalcAngleMove(self.pos2, self.speed, door_hit_top);
 
 	SUB_UseTargets();
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		if(oldself.spawnflags & DOOR_START_OPEN) {
+			shadow_fade_in();
+			shadow.shadowoff = 0;
+		} else {
+			shadow_fade_out();
+			shadow.shadowoff = 1;
+		}
+		
+		self = oldself;
+	}
 }
 
 
@@ -816,6 +851,8 @@ vector	cmins, cmaxs;
 	if (self.spawnflags & 4)
 	{
 		self.owner = self.enemy = self;
+		if (self.spawnflags&DOOR_ALWAYSTOUCH && !self.trigger_field)
+			spawn_field(cmins, cmaxs, self);
 		return;		// don't want to link this door
 	}
 
@@ -849,7 +886,7 @@ vector	cmins, cmaxs;
 
 			if (!self.thingtype && self.health)
 				return;
-			if (self.targetname)
+			if (self.targetname!="" && !self.spawnflags&DOOR_ALWAYSTOUCH)
 				return;
 			if (self.puzzle_piece_1 != string_null || 
 				self.puzzle_piece_2 != string_null || 
@@ -1270,6 +1307,11 @@ float movedist, num_axes;
 // the sizes can be detected properly.
 	self.think = LinkDoors;
 	self.nextthink = self.ltime + 0.1;
+	
+	// creates a shadow controller entity for the door if it has switchable shadows
+	if(self.switchshadstyle) {
+		spawn_shadowcontroller();
+	}
 
 	if (self.cnt)
 	{
@@ -1821,6 +1863,11 @@ vector	vec;
 
 	self.think = LinkDoors;
 	self.nextthink = self.ltime + 0.1;
+	
+	// creates a shadow controller entity for the door if it has switchable shadows
+	if(self.switchshadstyle) {
+		spawn_shadowcontroller();
+	}
 
 	if (self.cnt)
 	{

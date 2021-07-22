@@ -332,6 +332,11 @@ void breakable_brush()
 		self.think=linkBreakables;
 		self.nextthink=self.ltime+0.1;
 	}
+	
+	// creates a shadow controller entity for the door if it has switchable shadows
+	if(self.switchshadstyle) {
+		spawn_shadowcontroller();
+	}
 
 	self.ltime = time;
 }
