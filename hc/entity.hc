@@ -499,6 +499,16 @@ void end_sys_fields;
 		float raiseTime;
 		float summonTime;
 	};
+	struct
+	{	// Shadow controller
+		float speed2;
+		float shadowoff;
+	};
+	struct
+	{	// For bmodel entities with automatic switchable shadows
+		float switchshadspeed;
+		float switchshadspeed2;
+	};
 };
 
 // Once we can do unions above end_sys, have this with the field 'playerclass'
@@ -794,3 +804,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
 .entity ladder;
+
+// bmFbr switchable shadow code
+.float		switchshadstyle;
+.entity		shadowcontroller;
