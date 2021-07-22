@@ -258,9 +258,9 @@ void FireSnakeArrow (vector offset)
 		if (self.skin==MEDUSA_SKIN_RED)		//red version fires less smart missiles
 		{
 			newmis.hoverz = FALSE;
-			newmis.speed = 250;
+			newmis.speed = 300;
 			newmis.velocity=newmis.o_angle*newmis.speed;
-			newmis.wait = 0.2;
+			newmis.wait = 0.5;
 		}
 		else
 			newmis.wait = 0.05;
