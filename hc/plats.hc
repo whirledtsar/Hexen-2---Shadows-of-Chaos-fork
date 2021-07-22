@@ -90,6 +90,18 @@ void() plat_go_down =
 	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	self.state = STATE_DOWN;
 	SUB_CalcMove (self.pos2, self.speed, plat_hit_bottom);
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		shadow_fade_in();
+		shadow.shadowoff = 0;
+		
+		self = oldself;
+	}
 };
 
 void() plat_go_up =
@@ -97,6 +109,18 @@ void() plat_go_up =
 	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	self.state = STATE_UP;
 	SUB_CalcMove (self.pos1, self.speed, plat_hit_top);
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		shadow_fade_out();
+		shadow.shadowoff = 1;
+		
+		self = oldself;
+	}
 };
 
 void() plat_center_touch =
@@ -231,9 +255,7 @@ void() func_plat =
 	setorigin (self, self.origin);	
 	setmodel (self, self.model);
 	setsize (self, self.mins , self.maxs);
-	
 	self.blocked = plat_crush;
-	
 	if (!self.speed)
 		self.speed = 150;
 
@@ -247,7 +269,12 @@ void() func_plat =
 
 	self.use = plat_trigger_use;
 
-	plat_spawn_inside_trigger ();	// the "start moving" trigger	
+	plat_spawn_inside_trigger ();	// the "start moving" trigger
+	
+	// creates a shadow controller entity for the door if it has switchable shadows
+	if(self.switchshadstyle) {
+		spawn_shadowcontroller();
+	}
 
 	if (self.targetname)
 	{
@@ -812,7 +839,6 @@ void() func_newplat =
 	}
 
 	self.use = newplat_trigger_use;
-	
 	self.blocked = newplat_crush;
 
 	newplat_spawn_inside_trigger ();	//set the "start moving" trigger	
