@@ -490,6 +490,9 @@ string s;
 			t = find(t, targetname, self.killtarget);
 			if(t!=world)
 			{
+				if(t.switchshadstyle)
+					lightstyle(t.switchshadstyle, "m");
+				
 				if(self.classname=="func_train")
 				{//Trains can't target things when they die, so use killtarget
 					if(t.th_die)
