@@ -424,8 +424,11 @@ string s;
 		do
 		{
 			t = find(t, targetname, self.killtarget);
-			if(t!=world)
+			if(t!=world) {
+				if(t.switchshadstyle)
+					lightstyle(t.switchshadstyle, "m");
 				remove(t);
+			}
 		}
 		while(t!=world);
 	}

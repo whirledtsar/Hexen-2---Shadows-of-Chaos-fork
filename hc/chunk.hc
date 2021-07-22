@@ -791,6 +791,8 @@ void chunk_death (void)
 	}
 	else
 	{
+		if(self.switchshadstyle)
+			lightstyle(self.switchshadstyle, "m");
 		remove(self);
 	}
 }

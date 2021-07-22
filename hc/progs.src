@@ -134,15 +134,15 @@ bishop.hc
 afrit.hc
 wendigo.hc
 undying.hc
-objects_new.hc
-triggers_new.hc
-misc_model.hc
-
 //models by Razumen, code by whirledtsar
 maulotaur.hc
 reiver.hc
 //model by Rogue Software, code by whirledtsar
 roman.hc
+objects_new.hc
+triggers_new.hc
+misc_model.hc
+shadow.hc
 
 eric.hc
 
