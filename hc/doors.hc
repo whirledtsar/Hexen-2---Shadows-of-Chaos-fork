@@ -10,6 +10,7 @@ float DOOR_SLIDE		= 16;
 float DOOR_NORMAL		= 32;
 float DOOR_REMOVE_PP	= 64;
 float DOOR_NO_PP		= 128;
+float DOOR_ALWAYSTOUCH	= 65536;
 
 /*
 Doors are similar to buttons, but can spawn a fat trigger field around them
@@ -140,7 +141,7 @@ void door_crash_next()
 
 	if(len < 0.1 || nextlen > testlen)
 	{
-		door_hit_bottom;
+		door_hit_bottom();	//ws: made actual function call
 		return;
 	}
 	else 
@@ -254,6 +255,7 @@ void door_hit_top()
 
 	if(self.wait== -2)
 		self.th_die();
+	
 	else if(self.wait== -1)
 		self.nextthink = -1;
 	else
@@ -300,6 +302,23 @@ void door_go_down()
 			door_crash(self.pos1); 
 	}
 	else if (self.classname == "door_rotating") SUB_CalcAngleMove(self.pos1, self.speed, door_hit_bottom);
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		if(oldself.spawnflags & DOOR_START_OPEN) {
+			shadow_fade_out();
+			shadow.shadowoff = 1;
+		} else {
+			shadow_fade_in();
+			shadow.shadowoff = 0;
+		}
+		
+		self = oldself;
+	}
 }
 
 
@@ -355,6 +374,23 @@ void door_go_up()
 		SUB_CalcAngleMove(self.pos2, self.speed, door_hit_top);
 
 	SUB_UseTargets();
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		if(oldself.spawnflags & DOOR_START_OPEN) {
+			shadow_fade_in();
+			shadow.shadowoff = 0;
+		} else {
+			shadow_fade_out();
+			shadow.shadowoff = 1;
+		}
+		
+		self = oldself;
+	}
 }
 
 
@@ -373,7 +409,7 @@ void door_fire()
 
 	if (self.owner != self)
 		objerror ("door_fire: self.owner != self");
-
+	
 	if (self.no_puzzle_msg)
 		self.no_puzzle_msg = 0;
 	if (self.no_puzzle_str!="")
@@ -430,7 +466,7 @@ void door_use()
 	self.message = 0;			// door messages are for touch only
 	self.owner.message = 0;
 	self.enemy.message = 0;
-	self.messagestr="";	//SoC
+	self.messagestr="";		//SoC
 	self.owner.messagestr="";
 	self.enemy.messagestr="";
 	oself = self;
@@ -680,6 +716,8 @@ void LinkDoors()
 	if (self.spawnflags & 4)
 	{
 		self.owner = self.enemy = self;
+		if (self.spawnflags&DOOR_ALWAYSTOUCH && !self.trigger_field)
+			spawn_field(cmins, cmaxs, self);
 		return;		// don't want to link this door
 	}
 
@@ -699,6 +737,7 @@ void LinkDoors()
 		if (self.message != 0)
 			starte.message = self.message;
 		if (self.messagestr!="")
+			starte.messagestr = self.messagestr;	//SoC
 
 		t = find (t, classname, self.classname);	
 		if (!t)
@@ -712,7 +751,7 @@ void LinkDoors()
 
 			if (!self.thingtype && self.health)
 				return;
-			if (self.targetname)
+			if (self.targetname!="" && !self.spawnflags&DOOR_ALWAYSTOUCH)
 				return;
 			if (self.puzzle_piece_1 != string_null || 
 				self.puzzle_piece_2 != string_null || 
@@ -1082,6 +1121,11 @@ void func_door()
 // the sizes can be detected properly.
 	self.think = LinkDoors;
 	self.nextthink = self.ltime + 0.1;
+	
+	// creates a shadow controller entity for the door if it has switchable shadows
+	if(self.switchshadstyle) {
+		spawn_shadowcontroller();
+	}
 
 	if (self.cnt)
 	{
@@ -1230,7 +1274,7 @@ void fd_secret_use()
 		return;
 
 	self.message = 0;		// no more message
-	self.messagestr = "";
+	self.messagestr = "";	//SoC
 
 	SUB_UseTargets();				// fire all targets / killtargets
 
@@ -1598,6 +1642,11 @@ vector	vec;
 
 	self.think = LinkDoors;
 	self.nextthink = self.ltime + 0.1;
+	
+	// creates a shadow controller entity for the door if it has switchable shadows
+	if(self.switchshadstyle) {
+		spawn_shadowcontroller();
+	}
 
 	if (self.cnt)
 	{
