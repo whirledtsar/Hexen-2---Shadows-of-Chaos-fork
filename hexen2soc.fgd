@@ -78,8 +78,15 @@
 	]
 	_shadowself(choices) : "Self Shadow" = [
 		0 : "Do Nothing"
-		1 : "Cast shadows on Self"
+		1 : "Cast shadows on self"
 	]
+	_switchableshadow(choices) : "Switchable Shadow" = [
+		0 : "Do Nothing"
+		1 : "Switchable shadow"
+	]
+	switchshadstyle(integer) : "Style for automatic switchable shadow"
+	switchshadspeed(integer) : "Speed of automatic shadow fading in"
+	switchshadspeed2(integer) : "Speed of automatic shadow fading out"
 ]
 
 @baseclass = Appearflags [
@@ -372,10 +379,10 @@
 	spawnflags(Flags) =
 	[
 		8 : "Toggle" : 0
-		16 : "Slide" : 0
-		32 : "Normal move" : 0
+		16 : "Slide" : 0 : "Same acceleration both ways"
+		32 : "Normal move" : 0 : "No acceleration"
 		64 : "Remove puzzle" : 0
-		128 : "No puzzle" : 0
+		128 : "No puzzle" : 0 : "Dont open if player has puzzle piece"
 	]
 	angle(choices) : "Angle" : 0 =
 	[
@@ -560,7 +567,7 @@
 	wait(integer) : "Wait" : 3
 ]
 
-@SolidClass base(Appearflags, Targetname) = func_plat : "Plat"
+@SolidClass base(Appearflags, Targetname, BrushLighting) = func_plat : "Plat"
 [
 	spawnflags(Flags) =
 	[
@@ -987,6 +994,7 @@
 	lightvalue2(integer) : "Highest light value" : 11
 	fadespeed(integer) : "Fade speed" : 1
 	mangle(integer) : "Spotlight cone angle" : 40 : "Specifies the angle in degrees for a spotlight cone. Default 40"
+	_color(string) : "Color (R G B)"
 	_dirt(integer) : "Dirt map (override)" :  : "Overrides the worldspawn setting of '_dirt' for this particular light. -1 to disable dirtmapping (ambient occlusion) for this light, making it illuminate the dirtmapping shadows. 1 to enable ambient occlusion for this light. Default is to defer to the worldspawn setting"
 	_dirtscale(integer) : "Dirt scale (override)" :  : "Override the global '_dirtscale' or '_dirtgain' settings to change how this light is affected by dirtmapping (ambient occlusion). See descriptions of these keys in the worldspawn section"
 	_deviance(integer) : "Deviance" :  : "Split up the light into a sphere of randomly positioned lights within radius 'n' (in world units). Useful to give shadows a wider penumbra. '_samples' specifies the number of lights in the sphere. The 'light' value is automatically scaled down for most lighting formulas (except linear and non-additive minlight) to attempt to keep the brightness equal. Default is 0, do not split up lights"
@@ -1189,7 +1197,14 @@
 	]
 ]
 @PointClass base(monster_rat) size(-20 -20 0, 20 20 10) = monster_ratnest : "Rat's nest" []
-@PointClass base(Monster) size(-16 -16 0, 16 16 32) = monster_raven : "Raven" []
+
+@PointClass base(Monster) size(-8 -8 0, 8 8 20) = monster_raven : "Decorative raven. Will wander randomly unless it has a target or the 'stay put' spawnflag."
+[
+	spawnflags(Flags) =
+	[
+		2 : "Stay put"
+	]
+]
 
 @PointClass base(Appearflags, Targetname, Target) model(":models/snake.mdl") size(-80 -80 0, 80 80 200) = monster_snake : "Snake"
 [
@@ -2388,7 +2403,7 @@ Will not work well with a func_rotating that already has the TOGGLE_REVERSE spaw
 	targetname(target_source) : "Name. Don't killtarget to remove, just use."
 ]
 
-@PointClass size(-8 -8 -8, 8 8 8) model ({"path": model, "scale": scale, "skin": skin, "frame": frame })= custom_model : "External model"
+@PointClass size(-8 -8 -8, 8 8 8) model ({"path": model, "scale": scale, "skin": skin, "frame": frame })= misc_model : "External model"
 [
     abslight(integer) : "Absolute light value"
     model(string):   "External model path"
@@ -2444,6 +2459,22 @@ Will not work well with a func_rotating that already has the TOGGLE_REVERSE spaw
 		2 : "Non-solid"
 		4 : "Breakable"
 		8 : "Starts off"
-		16 : "Using breaks instead of toggleing"
+		16 : "Using breaks instead of toggling"
 	]
 ]
+
+@PointClass base(Appearflags, Targetname) size(16 16 16) color(64 64 64) = misc_shadowcontroller : "Controls switchable shadows on any bmodel entity. Doors, plats, and breakables automatically create a controller if they have a .switchshadstyle.
+Target this entity to toggle the shadows on/off with a fading animation.
+
+Targeted bmodel must have _switchableshadow set to 1."
+[
+	target(target_destination) : "Target with _switchableshadow and unique switchshadstyle"
+	speed(float) : "Fade-in speed" : 0.5 : "Controls the time in seconds it takes to fade the shadow in. Setting it to -1 disables fading."
+	speed2(float) : "Fade-out speed" :  : "Same as 'speed' but for the fade out animation. If unset it uses the same value as 'speed'."
+	spawnflags(flags) =
+	[
+		1 : "Shadow start off" : 0
+	]
+]
+
+@SolidClass base(Targetname, BrushLighting) = func_shadow : "An invisible bmodel that only casts a shadow. Requires _shadow 1." []
