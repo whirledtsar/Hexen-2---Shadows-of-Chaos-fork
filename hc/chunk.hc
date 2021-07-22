@@ -4,6 +4,7 @@
 void ThrowSolidHead (float dm);
 void MarkForRespawn (void);
 void () CorpseThink;
+void () feathers;
 
 void blood_splatter()
 {
@@ -531,49 +532,6 @@ void CreateModelChunks (vector space,float scalemod, float numChunks)
 
 void DropBackpack(void);  // in items.hc
 
-/*
-// Put a little splat down if it will fit
-void TinySplat (vector location)
-{
-	vector holdplane;
-	entity splat;
-
-	traceline (location + v_up*8 + v_right * 8 + v_forward * 8,location - v_up*32 + v_right * 8 + v_forward * 8, TRUE, self);
-	holdplane = trace_plane_normal;
-	if(trace_fraction==1)	// Nothing below victim
-		return;
-
-	traceline (location + v_up*8 - v_right * 8 + v_forward * 8,location - v_up*32 - v_right * 8 + v_forward * 8, TRUE, self);
-	if ((holdplane != trace_plane_normal) || (trace_fraction==1))
-		return;
-
-	traceline (location + v_up*8 + v_right * 8 - v_forward * 8,location - v_up*32 + v_right * 8 - v_forward * 8, TRUE, self);
-	if ((holdplane != trace_plane_normal) || (trace_fraction==1))
-		return;
-
-	traceline (location + v_up*8 - v_right * 8 - v_forward * 8,location - v_up*32 - v_right * 8 - v_forward * 8, TRUE, self);
-	if ((holdplane != trace_plane_normal) || (trace_fraction==1))
-		return;
-
-	traceline (location + v_up*8 ,location - v_up*32 , TRUE, self);
-
-    splat=spawn();
-    splat.owner=self;
-    splat.classname="bloodsplat";
-    splat.movetype=MOVETYPE_NONE;
-    splat.solid=SOLID_NOT;
-
-	// Flat to the surface
-	trace_plane_normal_x = trace_plane_normal_x * -1;
-	trace_plane_normal_y = trace_plane_normal_y * -1;
-	splat.angles = vectoangles(trace_plane_normal);
-
-    setmodel(splat,"models/bldspot4.spr");  // 8 x 8 sprite
-    setsize(splat,'0 0 0','0 0 0');
-    setorigin(splat,trace_endpos + '0 0 2');
-}
-*/
-
 float BLOOD_SMALL = 0;
 float BLOOD_MED = 1;
 float BLOOD_LARGE = 2;
@@ -584,7 +542,7 @@ float bloodsplat_radius[4] =
 	16, 20, 40, 8
 };
 
-string bloodsplat_mdl[4] =
+string bloodsplat_mdl[4] =	//could also use brains.mdl?
 {
 	"models/bloodpool.mdl", "models/bloodpool2.mdl", "models/bloodpool3.mdl", "models/bloodpool_green.mdl"
 };
@@ -693,6 +651,7 @@ vector org;
 	
 	org = trace_endpos;
 	org_z += random(0,0.4);
+	
 	setmodel (splat, bloodsplat_mdl[type]);
 	setsize(splat,'0 0 0','0 0 0');
 	setorigin(splat,org);
@@ -704,7 +663,7 @@ vector org;
 		thinktime splat : random(30,20);
 	}
 	
-	if (trace_plane_normal_x || trace_plane_normal_y)
+	if (trace_plane_normal != '0 0 0')
 	{	//on slope
 		pitch_roll_for_slope(trace_plane_normal, splat);
 	}
@@ -814,7 +773,7 @@ void chunk_death (void)
 	}
 	else if (self.thingtype==THINGTYPE_CLAY)
 		deathsound="fx/claybrk.wav";
-	else if ((self.thingtype==THINGTYPE_LEAVES)  || (self.thingtype==THINGTYPE_WOOD_LEAF))
+	else if ((self.thingtype==THINGTYPE_LEAVES) || (self.thingtype==THINGTYPE_WOOD_LEAF))
 		deathsound="fx/leafbrk.wav";
 	else if (self.thingtype==THINGTYPE_ICE)
 		deathsound="misc/icestatx.wav";
@@ -892,6 +851,8 @@ void chunk_death (void)
 	}
 	else
 	{
+		if(self.switchshadstyle)
+			lightstyle(self.switchshadstyle, "m");
 		remove(self);
 	}
 }
