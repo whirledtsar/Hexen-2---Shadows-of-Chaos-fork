@@ -923,11 +923,6 @@ void Precache_Necromancer (void)
 	precache_sound ("necro/bonephit.wav");	
 	precache_sound ("necro/bonenhit.wav");	
 	precache_sound ("necro/bonenwal.wav");
-	//SoC
-	precache_sound ("necro/attack1.wav");
-	precache_sound ("necro/hum1.wav");
-	precache_sound ("necro/hum2.wav");
-	precache_sound ("necro/hum3.wav");
 	//Raven Staff
 	precache_sound ("raven/ravengo.wav");		
 	precache_sound ("raven/squawk2.wav");		
@@ -1470,6 +1465,7 @@ void precache_soc()
 //necro
 	precache_sound("skullwiz/gate.wav");	//sickle summon
 	precache_sound ("necro/attack1.wav");	//old magic mis altfire
+	precache_sound ("mezzo/reflect.wav");	//magic mis star wall
 	precache_sound ("necro/hum1.wav");	//magic mis star wall
 	precache_sound ("necro/hum2.wav");
 	precache_sound ("necro/hum3.wav");
