@@ -39,6 +39,13 @@ void info_null()
 		remove(self);
 }
 
+/*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
+Restored from quake for map hacks, you sneaky breekis
+*/
+void() info_notnull =
+{
+}
+
 float ROTATE_BREAK = 16;
 /*
 //============================================================================
