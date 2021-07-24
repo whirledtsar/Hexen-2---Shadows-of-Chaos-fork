@@ -417,18 +417,25 @@ void GolemRun(void) [++ $run1..$run24]
 	float len;
 	float hdiff;
 	float dist, r;
+	float slide_ok;
 
 	check_pos_enemy();
 	checkenemy();
+	enemy_vis = visible(self.enemy);
 
-	if (coop && !visible(self.enemy))
+	if (coop && !enemy_vis)
 		LocateTarget();
+	
+	if (CanChargeForward(64) && enemy_vis)
+		slide_ok = TRUE;
+	else
+		slide_ok = FALSE;
 
 	if (self.classname == "monster_golem_stone" || self.classname == "monster_golem_crystal") 
 	{	
 		len = vlen(self.origin - self.enemy.origin);
 		hdiff = fabs(self.origin_z - self.enemy.origin_z);
-		if(len > 50 && len < 300 && hdiff < 80)
+		if(len > 50 && len < 300 && hdiff < 80 && slide_ok)
 		{
 			if(random() < 0.05)
 			{
@@ -444,9 +451,9 @@ void GolemRun(void) [++ $run1..$run24]
 		dist = vlen(self.enemy.origin - self.origin);
 		r = random(0, 10);
 
-		if (dist < 100)
+		if (dist < 100 && slide_ok)
 			GolemBMeleeDecide();
-		else if (dist > 256 && visible(self.enemy) && r < 0.6)
+		else if (dist > 256 && enemy_vis && r < 1+skill)	//0.6
 		{
 			if (GolemBCheckBeamAttack() == 1)
 				GolemBBeamBegin();
@@ -462,9 +469,9 @@ void GolemRun(void) [++ $run1..$run24]
 		dist = vlen(self.enemy.origin - self.origin);
 		r = random(0, 10);
 
-		if (dist < 100)
+		if (dist < 100 && slide_ok)
 			GolemBMeleeDecide();
-		else if (dist > 100 && visible(self.enemy) && r < 0.4)
+		else if (dist > 100 && enemy_vis && r < 0.4)
 			if (GolemICheckMissileAttack())
 				GolemIMissile();
 
