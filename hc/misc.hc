@@ -266,96 +266,34 @@ void() misc_explobox2 =
 */
 //============================================================================
 
-float SPAWNFLAG_SUPERSPIKE	= 1;
-float SPAWNFLAG_LASER = 2;
+float SHOOTER_SUPERSPIKE	= 1;
+float SHOOTER_POLY = 2;
 
-/*
-void Laser_Touch()
-{
-	local vector org;
-	
-	if (other == self.owner)
-		return;		// don't explode on owner
+void(float ofs) FirePoly;
 
-	if (pointcontents(self.origin) == CONTENT_SKY)
-	{
-		remove(self);
-		return;
-	}
-	
-	//sound (self, CHAN_WEAPON, "enforcer/enfstop.wav", 1, ATTN_STATIC);
-	org = self.origin - 8*normalize(self.velocity);
-
-	if (other.health)
-	{
-		SpawnPuff (org, self.velocity*0.2, 15,other);
-		T_Damage (other, self, self.owner, 15);
-	}
-	else
-	{
-		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
-		WriteCoord (MSG_BROADCAST, org_x);
-		WriteCoord (MSG_BROADCAST, org_y);
-		WriteCoord (MSG_BROADCAST, org_z);
-	}
-	
-	remove(self);	
-}
-
-void LaunchLaser(vector org, vector vec)
-{
-	local	vector	vec;
-		
-	vec = normalize(vec);
-	
-	newmis = spawn();
-	newmis.owner = self;
-	newmis.movetype = MOVETYPE_FLY;
-	newmis.solid = SOLID_BBOX;
-	newmis.effects = EF_DIMLIGHT;
-
-	setmodel (newmis, "models/javproj.mdl");
-	setsize (newmis, '0 0 0', '0 0 0');		
-
-	setorigin (newmis, org);
-
-	newmis.velocity = vec * 600;
-	newmis.angles = vectoangles(newmis.velocity);
-   
-	newmis.angles_y = newmis.angles_y + 30;
-	
-	thinktime newmis : 5;
-	newmis.think = SUB_Remove;
-	newmis.touch = Laser_Touch;
-}
-*/
 void spikeshooter_use()
 {
-
 	self.enemy = other.enemy;
 
-/*	if (self.spawnflags & SPAWNFLAG_LASER)
+	if (self.spawnflags&SHOOTER_POLY)
 	{
-		sound (self, CHAN_VOICE, "enforcer/enfire.wav", 1, ATTN_NORM);
-		LaunchLaser (self.origin, self.movedir);
+		sound (self, CHAN_VOICE, "imp/fireball.wav", 1, ATTN_NORM);
+		FirePoly (0);
 	}
 	else
-	{*/
+	{
 		sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
 		launch_spike (self.origin, self.movedir);
 		newmis.velocity = self.movedir * 500;
-		if (self.spawnflags & SPAWNFLAG_SUPERSPIKE)
+//		if (self.spawnflags & SHOOTER_SUPERSPIKE)
 //	 		newmis.touch = superspike_touch;
-	 		newmis.touch = spike_touch;
-//	}
+	}
 }
 
 void shooter_think()
 {
 	spikeshooter_use ();
 	thinktime self : self.wait;
-	//newmis.velocity = self.velocity * 500;
 }
 
 void sprayshooter_use()
@@ -392,17 +330,17 @@ Laser is only for REGISTERED.
 
 void trap_spikeshooter()
 {
+	if (self.spawnflags & SHOOTER_POLY)
+	{
+		precache_model("models/polymrph.spr");
+		precache_sound ("imp/fireball.wav");
+		self.v_angle = self.angles;		//necessary for FirePoly
+	}
+	else
+		precache_sound ("weapons/spike2.wav");
+	
 	SetMovedir ();
 	self.use = spikeshooter_use;
-/*	if (self.spawnflags & SPAWNFLAG_LASER)
-	{
-//		precache_model2 ("models/laser.mdl");
-		
-		//precache_sound2 ("enforcer/enfire.wav");
-		//precache_sound2 ("enforcer/enfstop.wav");
-	}
-	else*/
-		precache_sound ("weapons/spike2.wav");
 }
 
 
