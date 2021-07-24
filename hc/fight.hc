@@ -15,6 +15,7 @@ float anglemod(float v);
 void  ai_face();
 float CheckMonsterAttack(float AttackType, float ChanceModifier);
 float fov(entity targ,entity from,float scope);
+float(float dist) CanChargeForward;
 
 float enemy_vis, enemy_infront, enemy_range;
 float enemy_yaw;
@@ -61,6 +62,10 @@ float		chance;
 	{	// melee attack
 		if (self.th_melee)
 		{
+			if (self.netname=="golem") {		//golems need to check if theyre blocked
+				if (!CanChargeForward(64))
+					return FALSE;
+			}
 			self.th_melee ();
 			return TRUE;
 		}
