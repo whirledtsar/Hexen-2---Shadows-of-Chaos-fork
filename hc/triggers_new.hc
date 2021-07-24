@@ -355,11 +355,12 @@ float r, valid;
 	if (self.spawnflags&RANDOM_SINGLETRIG)				//dont use non-random targets again
 		self.target = self.killtarget = string_null;	//uninitiated string, not ""
 	
-	if (self.count)
+	if (self.count) {
 		++self.counter;
-	if (self.counter>=self.count) {
-		remove(self);
-		return;
+		if (self.counter>=self.count) {
+			remove(self);
+			return;
+		}
 	}
 }
 
