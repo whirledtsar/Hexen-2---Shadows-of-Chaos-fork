@@ -272,3 +272,15 @@ void NavigateWanderPoints ()
 		SetNewWanderPoint(40,140);
 	}
 }
+
+//ws: check to make sure we can see enemy and have a clear path forward from our feet
+//the visible and clear_path functions arent suitable because they check from our bbox center to enemy's bbox center, and we need to check from the ground
+float CanChargeForward(float dist)
+{
+	makevectors(self.angles);
+	tracearea(self.origin+'0 0 1', self.origin+'0 0 1'+v_forward*dist, self.mins, self.maxs, FALSE, self);
+	if ((trace_fraction==1 || (trace_ent.takedamage && !trace_ent.flags&FL_MONSTER)))
+		return TRUE;
+	else
+		return FALSE;
+}
