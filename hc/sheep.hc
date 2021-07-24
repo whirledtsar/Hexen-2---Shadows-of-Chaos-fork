@@ -703,30 +703,6 @@ void FirePoly (float ofs)
 	setorigin(newmis,self.origin+self.proj_ofs+v_forward*10);
 }
 
-void polyshooter_use()
-{
-	self.enemy = other.enemy;
-
-	sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
-	FirePoly (0);
-}
-
-void polyshooter_think()
-{
-	polyshooter_use ();
-	thinktime self : self.wait;
-}
-
-void trap_polyshooter ()
-{
-	precache_sound ("weapons/spike2.wav");
-	precache_model("models/polymrph.spr");
-	SetMovedir ();
-	if (self.wait == 0)
-		self.wait = 1;
-	self.use = polyshooter_use;
-}
-
 void Use_Polymorph ()
 {
 	FirePoly(-150);
