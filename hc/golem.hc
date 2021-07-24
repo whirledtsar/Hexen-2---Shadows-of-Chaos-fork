@@ -377,7 +377,7 @@ void GolemInit(void)
 	self.th_walk = GolemWalk;
 	self.th_run = GolemRun;
 	self.th_die = GolemDie;
-	if (!self.flags2 & FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 	{
 		precache_sound3("golem/awaken.wav");
 		precache_sound3("golem/step.wav");
