@@ -3,19 +3,23 @@
  *
  * Author: Joshua Skelton joshua.skelton@gmail.com
  * Edited by: Inky 20201219 Minor changes for a better integration with my own code
- * Edited by whirledtsar in 2021 to add toggle functionality and solid bounding box
+ * Edited by whirledtsar in 2021 to add toggle, breakable, and solid options
  */
 
 // Forward declarations
 void() misc_model_think;
 void() misc_model_toggle;
 
-float MODEL_NONSOLID = 2;
+float MODEL_SOLID = 2;
 float MODEL_BREAKABLE = 4;
 float MODEL_STARTOFF = 8;
 float MODEL_TRIGGERBREAK = 16;
+float MODEL_SCALETOP = 32;
+float MODEL_SCALECENTER = 64;
+float MODEL_SCALEZONLY = 128;
+float MODEL_SCALEXYONLY = 256;
 
-/*QUAKED custom_model (0 0.5 0.8) (-8 -8 -8) (8 8 8) X X X X X X X X NOT_ON_EASY NOT_ON_NORMAL NOT_ON_HARD_OR_NIGHTMARE NOT_IN_DEATHMATCH NOT_IN_COOP NOT_IN_SINGLEPLAYER X NOT_ON_HARD_ONLY NOT_ON_NIGHTMARE_ONLY
+/*QUAKED custom_model (0 0.5 0.8) (-8 -8 -8) (8 8 8)
 {
 	model ({"path" : mdl, "skin" : skin, "frame": frame});
 }
@@ -31,13 +35,16 @@ speed:   How long the animation frames last; default 0.05
 wait:	 Delay before beginning animation
 */
 void() misc_model = {
+	if (!self.model || self.model=="")
+		objerror("misc_model: No model");
+	
     precache_model(self.model);
     setmodel(self, self.model);
 	self.mins = self.orgnl_mins;
 	self.maxs = self.orgnl_maxs;
 	setsize(self, self.orgnl_mins, self.orgnl_maxs);
 	
-	if (!self.spawnflags&MODEL_NONSOLID)
+	if (self.spawnflags&MODEL_SOLID)
 		self.solid = SOLID_BBOX;
 	
 	if (self.spawnflags&MODEL_TRIGGERBREAK)
@@ -50,6 +57,16 @@ void() misc_model = {
 
 	if(self.abslight)
 		self.drawflags(+)MLS_ABSLIGHT;
+	
+	if (self.spawnflags&MODEL_SCALETOP)
+		self.drawflags(+)SCALE_ORIGIN_TOP;
+	else if (!self.spawnflags&MODEL_SCALECENTER)
+		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	
+	if (self.spawnflags&MODEL_SCALEXYONLY)
+		self.drawflags(+)SCALE_TYPE_XYONLY;
+	else if (self.spawnflags&MODEL_SCALEZONLY)
+		self.drawflags(+)SCALE_TYPE_ZONLY;
 	
 	self.mdl = self.model;
 	self.takedamage = TRUE;		//not really, but necessary for damage/impact particles
@@ -96,7 +113,7 @@ void misc_model_toggle ()
 {
 	if (!self.aflag)
 	{
-		if (!self.spawnflags&MODEL_NONSOLID)
+		if (self.spawnflags&MODEL_SOLID)
 			self.solid = SOLID_BBOX;
 		setmodel(self, self.mdl);
 		setsize(self, self.orgnl_mins, self.orgnl_maxs);
