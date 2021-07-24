@@ -10,6 +10,7 @@ float WATER_FULLBR = 8;
 float WATER_SCALEZ = 16;
 float WATER_SCALEXY = 32;
 float WATER_TOPORIGIN = 64;
+float WATER_SILENT = 128;
 
 .float modeltype;
 
@@ -106,9 +107,9 @@ void()	portal_open25	=[	24,	portal_anim1	] {};
 
 void water_fall () [++ 41 .. 66]
 {
-	if (!self.aflag) {
+	if (time > self.attack_finished && !self.spawnflags&WATER_SILENT) {
 		sound (self, CHAN_ITEM, "fx/wfall.wav", 1, ATTN_NORM);
-		self.aflag = TRUE;
+		self.attack_finished = time + 4.591;
 	}
 	self.think = water_fall;
 	thinktime self : self.wait;
@@ -120,7 +121,7 @@ void water_start () [++ 0 .. 25]
 		self.think = water_start;
 		setmodel(self, self.mdl);
 	}
-	else if (self.frame==3)
+	else if (self.frame==3 && !self.spawnflags&WATER_SILENT)
 		sound (self, CHAN_ITEM, "fx/wfstart.wav", 1, ATTN_NORM);
 	else if (self.frame == 25)
 		self.think = water_fall;
@@ -131,8 +132,12 @@ void water_start () [++ 0 .. 25]
 void water_stop () [++ 26 .. 40]
 {
 	self.think = water_stop;
-	if (self.frame >= 40)
+	if (self.frame==26 && !self.spawnflags&WATER_SILENT)
+		sound (self, CHAN_ITEM, "fx/wfend.wav", 1, ATTN_NORM);
+	if (self.frame >= 40) {
 		self.think = SUB_Null;
+		self.nextthink = -1;
+	}
 	
 	thinktime self : self.wait;
 }
@@ -361,7 +366,7 @@ float type;
 }
 
 void mist_spawn ()
-{;
+{
 vector org;
 	makevectors(self.angles);
 	org = (self.absmin+self.absmax)*0.5;
@@ -455,7 +460,7 @@ void fire_large_loop ()
 		sound (self, CHAN_ITEM, self.noise, self.height, self.lip);
 		self.counter = time+self.t_length;
 	}
-	CreateWhiteSmoke(self.origin + '0 0 80','0 0 8',HX_FRAME_TIME * 2);
+	CreateWhiteSmoke(self.origin + '0 0 112','0 0 8',HX_FRAME_TIME * 2);
 	
 	thinktime self : 0.5+random(0.5);
 }
