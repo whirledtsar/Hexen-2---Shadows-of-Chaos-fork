@@ -154,8 +154,11 @@ void monster_golem_stone(void)
 	setsize(self, '-24 -24 0', '24 24 80');
 	GolemInit();
 	self.hull = HULL_PLAYER;
-	self.health = 200;
-	self.experience_value = 125;
+	if (!self.health)
+		self.health = 200;
+	self.max_health = self.health;
+	if (!self.experience_value)
+		self.experience_value = 125;
 	self.mintel = 4;
 	self.th_melee = GolemSMeleeDecide;
 	self.th_pain = GolemSPain;
@@ -207,9 +210,12 @@ void monster_golem_iron(void)
 	setmodel(self, "models/golem_i.mdl");
 	setsize(self, '-32 -32 0', '32 32 80');
 	GolemInit();
-	self.health = 400;
+	if (!self.health)
+		self.health = 400;
+	self.max_health = self.health;
+	if (!self.experience_value)
+		self.experience_value = 200;
 	self.mintel = 6;
-	self.experience_value = 200;
 	self.th_melee = GolemIMeleeDecide;
 	self.th_pain = GolemIPain;
 	self.th_init = monster_golem_iron;
@@ -217,17 +223,6 @@ void monster_golem_iron(void)
 	
 	self.buff=2;
 	walkmonster_start();
-}
-
-void() bgolem_create =
-{
-
-	setmodel (self, "models/golem_b.mdl");
-	setsize(self, '-60 -60 0', '60 60 120');
-	spawn_tfog(self.origin);
-	walkmonster_start ();
-	self.movetype = MOVETYPE_STEP;
-	
 }
 
 //==========================================================================
@@ -273,9 +268,12 @@ void monster_golem_bronze(void)
 	setmodel(self, "models/golem_b.mdl");
 	setsize(self, '-60 -60 0', '60 60 120');
 	GolemInit();
-	self.health = 650;
+	if (!self.health)
+		self.health = 650;
+	self.max_health = self.health;
+	if (!self.experience_value)
+		self.experience_value = 275;
 	self.mintel = 8;
-	self.experience_value = 275;
 	self.th_melee = GolemBMeleeDecide;
 	self.th_pain = GolemBPain;
 	self.th_init = monster_golem_bronze;
