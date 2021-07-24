@@ -385,10 +385,15 @@ void GolemCUse(void)
 //
 //==========================================================================
 
-void GolemStand(void) [++ $rest1..$rest22]
+void GolemStand(void)// [++ $rest1..$rest22]
 {
+	self.think = GolemStand;
 	ai_stand();
-	thinktime self : 0.2;
+	if (time > self.absorb_time) {		//slow animation speed
+		AdvanceFrame($rest1, $rest22);
+		self.absorb_time = time + HX_FRAME_TIME*4;
+	}
+	thinktime self : HX_FRAME_TIME;	//0.2
 }
 
 //==========================================================================
