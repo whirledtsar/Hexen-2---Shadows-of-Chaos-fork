@@ -120,8 +120,6 @@ void light_chan (void)
 
 	setmodel (self,"models/chan.mdl");
 	self.weaponmodel = "models/chan.mdl";	//FIXME: Flame On!
-	
-	self.frame = 1 + (self.t_width-1)*2;
 
 	self.thingtype	= THINGTYPE_GREYSTONE;
 	setsize(self, '-6 -6 -8','6 6 8');
