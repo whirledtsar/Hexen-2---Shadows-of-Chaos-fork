@@ -914,7 +914,7 @@ void() crusher_hit_top =
    if (!self.level)
    {
     self.think = crusher_go_down;
-	 self.nextthink = self.ltime + 1;
+	 self.nextthink = self.ltime + self.wait;	//ws: changed to .wait
 	}
 	else 
 		self.nextthink = -1;
@@ -926,7 +926,7 @@ void() crusher_hit_bottom =
 	self.state = STATE_BOTTOM;
 	if (self.level && self.spawnflags & CRUSH_ENDPOS) return;
 	self.think = crusher_go_up;
-	self.nextthink = self.ltime + 1;
+	self.nextthink = self.ltime + self.wait;	//ws: changed to .wait
 };
 
 void() crusher_go_down =
@@ -1040,6 +1040,13 @@ void() func_crusher =
 		self.noise = "plats/guiltin1.wav";
 		self.noise1 = "plats/guiltin2.wav";
 	}
+	else if (self.soundtype == -1)
+	{
+		precache_sound ("misc/null.wav");
+		precache_sound ("misc/null.wav");
+		self.noise = "misc/null.wav";
+		self.noise1 = "misc/null.wav";
+	}
 
 	self.mangle = self.angles;
 	self.angles = '0 0 0';
@@ -1058,6 +1065,8 @@ void() func_crusher =
 	self.blocked = crusher_crush;
 	
 	if (!self.speed) self.speed = 150;
+	
+	if (!self.wait)	self.wait = 1;
 
 	self.pos1 = self.origin;
 	self.pos2 = self.pos1 + self.movedir*(fabs(self.movedir*self.size) - self.lip);
