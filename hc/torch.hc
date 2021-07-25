@@ -12,7 +12,7 @@ Torches can be toggled/faded, shot out, etc.
 
 void Init_Torch ()
 {
-	if(self.targetname)
+	if(SUB_IsTargeted(self))
 		self.use=torch_use;
 
 	self.solid		= SOLID_BBOX;
@@ -20,7 +20,7 @@ void Init_Torch ()
 	if(self.health)
 	{
 //		self.skin=1;
-		if(!self.targetname)
+		if(!SUB_IsTargeted(self))
 			dprint("No targetname for breakable torch\n");
 		if(self.style<32)
 		{
@@ -46,7 +46,7 @@ void Init_Torch ()
 	{
 		self.drawflags(+)MLS_ABSLIGHT;
 		setmodel(self,self.weaponmodel);
-		if(self.health!=0||self.targetname!="")
+		if(self.health!=0||SUB_IsTargeted(self))
 		{
 			dprint(ftos(self.style));
 			dprint(": Bad lightstyle for breakable torch\n");
