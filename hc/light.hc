@@ -235,12 +235,16 @@ void light_stopsound ()
 
 void light_changesound (entity light)
 {
-	if (light.spawnflags & LIGHT_SOUND) {
-		if (light.spawnflags & START_LOW)
-			light_startsound();
-		else
-			light_stopsound();
-	}
+	if (!light.spawnflags & LIGHT_SOUND)
+		return;
+	entity oself;
+	oself = self;
+	self = light;
+	if (light.spawnflags & START_LOW)
+		light_startsound();
+	else
+		light_stopsound();
+	self = oself;
 }
 
 void() FireAmbient =
