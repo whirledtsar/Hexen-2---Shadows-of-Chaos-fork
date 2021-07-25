@@ -119,6 +119,7 @@ void() misc_shadowcontroller ={
 
 		if(t1 == world) {
 			dprint("*misc_shadowcontroller* _switchableshadow not set in target ");dprint(self.target);dprint("\n");
+			remove(self);
 			return;
 		}
 		
@@ -135,10 +136,8 @@ void() misc_shadowcontroller ={
 
 	if(self.spawnflags & SHADOWCONTROLLER_STARTOFF) {
 		lightstyle(self.switchshadstyle, "m");
-
 		self.shadowoff = 1;
 		self.count = 12;
-
 		misc_shadowcontroller_setsteps(self.speed2);
 	}
 	else {
@@ -212,19 +211,41 @@ entity shadow, oldself;
 
 	shadow.classname = "misc_shadowcontroller";
 	shadow.switchshadstyle = self.switchshadstyle;
+	
 	if (!self.switchshadspeed) {
-		if (self.classname=="door" && self.spawnflags&DOOR_NORMAL)
+		if (self.classname=="door" && (self.spawnflags&DOOR_NORMAL || self.spawnflags&DOOR_SLIDE))
 			shadow.speed = vlen(self.pos2 - self.pos1) / self.speed;
-		else if (self.classname=="plat")
+		else if (self.classname=="plat" || self.classname=="newplat")
 			shadow.speed = vlen(self.pos2 - self.pos1) / self.speed;
 		else if (self.classname=="breakable_brush")
 			shadow.speed = 0.25;
 	}
+	else
+		shadow.speed = self.switchshadspeed;
+	
+	if (!self.switchshadspeed2) {
+		if (self.classname=="door" && (self.spawnflags&DOOR_NORMAL || self.spawnflags&DOOR_SLIDE))
+			shadow.speed2 = vlen(self.pos2 - self.pos1) / self.speed;
+		else if (self.classname=="plat" || self.classname=="newplat")
+			shadow.speed2 = vlen(self.pos2 - self.pos1) / self.speed;
+		else if (self.classname=="breakable_brush")
+			shadow.speed2 = 0.25;
+	}
+	else
+		shadow.speed2 = self.switchshadspeed2;
 	
 	if ((self.classname=="door" || self.classname=="door_rotating") && self.spawnflags&DOOR_START_OPEN)
-		shadow.spawnflags = 1;
-	else if (self.classname=="plat" && self.targetname && self.targetname!="")
-		shadow.spawnflags = 1;
+		shadow.spawnflags = SHADOWCONTROLLER_STARTOFF;
+	else if (self.classname=="plat" && SUB_IsTargeted(self))
+		shadow.spawnflags = SHADOWCONTROLLER_STARTOFF;
+	else if (self.classname=="newplat") {
+		if (SUB_IsTargeted(self)) {
+			if (!self.spawnflags&START_BOTTOM)
+				shadow.spawnflags = SHADOWCONTROLLER_STARTOFF;
+		}
+		else if (!self.spawnflags&START_BOTTOM)
+			shadow.spawnflags = SHADOWCONTROLLER_STARTOFF;
+	}
 	else
 		shadow.spawnflags = 0;
 	
@@ -238,9 +259,57 @@ entity shadow, oldself;
 	self = oldself;
 }
 
+void shadow_toggle ()
+{
+	if (time>self.counter) {
+		self.think = SUB_Null;
+		thinktime self : 999999;
+		return;
+	}
+	
+	entity oldself, shadow;
+	shadow = self.shadowcontroller;
+	oldself = self;
+	self = shadow;
+	
+	if (self.enemy.aflag) {
+		shadow_fade_out();
+		shadow.shadowoff = 1;
+	}
+	else {
+		shadow_fade_in();
+		shadow.shadowoff = 0;
+	}
+	
+	self = oldself;
+	
+	self.think = shadow_toggle;
+	thinktime self : HX_FRAME_TIME;
+}
+
+void shadow_use ()
+{
+	self.aflag = !self.aflag;
+	if (self.aflag)		//shadow fading out
+		self.counter = time+self.switchshadspeed2;
+	else				//shadow fading in
+		self.counter = time+self.switchshadspeed;
+	
+	entity oldself, shadow;
+	shadow = self.shadowcontroller;
+	oldself = self;
+	self = shadow;
+	misc_shadowcontroller_setsteps(self.enemy.counter-time);
+	self = oldself;
+	
+	self.think = shadow_toggle;
+	thinktime self : 0;
+}
+
 /*****************
 func_shadow
 An invisible bmodel that only casts a shadow.
+If killtargeted, switchable shadow is instantly removed. If targeted, switchable shadow fades in/out at switchshadspeed/switchshadspeed2.
 ******************/
 
 void() func_shadow =
@@ -253,8 +322,9 @@ void() func_shadow =
 	self.modelindex = 0;
 	self.model = "";
 	
-	// creates a shadow controller entity for the door if it has switchable shadows
+	// creates a shadow controller entity if it has switchable shadows
 	if(self.switchshadstyle) {
-		//spawn_shadowcontroller();
+		spawn_shadowcontroller();
+		self.use = shadow_use;
 	}
 };
