@@ -196,7 +196,8 @@ void light_sound ()
 		remove(self);
 		return;
 	}
-	sound(self, CHAN_ITEM, self.owner.noise, self.owner.height, self.owner.lip);
+	
+	sound(self, CHAN_ITEM, self.noise, self.height, self.lip);
 	self.think = light_sound;
 	thinktime self : self.t_length;
 }
@@ -208,11 +209,13 @@ void light_startsound ()
 	
 	entity sound;
 	sound = spawn();
-	self.movechain = sound;
+	self.enemy = sound;
 	setorigin (sound, self.origin);
 	sound.owner = self;
 	sound.solid = SOLID_NOT;
+	sound.noise = self.noise;
 	sound.height = self.height;
+	sound.lip = self.lip;
 	sound.t_length = self.t_length;
 	sound.think = light_sound;
 	thinktime sound : 0;
@@ -222,10 +225,10 @@ void light_startsound ()
 
 void light_stopsound ()
 {
-	if (self.flags2 & FL2_ONFIRE && self.movechain!=world) {
-		sound(self.movechain, CHAN_ITEM, "misc/null.wav", 1, 1);
-		self.movechain.think = SUB_Null;
-		remove(self.movechain);
+	if (self.flags2 & FL2_ONFIRE && self.enemy!=world) {
+		sound(self.enemy, CHAN_ITEM, "misc/null.wav", 1, 1);
+		self.enemy.think = SUB_Null;
+		remove(self.enemy);
 	}
 	return;
 }
@@ -241,7 +244,7 @@ void light_changesound (entity light)
 }
 
 void() FireAmbient =
-{	//FIXME: remove ambient sound if light is off, start it again if turned back on
+{
 	//t_length: exact length of wav file for toggleable looping purposes
 	//height: volume
 	//lip: attenuation
@@ -257,7 +260,7 @@ void() FireAmbient =
 	else if (self.soundtype == 2) {
 		self.noise = "misc/fburn_md.wav";
 		if (!self.height)
-			self.height = 1;
+			self.height = 0.75;
 		self.t_length = 2.787;
 	}
 	else if (self.soundtype == 3) {
@@ -265,7 +268,7 @@ void() FireAmbient =
 		if (!self.height)
 			self.height = 1;
 		if (!self.lip)
-			self.lip = ATTN_NORM;
+			self.lip = ATTN_NORM*0.75;
 		self.t_length = 1.812;
 	}
 	else if (self.soundtype == 4)
@@ -273,16 +276,18 @@ void() FireAmbient =
 	else {
 		self.noise = "raven/flame1.wav";
 		if (!self.height)
-			self.height = 0.25;
+			self.height = 0.5;
 		self.t_length = 3.39;
 	}
 	precache_sound (self.noise);
 	precache_sound ("misc/null.wav");
 	
-	if (!self.lip || self.lip <=0 || self.lip > ATTN_STATIC)
+	if (self.lip <=0)
+		self.lip = ATTN_STATIC;
+	else if (self.lip > ATTN_STATIC)
 		self.lip = ATTN_STATIC;
 	
-	if (self.health>=1 || self.targetname!="") {
+	if (self.health>=1 || SUB_IsTargeted(self)) {
 		self.flags2 = FL2_ONFIRE;	//flag that indicates this entity has a togglable sound
 		if (!self.spawnflags&START_LOW)
 			light_startsound();
@@ -534,6 +539,8 @@ void() light_newfire =
 	else
 		self.dmg=0;*/
 	self.spawnflags (+) LIGHT_SOUND;
+	if (!self.soundtype)
+		self.soundtype = 1;
 	FireAmbient ();
 	if(self.spawnflags&4)
 		self.drawflags = self.drawflags|SCALE_ORIGIN_BOTTOM;
