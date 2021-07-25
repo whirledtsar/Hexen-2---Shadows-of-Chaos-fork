@@ -255,6 +255,7 @@ void() func_plat =
 	setorigin (self, self.origin);	
 	setmodel (self, self.model);
 	setsize (self, self.mins , self.maxs);
+
 	self.blocked = plat_crush;
 	if (!self.speed)
 		self.speed = 150;
@@ -676,6 +677,18 @@ void() newplat_go_down =
 {
 	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	newplat_calc_down();
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		shadow_fade_in();
+		shadow.shadowoff = 0;
+		
+		self = oldself;
+	}
 };
 
 void() newplat_calc_up =
@@ -688,6 +701,18 @@ void() newplat_go_up =
 {
 	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	newplat_calc_up();
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		shadow_fade_out();
+		shadow.shadowoff = 1;
+		
+		self = oldself;
+	}
 };
 
 void() newplat_crush =
@@ -785,15 +810,14 @@ void() func_newplat =
 		self.noise = "plats/pulyplt1.wav";
 		self.noise1 = "plats/pulyplt2.wav";
 	}
-
-	if (self.soundtype == 2)
+	else if (self.soundtype == 2)
 	{
 		precache_sound ("plats/chainplt1.wav");
 		precache_sound ("plats/chainplt2.wav");
 		self.noise = "plats/chainplt1.wav";
 		self.noise1 = "plats/chainplt2.wav";
 	}
-	if (self.soundtype == 3)		// Big Stone Door, sliding
+	else if (self.soundtype == 3)		// Big Stone Door, sliding
 	{
 		precache_sound ("doors/doorstop.wav");
 		precache_sound ("doors/stonslid.wav");
@@ -840,6 +864,10 @@ void() func_newplat =
 
 	self.use = newplat_trigger_use;
 	self.blocked = newplat_crush;
+	
+	// creates a shadow controller entity if it has switchable shadows
+	if(self.switchshadstyle)
+		spawn_shadowcontroller();
 
 	newplat_spawn_inside_trigger ();	//set the "start moving" trigger	
 
