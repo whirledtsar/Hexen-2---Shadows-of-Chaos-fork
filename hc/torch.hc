@@ -12,7 +12,7 @@ Torches can be toggled/faded, shot out, etc.
 
 void Init_Torch ()
 {
-	if(self.targetname)
+	if(SUB_IsTargeted(self))
 		self.use=torch_use;
 
 	self.solid		= SOLID_BBOX;
