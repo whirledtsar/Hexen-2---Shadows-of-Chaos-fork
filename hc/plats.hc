@@ -394,6 +394,14 @@ void() train_next =
 
 	targ = find (world, targetname, self.target);
 	self.target = targ.target;
+	
+	if (targ.waketarget)	//ws: path corners can fire their waketarget when a train reaches them
+	{
+		local entity oself = self;
+		self = targ;
+		SUB_UseWakeTargets();
+		self = oself;
+	}
 
 	if (!self.decap && self.spawnflags & TRAIN_RETURN) 
 		if (self.netname == targ.targetname) 
