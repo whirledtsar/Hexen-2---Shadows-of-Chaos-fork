@@ -22,6 +22,7 @@ plaque.hc
 camera.hc
 
 subs.hc
+subs_ws.hc
 fight.hc
 path.hc
 ai.hc
