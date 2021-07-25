@@ -164,7 +164,6 @@ void() plat_trigger_use =
 
 void() plat_crush =
 {
-
 	T_Damage (other, self, self, 1);
 	
 	if (self.state == STATE_UP)
@@ -217,7 +216,7 @@ void() func_plat =
 		self.noise1 = "plats/pulyplt2.wav";
 	}
 
-	if (self.soundtype == 2)
+	else if (self.soundtype == 2)
 	{
 		precache_sound ("plats/chainplt1.wav");
 		precache_sound ("plats/chainplt2.wav");
@@ -225,15 +224,15 @@ void() func_plat =
 		self.noise1 = "plats/chainplt2.wav";
 	}
 	
-	if (self.soundtype == 3)
+	else if (self.soundtype == 3)
 	{
+		precache_sound ("plats/platslid.wav");
+		precache_sound ("plats/platstp.wav");
 		self.noise = "plats/platslid.wav";
 		self.noise1 = "plats/platstp.wav";
-		precache_sound (self.noise1);
-		precache_sound (self.noise);
 	}
 	
-	if (self.soundtype < 0)
+	else if (self.soundtype < 0)
 	{
 		self.noise = self.noise1 = "misc/null.wav";
 		precache_sound ("misc/null.wav");
@@ -678,6 +677,18 @@ void() newplat_go_down =
 {
 	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	newplat_calc_down();
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		shadow_fade_in();
+		shadow.shadowoff = 0;
+		
+		self = oldself;
+	}
 };
 
 void() newplat_calc_up =
@@ -690,6 +701,18 @@ void() newplat_go_up =
 {
 	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	newplat_calc_up();
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		shadow_fade_out();
+		shadow.shadowoff = 1;
+		
+		self = oldself;
+	}
 };
 
 void() newplat_crush =
@@ -761,7 +784,6 @@ wait - amount of time plat waits before moving (default 3)
 */
 void() func_newplat =
 {
-
 	if (!self.t_length)
 		self.t_length = 80;
 	if (!self.t_width)
@@ -777,16 +799,21 @@ void() func_newplat =
 		self.noise = "plats/pulyplt1.wav";
 		self.noise1 = "plats/pulyplt2.wav";
 	}
-
-	if (self.soundtype == 2)
+	else if (self.soundtype == 2)
 	{
 		precache_sound ("plats/chainplt1.wav");
 		precache_sound ("plats/chainplt2.wav");
 		self.noise = "plats/chainplt1.wav";
 		self.noise1 = "plats/chainplt2.wav";
 	}
+	else if (self.soundtype == 3)		// Big Stone Door, sliding
+	{
+		precache_sound ("doors/doorstop.wav");
+		precache_sound ("doors/stonslid.wav");
 
-
+		self.noise1 = "doors/doorstop.wav";
+		self.noise = "doors/stonslid.wav";
+	}
 
 	self.mangle = self.angles;
 	self.angles = '0 0 0';
@@ -826,6 +853,10 @@ void() func_newplat =
 
 	self.use = newplat_trigger_use;
 	self.blocked = newplat_crush;
+	
+	// creates a shadow controller entity if it has switchable shadows
+	if(self.switchshadstyle)
+		spawn_shadowcontroller();
 
 	newplat_spawn_inside_trigger ();	//set the "start moving" trigger	
 
