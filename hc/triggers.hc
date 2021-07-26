@@ -1428,6 +1428,7 @@ void() trigger_hurt =
 
 float PUSH_ONCE = 1;
 float PUSH_SHEEP = 64;
+float PUSH_ADDITIVE = 16;
 
 void trigger_push_gone (void)
 {
@@ -1442,8 +1443,13 @@ void() trigger_push_touch =
 	{
 		if (other.flags & FL_ONGROUND)
 		{
-			other.velocity = self.movedir * self.speed;
-			other.velocity_z = 500;
+			if (self.spawnflags&PUSH_ADDITIVE)
+				other.velocity += self.movedir * self.speed;
+			else
+				other.velocity = self.movedir * self.speed;
+			
+			if (!self.spawnflags&PUSH_ADDITIVE)
+				other.velocity_z = 500;
 		}
 		if ((other.classname == "player") && (other.flags & FL_ONGROUND))
 		{
