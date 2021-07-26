@@ -1184,7 +1184,7 @@ void monster_skull_wizard_lord (void)
 	skullwizard_init();
 	
 	if(!self.health)
-		self.health = 600;				//vanilla: 650
+		self.health = 550;				//vanilla: 650
 	self.max_health=self.health;
 	if (!self.experience_value)
 		self.experience_value = 300;	//vanilla: 325
