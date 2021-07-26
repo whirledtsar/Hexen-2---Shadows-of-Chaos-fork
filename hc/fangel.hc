@@ -172,13 +172,13 @@ float retval;
 		enemy_infront = 0;
 
 	if (enemy_infront)
-	{
+	{	//ws: increased attack chance, because she isnt always checking this, so make it count when she does
 		self.th_save = self.think;
 		enemy_range = range (self.enemy);
 		if (random() < 0.5)
-		   retval = CheckMonsterAttack(MA_FAR_MELEE,1);
+		   retval = CheckMonsterAttack(MA_FAR_MELEE,1.25);
 		else
-		   retval = CheckMonsterAttack(MA_MISSILE,1);
+		   retval = CheckMonsterAttack(MA_MISSILE,1.25);
 	}
 	else retval = MA_NOATTACK;
 
@@ -374,9 +374,9 @@ void () fangel_float =
 	ai_face();
 
 	enemy_range = range (self.enemy);	// Attack if they are too near
-	if ((enemy_range <= RANGE_NEAR) && (random() < .25))
+	if ((enemy_range <= RANGE_MELEE) && (random() < .9))
 		self.monster_duration = 0;
-	else if ((enemy_range <= RANGE_MELEE) && (random() < .90))
+	else if ((enemy_range <= RANGE_NEAR) && (random() < .25))
 		self.monster_duration = 0;
 
 	if (self.monster_duration <= 0)
@@ -426,8 +426,8 @@ void () fangel_hand_fire =
 
 	sound (self, CHAN_WEAPON, "fangel/hand.wav", 1, ATTN_NORM);
 
-	do_faSpell('10 -4 8',600);	//ws: increased both by 200
-	do_faSpell('10 -4 8',500);
+	do_faSpell('10 -4 8',FALSE);	//straight ahead
+	do_faSpell('10 -4 8',TRUE);		//lead shot
 };
 
 void () fangel_wing_fire =
@@ -634,6 +634,10 @@ void() fangel_flyframes =
 	else
 		self.think = fangel_flyframes;
 	thinktime self : HX_FRAME_TIME;
+	if (visible(self.enemy))
+		self.wallspot = (self.enemy.absmin+self.enemy.absmax)*0.5;
+	else
+		SetNextWaypoint();
 
 	fangel_check_incoming();
 
@@ -703,61 +707,33 @@ void() fangel_painframes =
 
 void() fangel_prepare_beam =
 {	//ws: hitting the player instantly for the attack's duration felt cheap. so instead, find the player's position beforehand and aim beam there.
-vector org;
-	if (!visible(self.enemy)) {
+	if (!self.enemy) {
+		self.finaldest = v_forward*512;
+		return;
+	}
+	
+	enemy_vis = visible(self.enemy);
+	if (!enemy_vis) {
 		self.finaldest = self.wallspot;		//if we cant see enemy, aim at last spot we saw them in
-		if (!self.shoot_cnt)				//not firing so dont need to do anything else
-			return;
 	}
-	if (self.shoot_cnt) {	//while firing, aim beam in the direction player was heading before firing
-		self.finaldest = self.finaldest + self.movedir*random(13,17);
-		self.ideal_yaw = vectoyaw(self.finaldest - self.origin);
-		self.yaw_speed = 18;
-		ChangeYaw();			//turn towards angle of beam
-		self.yaw_speed = fangel_move_speed;
+	if (enemy_vis && !self.shoot_cnt) {		//if not yet firing, remember direction player is heading
+		self.finaldest = (self.enemy.absmin+self.enemy.absmax)*0.5;
+		self.movedir = self.enemy.velocity;
+		if (!self.enemy.flags&FL_ONGROUND)
+			self.movedir_z = 0;		//ignore jumping
+	}
+	if (!self.shoot_cnt)
 		return;
-	}
 	
-	org=self.origin-'0 0 5';
-	traceline(org,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
-	if (trace_fraction==1)
-		self.finaldest = trace_endpos;
-	else if (trace_ent.thingtype >= THINGTYPE_WEBS) {	//if webs/glass in the way, try to shoot through them
-		traceline(trace_endpos,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
-		if (trace_fraction==1)
-			self.finaldest = trace_endpos;
-	}
-	
-	if (!self.shoot_cnt) {	//if we arent firing yet, save player's direction
-		local vector vec = normalize(self.enemy.velocity);
-		local float dir;
-		
-		if (vlen(self.enemy.velocity)<200) {
-			self.movedir = '0 0 0';
-			return;
-		}
-		else if (heading(self, self.enemy, 0.8)) {	//does work
-			//dprint("heading\n");
-			//makevectors(vec);
-			//self.movedir = v_forward;		//doesnt work
-			self.movedir = '0 0 0';
-			return;
-		}
-		
-		dir = check_heading_left_or_right(self.enemy);	//1 for right, -1 for left, 0 otherwise
-		if (dir != 0) {
-			//if(dir<0) dprint("left\n"); else dprint("right\n");
-			makevectors(vec);
-			self.movedir = v_right*(-dir);
-		}
-		else {	//likely moving backwards
-			//dprint("backwards\n");
-			//makevectors(vec);
-			//self.movedir = (-v_forward);
-			self.movedir = '0 0 0';
-		}
+	//while firing, aim beam in the direction player was heading before firing
+	if (self.movedir == VEC_ORIGIN)	//player wasnt moving, no need to aim
 		return;
-	}
+	//self.finaldest += self.movedir*(20+((skill>2)*8));
+	self.finaldest += normalize(self.movedir)*(vlen(self.movedir)*0.04);
+	self.ideal_yaw = vectoyaw(self.finaldest - self.origin);
+	self.yaw_speed = 18;
+	ChangeYaw();			//turn towards angle of beam
+	self.yaw_speed = fangel_move_speed;
 };
 
 void() fangel_wingframes =
@@ -768,6 +744,7 @@ void() fangel_wingframes =
 	if (AdvanceFrame($fwing1,$fwing30) == AF_END)
 	{
 		fangel_prepare_attack();
+		self.finaldest = self.movedir = VEC_ORIGIN;		//reset beam aim
 
 		if (random() < .25)
 		{
@@ -835,7 +812,7 @@ void() fangel_wingframes =
 
 					LightningDamage (self.origin, org2, self, 3,"sunbeam");
 
-					self.frame -= 1;
+					//self.frame -= 1;
 					self.shoot_cnt += 1;
 					self.frame = $fwing20;
 				}
@@ -868,6 +845,7 @@ void(entity attacker, float damage) fangel_pain =
 	}*/
 	if (self.think == fangel_flyframes)
 	{
+		self.finaldest = self.movedir = VEC_ORIGIN;		//reset beam aim
 		if (self.classname == "monster_fallen_angel")
 			sound (self, CHAN_WEAPON, "fangel/pain.wav", 1, ATTN_NORM);
 		else
@@ -908,8 +886,8 @@ void() init_fangel =
 		precache_sound2("fangel/deflect.wav");
 		precache_sound2("fangel/hand.wav");
 		precache_sound2("fangel/wing.wav");
-		precache_sound("mezzo/reflect.wav");	//ws: bouncing missiles
-		precache_sound("golem/gbfire.wav");
+		precache_sound("mezzo/reflect.wav");	//SoC: bouncing missiles
+		precache_sound("golem/gbfire.wav");	/SoC: beam attack
 	}
 
 	if (self.classname == "monster_fallen_angel")
@@ -927,8 +905,6 @@ void() init_fangel =
 			self.experience_value = 400;
 	}
 	CreateEntityNew(self,ENT_FANGEL,"models/fangel.mdl",fangel_deathframes);
-
-	self.skin = 0;
 
 	self.hull = HULL_SCORPION;//HULL_BIG;
 	if (self.classname == "monster_fallen_angel")
