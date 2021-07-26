@@ -752,23 +752,47 @@ entity	sight_entity;	//So monsters wake up other monsters
 //.float sv_flags;		//temp serverflags fix
 
 .float	dmgtime;
-.float	healamount, healtype;
+//unused	.float	healamount, healtype;
 .float anglespeed;
 .float angletime;
 .float movetime;	//used by doors/plats/etc; also re-used to track when player last stepped in blood pool
 //.float hit_z;		unused
-.float torncount;
+.float torncount;	//used by meteor staff and eidolon
 .entity path_last;
 .float dflags;
+
+.union	//SoC new union
+{
+	struct
+	{	//Player only
+		float welcomeshown;
+		float whiptime;
+		float minionhealth;
+		float statselection;	//indicates current selection (wraps between 0 and 3)
+		float statpoints; 		//counts stat points remaining
+	};
+	struct
+	{	//Monster only
+		float spawndelay;		//time before spawning in if dormant
+		float blasted;			//flymonsters: distance to move back after being blasted
+		float buff;				//can this monster be buffed
+		float killerlevel;		//used to measure player level for respawn strength
+		float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
+	};
+	struct
+	{	//bmodel/trigger only
+		float		switchshadstyle;
+	};
+};
 
 //Game of Tomes
 .float preventrespawn;
 .float playercontrolled;
-.float whiptime;
-.float killerlevel;	//used to measure player level for respawn strength
+//moved to union	.float whiptime;
+//moved to union .float killerlevel;	//used to measure player level for respawn strength
 .float bufftype;	 //used for monsters to determine bonus types on spawn
 .float tempscale;
-.float buff;	//1 = can become a buffed variant, 2 = can further become a leader variant
+//moved to union	.float buff;	//1 = can become a buffed variant, 2 = can further become a leader variant
 
 //EXPANSION CODE FOR YAKMAN
 .void() th_init;		//used for expansion respawning system and monster resurrection system
@@ -777,34 +801,28 @@ entity	sight_entity;	//So monsters wake up other monsters
 
 //Bloodshot
 .void() storethink;		//for assassin whip
-.float welcomeshown;
+//moved to union .float welcomeshown;
 
 //WS
 .float altfiring;		//track altfire even when button isn't pressed
 .float glyph_finished;	//delay between glyph use
 .string waketarget;		//monsters use self.waketarget upon sighting player
 .string sightsound;
-.float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
 .void() th_raise;		//monster resurrection system
 .float targetid;		//numerical id for trigger_random
 .string messagestr;		//string version of message
 .string msg2str;		//string version of msg2
 .string no_puzzle_str;	//string version of no_puzzle_msg
-.float class_weaponvar;	//variable that can be used by each class for specific weapon purposes; used by paladin axe, crusader icemace, assassin dagger
+.float class_weaponvar;	//variable that can be used by each class for specific weapon purposes; used by paladin axe, crusader icemace, assassin dagger, necro magic missile
 .float safe_time_sunstaff;	//safe from sunstaff altfire seeking
-.float statselection;	//indicates current selection (wraps between 0 and 3)
-.float statpoints; 		//counts stat points remaining
 .entity menu;			//player stats menu entity
 .void() th_blasted;		//flymonsters: function to run when hit by disc of repulsion to simulate effect
-.float blasted;			//flymonsters: distance to move back after being blasted
 .void() minionfunc;
 .string minionname;
-.float minionhealth;
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
 .entity ladder;
 
 // bmFbr switchable shadow code
-.float		switchshadstyle;
 .entity		shadowcontroller;
