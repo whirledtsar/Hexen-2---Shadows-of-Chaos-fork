@@ -250,7 +250,7 @@ flags2: maximum target id
 spawnflags: 1 (RANDOM_SINGLETRIG): Only use target/killtarget once
 			2 (RANDOM_NOREPEAT) : Only use any random id once
 			4 (RANDOM_IGNOREMISSING) : Don't reorganize range if an id in range has no matching entities
-			16 (RANDOM_REMOVELOSER) : After triggering random entity, remove all other entities in trigger's range.
+			16 (RANDOM_REMOVELOSER) : After triggering random id, remove all other entities in trigger's range.
 									Possible useage: spawning random monster or activating random trigger and removing the ones not chosen. Implies single-use.
 */
 
@@ -272,7 +272,7 @@ float valid;
 					first = found;	//found first relevant entity in list
 					valid = TRUE;
 				}
-				dprint("Trigger_random: Decremented id ");dprint(ftos(found.targetid));dprint("\n");
+				dprint("*Trigger_random: Decremented id ");dprint(ftos(found.targetid));dprint("*\n");
 				found.targetid -= 1;
 			}
 			found=nextent(found);
@@ -283,7 +283,7 @@ float valid;
 	while (found)
 	{
 		if (found.targetid == id) {
-			dprint("Trigger_random: reset id ");dprint(ftos(id));dprint("\n");
+			dprint("*Trigger_random: reset id ");dprint(ftos(id));dprint("*\n");
 			found.targetid = 0;
 		}
 		found=nextent(found);
@@ -391,7 +391,7 @@ float valid, i;
 	}
 	
 	for (i = self.flags; i <= self.flags2; i++)
-	{	dprint("*\n*Trigger_random: checking id ");dprint(ftos(i));dprint("*\n");
+	{	dprint("*Trigger_random: checking id ");dprint(ftos(i));dprint("*\n");
 		found = nextent(world);
 		while (found)
 		{
@@ -403,7 +403,7 @@ float valid, i;
 				found=nextent(found);
 		}
 		if (!valid && !self.spawnflags&RANDOM_IGNOREMISSING) {
-			dprint("*\n*Trigger_random: found missing id ");dprint(ftos(i));dprint("*\n");
+			dprint("*Trigger_random: found missing id ");dprint(ftos(i));dprint("*\n");
 			trigger_random_reorder (i);		//found id without a match, so reorganize our range
 		}
 		valid = FALSE;
