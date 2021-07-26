@@ -223,9 +223,14 @@ void WanderPointTouch ()
 
 void SetNewWanderPoint (float mindist, float maxdist)
 {
-	entity waypoint;
+	entity waypoint, us;
 	vector dest;
 	float i;
+	
+	if (self.classname=="wanderpoint")
+		us = self.controller;
+	else
+		us = self;
 	
 	dest = FindSpawnSpot(mindist, maxdist, 360, self);
 	do {
@@ -234,30 +239,28 @@ void SetNewWanderPoint (float mindist, float maxdist)
 		if (pointcontents(dest)==CONTENT_LAVA)
 			dest = VEC_ORIGIN;
 	}
-	while (dest != VEC_ORIGIN && i<300);
+	while (dest == VEC_ORIGIN && i<100);
 	
-	if (dest==VEC_ORIGIN) {	dprint("Raven could not find new wander point\n");
+	if (dest==VEC_ORIGIN) {
 		self.goalentity = world;
 		return;
 	}
 	
 	waypoint = spawn();
-	if (self.classname=="wanderpoint")
-		waypoint.controller = self.controller;
-	else
-		waypoint.controller = self;
+	waypoint.controller = us;
 	waypoint.classname = "wanderpoint";
 	waypoint.t_width = mindist;
 	waypoint.t_length = maxdist;
-	//waypoint.effects = EF_NODRAW;
+	waypoint.effects = EF_NODRAW;
 	waypoint.movetype = MOVETYPE_NONE;
+	waypoint.movetype = MOVETYPE_PUSH;
 	waypoint.solid = SOLID_TRIGGER;
 	waypoint.touch = WanderPointTouch;
-	setmodel(waypoint, "models/raven.mdl");
+	setmodel(waypoint, "models/null.spr");
 	setsize(waypoint,'-2 -2 -2','2 2 2');
 	setorigin(waypoint, dest);
 	
-	self.enemy = self.goalentity = waypoint;
+	us.enemy = us.goalentity = waypoint;
 }
 
 void NavigateWanderPoints ()
@@ -266,10 +269,10 @@ void NavigateWanderPoints ()
 		return;
 	
 	if(!self.goalentity || self.goalentity.flags&FL_CLIENT)
-		SetNewWanderPoint(40,140);
-	if (vlen(self.goalentity.origin-self.origin)<16) {
+		SetNewWanderPoint(40,180);
+	if (vlen(self.goalentity.origin-self.origin)<16 && self.goalentity.classname=="wanderpoint") {
 		remove(self.goalentity);
-		SetNewWanderPoint(40,140);
+		SetNewWanderPoint(40,180);
 	}
 }
 
