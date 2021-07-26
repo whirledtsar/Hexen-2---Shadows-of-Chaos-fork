@@ -1601,6 +1601,7 @@ void() trigger_hurt =
 
 float PUSH_ONCE = 1;
 float PUSH_NOPICKUP = 2;
+float PUSH_ADDITIVE = 16;
 float PUSH_SHEEP = 64;
 
 void trigger_push_gone (void)
@@ -1624,8 +1625,9 @@ void() trigger_push_touch =
 
 	if (other.movetype&&other.solid!=SOLID_BSP)//health>0?
 	{
-		
-		if (world.spawnflags&MISSIONPACK)
+		if (self.spawnflags&PUSH_ADDITIVE && other.flags&FL_ONGROUND)
+			other.velocity += self.movedir * self.speed;
+		else if (world.spawnflags&MISSIONPACK)
 			other.velocity = self.movedir * self.speed;
 		else if(other.flags & FL_ONGROUND) {
 			other.velocity = self.movedir * self.speed;
