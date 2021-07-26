@@ -573,9 +573,9 @@ void() monster_spawn =
 	else if (self.classname=="monster_hydra")
 		init_hydra();
 	else if (self.flags&FL_FLY)
-		flymonster_start_go();
+		flymonster_start();
 	else
-		walkmonster_start_go();
+		walkmonster_start();
 }
 
 void() monster_dormant =
