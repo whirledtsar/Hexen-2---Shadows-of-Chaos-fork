@@ -100,7 +100,6 @@ $frame caw1
  * when standing, look for incoming projectiles and nearby player melee
  * if in danger, enter pain state and fly away if so (even if STAYPUT flagged)
  * properly path to target on ground from flight state
- * periodically make sound effect (open beak anim?)
 */
 
 void()raven_flap_fast;
@@ -183,7 +182,7 @@ void raven_flap_fast (void) [++ $fastfly1 .. $fastfly5]
 {
 //Taking off or flying fast
 	ai_walk(self.speed+(self.frame-$fastfly1)*2);
-	if(cycle_wrapped&&(random()<0.5||vlen(self.goalentity.origin-self.origin)<30))
+	if(cycle_wrapped&&(!self.goalentity||random()<0.5||vlen(self.goalentity.origin-self.origin)<20))
 	{
 		if (self.flags&FL_FLY)
 			self.think=raven_glide;
@@ -212,7 +211,7 @@ void raven_glide_think ()
 		//if(trace_fraction<1)
 		traceline(self.origin,self.goalentity.origin,FALSE,self);
 		if (trace_ent == self.goalentity && (self.origin_z-trace_endpos.z)<=100 && vlen(self.origin-self.goalentity.origin)<=250)
-		{dprint("slowdown\n");
+		{
 			self.monster_stage=RAVEN_LAND;
 			self.think=raven_slowdown;
 			thinktime self : 0;
@@ -430,9 +429,9 @@ float newaction;
 		if (r==1)
 			self.think = raven_choose_look;
 		else if(r==2) {
-				self.monster_stage=RAVEN_THREATEN;
-				self.think=raven_open_wings;
-			}
+			self.monster_stage=RAVEN_THREATEN;
+			self.think=raven_open_wings;
+		}
 		else if (r==4 && !self.spawnflags&RAVEN_STAYPUT && vlen(self.goalentity.origin-self.origin)>30) {
 			self.monster_stage=RAVEN_TAKEOFF;
 			self.think=raven_open_wings;
@@ -460,7 +459,6 @@ float newaction;
 
 void raven_stand_think ()
 {
-float r;
 	thinktime self : HX_FRAME_TIME;
 	
 	if (!self.spawnflags&RAVEN_STAYPUT)
@@ -498,6 +496,7 @@ void raven_die (void)
 		remove(self.goalentity);
 	
 	self.flags(+)FL_SMALL;
+	ThrowGib("models/blood.mdl", self.health);
 	if(self.health<-20) {
 		chunk_death();
 	}
@@ -541,11 +540,12 @@ void raven_choose_look ()
 		self.frame=$upleft1;
 	else if (r<4)
 		self.frame=$uprght1;
-	else
+	else {
 		if (self.th_save==raven_peck_down)	//dont look down if we just finished pecking
 			self.frame=$uprght1;
 		else
 			self.frame=$down1;
+	}
 	
 	self.think = raven_stand_think;
 	thinktime self : 0;
