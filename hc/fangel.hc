@@ -887,7 +887,7 @@ void() init_fangel =
 		precache_sound2("fangel/hand.wav");
 		precache_sound2("fangel/wing.wav");
 		precache_sound("mezzo/reflect.wav");	//SoC: bouncing missiles
-		precache_sound("golem/gbfire.wav");	/SoC: beam attack
+		precache_sound("golem/gbfire.wav");	//SoC: beam attack
 	}
 
 	if (self.classname == "monster_fallen_angel")
