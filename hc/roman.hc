@@ -370,17 +370,20 @@ void roman_walk(void)
 	thinktime self : HX_FRAME_TIME;
 	self.think = roman_walk;
 	
-	if ((random() < .10) && (self.frame == ROMAN_WALK))
+	if ((random() < .05) && (self.frame == ROMAN_WALK))
 	{
 		/*if (self.strength)
 			sound (self, CHAN_VOICE, "mummy/moan2.wav", 1, ATTN_NORM);
 		else*/
-			sound (self, CHAN_VOICE, "roman/see.wav", 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, "roman/see.wav", 1, ATTN_IDLE);
+	}
+	
+	if (time > self.counter) {
+		AdvanceFrame(ROMAN_WALK,ROMAN_WALK_END);
+		self.counter = time+HX_FRAME_TIME*1.25;
 	}
 
-	AdvanceFrame(ROMAN_WALK,ROMAN_WALK_END);
-
-	ai_walk(2.5);
+	ai_walk(1);
 }
 
 void roman_stand(void)
