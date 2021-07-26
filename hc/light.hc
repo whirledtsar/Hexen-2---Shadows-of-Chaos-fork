@@ -16,6 +16,7 @@ float LIGHT_SOUND	= 4;		//ws: force torches to emit ambient sound
 
 void() light_stopsound;
 void() light_startsound;
+void(entity light) light_changesound;
 
 void fire_hurt_field_touch ()
 {
