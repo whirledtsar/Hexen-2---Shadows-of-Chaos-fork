@@ -385,7 +385,7 @@ vector spot;
 	
 	self.flags2=FL_SUMMONED;
 	self.yaw_speed = 10;
-	self.mass = 1;
+	self.mass = 0.5;
 	self.speed = 5;
 	
 	self.lifetime = time + 30;
