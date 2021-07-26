@@ -696,9 +696,16 @@ void() imp_hover;
 
 void() monster_spawn =
 {
+	if (self.spawndelay) {
+		self.think = monster_spawn;
+		thinktime self : self.spawndelay;
+		self.spawndelay = 0;
+		return;
+	}
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 	self.takedamage = DAMAGE_YES;
+	self.effects(-)EF_NODRAW;
 	self.use = monster_use;
 	setmodel (self, self.init_model);
 	setsize (self, self.orgnl_mins, self.orgnl_maxs);
@@ -722,10 +729,12 @@ void() monster_dormant =
 	self.solid = SOLID_NOT;
 	self.movetype = MOVETYPE_NONE;
 	self.takedamage = DAMAGE_NO;
+	self.effects(+)EF_NODRAW;
 	self.init_model = self.model;	//use pre-existing fields to save values for when its spawned; init_model is otherwise only used by clients afaik
 	self.orgnl_mins = self.mins;
 	self.orgnl_maxs = self.maxs;
 	self.spawnflags (-) SPAWNIN;
+	self.flags2 (+) FL2_SPAWNED;
 	self.use = monster_spawn;
 	setmodel (self, "");
 	setsize (self, '0 0 0', '0 0 0');
