@@ -378,7 +378,7 @@ vector spot;
 	self.solid = SOLID_SLIDEBOX;
 	setmodel(self, "models/spider.mdl");
 	setsize(self, '-7 -7 0', '7 7 10');
-	setorigin(self,spot + '0 0 2');
+	setorigin(self,spot + '0 0 4');
 	droptofloor();
 	
 	self.flags2=FL_SUMMONED;
