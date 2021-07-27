@@ -967,7 +967,7 @@ float	SILENT = 2;
 
 float	TDEST_NOTHROW = 1;
 float	TDEST_RESETVEL = 2;
-float	TDEST_SETANGLE = 4;
+float	TDEST_ALWAYSFACE = 4;
 
 void() play_teleport =
 {
@@ -1118,10 +1118,13 @@ float poof_speed;
 	if(t.avelocity!='0 0 0')
 		t.mangle=t.angles;
 
-	if(!t.spawnflags&1&&self.classname != "teleportcoin")
+	if(!t.spawnflags&TDEST_NOTHROW&&self.classname != "teleportcoin")
 	{
-		makevectors (t.mangle);
-		org = t.origin + 32 * v_forward;
+		if(!t.spawnflags&TDEST_RESETVEL||other.classname!="player")
+		{
+			makevectors (t.mangle);
+			org = t.origin + 32 * v_forward;
+		}
 	}
 	else
 		org=t.origin;
@@ -1147,17 +1150,18 @@ float poof_speed;
 	}
 	other.teleport_time = time + 0.7;
 
-	if ((t.spawnflags&TDEST_SETANGLE||!t.spawnflags&TDEST_NOTHROW) && self.classname != "teleportcoin") {
+	if (t.spawnflags&TDEST_RESETVEL&&other.flags&FL_CLIENT)
+		other.velocity = '0 0 0';
+	
+	if ((t.spawnflags&TDEST_ALWAYSFACE) && self.classname != "teleportcoin") {
 		other.angles = t.mangle;
 		other.fixangle = 1;		// turn this way immediately
 	}
 	
-	if (t.spawnflags&TDEST_RESETVEL)
+	if(!t.spawnflags&TDEST_NOTHROW&&self.classname != "teleportcoin")
 	{
-		other.velocity = '0 0 0';
-	}
-	else if(!t.spawnflags&TDEST_NOTHROW&&self.classname != "teleportcoin")
-	{
+		other.angles = t.mangle;
+		other.fixangle = 1;		// turn this way immediately
 		if(other.classname!="player"&&other.velocity!='0 0 0')
 			poof_speed = vlen(other.velocity);
 		/* commented out my old ugly hack and using Thomas'
