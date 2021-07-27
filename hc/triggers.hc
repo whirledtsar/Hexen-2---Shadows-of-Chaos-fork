@@ -965,6 +965,10 @@ TELEPORT TRIGGERS
 float	PLAYER_ONLY	= 1;
 float	SILENT = 2;
 
+float	TDEST_NOTHROW = 1;
+float	TDEST_RESETVEL = 2;
+float	TDEST_SETANGLE = 4;
+
 void() play_teleport =
 {
 	local	float v;
@@ -1128,7 +1132,7 @@ float poof_speed;
 	if (!other.health&&other.size!='0 0 0')
 	{//Exclude projectiles!
 		other.origin = t.origin;
-		if(!t.spawnflags&1&&self.classname != "teleportcoin")	//In case you don't want to push them in a certain dir
+		if(!t.spawnflags&TDEST_NOTHROW&&self.classname != "teleportcoin")	//In case you don't want to push them in a certain dir
 			other.velocity = (v_forward * other.velocity_x) + (v_forward * other.velocity_y);
 		return;
 	}
@@ -1143,10 +1147,17 @@ float poof_speed;
 	}
 	other.teleport_time = time + 0.7;
 
-	if(!t.spawnflags&1&&self.classname != "teleportcoin")
-	{
+	if ((t.spawnflags&TDEST_SETANGLE||!t.spawnflags&TDEST_NOTHROW) && self.classname != "teleportcoin") {
 		other.angles = t.mangle;
 		other.fixangle = 1;		// turn this way immediately
+	}
+	
+	if (t.spawnflags&TDEST_RESETVEL)
+	{
+		other.velocity = '0 0 0';
+	}
+	else if(!t.spawnflags&TDEST_NOTHROW&&self.classname != "teleportcoin")
+	{
 		if(other.classname!="player"&&other.velocity!='0 0 0')
 			poof_speed = vlen(other.velocity);
 		/* commented out my old ugly hack and using Thomas'
