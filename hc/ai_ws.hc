@@ -32,9 +32,10 @@ float EnemyIsValid (entity ent)
 {
 	if (ent==world)								return FALSE;
 	if (ent==self)								return FALSE;
-	if (!ent.flags2&FL_ALIVE)					return FALSE;
 	if (ent.health<=0)							return FALSE;
-	if (ent.artifact_active&ARTFLAG_FROZEN)		return FALSE;
+	if (!ent.flags&FL_CLIENT && !ent.flags2&FL_ALIVE)					return FALSE;
+	if (ent.artifact_active&ARTFLAG_FROZEN
+		&& self.classname!="monster_yakman")	return FALSE;
 	if (ent.artifact_active&ARTFLAG_STONED
 		&& self.classname!="monster_medusa")	return FALSE;
 	if (ent.artifact_active&ARTFLAG_ASH
