@@ -18,7 +18,7 @@ float AFRIT_DODGESPEED = 6;
 float AFRIT_STAGE_CHARGE = 1;
 float AFRIT_STAGE_SLIDE = 2;
 
-void() AfritCheckDodge;
+void(float ignorechance) AfritCheckDodge;
 void() afrit_wake1;
 void() afrit_blasted;
 void(entity attacker, float damage)	afrit_pain;
@@ -138,8 +138,8 @@ void afrit_dormant () [++ 78 .. 101]
 		self.th_run();
 		return;
 	}
-	else
-		self.think = afrit_dormant;
+	
+	self.think = afrit_dormant;
 	thinktime self : HX_FRAME_TIME;
 	//no idle sound intentionally
 	if (self.frame==91)
@@ -177,26 +177,26 @@ void()	afrit_sit24	=[	101,		afrit_sit1	] {ai_stand();};
 void()	afrit_hover1	=[	35,		afrit_hover2	] {
 if (random() < 0.02)
 	sound (self, CHAN_VOICE, "afrit/idle.wav", 1,  ATTN_IDLE);
-ai_stand();}; //3);};
-void()	afrit_hover2	=[	36,		afrit_hover3	] {ai_stand();AfritEffects();}; //2);};
-void()	afrit_hover3	=[	37,		afrit_hover4	] {ai_stand();}; //3);};
-void()	afrit_hover4	=[	38,		afrit_hover5	] {ai_stand();particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 18',HX_FRAME_TIME * 2);}; //4);};
-void()	afrit_hover5	=[	39,		afrit_hover6	] {ai_stand();AfritEffects();}; //3);};
-void()	afrit_hover6	=[	40,		afrit_hover7	] {ai_stand();}; //3);};
-void()	afrit_hover7	=[	41,		afrit_hover8	] {ai_stand();AfritEffects();}; //3);};
-void()	afrit_hover8	=[	42,		afrit_hover9	] {ai_stand();}; //4);};
-void()	afrit_hover9	=[	43,		afrit_hover10	] {ai_stand();AfritEffects();}; //3);};
-void()	afrit_hover10	=[	44,		afrit_hover11	] {ai_stand();}; //3);};
-void()	afrit_hover11	=[	45,		afrit_hover12	] {ai_stand();AfritEffects();if (random() < 0.4) CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);}; //2);};
-void()	afrit_hover12	=[	46,		afrit_hover13	] {ai_stand();}; //3);};
-void()	afrit_hover13	=[	47,		afrit_hover14	] {ai_stand();AfritEffects();sound (self, CHAN_AUTO, "afrit/hover.wav", 1, ATTN_IDLE);}; //4);};
-void()	afrit_hover14	=[	48,		afrit_hover15	] {ai_stand();}; //3);};
-void()	afrit_hover15	=[	49,		afrit_hover16	] {ai_stand();AfritEffects();}; //3);};
-void()	afrit_hover16	=[	50,		afrit_hover17	] {ai_stand();}; //2);};
-void()	afrit_hover17	=[	51,		afrit_hover18	] {ai_stand();AfritEffects();}; //3);};
-void()	afrit_hover18	=[	52,		afrit_hover19	] {ai_stand();}; //3);};
-void()	afrit_hover19	=[	53,		afrit_hover20	] {ai_stand();AfritEffects();particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);}; //2);};
-void()	afrit_hover20	=[	54,		afrit_hover1	] {ai_stand();}; //3);};
+ai_stand();};
+void()	afrit_hover2	=[	36,		afrit_hover3	] {ai_stand();AfritEffects();};
+void()	afrit_hover3	=[	37,		afrit_hover4	] {ai_stand();};
+void()	afrit_hover4	=[	38,		afrit_hover5	] {ai_stand();particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 18',HX_FRAME_TIME * 2);};
+void()	afrit_hover5	=[	39,		afrit_hover6	] {ai_stand();AfritEffects();};
+void()	afrit_hover6	=[	40,		afrit_hover7	] {ai_stand();};
+void()	afrit_hover7	=[	41,		afrit_hover8	] {ai_stand();AfritEffects();};
+void()	afrit_hover8	=[	42,		afrit_hover9	] {ai_stand();};
+void()	afrit_hover9	=[	43,		afrit_hover10	] {ai_stand();AfritEffects();};
+void()	afrit_hover10	=[	44,		afrit_hover11	] {ai_stand();};
+void()	afrit_hover11	=[	45,		afrit_hover12	] {ai_stand();AfritEffects();if (random() < 0.4) CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_hover12	=[	46,		afrit_hover13	] {ai_stand();};
+void()	afrit_hover13	=[	47,		afrit_hover14	] {ai_stand();AfritEffects();sound (self, CHAN_AUTO, "afrit/hover.wav", 1, ATTN_IDLE);};
+void()	afrit_hover14	=[	48,		afrit_hover15	] {ai_stand();};
+void()	afrit_hover15	=[	49,		afrit_hover16	] {ai_stand();AfritEffects();};
+void()	afrit_hover16	=[	50,		afrit_hover17	] {ai_stand();};
+void()	afrit_hover17	=[	51,		afrit_hover18	] {ai_stand();AfritEffects();};
+void()	afrit_hover18	=[	52,		afrit_hover19	] {ai_stand();};
+void()	afrit_hover19	=[	53,		afrit_hover20	] {ai_stand();AfritEffects();particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_hover20	=[	54,		afrit_hover1	] {ai_stand();};
 
 //AFRIT DODGE
 
@@ -223,7 +223,7 @@ void()	afrit_glide1	=[	35,		afrit_glide2	] {
 if (random() < 0.02)
 	sound (self, CHAN_VOICE, "afrit/idle.wav", 1,  ATTN_IDLE);
 ai_walk(3);};
-void()	afrit_glide2	=[	36,		afrit_glide3	] {ai_walk(3); if (self.th_stand == afrit_sit1) self.th_stand = afrit_hover1;};
+void()	afrit_glide2	=[	36,		afrit_glide3	] {ai_walk(3);};
 void()	afrit_glide3	=[	37,		afrit_glide4	] {ai_walk(3);self.drawflags(+)MLS_FULLBRIGHT;};
 void()	afrit_glide4	=[	38,		afrit_glide5	] {ai_walk(4);};
 void()	afrit_glide5	=[	39,		afrit_glide6	] {ai_walk(3);particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
@@ -262,27 +262,27 @@ void() afrit_run =
 void()	afrit_fly1	=[	35,		afrit_fly2	] {
 if (random() < 0.02)
 	sound (self, CHAN_VOICE, "afrit/idle.wav", 1,  ATTN_IDLE);
-AfritCheckDodge();
+AfritCheckDodge(0.9);
 ai_run(3);};
-void()	afrit_fly2	=[	36,		afrit_fly3	] {AfritCheckDodge(); ai_run(3); if (self.th_stand == afrit_sit1) self.th_stand = afrit_hover1;};
-void()	afrit_fly3	=[	37,		afrit_fly4	] {AfritCheckDodge(); ai_run(3); self.drawflags(+)MLS_FULLBRIGHT;};
-void()	afrit_fly4	=[	38,		afrit_fly5	] {AfritCheckDodge(); ai_run(4);};
-void()	afrit_fly5	=[	39,		afrit_fly6	] {AfritCheckDodge(); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_fly6	=[	40,		afrit_fly7	] {AfritCheckDodge(); ai_run(3);};
-void()	afrit_fly7	=[	41,		afrit_fly8	] {AfritCheckDodge(); ai_run(3); AfritEffects();};
-void()	afrit_fly8	=[	42,		afrit_fly9	] {AfritCheckDodge(); ai_run(4);};
-void()	afrit_fly9	=[	43,		afrit_fly10	] {AfritCheckDodge(); ai_run(3);};
-void()	afrit_fly10	=[	44,		afrit_fly11	] {AfritCheckDodge(); ai_run(3); AfritEffects();};
-void()	afrit_fly11	=[	45,		afrit_fly12	] {AfritCheckDodge(); ai_run(3); CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_fly12	=[	46,		afrit_fly13	] {AfritCheckDodge(); ai_run(3);};
-void()	afrit_fly13	=[	47,		afrit_fly14	] {AfritCheckDodge(); ai_run(3); AfritEffects(); sound (self, CHAN_AUTO, "afrit/hover.wav", 1, ATTN_NORM);};
-void()	afrit_fly14	=[	48,		afrit_fly15	] {AfritCheckDodge(); ai_run(4);};
-void()	afrit_fly15	=[	49,		afrit_fly16	] {AfritCheckDodge(); ai_run(4);};
-void()	afrit_fly16	=[	50,		afrit_fly17	] {AfritCheckDodge(); ai_run(3); AfritEffects();};
-void()	afrit_fly17	=[	51,		afrit_fly18	] {AfritCheckDodge(); ai_run(3);};
-void()	afrit_fly18	=[	52,		afrit_fly19	] {AfritCheckDodge(); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_fly19	=[	53,		afrit_fly20	] {AfritCheckDodge(); ai_run(3); AfritEffects();};
-void()	afrit_fly20	=[	54,		afrit_fly1	] {AfritCheckDodge(); ai_run(3);};
+void()	afrit_fly2	=[	36,		afrit_fly3	] {AfritCheckDodge(0.9); ai_run(3);};
+void()	afrit_fly3	=[	37,		afrit_fly4	] {AfritCheckDodge(0.9); ai_run(3); self.drawflags(+)MLS_FULLBRIGHT;};
+void()	afrit_fly4	=[	38,		afrit_fly5	] {AfritCheckDodge(0.9); ai_run(4);};
+void()	afrit_fly5	=[	39,		afrit_fly6	] {AfritCheckDodge(0.9); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_fly6	=[	40,		afrit_fly7	] {AfritCheckDodge(0.9); ai_run(3);};
+void()	afrit_fly7	=[	41,		afrit_fly8	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
+void()	afrit_fly8	=[	42,		afrit_fly9	] {AfritCheckDodge(0.9); ai_run(4);};
+void()	afrit_fly9	=[	43,		afrit_fly10	] {AfritCheckDodge(0.9); ai_run(3);};
+void()	afrit_fly10	=[	44,		afrit_fly11	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
+void()	afrit_fly11	=[	45,		afrit_fly12	] {AfritCheckDodge(0.9); ai_run(3); CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_fly12	=[	46,		afrit_fly13	] {AfritCheckDodge(0.9); ai_run(3);};
+void()	afrit_fly13	=[	47,		afrit_fly14	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects(); sound (self, CHAN_BODY, "afrit/hover.wav", 1, ATTN_IDLE);};
+void()	afrit_fly14	=[	48,		afrit_fly15	] {AfritCheckDodge(0.9); ai_run(4);};
+void()	afrit_fly15	=[	49,		afrit_fly16	] {AfritCheckDodge(0.9); ai_run(4);};
+void()	afrit_fly16	=[	50,		afrit_fly17	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
+void()	afrit_fly17	=[	51,		afrit_fly18	] {AfritCheckDodge(0.9); ai_run(3);};
+void()	afrit_fly18	=[	52,		afrit_fly19	] {AfritCheckDodge(0.9); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_fly19	=[	53,		afrit_fly20	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
+void()	afrit_fly20	=[	54,		afrit_fly1	] {AfritCheckDodge(0.9); ai_run(3);};
 
 void afrit_charge ()
 {
@@ -328,14 +328,14 @@ void()	afrit_atk15=[	28,		afrit_atk16	] {afrit_atk_slide(); };
 void()	afrit_atk16=[	29,		afrit_atk17	] {afrit_atk_slide(); AfritEffects();};
 void()	afrit_atk17=[	30,		afrit_atk18	] {afrit_atk_slide(); AfritFire(0);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
 void()	afrit_atk18=[	31,		afrit_atk19	] {ai_face(); };
-void()	afrit_atk19=[	32,		afrit_atk20	] {ai_face(); AfritCheckDodge();};
-void()	afrit_atk20=[	33,		afrit_atk21	] {AfritCheckDodge();};
-void()	afrit_atk21=[	34,		afrit_fly1	] {AfritEffects(); AfritCheckDodge();};
+void()	afrit_atk19=[	32,		afrit_atk20	] {ai_face(); AfritCheckDodge(0.9);};
+void()	afrit_atk20=[	33,		afrit_atk21	] {AfritCheckDodge(0.9);};
+void()	afrit_atk21=[	34,		afrit_fly1	] {AfritEffects(); AfritCheckDodge(0.9);};
 
 
 //===========================================================================
 
-void()	afrit_pain1	=[	62,	afrit_pain2	] {if (random() < 0.1) afrit_dodge1();};
+void()	afrit_pain1	=[	62,	afrit_pain2	] {};
 void()	afrit_pain2	=[	63,	afrit_pain3	] {};
 void()	afrit_pain3	=[	64,	afrit_pain4	] {};
 void()	afrit_pain4	=[	65,	afrit_pain5	] {};
@@ -343,12 +343,12 @@ void()	afrit_pain5	=[	66,	afrit_pain6	] {ai_pain(2);};
 void()	afrit_pain6	=[	67,	afrit_pain7	] {ai_pain(2);};
 void()	afrit_pain7	=[	68,	afrit_pain8	] {AfritEffects();};
 void()	afrit_pain8	=[	69,	afrit_pain9	] {};
-void()	afrit_pain9	=[	70,	afrit_pain10	] {AfritCheckDodge();};
+void()	afrit_pain9	=[	70,	afrit_pain10	] {if (random() < 0.1) afrit_dodge1();};
 void()	afrit_pain10	=[	71,	afrit_pain11	] {};
 void()	afrit_pain11	=[	72,	afrit_pain12	] {AfritEffects();};
-void()	afrit_pain12	=[	73,	afrit_pain13	] {};
-void()	afrit_pain13	=[	74,	afrit_pain14	] {};
-void()	afrit_pain14	=[	75,	afrit_fly1	] {AfritCheckDodge();};
+void()	afrit_pain12	=[	73,	afrit_pain13	] {AfritCheckDodge(0.1);};
+void()	afrit_pain13	=[	74,	afrit_pain14	] {AfritCheckDodge(0.1);};
+void()	afrit_pain14	=[	75,	afrit_fly1	] {AfritCheckDodge(0.1);};
 
 void afrit_blasted ()
 {
@@ -359,19 +359,21 @@ void afrit_blasted ()
 		self.blasted -= BLAST_DECEL;
 	}
 	
-	if (random()<0.33)
-		AfritCheckDodge();
 	if (random()<0.2)
 		AfritEffects();
 	
-	if (result == AF_END)
-		self.think = afrit_fly1;
+	if (result == AF_END) {
+		if (random()<0.1)
+			afrit_dodge1();
+		else
+			self.think = afrit_fly1;
+	}
 	else
 		self.think = afrit_blasted;
 	thinktime self : HX_FRAME_TIME;
 }
 
-void()	afrit_wake1	=[	54,	afrit_wake2	] {};
+void()	afrit_wake1	=[	54,	afrit_wake2	] {self.th_stand = afrit_hover1;};
 void()	afrit_wake2	=[	55,	afrit_wake3	] {};
 void()	afrit_wake3	=[	56,	afrit_wake4	] {};
 void()	afrit_wake4	=[	57,	afrit_wake5	] {};
@@ -397,11 +399,12 @@ void()	afrit_wake22	=[	75,	afrit_fly1	] {};
 
 void(entity attacker, float damage)	afrit_pain =
 {
-	//local float r;
+	if (self.th_stand == afrit_sit1 || self.th_stand == afrit_dormant)
+		afrit_wake1();
 
 	if (self.pain_finished > time)
 		return;
-	if (random() > 0.5)
+	if (random() < 0.85)
 		sound (self, CHAN_VOICE, "afrit/pain.wav", 1, ATTN_NORM);
 	else
 		sound (self, CHAN_VOICE, "afrit/pain2.wav", 1, ATTN_NORM);
@@ -428,9 +431,11 @@ void()	afrit_die12=[	11,	afrit_die13] {};
 void()	afrit_die13=[	12,	afrit_die14] {};
 void()	afrit_die14=[	13,	afrit_die14] {MakeSolidCorpse();};
 
-void AfritCheckDodge ()
+void AfritCheckDodge (float ignorechance)
 {
-	if (self.enemy==world || self.counter>time || random()<0.05)
+	if (self.enemy==world || self.counter>time)
+		return;
+	if (random()<ignorechance)
 		return;
 	
 	entity enemy_proj;
