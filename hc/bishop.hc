@@ -448,7 +448,7 @@ void() monster_bishop =
 	self.thingtype=THINGTYPE_FLESH;
 	
 	self.netname="bishop";
-	self.flags (+) FL_MONSTER;
+	self.flags (+) FL_MONSTER|FLY_FLY;
 	self.flags2 (+) FL_ALIVE;
 	self.lefty = 1;	//-1 for left dodge, 1 for right dodge
 	self.sightsound = "bishop/sight.wav";
