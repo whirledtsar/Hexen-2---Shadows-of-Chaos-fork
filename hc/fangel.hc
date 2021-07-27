@@ -630,9 +630,11 @@ void() fangel_flyframes =
 	if (!EnemyIsValid(self.enemy)) {
 		stopSound(self,CHAN_WEAPON);//cut off wings sound
 		self.think = self.th_stand;
+		thinktime self : 0;
+		return;
 	}
-	else
-		self.think = fangel_flyframes;
+	
+	self.think = fangel_flyframes;
 	thinktime self : HX_FRAME_TIME;
 	
 	if (visible(self.enemy))
