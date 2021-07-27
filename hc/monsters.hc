@@ -572,6 +572,7 @@ void() monster_spawn =
 	self.use = monster_use;
 	setmodel (self, self.init_model);
 	setsize (self, self.orgnl_mins, self.orgnl_maxs);
+	spawn_tdeath(self.origin, self);
 	if (!self.spawnflags&SPAWNQUIET)
 		GenerateTeleportEffect(self.origin, 0);	//spawn_tfog(self.origin);
 	
