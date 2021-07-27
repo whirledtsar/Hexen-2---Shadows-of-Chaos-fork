@@ -419,6 +419,10 @@ void monster_roman (void)
 	setsize(self, '-16 -16 0', '16 16 56');
 	self.hull = HULL_PLAYER;
 	
+	self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	if (!self.scale)
+		self.scale = 0.9;	//match height of other humanoid enemies
+	
 	if (!self.experience_value)
 		self.experience_value = 200;
 	if (!self.health)
