@@ -292,7 +292,7 @@ void() misc_waterfall =
 	precache_model(self.mdl);
 	setmodel (self, self.mdl);
 	
-	setsize (self, '-73 -73 -150', '73 73 120');
+	setsize (self, '-32 -32 -184', '32 32 128');
 	
 	self.netname="waterfall";
 	self.flags (+) FL_FLY;
