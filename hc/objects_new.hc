@@ -310,10 +310,26 @@ void() misc_waterfall =
 	
 	if (self.spawnflags & WATER_TOPORIGIN)
 		self.drawflags (+) SCALE_ORIGIN_TOP;
-	if (self.spawnflags & WATER_SCALEXY)
+	if (self.spawnflags & WATER_SCALEXY) {
 		self.drawflags (+) SCALE_TYPE_XYONLY;
-	else if (self.spawnflags & WATER_SCALEZ)
+		self.mins_x *= self.scale;
+		self.mins_y *= self.scale;
+		self.maxs_x *= self.scale;
+		self.maxs_y *= self.scale;
+		setsize (self, self.mins, self.maxs);
+	}
+	else if (self.spawnflags & WATER_SCALEZ) {
 		self.drawflags (+) SCALE_TYPE_ZONLY;
+		self.mins_z *= self.scale;
+		if (!self.spawnflags & WATER_TOPORIGIN)
+			self.maxs_z *= self.scale;
+		setsize (self, self.mins, self.maxs);
+	}
+	else {	//scaled from center
+		self.mins *= self.scale;
+		self.maxs *= self.scale;
+		setsize (self, self.mins, self.maxs);
+	}
 	
 	if (self.targetname)
 	{
