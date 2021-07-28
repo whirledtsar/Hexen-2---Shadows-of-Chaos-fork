@@ -257,10 +257,10 @@ void bloodrain_charge ()
 			advanceweaponframe($normal02,$normal13);
 			self.search_time = time+HX_FRAME_TIME*2;	//animate at half-speed
 		}
+		self.whiptime = time+1.75;		//can only hold for this many seconds, discourage holding onto charge when outside combat
 	}
 	else if (self.weaponframe == $normal05) {
-		if (!self.button1 && self.weaponframe_cnt>=BLRAIN_CHARGE) {		//end loop if fire button released
-			//advanceweaponframe($normal02,$normal13);
+		if ((!self.button1 || time > self.whiptime) && self.weaponframe_cnt>=BLRAIN_CHARGE) {		//end loop if fire button released
 			++self.weaponframe;
 			self.search_time = time + HX_FRAME_TIME*8;
 		}
@@ -291,13 +291,14 @@ void bloodrain_charge ()
 		vector org = self.origin+self.proj_ofs+v_forward*15-v_right*12+'0 0 8';
 		if (random()<0.5)
 			particle3(org,'0.5 0.5 0.5',144,PARTICLETYPE_REDFIRE,1);
-		//particle(org, '0 0 1', 384, 1);	//why does every fucking color i choose make grey particles? what the fuck? why have a color field if it doesnt fucking work?
+		//particle(org, '0 0 1', COLOR_RED_MID, 1);	//why does every fucking color i choose make grey particles? what the fuck? why have a color field if it doesnt fucking work?
 	}
 	
 	if(self.weaponframe==$normal13) {
 		self.altfiring = 0;
 		self.search_time = 0;
 		self.weaponframe_cnt = 0;
+		self.whiptime = 0;
 		self.attack_finished = time+0.3;
 		bloodrain_ready();
 	}
