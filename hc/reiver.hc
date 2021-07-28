@@ -120,6 +120,7 @@ void reiv_rise () [++ $001rise .. $024rise]
 		self.th_pain = reiv_pain;
 		self.th_blasted = reiv_blasted;
 		setsize (self, REIV_MINS, REIV_MAXS);
+		self.hull = HULL_CROUCH;
 		//self.solid = SOLID_SLIDEBOX;		//handled in reiv_check
 		self.takedamage = DAMAGE_YES;
 		self.th_run = reiv_run;
@@ -691,6 +692,7 @@ void monster_reiver ()
 	
 	setmodel (self, "models/reiver.mdl");
 	setsize (self, REIV_MINS, REIV_MAXS);
+	self.hull = HULL_CROUCH;
 	
 	if (self.spawnflags & REIV_BURIED)
 	{
