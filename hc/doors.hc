@@ -390,6 +390,23 @@ string hold_target;
 	}
 
 	self.state = STATE_DOWN;
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		if(oldself.spawnflags & DOOR_START_OPEN) {
+			shadow_fade_out();
+			shadow.shadowoff = 1;
+		} else {
+			shadow_fade_in();
+			shadow.shadowoff = 0;
+		}
+		
+		self = oldself;
+	}
 
 	if(self.classname == "door")
 	{
@@ -419,23 +436,6 @@ string hold_target;
 		self.target=self.close_target;
 		SUB_UseTargets();
 		self.target=hold_target;
-	}
-	
-	entity oldself, shadow;
-	if(self.switchshadstyle) {
-		shadow = self.shadowcontroller;
-		oldself = self;
-		self = shadow;
-		
-		if(oldself.spawnflags & DOOR_START_OPEN) {
-			shadow_fade_out();
-			shadow.shadowoff = 1;
-		} else {
-			shadow_fade_in();
-			shadow.shadowoff = 0;
-		}
-		
-		self = oldself;
 	}
 }
 
@@ -469,6 +469,23 @@ void door_go_up()
 
 	sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
 	self.state = STATE_UP;
+	
+	entity oldself, shadow;
+	if(self.switchshadstyle) {
+		shadow = self.shadowcontroller;
+		oldself = self;
+		self = shadow;
+		
+		if(oldself.spawnflags & DOOR_START_OPEN) {
+			shadow_fade_in();
+			shadow.shadowoff = 0;
+		} else {
+			shadow_fade_out();
+			shadow.shadowoff = 1;
+		}
+		
+		self = oldself;
+	}
 
 	if(self.classname == "door")
 	{
@@ -496,23 +513,6 @@ void door_go_up()
 		SUB_CalcAngleMove(self.pos2, self.speed, door_hit_top);
 
 	SUB_UseTargets();
-	
-	entity oldself, shadow;
-	if(self.switchshadstyle) {
-		shadow = self.shadowcontroller;
-		oldself = self;
-		self = shadow;
-		
-		if(oldself.spawnflags & DOOR_START_OPEN) {
-			shadow_fade_in();
-			shadow.shadowoff = 0;
-		} else {
-			shadow_fade_out();
-			shadow.shadowoff = 1;
-		}
-		
-		self = oldself;
-	}
 }
 
 
