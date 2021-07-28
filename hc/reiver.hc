@@ -483,7 +483,7 @@ void reiv_misfire () [++ $054fire .. $070fire]
 		
 		newmis.scale = 0.666;
 		setmodel (newmis,"models/lavaball.mdl");
-		setsize (newmis, '-5 -5 -5', '5 5 5');
+		setsize (newmis, '-1 -1 -1', '1 1 1');
 		setorigin (newmis, org1);
 		
 		newmis.dmg = random(16,22);
