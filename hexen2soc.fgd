@@ -917,6 +917,8 @@
 	spawnflags(Flags) =
 	[
 		1 : "No throw" : 0
+		2 : "Reset velocity" : 0
+		4 : "Always face angle" : 0
 	]
 ]
 
@@ -1053,10 +1055,10 @@
 @PointClass base(Lights) model(":models/egtorch.mdl")  = light_torch_eqypt : "Egyptian torch" []	//yes, "eqypt" is correct...
 @PointClass base(Lights) model(":models/mflmtrch.mdl") = light_torch_meso : "Meso torch" []
 @PointClass base(Lights)  model(":models/rflmtrch.mdl") = light_torch_rome : "Roman torch" []
-@PointClass base(Lights, Lightdmg) model(":models/flame.mdl") size(-10 -10 -20, 10 10 20) = light_torch_small_walltorch : "Walltorch" []
+@PointClass base(Lights) model(":models/flame.mdl") size(-10 -10 -20, 10 10 20) = light_torch_small_walltorch : "Walltorch" []
 
 @PointClass base(Lights, Lightdmg) size(-16 -16 -52, 16 16 16) = light_burner : "Burner (PoP)" []
-@PointClass base(Lights) model(":models/candle.mdl") size(-8 -8 -16, 8 8 32) = light_candle : "Candle - Asian theme in PoP" [
+@PointClass base(Lights) model(":models/candle.mdl") size(-8 -8 -16, 8 8 32) = light_candle : "Candle (Asian theme in PoP)" [
 	spawnflags(Flags) =
 	[
 		1 : "Start low" : 0
@@ -1065,7 +1067,7 @@
 		8 : "Force candle model in PoP"
 	]
 ]
-@PointClass base(Lights) model(":models/lantern.mdl") size(-8 -8 -40, 8 8 8) = light_lantern : "Lantern (PoP)" []
+@PointClass base(Lights) model(":models/lantern.mdl") size(-8 -8 -40, 8 8 8) = light_lantern : "Lantern" []
 @PointClass base(Lights, Lightdmg) size(-48 -48 -4, 48 48 224) = light_newfire : "Large fire"
 [
 	spawnflags(Flags) =
@@ -1093,15 +1095,15 @@
 
 @PointClass base(Appearflags, Targetname) size(-8 -8 -8, 8 8 8) = misc_fireball : "Lava balls" []
 
-@PointClass base(Appearflags, Targetname) size(0 0 0, 32 32 32) = misc_fountain : "Fountain"
+@PointClass base(Appearflags, Targetname) size(0 0 0, 32 32 32) color(150 150 255) = misc_fountain : "Fountain"
 [
 	soundtype(choices) : "Sound" : 0 =
 	[
 		0 : "Silent"
 		1 : "Water"
 	]
-	angles(string) : "Angles (x y z)" : "0 0 0"
-	movedir(string) : "Direction (x y z)" : "1 1 1"
+	angles(string) : "Angles (pitch yaw roll)" : "0 0 0"
+	movedir(string) : "Speed (x y z)" : "1 1 1"
 	color(integer) : "Color" : 407
 	cnt(integer) : "Number of particles" : 2
 ]
@@ -1119,14 +1121,15 @@
 		4 : "Jump" : 0 //Has the ability to leap forward
 		8 : "Play dead (PoP)" : 0 //Possibly no useful effect?
 		16 : "Dormant" : 0 //Possibly no useful effect?
-		32 : "No drop" : 0 : "Doesn't drop to floor on spawn" //Will not drop random mana or items on death? Or doesn't drop to floor on spawn?
+		32 : "No drop" : 0 : "Doesn't drop to floor on spawn"
 		64 : "Frozen (PoP)" : 0 //Enemy is made out of ice
-		128 : "Spawn in" : 0 : "Enemy spawns in when triggered"
+		128 : "Spawn in" : 0 : "Spawns in when triggered"
 		65536 : "Spawn quiet" : 0 : "Spawns in without teleport fog/noise"
 	]
-	health(integer) : "Health (PoP)"
+	health(integer) : "Health"
 	experience_value(integer) : "Experience"
 	//experience(integer) : "Experience (PoP)" //Doesn't seem to work
+	spawndelay(integer) : "Delay before triggered spawning"
 	waketarget(target_destination) : "Target fired upon waking up"
 ]
 
@@ -1153,28 +1156,14 @@
 		4 : "" : 0
 		8 : "" : 0
 		16 : "Gargoyle" : 0
-		32 : "Pickup (not functional?)" : 0
+		32 : "Pickup (not functional)" : 0
 		64 : "" : 0
 		128 : "Spawn in"
 	]
 	wait(integer) : "Wait (-1 for decoration)"
 ]
 
-@PointClass base(Monster) model({"path": ":models/imp.mdl", "skin": 1}) size(-16 -16 0, 16 16 36) = monster_imp_ice : "Ice imp"
-[
-	spawnflags(Flags) =
-	[
-		1 : "Stand" : 0 : "Don't do swoop attack"
-		2 : "Hover" : 0
-		4 : "" : 0
-		8 : "" : 0
-		16 : "Gargoyle" : 0
-		32 : "Pickup (not functional?)" : 0
-		64 : "" : 0
-		128 : "Spawn in"
-	]
-	wait(integer) : "Wait (-1 for decoration)"
-]
+@PointClass base(monster_imp_fire) model({"path": ":models/imp.mdl", "skin": 1}) size(-16 -16 0, 16 16 36) = monster_imp_ice : "Ice imp" []
 
 @PointClass base(monster_imp_fire) = monster_imp_lord : "Lord imp" []
 
@@ -1222,7 +1211,7 @@
 ]
 @PointClass base(monster_rat) size(-20 -20 0, 20 20 10) = monster_ratnest : "Rat's nest" []
 
-@PointClass base(Monster) size(-8 -8 0, 8 8 20) = monster_raven : "Decorative raven. Will wander randomly unless it has a target or the 'stay put' spawnflag."
+@PointClass base(Monster) model(":models/raven.mdl") size(-8 -8 0, 8 8 20) = monster_raven : "Decorative raven. Will wander randomly unless it has a target or the 'stay put' spawnflag."
 [
 	spawnflags(Flags) =
 	[
@@ -1655,7 +1644,39 @@
 
 @PointClass base(Appearflags) = custom_sound_ambient : "Ambient sound (custom)"
 [
-	netname(string) : "Sound filename, including subfolder and .wav extension. If no delay is supplied, it will loop continuously"
+	netname(choices) : "Sound filename, including subfolder and .wav extension. If no delay is supplied, it will loop continuously" : "" =
+	[
+		"Various sounds included with SoC" : ""
+		"ambience/bridgec1.wav" : ""
+		"ambience/chains.wav" : ""
+		"ambience/chant1.wav" : "Chanting loop"
+		"ambience/choir.wav" : "Spooky female choir loop"
+		"ambience/cricketl.wav" : "Crickets loop"
+		"ambience/crickets1.wav" : "Random cricket sound"
+		"ambience/darkchor.wav" : "Deep choir loop"
+		"ambience/drums.wav" : "Tribal drums"
+		"ambience/elecloop.wav" : "Electricity crackle loop"
+		"ambience/flagwave.wav" : "Flag waving in wind"
+		"ambience/gong.wav" : ""
+		"ambience/lavaburn.wav" : "Lava loop"
+		"ambience/lavadrop1.wav" : "Small sizzle"
+		"ambience/moan1.wav" : ""
+		"ambience/moan2.wav" : ""
+		"ambience/moan3.wav" : ""
+		"ambience/mudpool.wav" : "Liquid gurgle"
+		"ambience/rockfal2.wav" : ""
+		"ambience/rockfal3.wav" : ""
+		"ambience/rustle.wav" : "Leaves rustling"
+		"ambience/subsonic.wav" : "Low drone loop"
+		"ambience/wcreak1.wav" : "Wood creak"
+		"ambience/wcreak2.wav" : "Wood creak"
+		"ambience/zaploop.wav" : "Electricity crackle loop"
+		"doors/creak1a.wav" : "Long door creak"
+		"fx/icequake.wav" : "Ice cracking"
+		"fx/lava2" : "Lava loop (Heretic)"
+		"fx/snowwind.wav" : ""
+		"fx/wfall.wav" : "Waterfall"
+	]
 	noise2(string) : "Optional second sound, played randomly"
 	noise3(string) : "Optional third sound, played randomly"
 	flags(integer) : "Random delay minimum" : 0
@@ -2020,6 +2041,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 		2 : "Bell"
 		3 : "Large switch"
 	]
+	wait(integer) : "Wait" : 0.2
 ]
 
 @SolidClass base(Appearflags) = trigger_no_friction : "Removes friction (PoP)"
@@ -2058,12 +2080,11 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	[
 		1 : "Push once" : 0
 		2 : "Must jump first (PoP)" : 0
-		4 : "" : 0
 		8 : "Deactivated (PoP)" : 0
 		64 : "Ignore sheep" : 0
 	]
-	speed(integer) : "Speed of push"
-	angles(string) : "Angle of push (X Y Z)"
+	speed(integer) : "Speed of push" : 500
+	angles(string) : "Angle of push (X Y Z)" : "0 0 0"
 	noise1(string) : "Custom sound (misc/null.wav for silence)"
 ]
 
@@ -2106,7 +2127,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	killtarget(target_destination) : "KillTarget"
 	netname(string) : "Netname"
 	cnt(integer) : "Random delay minimum"
-	lifetime(integer) : "Random delay minimum"
+	lifetime(integer) : "Random delay maximum"
 	wait(integer) : "Wait"
 	delay(integer) : "Delay before trigger"
 	message(integer) : "Message (index in strings.txt)"
@@ -2336,11 +2357,11 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	]
 ]
 
-@PointClass base(Monster) size(-16 -16 0, 16 16 36) model(":models/reiver.mdl") = monster_reiver : "Reiver" [
+@PointClass base(Monster) size(-16 -16 0, 16 16 36) model({"path": ":models/reiver.mdl", "frame": 25}) = monster_reiver : "Reiver" [
 	spawnflags(Flags) =
 	[
 		2 : "Buried"
-		16 : "Buried: dormant (only rise when triggered)"
+		16 : "Buried: dormant" : 0 : "Only rise when triggered"
 		262144 : "Stay above player"
 		524288 : "Buried: no earth/dirt FX when rising"
 	]
@@ -2478,6 +2499,10 @@ Will not work well with a func_rotating that already has the TOGGLE_REVERSE spaw
 		4 : "Breakable"
 		8 : "Starts off"
 		16 : "Using breaks instead of toggling" : 0 : "Works with start off spawnflag"
+		32 : "Scale from top"
+		64 : "Scale from center"
+		128 : "Scale Z axis only"
+		256 : "Scale XY axis only"
 	]
 ]
 
