@@ -486,7 +486,7 @@ void reiv_misfire () [++ $054fire .. $070fire]
 		setsize (newmis, '-1 -1 -1', '1 1 1');
 		setorigin (newmis, org1);
 		
-		newmis.dmg = random(16,22);
+		newmis.dmg = random(14,18);
 		newmis.touch = fireballTouch;
 		newmis.think = reiv_misthink;
 		thinktime newmis : HX_FRAME_TIME;
