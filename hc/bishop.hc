@@ -454,7 +454,7 @@ void() monster_bishop =
 	self.sightsound = "bishop/sight.wav";
 	self.yaw_speed = 14;
 	
-	self.monsterclass = CLASS_LEADER;
+	self.monsterclass = CLASS_HENCHMAN;
 	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
