@@ -210,7 +210,8 @@ float hydra_check_blind_melee(void)
 
 void hydra_blind(void)
 {
-	stuffcmd (self.enemy, "df\n");
+	if (self.enemy.flags&FL_CLIENT)
+		stuffcmd (self.enemy, "df\n");
 
 	self.hydra_chargeTime = time + 1;
 	self.think = hydra_charge;
