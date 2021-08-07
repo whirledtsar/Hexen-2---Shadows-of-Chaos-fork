@@ -1400,7 +1400,7 @@ void() WaterMove =
 			org = self.origin + '0 0 15' + v_forward*24 + v_right*10;
 			if (self.oldwatertype == CONTENT_SLIME)
 				CreateSludgeSplashBig(org);
-			else//if (self.oldwatertype == CONTENT_WATER)
+			else if (self.oldwatertype == CONTENT_WATER)
 				CreateWaterSplashBig(org);
 		}
 		return;
