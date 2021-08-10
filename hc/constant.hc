@@ -28,13 +28,13 @@ float FL_ONGROUND				= 512;		// standing on something
 float FL_PARTIALGROUND			= 1024;		// not all corners are valid
 float FL_WATERJUMP				= 2048;		// player jumping out of water
 float FL_JUMPRELEASED			= 4096;		// for jump debouncing
-float FL_FLASHLIGHT				= 8192;		// quake 2 thingy
+//float FL_FLASHLIGHT				= 8192;		// quake 2 thingy
 float FL_ARTIFACTUSED			= 16384;	// an artifact was just used
 float FL_MOVECHAIN_ANGLE		= 32768;    // when in a move chain, will update the angle
-float FL_FIRERESIST				= 65536;	// resistant to fire and heat and lava
-float FL_NOZ					= 131072;	//Monster will not automove on Z if flying or swimming
+//float FL_FIRERESIST				= 65536;	// resistant to fire and heat and lava
 //float FL_FIREHEAL				= 131072;	// healed by fire, heat, and lava
 //float FL_COLDHEAL				= 524288;	// healed by freezing
+float FL_NOZ					= 131072;	//Monster will not automove on Z if flying or swimming
 float FL_ARCHIVE_OVERRIDE		= 1048576;	// quake 2 thingy
 float FL_CLASS_DEPENDENT		= 2097152;  // model will appear different to each player
 float FL_SPECIAL_ABILITY1		= 4194304;  // has 1st special ability
@@ -377,7 +377,7 @@ float THINGTYPE_GLASS 			= 17;
 float THINGTYPE_ICE 			= 18;
 float THINGTYPE_CLEARGLASS 		= 19;
 float THINGTYPE_REDGLASS 		= 20;
-float THINGTYPE_BONE			= 21;
+float THINGTYPE_BONE			= 24;
 float THINGTYPE_ASH				= 25;
 
 
@@ -688,12 +688,6 @@ float STATS_MOVEDOWN = 81;
 float STATS_MOVEUP = 82;
 float STATS_INCREASE = 83;
 float STATS_DUMP = 84;
-
-//impulse commands
-float IMPULSE_INFO = 50;
-float IMPULSE_RESPAWN = 51;
-float IMPULSE_FADE = 52;
-float IMPULSE_BUFF = 53;
 
 //possible extra weapons
 float IT_WEAPON5					= 8;
