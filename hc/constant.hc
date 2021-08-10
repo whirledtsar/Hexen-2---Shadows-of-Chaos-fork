@@ -291,7 +291,11 @@ float IT_WEAPON6					= 16;
 float IT_TESTWEAP					= 32;
 float IT_WEAPON4_1					= 64;		// First half of weapon
 float IT_WEAPON4_2					= 128;		// Second half of weapon
-
+//possible extra weapons
+float IT_WEAPON5					= 64;
+float IT_WEAPON6					= 128;
+float IT_WEAPON7					= 256;
+float IT_WEAPON8					= 512;
 
 // paladin weapons
 float IT_GAUNTLETS           = 4096;
@@ -689,12 +693,6 @@ float STATS_MOVEDOWN = 81;
 float STATS_MOVEUP = 82;
 float STATS_INCREASE = 83;
 float STATS_DUMP = 84;
-
-//possible extra weapons
-float IT_WEAPON5					= 8;
-float IT_WEAPON6					= 16;
-float IT_WEAPON7					= 32;
-float IT_WEAPON8					= 64;
 
 //rate of decceleration for effect of disc of repulsion on fly monsters
 float BLAST_DECEL = 4;
