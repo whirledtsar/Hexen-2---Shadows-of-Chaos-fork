@@ -74,25 +74,45 @@ START_LOW = will make the light start at the lower of the lightvalues you specif
 NOTE: IF YOU DON'T PLAN ON USING THE DEFAULTS, ALL LIGHTS IN THE BANK OF LIGHTS NEED THIS INFO
 --------------------------------------------------------
 */
+void() light_candle2;
+
 void light_candle (void)
 {	//ws: the following nonsense is not my choice, bloodshot's "light_candle" entity that conflicts with this PoP entity forced my hand...
-string model;
-	if (world.spawnflags&MISSIONPACK || self.spawnflags&8)
-		model = "models/candle.mdl";
-	else
-		model = "models/candle1.mdl";
+	if (!world.spawnflags&MISSIONPACK && !self.spawnflags&8) {
+		light_candle2();
+		return;
+	}
 	
-	precache_model(model);
+	precache_model("models/candle.mdl");
 	self.drawflags(+)MLS_ABSLIGHT;
 	if(!self.abslight)
 		self.abslight = .75;
 	
-	self.mdl = model;
-	self.weaponmodel = model;	//FIXME: Flame On!
+	self.mdl = "models/candle.mdl";
+	self.weaponmodel = "models/candle.mdl";	//FIXME: Flame On!
 
 	self.thingtype	= THINGTYPE_BROWNSTONE;
 	setsize(self, '-6 -6 -8','6 6 8');
 
+	FireAmbient();
+	Init_Torch();
+	self.solid=SOLID_BBOX;
+}
+
+void light_candle2 (void)
+{
+	precache_model("models/candle1.mdl");
+	precache_model("models/candle1b.mdl");
+	self.drawflags(+)MLS_ABSLIGHT;
+	if(!self.abslight)
+		self.abslight = .75;
+	
+	self.mdl = "models/candle1b.mdl";
+	self.weaponmodel = "models/candle1.mdl";
+	
+	self.thingtype	= THINGTYPE_BROWNSTONE;
+	setsize(self, '-6 -6 -8','6 6 8');
+	
 	FireAmbient();
 	Init_Torch();
 	self.solid=SOLID_BBOX;
