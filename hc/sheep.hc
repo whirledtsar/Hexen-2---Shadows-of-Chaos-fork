@@ -723,7 +723,7 @@ void poly_touch ()
 	}
 	else if(other.flags2&FL_ALIVE&&
 			other.model!="models/sheep.mdl"&&
-			other.classname!="monster_golem_crystal"&&
+			(!other.spawnflags&DONTMORPH)&&
 			other.takedamage&&
 			other.classname!="monster_pentacles")
 	{

@@ -332,6 +332,9 @@ void monster_golem_crystal(void)
 		precache_sound3("golem/slide.wav");
 		precache_sound3("golem/dthgroan.wav");
 	}
+	
+	self.spawnflags(+)DONTMORPH;
+	
 	self.thingtype = THINGTYPE_ICE;
 	setmodel(self, "models/golem_s.mdl");
 	setsize(self, '-24 -24 0', '24 24 80');

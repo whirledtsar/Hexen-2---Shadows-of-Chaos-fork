@@ -294,7 +294,11 @@ float IT_WEAPON4					= 4;
 float IT_TESTWEAP					= 8;
 float IT_WEAPON4_1					= 16;		// First half of weapon
 float IT_WEAPON4_2					= 32;		// Second half of weapon
-
+//possible extra weapons
+float IT_WEAPON5					= 64;
+float IT_WEAPON6					= 128;
+float IT_WEAPON7					= 256;
+float IT_WEAPON8					= 512;
 
 // paladin weapons
 //float IT_GAUNTLETS           = 4096;
@@ -651,6 +655,7 @@ float NO_DROP	= 32;	//Keeps them from dropping to the ground at spawntime
 float SF_FROZEN	= 64;	//Start frozen
 float SPAWNIN	= 128;	//Spawn in when triggered
 float SPAWNQUIET	= 65536;	//Spawn in without teleport fog/noise
+float DONTMORPH		= 131072;	//Not affected by polymorph spell
 
 float SLOPE = 16;		//Trains- follow angle for vec between path_corners
 
@@ -736,12 +741,6 @@ float STATS_MOVEDOWN = 81;
 float STATS_MOVEUP = 82;
 float STATS_INCREASE = 83;
 float STATS_DUMP = 84;
-
-//possible extra weapons
-float IT_WEAPON5					= 8;
-float IT_WEAPON6					= 16;
-float IT_WEAPON7					= 32;
-float IT_WEAPON8					= 64;
 
 //rate of decceleration for effect of disc of repulsion on fly monsters
 float BLAST_DECEL = 4;
