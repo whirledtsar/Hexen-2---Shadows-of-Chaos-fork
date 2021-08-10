@@ -75,7 +75,6 @@ void cube_dobeam(vector targ_org)
 
 	//LightningDamage (self.origin, targ_org, self, beam_color+1,"sunbeam");
 	LightningDamage (self.origin, targ_org, self, self.owner.wisdom*0.2,"sunbeam");
-	dprint(ftos(self.owner.wisdom*0.2));dprint("\n");
 }
 
 vector CubeDirection[6] =
