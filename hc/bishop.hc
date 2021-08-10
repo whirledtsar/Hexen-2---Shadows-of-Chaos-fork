@@ -217,21 +217,24 @@ void() bishop_fx
 }*/
 
 //===========================================================================
-void(vector org) CreateFog;		//objects_new.hc
+void dark_bishop_fog ()
+{	//CreateFog(self.finaldest);
+	CreateGreySmoke(self.finaldest, randomv('-8 -8 1', '8 8 8'), HX_FRAME_TIME*4);
+}
 
 void()	dark_bishop_die1	=[	36,	dark_bishop_die2	] {self.movetype=MOVETYPE_NONE; };
 void()	dark_bishop_die2	=[	37,	dark_bishop_die3	] {};
 void()	dark_bishop_die3	=[	38,	dark_bishop_die4	] {};
 void()	dark_bishop_die4	=[	39,	dark_bishop_die5	] {self.solid = SOLID_PHASE; };
 void()	dark_bishop_die5	=[	40,	dark_bishop_die6	] {};
-void()	dark_bishop_die6	=[	41,	dark_bishop_die7	] {};
-void()	dark_bishop_die7	=[	42,	dark_bishop_die8	] {};
-void()	dark_bishop_die8	=[	43,	dark_bishop_die9	] {};
-void()	dark_bishop_die9	=[	44,	dark_bishop_die10] {};
-void()	dark_bishop_die10=[	45,	dark_bishop_die11] {self.finaldest = self.origin+'0 0 8'; CreateFog(self.finaldest); };
-void()	dark_bishop_die11=[	46,	dark_bishop_die12] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(16); CreateFog(self.finaldest); };
-void()	dark_bishop_die12=[	47,	dark_bishop_die13] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(8,24); CreateFog(self.finaldest); };
-void()	dark_bishop_die13=[	48,	dark_bishop_die14] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(16,32); CreateFog(self.finaldest); };
+void()	dark_bishop_die6	=[	41,	dark_bishop_die7	] {self.finaldest = self.origin+'0 0 8'; dark_bishop_fog(); };
+void()	dark_bishop_die7	=[	42,	dark_bishop_die8	] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(16); dark_bishop_fog(); };
+void()	dark_bishop_die8	=[	43,	dark_bishop_die9	] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(8,24); dark_bishop_fog(); };
+void()	dark_bishop_die9	=[	44,	dark_bishop_die10] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(16,32); dark_bishop_fog(); };
+void()	dark_bishop_die10=[	45,	dark_bishop_die11] {self.finaldest = self.origin+'0 0 8'; self.finaldest_z += random(16,32); dark_bishop_fog(); };
+void()	dark_bishop_die11=[	46,	dark_bishop_die12] {};
+void()	dark_bishop_die12=[	47,	dark_bishop_die13] {};
+void()	dark_bishop_die13=[	48,	dark_bishop_die14] {};
 void()	dark_bishop_die14=[	49,	dark_bishop_die15] {};
 void()	dark_bishop_die15=[	50,	dark_bishop_die15] {
 	ThrowGib ("models/blood.mdl", self.health);
