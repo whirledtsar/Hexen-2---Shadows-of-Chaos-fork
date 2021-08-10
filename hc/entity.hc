@@ -300,8 +300,7 @@ void end_sys_fields;
 .union
 { // Entity type specific stuff
 	struct // player stuff
-	{		
-		float oldwatertype;		// Last water type for splash effect
+	{	
 		float camera_time;      //
 		float weaponframe_cnt;  //
 		float attack_cnt;       // Shows which attack animation can be used
@@ -765,6 +764,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 {
 	struct
 	{	//Player only
+		float oldwatertype;		// Last water type for splash effect
 		float welcomeshown;
 		float whiptime;
 		float minionhealth;
