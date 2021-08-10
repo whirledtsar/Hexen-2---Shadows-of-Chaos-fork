@@ -778,6 +778,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 		float buff;				//can this monster be buffed
 		float killerlevel;		//used to measure player level for respawn strength
 		float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
+		float respawntime;
 	};
 	struct
 	{	//bmodel/trigger only
