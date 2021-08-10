@@ -33,7 +33,7 @@ float FL_ARTIFACTUSED			= 16384;	// an artifact was just used
 float FL_MOVECHAIN_ANGLE		= 32768;    // when in a move chain, will update the angle
 //float FL_FIRERESIST				= 65536;	// resistant to fire and heat and lava
 //float FL_FIREHEAL				= 131072;	// healed by fire, heat, and lava
-float FL_COLDHEAL				= 524288;	// healed by freezing
+//float FL_COLDHEAL				= 524288;	// healed by freezing
 float FL_HUNTFACE				= 65536;	//Makes monster go for enemy view_ofs thwn moving
 float FL_NOZ					= 131072;	//Monster will not automove on Z if flying or swimming
 float FL_SET_TRACE				= 262144; // trace_ globals are set when monster calls movestep
@@ -61,14 +61,12 @@ float FL2_CROUCH_TOGGLE			= 8192;
 float FL2_MOVING				= 8192;		//Used by monsters to indicate if theyre moving or still
 
 //edict.flags2 EXPANSION
-//FIXME: Shielded and small may be able to be determined by
-//other means...
 float FL2_FADE_UP				= 128;		//Succ.
 float FL2_RESPAWN				= 256;		//Monster that respawns
 float FL2_DEADMEAT				= 1024;		//Tagged for death
 float FL2_FIRERESIST			= 16384;	// resistant to fire and heat and lava
 float FL2_FIREHEAL				= 32768;	// healed by fire, heat, and lava
-float FL2_COLDHEAL				= 65536;	// healed by freezing
+float FL2_COLDRESIST			= 65536;	// healed by freezing
 float FL2_TEST_TRACE			= 131072;	// 
 float FL2_POISONED				= 262144;	// 
 float FL2_ONFIRE				= 4194304;  // on fire
