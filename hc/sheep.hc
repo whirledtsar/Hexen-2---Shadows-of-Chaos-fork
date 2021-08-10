@@ -362,7 +362,7 @@ void monster_sheep_bite ()
 	traceline(self.origin+self.view_ofs,self.origin+self.view_ofs+v_forward*36,FALSE,self);
 	if(trace_ent.takedamage)//classname=="obj_catapult2")
 	{
-		sound(self,CHAN_VOICE,"spider/bite.wav",1,ATTN_NORM);
+		sound(self,CHAN_VOICE,"player/bite.wav",1,ATTN_NORM);
 		SpawnPuff (trace_endpos, '0 0 0', 3,trace_ent);
 		T_Damage(trace_ent,self,self,5);
 		self.attack_finished=time+random(0.2,1);
@@ -528,7 +528,7 @@ void player_sheep_baa ()
 	traceline(self.origin+self.view_ofs,self.origin+self.view_ofs+v_forward*36,FALSE,self);
 	if(trace_ent.takedamage)//classname=="obj_catapult2")
 	{
-		sound(self,CHAN_VOICE,"spider/bite.wav",1,ATTN_NORM);
+		sound(self,CHAN_VOICE,"player/bite.wav",1,ATTN_NORM);
 		SpawnPuff (trace_endpos, '0 0 0', 3,trace_ent);
 		T_Damage(trace_ent,self,self,5);
 	}
