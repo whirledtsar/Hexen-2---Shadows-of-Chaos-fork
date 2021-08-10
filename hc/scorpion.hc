@@ -99,7 +99,7 @@ void ScorpionStrafeDefense(void);
 
 float ScorpionStandFrames[6] =
 {
-	$scwake1, $scwake2, $scwake3, $scwake4, $scwake3, $scwake2
+	$ScWake1, $ScWake2, $ScWake3, $ScWake4, $ScWake3, $ScWake2
 };
 
 // CODE --------------------------------------------------------------------
@@ -182,7 +182,7 @@ void ScorpionInit(float type)
 		return;
 	}
 
-	if (!self.flags2 & FL_SUMMONED &&!self.flags2&FL2_RESPAWN)
+	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_scorpion();
 	
 	setmodel(self, "models/scorpion.mdl");
@@ -267,11 +267,6 @@ void ScorpionStand(void)
 	ai_stand();
 	if(self.think != ScorpionStand)
 	{ // Wake up
-		/*if (self.playercontrolled && self.enemy=self.controller)	//ws: if summoned minion and already close to player, dont move further
-			if (range(self.controller)<=RANGE_MELEE && visible(self.controller)) {
-				self.think = self.th_stand;
-				return;
-			}*/
 		self.th_save = self.think;
 		self.think = ScorpionWake;
 		//sound(self, CHAN_VOICE, "scorpion/awaken.wav", 1, ATTN_NORM);
@@ -300,7 +295,7 @@ void ScorpionWake(void) [++ $scwake1..$scwake30]
 //
 //==========================================================================
 
-void ScorpionWalk(void) [++ $scwalk1..$scwalk16]
+void ScorpionWalk(void) [++ $ScWalk1..$ScWalk16]
 {
 	if(((self.scorpionWalkCount += 1)&3) == 0)
 	{
@@ -317,7 +312,7 @@ void ScorpionWalk(void) [++ $scwalk1..$scwalk16]
 //
 //==========================================================================
 
-void ScorpionRunBlack(void) [++ $scwalk1..$scwalk16]
+void ScorpionRunBlack(void) [++ $ScWalk1..$ScWalk16]
 {
 	float enemy_dist;
 
@@ -376,7 +371,7 @@ void ScorpionRunBlack(void) [++ $scwalk1..$scwalk16]
 //
 //==========================================================================
 
-void ScorpionRun(void) [++ $scwalk1..$scwalk16]
+void ScorpionRun(void) [++ $ScWalk1..$ScWalk16]
 {
 	float enemy_dist;
 
@@ -451,7 +446,7 @@ void ScorpionPainDecide(void)
 //
 //==========================================================================
 
-void ScorpionPain(void) [++ $scpain1..$scpain10]
+void ScorpionPain(void) [++ $ScPain1..$ScPain10]
 {
 	if(cycle_wrapped)
 	{
@@ -537,20 +532,20 @@ void ScorpionMeleeDecide(void)
 //
 //==========================================================================
 
-void ScorpionMelee1(void) [++ $scatta1..$scatta25]
+void ScorpionMelee1(void) [++ $ScAttA1..$ScAttA25]
 {
 	if(self.frame == $scatta4 || self.frame == $scatta9)
 	{
 		sound(self, CHAN_VOICE, "scorpion/clawsnap.wav", 1, ATTN_NORM);
 		ScorpionMelee(1);
 	}
-	else if(self.frame == $scatta14)
+	else if(self.frame == $ScAttA14)
 	{
 		sound(self, CHAN_BODY, "scorpion/tailwhip.wav", 1, ATTN_NORM);
 		ScorpionMelee(1);
 	}
 
-	if(self.frame > $scatta16 && self.frame < $scatta20)
+	if(self.frame > $ScAttA16 && self.frame < $scatta20)
 	{
 		ai_charge(4);
 		if (self.classname == "monster_scorpion_yellow")
@@ -573,16 +568,16 @@ void ScorpionMelee1(void) [++ $scatta1..$scatta25]
 //
 //==========================================================================
 
-void ScorpionMelee2(void) [++ $scattb1..$scattb27]
+void ScorpionMelee2(void) [++ $ScAttB1..$ScAttB27]
 {
 	if(self.frame == $scattb4 || self.frame == $scattb8
-		|| self.frame == $scattb13)
+		|| self.frame == $ScAttB13)
 	{
 		sound(self, CHAN_VOICE, "scorpion/clawsnap.wav", 1, ATTN_NORM);
 		ScorpionMelee(1);
 	}
 
-	if(self.frame > $scattb16 && self.frame < $scattb20)
+	if(self.frame > $ScAttB16 && self.frame < $scattb20)
 	{
 		ai_charge(4);
 		if (self.classname == "monster_scorpion_yellow")
@@ -604,7 +599,7 @@ void ScorpionMelee2(void) [++ $scattb1..$scattb27]
 //
 //==========================================================================
 
-void ScorpionMelee3(void) [++ $scattc1..$scattc22]
+void ScorpionMelee3(void) [++ $ScAttC1..$ScAttC22]
 {
 	if(self.frame == $scattc9)
 	{
@@ -612,7 +607,7 @@ void ScorpionMelee3(void) [++ $scattc1..$scattc22]
 		ScorpionMelee(1);
 	}
 
-	if(self.frame > $scattc16 && self.frame < $scattc20)
+	if(self.frame > $ScAttC16 && self.frame < $scattc20)
 	{
 		ai_charge(4);
 		if (self.classname == "monster_scorpion_yellow")
@@ -634,14 +629,14 @@ void ScorpionMelee3(void) [++ $scattc1..$scattc22]
 //
 //==========================================================================
 
-void ScorpionMelee4(void) [++ $scatta1..$scatta25]
+void ScorpionMelee4(void) [++ $ScAttA1..$ScAttA25]
 {
 	if (self.frame == $scatta4 || self.frame == $scatta9)
 	{
 		sound(self, CHAN_VOICE, "scorpion/clawsnap.wav", 1, ATTN_NORM);
 		ScorpionMelee(1);
 	}
-	else if(self.frame == $scatta14)
+	else if(self.frame == $ScAttA14)
 	{
 		sound(self, CHAN_BODY, "scorpion/tailwhip.wav", 1, ATTN_NORM);
 		if (self.classname == "monster_scorpion_yellow")
@@ -650,7 +645,7 @@ void ScorpionMelee4(void) [++ $scatta1..$scatta25]
 			ScorpionMelee(3);
 	}
 
-	if(self.frame > $scatta16 && self.frame < $scatta20)
+	if(self.frame > $ScAttA16 && self.frame < $scatta20)
 	{
 		ai_charge(16);
 		if (self.classname == "monster_scorpion_yellow")
@@ -672,7 +667,7 @@ void ScorpionMelee4(void) [++ $scatta1..$scatta25]
 //
 //==========================================================================
 
-void ScorpionStrafeDefense(void) [++ $scwalk1..$scwalk8]
+void ScorpionStrafeDefense(void) [++ $ScWalk1..$scwalk8]
 {
 	float ofs;
 
@@ -739,7 +734,8 @@ entity ScorpionLookProjectiles ()
 	found=findradius(self.origin,1000);
 	while(found)
 	{
-		if(found.movetype==MOVETYPE_FLYMISSILE||found.movetype==MOVETYPE_BOUNCE||found.movetype==MOVETYPE_BOUNCEMISSILE)
+		//if(found.movetype==MOVETYPE_FLYMISSILE||found.movetype==MOVETYPE_BOUNCE||found.movetype==MOVETYPE_BOUNCEMISSILE)
+		if(IsMissile(found))
 		if(visible(found))
 		{	
 			if(heading(self,found,0.9))
@@ -767,7 +763,7 @@ void ScorpionDie(void)
 		MakeSolidCorpse();
 		return;
 	}
-
+	
 	if(self.health < -30)
 	{
 		chunk_death();
