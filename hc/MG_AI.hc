@@ -424,7 +424,7 @@ void MonsterCheckContents ()
 
 	if(pointcontents(self.origin)==CONTENT_LAVA)
 	{
-		if(self.flags&FL_FIREHEAL)
+		if(self.flags2&FL2_FIREHEAL)
 		{
 			if(self.health<self.max_health)
 				self.health+=1;
