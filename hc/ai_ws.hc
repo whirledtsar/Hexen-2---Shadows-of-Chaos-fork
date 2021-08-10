@@ -282,9 +282,16 @@ void NavigateWanderPoints ()
 float CanChargeForward(float dist)
 {
 	makevectors(self.angles);
-	tracearea(self.origin+'0 0 1', self.origin+'0 0 1'+v_forward*dist, self.mins, self.maxs, FALSE, self);
-	if ((trace_fraction==1 || (trace_ent.takedamage && !trace_ent.flags&FL_MONSTER)))
+	traceline(self.origin+'0 0 1', self.origin+'0 0 1'+v_forward*dist, FALSE, self);	//try simple trace first
+	if (trace_ent && trace_ent.flags2&FL_ALIVE && trace_ent.takedamage)
 		return TRUE;
-	else
+	else if (trace_fraction<1)
 		return FALSE;
+	tracearea(self.origin+'0 0 1', self.origin+'0 0 1'+v_forward*dist, self.mins, self.maxs, FALSE, self);
+	if (trace_ent && trace_ent.flags2&FL_ALIVE && trace_ent.takedamage)
+		return TRUE;
+	else if (trace_fraction<1)
+		return FALSE;
+	
+	return FALSE;
 }
