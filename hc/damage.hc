@@ -904,14 +904,14 @@ vector	inflictor_org, org;
 							if(points>10||points<5)
 								points=random(5,10);
 
-							if(head.flags&FL_FIREHEAL)
+							if(head.flags2&FL2_FIREHEAL)
 							{
 								if(head.health+points<=head.max_health)
 									head.health=head.health+points;
 								else
 									head.health=head.max_health;
 							}
-							else if(!head.flags&FL_FIRERESIST)
+							else if(!head.flags2&FL2_FIRERESIST)
 							{
 								if(head.health<=points)
 									points=1000;
