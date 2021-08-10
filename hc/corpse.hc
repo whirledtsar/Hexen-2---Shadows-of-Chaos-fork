@@ -221,15 +221,14 @@ vector newmaxs;
 	if(newmaxs_z>5)
 		newmaxs_z=5;
 	if (self.netname == "maulotaur")
-		setsize (self, self.mins,newmaxs+'0 0 5');
-	else if (self.classname=="monster_death_knight")
+		newmaxs_z+=5;
+	/*if (self.classname=="monster_death_knight")
 		//setsize (self, '-13 -28 -14', '10 3 -9'); //resize the dk berserker because i fucked up his origin and im too lazy to fix it. Also wtf are you doing using HexenC? It's 2017 nerd, go use UE4
-		setsize (self, '-26 -28 -14', '88 28 -9'); //ws: it was still messed up. 2017 eh?
-	else
-		setsize (self, self.mins,newmaxs);
+	else*/
+	setsize (self, self.mins,newmaxs);
 	if(self.flags&FL_ONGROUND)
 		self.velocity='0 0 0';
-    self.flags(-)FL_MONSTER;
+	self.flags(-)FL_MONSTER;
 	if (!self.preventrespawn)
 		self.controller = self;
 	self.onfire = FALSE;
