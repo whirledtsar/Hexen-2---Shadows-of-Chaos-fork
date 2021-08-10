@@ -235,13 +235,9 @@ vector newmaxs;
         self.think=Spurt;
         thinktime self : random(1,4);
     }
-    else 
+	else 
 	{
-		if (CheckCfgParm(PARM_RESPAWN) && !CheckCfgParm(PARM_FADE))
-			self.lifetime = time + random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
-		else
-			self.lifetime = time + random(20,30);
-		self.aflag = FALSE;
+		self.lifetime = time + random(20,30);
 		self.think=CorpseThink;
 		thinktime self : 0;
 	}
