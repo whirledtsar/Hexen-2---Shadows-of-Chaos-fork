@@ -8,6 +8,7 @@ void wandering_monster_respawn()
 	float loop_cnt;
 	
 	//check if anything is in the path of spawning
+	dprint("Respawning monster checking area\n");
 	trace_fraction = 0;
 	loop_cnt =0;
 	spot1 = self.origin;
@@ -37,11 +38,9 @@ void wandering_monster_respawn()
 		}
 		
 		loop_cnt +=1;
-		dprint("Respawning monster checking area\n");
 
 		if (loop_cnt > 10)   // No endless loops
 		{
-			//if 10 checks happen and no spot is found, try again in 2 seconds
 			self.nextthink = time + 2;
 			dprint("Respawning monster inhibited\n");
 			return;
@@ -62,7 +61,7 @@ void MarkForRespawn (void)
 {
 	entity newmis;
 	
-	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && !self.preventrespawn && !self.playercontrolled) //do not respawn players or summoned monsters
+	if (CheckCfgParm(PARM_RESPAWN) && self.classname != "player" && self.th_init && self.th_init != SUB_Null && !self.preventrespawn && !self.playercontrolled && self.monsterclass < CLASS_BOSS) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -81,29 +80,19 @@ void MarkForRespawn (void)
 		newmis.classname = self.classname;
 		newmis.th_init = self.th_init;
 		
-		if (self.monsterclass < CLASS_BOSS)	//drop mana on death
-		{
-			float chance;
-			chance = random();
-			if (chance<0.4)
-				newmis.greenmana = 15;
-			else if (chance<0.8)
-				newmis.bluemana = 15;
-		}
+		float chance;
+		chance = random();
+		if (chance<0.4)
+			newmis.greenmana = 15;
+		else if (chance<0.8)
+			newmis.bluemana = 15;
 		
 		newmis.think = wandering_monster_respawn;
-		thinktime newmis : self.lifetime;
-			
+		thinktime newmis : self.respawntime + (self.monsterclass*60);
+		
 		//mark for respawn buff chance
 		newmis.killerlevel = self.killerlevel;
 	}
-	if (!self.aflag) {	//if we are a destructible corpse and not fading or faded
-		self.th_init = SUB_Null;
-		self.solid = SOLID_SLIDEBOX;
-		chunk_death();
-	}
-	else
-		remove(self);
 }
 
 void corpseblink (void)
@@ -113,14 +102,14 @@ void corpseblink (void)
 	self.scale -= 0.10;
 
 	if (self.scale < 0.10) {
-		if (CheckCfgParm(PARM_RESPAWN)) {
+		/*if (CheckCfgParm(PARM_RESPAWN)) {
 			setmodel(self, "models/null.spr");
 			self.effects (+) EF_NODRAW;
-			self.lifetime = 0;	//respawn immediately upon our next think
-			self.think = MarkForRespawn;
+			self.respawntime = 0;	//respawn immediately upon our next think
+			self.think = corpseblink;
 			thinktime self : random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
 		}
-		else
+		else*/
 			remove(self);
 	}
 }
@@ -160,8 +149,6 @@ void () CorpseThink =
 		T_Damage(self,self,self,self.health);
 	else if (CheckCfgParm(PARM_FADE) && self.lifetime < time)			// Time is up, begone with you
 		init_corpseblink();
-	else if (CheckCfgParm(PARM_RESPAWN) && self.lifetime < time)
-		MarkForRespawn();
 };
 
 void CorpsePain (entity attacker, float damage) =
@@ -229,8 +216,11 @@ vector newmaxs;
 	if(self.flags&FL_ONGROUND)
 		self.velocity='0 0 0';
 	self.flags(-)FL_MONSTER;
-	if (!self.preventrespawn)
+	if (!self.preventrespawn) {
 		self.controller = self;
+		self.respawntime = random(WANDERING_MONSTER_TIME_MAX, WANDERING_MONSTER_TIME_MAX);
+		MarkForRespawn();
+	}
 	
 	pitch_roll_for_slope('0 0 0',self);
 
