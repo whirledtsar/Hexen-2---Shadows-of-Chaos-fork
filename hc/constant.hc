@@ -670,7 +670,7 @@ float MAX_URN = 2;
 
 //GoT wandering monster respawn
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
-float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
+float WANDERING_MONSTER_TIME_MAX = 540; //9 minutes   //666; //11 minutes
 
 //Config flag parm system
 float PARM_RESPAWN	= 1;
