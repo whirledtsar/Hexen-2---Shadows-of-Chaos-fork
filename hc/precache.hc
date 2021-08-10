@@ -621,7 +621,7 @@ void Precache_wav (void)
 	precache_sound ("misc/sheep2.wav");
 	precache_sound ("misc/sheep3.wav");
 	precache_sound ("misc/sheepfly.wav");	//Sheep launched from catapult!!!
-	precache_sound ("spider/bite.wav");		//Sheep bite
+	precache_sound ("player/bite.wav");		//Sheep bite
 	precache_sound ("items/itempkup.wav");
 	precache_sound ("items/itmspawn.wav");		// item respawn sound
 	precache_sound ("items/ringpkup.wav");		// Picking up a ring
@@ -1433,6 +1433,5 @@ void precache_soc()
 //necro minions
 	precache_spider();
 	precache_scorpion();
-	precache_knight();
 	precache_mummy();
 }
