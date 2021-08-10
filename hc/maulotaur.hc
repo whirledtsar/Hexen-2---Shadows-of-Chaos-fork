@@ -719,6 +719,7 @@ void monster_maulotaur ()
 */
 void monster_maulotaur_lord ()
 {
+	self.spawnflags(+)DONTMORPH;
 	monster_maulotaur();
 }
 
