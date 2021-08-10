@@ -851,7 +851,7 @@ void chunk_death (void)
 	}
 	else
 	{
-		if(self.switchshadstyle)
+		if(self.switchshadstyle && self.solid==SOLID_BSP)
 			lightstyle(self.switchshadstyle, "m");
 		remove(self);
 	}
