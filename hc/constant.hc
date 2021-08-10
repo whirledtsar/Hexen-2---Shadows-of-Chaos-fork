@@ -1,875 +1,770 @@
-
-//**************************************************************************
-//**
-//** entity.hc
-//**
-//** $Id: entity.hc 3951 2011-05-09 09:51:10Z sezero $
-//**
-//**************************************************************************
-
-// SYSTEM FIELDS -----------------------------------------------------------
-// (entvars_t C structure, *** = don't modify in HexC) ---------------------
-
-// *** Model index in the precached list.
-.float modelindex;
-
-// *** Origin + mins / maxs
-.vector absmin, absmax;
-
-// Local time for entity.
-.float ltime;
-
-.float movetype;
-.float solid;
-
-// ***
-.vector	origin;
-
-// ***
-.vector	oldorigin;
-
-.vector	velocity;
-.vector	angles;
-.vector	avelocity;
-
-// Temp angle adjust from damage or recoil.
-.vector punchangle;
-
-// Spawn function.
-.string classname;
-
-.string model;
-.float frame;
-.float skin;
-.float effects;
-.float scale;
-.float drawflags;
-.float abslight;
-
-// Bounding box extents relative to origin.
-.vector	mins, maxs;
-
-// maxs - mins
-.vector size;
-
-// Which clipping hull to use.
-.float	hull;
-
-.void() touch;
-.void() use;
-.void() think;
-
-// For doors or plats, called when can't push other.
-.void()	blocked;
-
-.float nextthink;
-.entity groundentity;
-
-// Stats
-.float stats_restored;
-
-.float frags;
-.float weapon;
-.string weaponmodel;
-.float weaponframe;
-
-.float health;				// HP
-.float max_health;			// Max HP
-.float playerclass;			// 0 (none), 1-4
-.float bluemana;			// Blue mana
-.float greenmana;			// Green mana
-.float max_mana;			// Maximum amount of mana for current class / level
-.float armor_amulet;		// Health of amulet armor
-.float armor_bracer;		// Health of bracer armor
-.float armor_breastplate;	// Health of breastplate armor
-.float armor_helmet;		// Health of helmet armor
-.float level;				// Player level
-.float intelligence;		// Player INT
-.float wisdom;				// Player WIS
-.float dexterity;			// Player DEX
-.float strength;			// Player STR
-.float experience;			// Accumulated experience points
-
-.float ring_flight;			// Health of rings 0 - 100
-.float ring_water;			// 
-.float ring_turning;		//
-.float ring_regeneration;	//
-
-.float haste_time;			// When hast is depleted
-.float tome_time;			// When tome of power is depleted
-.string puzzle_inv1;		// Puzzle piece inventory...
-.string puzzle_inv2;
-.string puzzle_inv3;
-.string puzzle_inv4;
-.string puzzle_inv5;
-.string puzzle_inv6;
-.string puzzle_inv7;
-.string puzzle_inv8;
-
-// Experience this entity is worth when killed or used.
-.float experience_value;
-
-// Bit flags.
-.float items;
-
-.float takedamage;
-.entity chain;
-.float deadflag;
-
-// Add to origin to get eye point.
-.vector view_ofs;
-
-// Fire.
-.float button0;
-
-// Use.
-.float button1;
-
-// Jump.
-.float button2;
-
-// Weapon changes, misc.
-.float impulse;
-
-.float fixangle;
-
-// View / targeting angle for players.
-.vector v_angle;
-
-// Calculated pitch angle for slopes.
-.float idealpitch;
-
-.float idealroll;
-.float hoverz;
-
-.string	netname;
-
-.entity enemy;
-
-.float flags;
-.float flags2;
-.float artifact_flags;
-
-.float colormap;
-.float team;
-.float light_level;
-
-// Don't back up.
-.float teleport_time;
-
-// Save this fraction of incoming damage.
-.float armortype;
-
-.float armorvalue;
-
-// 0 = not in, 1 = feet, 2 = waist, 3 = eyes.
-.float waterlevel;
-
-// A contents value.
-.float watertype;
-
-// 0 = not in a friction entity, else the friction of the entity.
-.float friction;
-
-.float	ideal_yaw;
-.float	yaw_speed;
-
-//rj.entity	aiment;
-
-// A pathentity or an enemy. also used by axeblade for it's tail
-.entity goalentity;
-
-.float spawnflags;
-
-// The target of this entity.
-.string	target;
-
-.string	targetname;
-
-// Damage is accumulated through a frame and sent as one single
-// message, so the super shotgun doesn't generate huge messages.
-.float dmg_take;
-.float dmg_save;
-.entity dmg_inflictor;
-
-// Who launched a missile.
-.entity	owner;
-
-// Mostly or doors, but also used for waterjump.
-.vector	movedir;
-
-// Trigger messages.
-.float	message;
-
-// Either a CD track number or a sound number.
-.float soundtype;
-
-// Contains names of .WAVs to play.
-.string	noise, noise1, noise2, noise3;
-
-.float rings;				// Which rings hero has
-.float rings_active;		// Shows which rings have been activated
-.float rings_low;			// Shows which rings are low on power
-
-.float artifacts;			// Which artifact hero has
-.float artifact_active;		// Shows which artifact have been activated
-.float artifact_low;		// Shows which artifact is running out
-
-.float hasted;				// % of normal speed player has been hasted
-
-.float inventory;			// Which item is currently chosen?
-//rj.float ordr_cnt;			// Number of items in order
-
-// make sure you change references to:
-//    max_ammo2()   DropBackpack()   BackpackTouch()
-// when adding or changing inventory fields
-.float cnt_torch;			// Count of inventory item - Torch
-.float cnt_h_boost;			// Count of inventory item - Health Boost
-.float cnt_sh_boost;		// Count of inventory item - Super Health Boost
-.float cnt_mana_boost;		// Count of inventory item - Mana Boost
-.float cnt_teleport;		// Count of inventory item - Teleport
-.float cnt_tome;			// Count of inventory item - Tome of Power
-.float cnt_summon;			// Count of inventory item - Summon
-.float cnt_invisibility;	// Count of inventory item - Invisibility
-.float cnt_glyph;			// Count of inventory item - Glyph of the Ancients
-.float cnt_haste;			// Count of inventory item - Haste
-.float cnt_blast;			// Count of inventory item - Blast Radius
-.float cnt_polymorph;		// Count of inventory item - Polymorph
-.float cnt_flight;			// Count of inventory item - Flight
-.float cnt_cubeofforce;		// Count of inventory item - Cube of Force
-.float cnt_invincibility;	// Count of inventory item - Invincibility
-
-.entity cameramode;
-
-.entity movechain;
-.void() chainmoved;
-
-.float string_index;		// Index used for global string table
-
-// END SYSTEM FIELDS -------------------------------------------------------
-
-// Flag the compiler.
-void end_sys_fields;
-
-// World fields
-.string	wad;
-.string map;
-.float worldtype; // 0=medieval 1=metal 2=base
-
-.string killtarget;
-.string failtarget;
-.string close_target;
-
-// QuakeEd fields
-.float light_lev; // Not used by game, but parsed by light util
-.float style;
-
-// Monster AI, doubled over for player
-.void() th_stand;
-.void() th_walk;	//player_crouch_move
-.void() th_run;
-.void() th_missile;	//player_attack
-.void() th_melee;	
-.void(entity attacker, float damage) th_pain;
-.void() th_die;
-.void() th_save; // In case you need to save/restore a thinking state
-
-// Mad at this player before taking damage.
-.entity oldenemy;
-
-.float speed;
-.float lefty;
-.float search_time;
-.float attack_state;
-
-// Monster AI stuff
-.float monster_stage;
-.float monster_duration; // Stage duration
-.float monster_awake;
-.float monster_check;
-.vector monster_last_seen;
-
-// because of how physics works, certain calls to the touch
-// function of other entities involving the player do not
-// allow you to adjust the velocity, so you have to do it
-// outside of the inner physics stuff
-.vector	adjust_velocity;
-
-//ws: moved out of union so all monsters can use them
-.float splash_time;	    // When to generate the next splash
-.float idealpitch;
-
-.union	//must all be the same type!
-{ // Entity type specific stuff
-	struct // player stuff
-	{		
-		float camera_time;      //
-		float weaponframe_cnt;  //
-		float attack_cnt;       // Shows which attack animation can be used
-		float ring_regen_time;	// When to add the next point of health
-		float ring_flight_time;	// When to update ring of flight health
-		float ring_water_time;	// When to update ring of waterbreathing health
-		float ring_turning_time;// When to update ring of turning health
-		float super_damage;		// Player does this much more damage (Like Crusader with Special Ability #2)
-		float super_damage_low; // Flag the super damage is low
-		float puzzles_cheat;	// Allows player past puzzle triggers
-		float camptime;			// Amount of time player has been motionless
-		float crouch_time;		// Next time player should run crouch subroutine
-		float crouch_stuck;		// If set this means the player has released the crouch key in an area too small to uncrouch in
-		float divine_time;		// Amount of time flash happens in divine intervention
-		float act_state;		// Anim info
-		float raven_cnt;		// Number of raven's this guys has in the world
-		float newclass;			// If doing a quick class change
-		float sheep_call;
-	};
-/*	struct // Talking heads
-	{		
-		float voice1;	    // When to generate the next splash
-		float voice2;
-		float voice3;
-		float voice4;
-		float voice5;
-		float voice6;
-		float voice7;
-		float voice8;
-		float voice9;
-		float voice10;
-		float delay1;
-		float delay2;
-		float delay3;
-		float delay4;
-		float delay5;
-		float delay6;
-		float delay7;
-		float delay8;
-		float delay9;
-		float delay10;
-		float loop;
-	};
+/*
+ * $Header: /cvsroot/uhexen2/gamecode/hc/h2/constant.hc,v 1.2 2005-09-19 19:50:09 sezero Exp $
+ */
+
+#pragma warning disable F304	//shut the fuck up about unary operators
+
+//
+// constants
+//
+
+float FALSE					= 0;
+float TRUE					= 1;
+
+float HX_FRAME_TIME			= 0.05;
+float HX_FPS				= 20;
+
+// edict.flags
+float FL_FLY					= 1;
+float FL_SWIM					= 2;
+float FL_PUSH					= 4;		// Object is pushable
+float FL_CLIENT					= 8;		// set for all client edicts
+float FL_INWATER				= 16;		// for enter / leave water splash
+float FL_MONSTER				= 32;
+float FL_GODMODE				= 64;		// player cheat
+float FL_NOTARGET				= 128;		// player cheat
+float FL_ITEM					= 256;		// extra wide size for bonus items
+float FL_ONGROUND				= 512;		// standing on something
+float FL_PARTIALGROUND			= 1024;		// not all corners are valid
+float FL_WATERJUMP				= 2048;		// player jumping out of water
+float FL_JUMPRELEASED			= 4096;		// for jump debouncing
+//float FL_FLASHLIGHT				= 8192;		// quake 2 thingy
+float FL_ARTIFACTUSED			= 16384;	// an artifact was just used
+float FL_MOVECHAIN_ANGLE		= 32768;    // when in a move chain, will update the angle
+//float FL_FIRERESIST				= 65536;	// resistant to fire and heat and lava
+//float FL_FIREHEAL				= 131072;	// healed by fire, heat, and lava
+//float FL_COLDHEAL				= 524288;	// healed by freezing
+float FL_HUNTFACE				= 65536;	//Makes monster go for enemy view_ofs thwn moving
+float FL_NOZ					= 131072;	//Monster will not automove on Z if flying or swimming
+float FL_SET_TRACE				= 262144;	// trace_ globals are set when monster calls movestep
+//float FL_MISMATCHEDBOUNDS		= 524288;
+float FL_ARCHIVE_OVERRIDE		= 1048576;	// quake 2 thingy
+float FL_CLASS_DEPENDENT		= 2097152;  // model will appear different to each player
+float FL_SPECIAL_ABILITY1		= 4194304;  // has 1st special ability
+float FL_SPECIAL_ABILITY2		= 8388608;  // has 2nd special ability
+
+//edict.flags2
+//FIXME: Shielded and small may be able to be determined by
+//other means...
+float FL2_ADJUST_MON_DAM		= 1;		//Do more damage to monsters
+float FL_NODAMAGE				= 2;		//Special flag put on a missle to make it not do damage- used only by mezzoman
+float FL_SMALL					= 4;		//Small enough to be crsuhed underfoot
+float FL_ALIVE					= 8;		//Dead or alive.
+//float FL_FAKE_WATER			= 16;		//Fake water
+float FL2_MENUACTIVE			= 16;		//SoC: player has stats menu active
+float FL_SUMMONED				= 32;		//Summoned monster, stops it from precaching
+//float FL_LEDGEHOLD				= 64;		//Can realistically pull yourself up over ledges, etc.
+float FL_TORNATO_SAFE			= 512;
+float FL_CHAINED				= 2048;		//Held by chains
+float FL2_CROUCHED				= 4096;
+float FL2_CROUCH_TOGGLE			= 8192;
+float FL2_MOVING				= 8192;		//Used by monsters to indicate if theyre moving or still
+
+//edict.flags2 EXPANSION
+float FL2_FADE_UP				= 128;		//Succ.
+float FL2_RESPAWN				= 256;		//Monster that respawns
+float FL2_DEADMEAT				= 1024;		//Tagged for death
+float FL2_FIRERESIST			= 16384;	// resistant to fire and heat and lava
+float FL2_FIREHEAL				= 32768;	// healed by fire, heat, and lava
+float FL2_COLDRESIST			= 65536;	// healed by freezing
+float FL2_TEST_TRACE			= 131072;	// 
+float FL2_POISONED				= 262144;	// 
+float FL2_ONFIRE				= 4194304;  // on fire
+float FL2_SPAWNED				= 8388608;	// SoC: monster spawned with spawnin system
+float FL2_ITEMNOEXTRA			= 8388608;	// SoC: item is an extra or dropped item for coop and should not spawn another extra itself
+
+float	SFL_FLUFFY					= 1;// All largish flakes
+float	SFL_MIXED					= 2;// Mixed flakes
+float	SFL_HALF_BRIGHT				= 4;// All flakes start darker
+float	SFL_NO_MELT					= 8;// Flakes don't melt when his surface, just go away
+float	SFL_IN_BOUNDS				= 16;// Flakes cannot leave the bounds of their box
+float	SFL_NO_TRANS				= 32;// All flakes start non-translucent
+float	CE_SNOW						= 43;
+
+
+// edict.drawflags
+float MLS_MASKIN			= 7;	// MLS: Model Light Style
+float MLS_MASKOUT			= 248;
+float MLS_NONE				= 0;
+float MLS_FULLBRIGHT		= 1;
+float MLS_POWERMODE			= 2;
+float MLS_TORCH				= 3;
+float MLS_FIREFLICKER		= 4;
+float MLS_CRYSTALGOLEM		= 5;
+float MLS_ABSLIGHT			= 7;
+float SCALE_TYPE_MASKIN		= 24;
+float SCALE_TYPE_MASKOUT	= 231;
+float SCALE_TYPE_UNIFORM	= 0;	// Scale X, Y, and Z
+float SCALE_TYPE_XYONLY		= 8;	// Scale X and Y
+float SCALE_TYPE_ZONLY		= 16;	// Scale Z
+float SCALE_ORIGIN_MASKIN	= 96;
+float SCALE_ORIGIN_MASKOUT	= 159;
+float SCALE_ORIGIN_CENTER	= 0;	// Scaling origin at object center
+float SCALE_ORIGIN_BOTTOM	= 32;	// Scaling origin at object bottom
+float SCALE_ORIGIN_TOP		= 64;	// Scaling origin at object top
+float DRF_TRANSLUCENT		= 128;
+
+// Artifact Flags
+float AFL_CUBE_RIGHT			= 1;
+float AFL_CUBE_LEFT				= 2;
+float AFL_TORCH					= 4;
+float AFL_SUPERHEALTH			= 8;
+
+// edict.movetype values
+float	MOVETYPE_NONE				=  0;		// never moves
+//float	MOVETYPE_ANGLENOCLIP		=  1;
+//float	MOVETYPE_ANGLECLIP			=  2;
+float	MOVETYPE_WALK				=  3;		// players only
+float	MOVETYPE_STEP				=  4;		// discrete, not real time unless fall
+float	MOVETYPE_FLY				=  5;
+float	MOVETYPE_TOSS				=  6;		// gravity
+float	MOVETYPE_PUSH				=  7;		// no clip to world, push and crush
+float	MOVETYPE_NOCLIP				=  8;
+float	MOVETYPE_FLYMISSILE			=  9;		// fly with extra size against monsters
+float	MOVETYPE_BOUNCE				= 10;
+float	MOVETYPE_BOUNCEMISSILE		= 11;		// bounce with extra size and no gravity
+float	MOVETYPE_PUSHPULL			= 13;		// pushable/pullable object
+float	MOVETYPE_SWIM				= 14;		// object won't move out of water
+
+// particle types
+float PARTICLETYPE_STATIC		= 0;
+float PARTICLETYPE_GRAV			= 1;
+float PARTICLETYPE_FASTGRAV		= 2;
+float PARTICLETYPE_SLOWGRAV		= 3;
+float PARTICLETYPE_FIRE			= 4;
+float PARTICLETYPE_EXPLODE		= 5;
+float PARTICLETYPE_EXPLODE2		= 6;
+float PARTICLETYPE_BLOB			= 7;
+float PARTICLETYPE_BLOB2		= 8;
+float PARTICLETYPE_RAIN			= 9;
+float PARTICLETYPE_C_EXPLODE	= 10;
+float PARTICLETYPE_C_EXPLODE2	= 11;
+float PARTICLETYPE_SPIT			= 12;
+float PARTICLETYPE_FIREBALL		= 13;
+float PARTICLETYPE_ICE			= 14;
+float PARTICLETYPE_SPELL		= 15;
+float PARTICLETYPE_DARKEN		= 25;	//Particle will darken to darkest color of that shade, valid only for colors <= 232
+float PARTICLETYPE_REDFIRE		= 28;	//Particle will darken to darkest color of that shade, valid only for colors <= 232
+
+// Hexen hull constants
+float HULL_IMPLICIT			= 0;	//Choose the hull based on bounding box- like in Quake
+float HULL_POINT			= 1;	//0 0 0, 0 0 0
+float HULL_PLAYER			= 2;	//'-16 -16 0', '16 16 56'
+float HULL_SCORPION			= 3;	//'-24 -24 -20', '24 24 20'
+float HULL_CROUCH			= 4;	//'-16 -16 0', '16 16 28'
+//Next 2 clip though world?
+float HULL_HYDRA			= 5;	//'-28 -28 -24', '28 28 24'
+float HULL_GOLEM			= 6;	//???,???
+
+// Keep around old constants until all references are removed
+float HULL_OLD				= 0;
+float HULL_SMALL			= 1;
+float HULL_NORMAL			= 2;
+float HULL_BIG				= 3;
+
+// edict.solid values
+float	SOLID_NOT					= 0;		// no interaction with other objects
+float	SOLID_TRIGGER				= 1;		// touch on edge, but not blocking
+float	SOLID_BBOX					= 2;		// touch on edge, block
+float	SOLID_SLIDEBOX				= 3;		// touch on edge, but not an onground
+float	SOLID_BSP					= 4;		// bsp clip, touch on edge, block
+float	SOLID_PHASE					= 5;		// will interact with all objects except entities with FL_MONSTER & FL_CLIENT - those it will pass through
+
+// range values
+float	RANGE_MELEE					= 0;
+float	RANGE_NEAR					= 1;
+float	RANGE_MID					= 2;
+float	RANGE_FAR					= 3;
+
+// deadflag values
+
+float	DEAD_NO						= 0;
+float	DEAD_DYING					= 1;
+float	DEAD_DEAD					= 2;
+float	DEAD_RESPAWNABLE			= 3;
+
+// takedamage values
+
+float	DAMAGE_NO					= 0;	// Entity cannot be hurt
+float	DAMAGE_YES					= 1;	// Can be hurt 
+float	DAMAGE_NO_GRENADE			= 2;	// Will not trigger a grenade to explode
+
+
+// use inventory flags to show which item is the current item
+float INV_NONE 						= 0;
+float INV_TORCH						= 1;
+float INV_HP_BOOST					= 2;
+float INV_SUPER_HP_BOOST			= 3;
+float INV_MANA_BOOST				= 4;
+float INV_TELEPORT					= 5;
+float INV_TOME						= 6;
+float INV_SUMMON					= 7;
+float INV_INVISIBILITY				= 8;
+float INV_GLYPH						= 9;
+float INV_HASTE						= 10;
+float INV_BLAST						= 11;
+float INV_POLYMORPH					= 12;
+float INV_FLIGHT					= 13;
+float INV_CUBEOFFORCE				= 14;
+float INV_INVINCIBILITY				= 15;
+
+float ARTIFACT_TORCH					= 1;
+float ARTIFACT_HP_BOOST					= 2;
+float ARTIFACT_SUPER_HP_BOOST			= 3;
+float ARTIFACT_MANA_BOOST				= 4;
+float ARTIFACT_TELEPORT					= 5;
+float ARTIFACT_TOME						= 6;
+float ARTIFACT_SUMMON					= 7;
+float ARTIFACT_INVISIBILITY				= 8;
+float ARTIFACT_GLYPH					= 9;
+float ARTIFACT_HASTE					= 10;
+float ARTIFACT_BLAST					= 11;
+float ARTIFACT_POLYMORPH				= 12;
+float ARTIFACT_FLIGHT					= 13;
+float ARTIFACT_CUBEOFFORCE				= 14;
+float ARTIFACT_INVINCIBILITY			= 15;
+
+
+// Use ring flags to show which rings hero carries
+float RING_NONE						= 0;
+float RING_FLIGHT					= 1;
+float RING_WATER					= 2;
+float RING_REGENERATION				= 4;
+float RING_TURNING					= 8;
+
+
+// Use artifact flags to show which artifacts are in use
+float ART_NONE						= 0;
+float ART_HASTE						= 1;
+float ART_INVINCIBILITY				= 2;
+float ART_TOMEOFPOWER  				= 4;
+float ART_INVISIBILITY				= 8;
+float ARTFLAG_FROZEN				= 128;
+float ARTFLAG_STONED				= 256;
+float ARTFLAG_DIVINE_INTERVENTION	= 512;
+float ARTFLAG_ASH					= 1024;
+
+
+// Gobal skin textures
+float GLOBAL_SKIN_STONE				= 100;
+float GLOBAL_SKIN_ICE				= 101;
+float GLOBAL_SKIN_ASH				= 102;
+
+// Player Classes
+float CLASS_NONE					= 0;
+float CLASS_PALADIN					= 1;
+float CLASS_CRUSADER				= 2;
+float CLASS_NECROMANCER				= 3;
+float CLASS_ASSASSIN				= 4;
+float CLASS_SUCCUBUS				= 5;
+
+
+// Monster Classes
+float CLASS_GRUNT   				= 1;
+float CLASS_HENCHMAN   				= 2;
+float CLASS_LEADER   				= 3;
+float CLASS_BOSS     				= 4;
+float CLASS_FINAL_BOSS				= 5;
+
+//Bufftypes
+float BUFFTYPE_NORMAL				= 0;
+float BUFFTYPE_LARGE				= 1;
+float BUFFTYPE_SPECTRE				= 2;
+float BUFFTYPE_GHOST				= 4;
+float BUFFTYPE_LEADER				= 8;
+
+float MAX_HEALTH					= 200;
+
+// Player Mode
+float	MODE_NORMAL					= 0;		// normal play mode
+float	MODE_CAMERA  				= 1;		// player is a camera right now
+
+float AS_STRAIGHT	= 1;
+float AS_SLIDING	= 2;
+float AS_MELEE		= 3;
+float AS_MISSILE	= 4;
+float AS_WAIT		= 5;
+float AS_FERRY		= 6;
+
+// Generic Weapon Names
+float IT_WEAPON1					= 4096;
+float IT_WEAPON2					= 1;
+float IT_WEAPON3					= 2;
+float IT_WEAPON4					= 4;
+float IT_TESTWEAP					= 8;
+float IT_WEAPON4_1					= 16;		// First half of weapon
+float IT_WEAPON4_2					= 32;		// Second half of weapon
+//possible extra weapons
+float IT_WEAPON5					= 64;
+float IT_WEAPON6					= 128;
+float IT_WEAPON7					= 256;
+float IT_WEAPON8					= 512;
+
+// paladin weapons
+//float IT_GAUNTLETS           = 4096;
+
+
+// items
+/*
+float	IT_AXE						= 4096;
+float	IT_SHOTGUN					= 1;
+float	IT_SUPER_SHOTGUN			= 2;
+float	IT_NAILGUN					= 4;
+float	IT_SUPER_NAILGUN			= 8;
+float	IT_GRENADE_LAUNCHER			= 16;
+float	IT_ROCKET_LAUNCHER			= 32;
+float	IT_LIGHTNING				= 64;
+float	IT_EXTRA_WEAPON				= 128;
 */
-	struct
-	{ // Fallen Angel
-		float fangel_SaveFrame;
-		float fangel_Count;
-		float shoot_cnt;
-		float shoot_time;	//	Time of last shot
-		float z_movement;
-		float z_duration;
-		float drop_time;
-	};
-	struct
-	{ // Fallen Angel's Spell
-		float spell_angle;
-	};
-	struct
-	{ // Hydra
-		float hydra_FloatTo;
-		float hydra_chargeTime;
-	};
-	struct
-	{ // Spider
-		float spiderType;			// SPIDER_? types
-		float spiderActiveCount;	// Tallies "activity"
-		float spiderGoPause;		// Active/pause threshold
-		float spiderPauseLength;	// Pause duration in frames
-		float spiderPauseCount;		// Tallies paused frames
-	};
-	struct
-	{ // Scorpion
-		float scorpionType;			// SCORPION_? types
-		float scorpionRest;			// Resting state counter
-		float scorpionWalkCount;	// Counts walking frames
-	};
-	struct
-	{ // Golem
-		float golemSlideCounter;
-		float golemBeamDelay;
-		float golemBeamOff1;
-		float golemBeamOff2;
-	};
-	struct
-	{ // Imp
-		float impType;				// IMP_? types
-	};
-	struct
-	{ // Mummy
-		float parts_gone;
-		float mummy_state;
-		float mummy_state_time;
-	};
-	struct
-	{ // Artifacts
-		float artifact_respawn;		// Should respawn?
-		float artifact_ignore_owner_time;
-		float artifact_ignore_time;
-	};
-	struct
-	{ // Rider path
-		float next_path_1;
-		float next_path_2;
-		float next_path_3;
-		float next_path_4;
-		float path_id;
-		float next_path_5;
-		float next_path_6;
-	};
-	struct
-	{ // Rider triggers
-		float rt_chance;
-	};
-	struct
-	{ // Rider data
-		float rider_gallop_mode;
-		float rider_last_y_change;
-		float rider_y_change;
-		float rider_death_speed;
-		float rider_path_distance;
-		float rider_move_adjustment;
-	};
-	struct
-	{ // War rider axe
-		float waraxe_offset;
-		float waraxe_horizontal;
-		float waraxe_track_inc;
-		float waraxe_track_limit;
-		float waraxe_max_speed;
-		float waraxe_max_height;
-	};
-	struct
-	{ // War rider's quake
-		float wrq_effect_id;
-		float wrq_radius;
-		float wrq_count;
-	};
-	struct
-	{ // Rider's beam
-		float beam_angle_a;
-		float beam_angle_b;
-		float beam_max_scale;
-		float beam_direction;
-		float beam_speed;
-	};
-	struct	
-	{	// Used by smoke generator
-		float z_modifier;	
-	};
-	struct
-	{
-		float last_health; // Used by bell entity
-	};
-	struct	// For raven staff Ravens
-	{
-		float pitchdowntime;
-		float searchtime;	// Amount of time bird has been searching
-		float next_action;	// Next time to take action
-		//float searchtime;	// When search was first started
-		float damage_max; // Amount of damage each raven can do before it has to leave
-	};
-	struct
-	{	// fish
-		float fish_speed;
-		float fish_leader_count;
-	};
 
-	struct
-	{	// Used by particle explosion entity.
-		float exploderadius;
-	};
-
-	struct
-	{	// Skull missiles from skullwizard
-		float scream_time;
-	};
-	struct  
-	{  // Pestalance's Hive
-		float beginframe;
-	};
-	struct
-	{   // Soul spheres
-		float sound_time;
-	};
-	struct
-	{	// Cube of force
-		float shot_cnt;   // Number of shots the force cube has shot
-	};
-	struct
-	{	// Trigger field
-		float failchance;   // percentage (chance) that trigger will not fire
-		// this is a design flaw by Raven: setting dest2 here overwrites
-		// super_damage in the "player" struct which used to lead T_Damage()
-		// making a pentacle monster in tibet1.bsp invulnerable, because of
-		// super_damage becoming negative..
-		vector dest, dest1, dest2;	//9 spots unioned
-	};
-	struct
-	{	// Reiver
-		float reivAcceleration;
-		float reivDodgeTimer;
-		float reivSecondPhase;
-		float reivFXTimer;
-		float reivDrainTimer;
-		float reivVoiceTimer;
-		float reivChargeTime;
-		float reivIdleTimer;
-		float reivDodgeDir;
-	};
-	struct
-	{	// Sunstaff tomed altfire
-		float sunCurrLength;
-		float sunMaxLength;
-		float sunHomeTimer;
-		float sunSoundTimer;
-		float sunRayTimer;
-	};
-	struct
-	{	// Maulotaur
-		float maulVoiceTime;
-		float maulChargeTime;
-		float maulAtten;
-		float maulRange;
-	};
-	struct
-	{	// Skull Wizard
-		float teleportTime;
-		float raiseTime;
-		float summonTime;
-	};
-	struct
-	{	// Shadow controller
-		float speed2;
-		float shadowoff;
-	};
-	struct
-	{	// For bmodel entities with automatic switchable shadows
-		float switchshadspeed;
-		float switchshadspeed2;
-	};
-};
-
-//Needed to remember set gravity compared to other grav changes
-.float standard_grav;
-
-// Once we can do unions above end_sys, have this with the field 'playerclass'
-.float monsterclass;
-
-.float turn_time;
-
-// Triggers / doors
-.string puzzle_piece_1;
-.string puzzle_piece_2;
-.string puzzle_piece_3;
-.string puzzle_piece_4;
-.float no_puzzle_msg;
-
-// Puzzle Item
-.string puzzle_id;
-
-// More rider stuff that can't be in the union
-.entity path_current;
-
-.vector	oldangles;
-.string lastweapon;			// Weapon model player had before changing to camera mode
-
-.float lifetime;
-.float lifespan;
-
-//.float walkframe;		//unused
-.float wfs;				// Weapon frame state
-
-.float attack_finished;
-.float pain_finished;
-
-.float invisible_finished;
-
-.float invincible_time, invincible_sound;
-.float invisible_time;
-.float super_damage_time;
-
-// Set to time+0.2 whenever a client fires a weapon or takes damage.
-// Used to alert monsters that otherwise would let the player go.
-.float show_hostile;
-
-// Player jump flag.
-.float jump_flag;
-
-// Player swimming sound flag.
-.float swim_flag;
-
-// When time > air_finished, start drowning.
-.float air_finished;
-
-// Keeps track of the number of bubbles.
-//.float bubble_count;
-
-.union
-{ 
-	// Keeps track of how the player died.
-	struct 
-	{		
-		string deathtype;
-	};
-	struct 
-	{
-		string spawnername;
-	};
-	struct 
-	{
-		string mdl;
-	};
-};
-
-// Object stuff.
-.vector mangle; // Angle at start
-
-// Only used by secret door.
-.vector oldorigin;
-
-.float t_length, t_width;	//ws: using t_length for custom monster melee range for ai_melee()
-
-// Things color.
-.float color;
-
-// Count of things (used by rain entity)
-.float counter;
-
-// Can these be made part of a union??
-.float plaqueflg;			// 0 if not using a plaque, 1 if using a plaque
-.vector plaqueangle;		// Angle player was facing when the plaque was touched
+//float	IT_ARMOR1					= 8192;
+//float	IT_ARMOR2					= 16384;
+//float	IT_ARMOR3					= 32768;
+//float	IT_SUPERHEALTH				= 65536;
 
 
-// Doors, etc.
-//.vector dest, dest1, dest2;
-.float wait;					// Time from firing to restarting
-.float delay;					// Time from activation to firing
-.entity trigger_field;			// Door's trigger entity
-.string noise4;
+float	IT_INVISIBILITY			= 524288;
+//float	IT_INVULNERABILITY		= 1048576;
+//float	IT_SUIT						= 2097152;
+//float	IT_QUAD						= 4194304;
 
-// Monsters.
-.float pausetime;
-.entity pathentity;
+// rings - amount of time they work
+float FLIGHT_TIME					= 30;
+float WATER_TIME					= 30;
+float ABSORPTION_TIME				= 30;
+float REGEN_TIME					= 30;
+float TURNING_TIME					= 30;
 
-// Doors.
-.float aflag;
-.float dmg; // Damage done by door when hit
+// artifacts - amount of time they work
+float HASTE_TIME				= 15;
+float TOME_TIME					= 30;
 
-// Misc flag.
-.float cnt;
+float RESPAWN_TIME				= 30;
 
-// What type of thing is this?
-.float thingtype;
-
-// Amount of time left on torch.
-.float torchtime;
-
-// Next torch think.
-.void() torchthink;
-
-// Amount of time left on the super health.
-.float healthtime;
-
-// Subs
-.void() think1;
-.vector finaldest, finalangle;
-
-// For counting triggers
-.float count;
-
-.float spawn_health;	// Set to >0 to spawn instant health
-
-// Plats/doors/buttons
-.float lip;
-.float state;
-.vector pos1, pos2; // Top and bottom positions
-.float height;
-
-// Sounds
-//.float waitmin, waitmax;
-//.float distance;
-//.float volume;
-
-.vector orgnl_mins, orgnl_maxs;	// original bounding box
-
-.float veer;		//Amount of veer when Veer function called (included in HomeThink Function)
-				//The higher the number, the more drastic the wander is.
-.float homerate;//Turning rate on homing missiles, is used as the nextthink time
-				//so the lower the number, the tighter thr turn radius.
-				//From the SpiralThink function, a value of FALSE will
-				//stop it from randomly homing while spiraling,
-				//a value of TRUE will allow it to randomly Home, but
-				//does not effect rate of homing since it only calls
-				//it randomly.
-.float mass;	//NOTE: 1 = @18.5 pounds.
-				//How much they weigh- should be used in all velocity mods
-				//(pushing, impact, throwing). Used as a divider, so
-				//the higher the number, the higher the mass, the less
-				//distance it will go.  Make sure it's >0
-				//Buttons and pressure plates can use this too so that
-				//if a light object is placed on it, it won't activate
-				//(but it should be cumulative so that you can stack several
-				//light objects to increase mass and activate it)
-				//Also, a light player (featherfall?) could get around
-				//certain traps?
-.float onfire;	//A value that, when FALSE means the object is not on
-				//fire.  A greater than zero value indicates how fast
-				//the thing is burning.  The higher the number, the higher
-				//the damage and the more flames.
-
-.vector o_angle;//Just to remember an old angle or vector
-
-//Player
-//.float bloodloss;//For the Bleed() function which will remove health and add graphic.  Set to 666 for beheading death.
-.float oldweapon;//For remembering your last weapon, has many uses
-
-//Monsters (and some projectiles)
-.entity controller;	//What is the owner of this thing, this allows
-					//it to touch it's owner if you set the owner
-					//to self.
-
-.float init_modelindex;//initial model index, so you can switch away and back
-.string init_model;
-
-//Player Only th_***
-.void() th_swim;
-.void() th_jump;
-.void() th_fly;
-.void() th_die1;
-.void() th_die2;
-.void() th_goredeath;
-
-.float last_attack;	//Used for weapons that go into rest mode after
-					//a while
-.entity shield;
-.float frozen;		//Can't be a flag, is a counter
-.float oldskin;
-//.void() oldthink;
-.void() th_weapon;
-.float decap;		//To know if was beheaded, not a flag, set to 2 if
-					//head should explode
-.string headmodel;
-.void() oldtouch;	//These two are for when you're frozen and thaw out
-.float oldmovetype;
-.float target_scale;
-.float scalerate;
-.float blizzcount;
-.float tripwire_cnt;
-.float imp_count;
-.vector proj_ofs;	//Projectile offset, different from view_ofs.
+// weapon damage values
+float WEAPON1_BASE_DAMAGE			= 12;
+float WEAPON1_ADD_DAMAGE			= 12;
+float WEAPON1_PWR_BASE_DAMAGE		= 30;
+float WEAPON1_PWR_ADD_DAMAGE		= 20;
+float WEAPON1_PUSH					= 5;
 
 
-.entity catapulter;
-.float catapult_time;
-.float last_onground;	//Timer- helps keep track of how long something has been in the air.
-.vector pos_ofs;		//Position ofset
-.vector angle_ofs;		//Angle offset
-.float safe_time;		//How long after a tornado throws you that it cant pick you up again
-.float absorb_time;		//for 0.3 seconds after crouching, you will absorb 1/2 of your falling damage upon impact
-.float mintel;			//Monster intelligence- temp since entity.hc was checked out
-.vector wallspot;		//Last place enemy was seen- for waypoint ai
-.vector walldir;
-.vector lastwaypointspot;//explains itself
-.entity lockentity;		//for waypoint system
-.float last_impact;		//Last time touch function was called
+// glyph of the ancients
+float GLYPH_BASE_DAMAGE			= 100;
+float GLYPH_ADD_DAMAGE			= 20;
 
-.float inactive;
-.float msg2;
-.string nexttarget;		//For target transferral
-.float gravity;			//Gravity, duh
-//.float upside_down;	unused
-.float lightvalue1;
-.float lightvalue2;
-.float fadespeed;
-.float point_seq;		//Waypoint sequence number
-.float sheep_time;		//How long you will be a sheep for
-.float sheep_sound_time;
-.float still_time;		//How long she's been standing still
-.float visibility_offset;	//How hard it is to see and aim at entity, from 0 to 1
-							//0 is totally visible, 1 is invisible
-.float check_ok;			//For trigger check, instead of re-using aflag
-.entity check_chain;		//for trigger_check, keeps track of it's targetted entities
+// Modifier for HASTE
+//float HASTE_MOD				= 2;
+float BLAST_RADIUS				= 200;
+float BLASTDAMAGE				= 2; 
 
-.void() th_init;			//Monster function you spawned with
-.float freeze_time;
-.float level_frags;
-.float visibility;
+// Damage values for attacks from monsters
+float DMG_ARCHER_PUNCH			= 4;
+float DMG_MUMMY_PUNCH			= 8;
+float DMG_MUMMY_BITE 			= 2;
 
-entity	sight_entity;	//So monsters wake up other monsters
-.entity viewentity;
-//.float sv_flags;		//temp serverflags fix
 
-.float	dmgtime;
-//unused	.float	healamount, healtype;
-.float anglespeed;
-.float angletime;
-.float movetime;	//used by doors/plats/etc; also re-used to track when player last stepped in blood pool
-//.float hit_z;		unused
-.float torncount;	//used by meteor staff and eidolon
-.entity path_last;
-.float dflags;
-.float init_exp_val;
-.vector init_org;
+//Thing Types
+float THINGTYPE_GREYSTONE		= 1;
+float THINGTYPE_WOOD			= 2;
+float THINGTYPE_METAL			= 3;
+float THINGTYPE_FLESH			= 4;
+float THINGTYPE_FIRE			= 5;
+float THINGTYPE_CLAY			= 6;
+float THINGTYPE_LEAVES			= 7;
+float THINGTYPE_HAY				= 8;
+float THINGTYPE_BROWNSTONE		= 9;
+float THINGTYPE_CLOTH			= 10;
+float THINGTYPE_WOOD_LEAF		= 11;
+float THINGTYPE_WOOD_METAL		= 12;
+float THINGTYPE_WOOD_STONE		= 13;
+float THINGTYPE_METAL_STONE		= 14;
+float THINGTYPE_METAL_CLOTH 	= 15;
+float THINGTYPE_WEBS		 	= 16;
+float THINGTYPE_GLASS 			= 17;
+float THINGTYPE_ICE 			= 18;
+float THINGTYPE_CLEARGLASS 		= 19;
+float THINGTYPE_REDGLASS 		= 20;
+float THINGTYPE_ACID	 		= 21;
+float THINGTYPE_METEOR	 		= 22;
+float THINGTYPE_GREENFLESH 		= 23;
+float THINGTYPE_BONE	 		= 24;
+float THINGTYPE_ASH				= 25;
 
-.float fire_damage;
-//.float scoped;	unused
 
-.union	//SoC new union
-{
-	struct
-	{	//Player only
-		float oldwatertype;		// Last water type for splash effect
-		float welcomeshown;
-		float whiptime;
-		float minionhealth;
-		float statselection;	//indicates current selection (wraps between 0 and 3)
-		float statpoints; 		//counts stat points remaining
-	};
-	struct
-	{	//Monster only
-		float spawndelay;		//time before spawning in if dormant
-		float blasted;			//flymonsters: distance to move back after being blasted
-		float buff;				//can this monster be buffed
-		float killerlevel;		//used to measure player level for respawn strength
-		float jumpframe;		//frame monsters use while in air due to disc of repulsion or trigger_monsterjump
-		float respawntime;
-	};
-	struct
-	{	//bmodel/trigger only
-		float		switchshadstyle;
-	};
-};
+// point content values
+float	CONTENT_EMPTY				= -1;
+float	CONTENT_SOLID				= -2;
+float	CONTENT_WATER				= -3;
+float	CONTENT_SLIME				= -4;
+float	CONTENT_LAVA				= -5;
+float	CONTENT_SKY					= -6;
 
-//Game of Tomes
-.float preventrespawn;
-.float playercontrolled;
-//moved to union	.float whiptime;
-//moved to union .float killerlevel;	//used to measure player level for respawn strength
-.float bufftype;	 //used for monsters to determine bonus types on spawn
-.float tempscale;
-//moved to union	.float buff;	//1 = can become a buffed variant, 2 = can further become a leader variant
+float	STATE_TOP					= 0;
+float	STATE_BOTTOM				= 1;
+float	STATE_UP					= 2;
+float	STATE_DOWN					= 3;
+float	STATE_MOVING				= 4;
 
-//Bloodshot
-.void() storethink;		//for assassin whip
-//moved to union .float welcomeshown;
+vector	VEC_ORIGIN				= '0 0 0';
+vector	VEC_HULL_MIN			= '-16 -16 -24';
+vector	VEC_HULL_MAX			= '16 16 32';
+//Temp- because player models origins are at feet,
+//Above values raise them 12 above the floor!
+//But what about monsters using this Hull size??
+//vector	VEC_HULL_MIN			= '-16 -16 0';
+//vector	VEC_HULL_MAX			= '16 16 56';
 
-//WS
-.float altfiring;		//track altfire even when button isn't pressed
-.float glyph_finished;	//delay between glyph use
-.string waketarget;		//monsters use self.waketarget upon sighting player
-.string sightsound;
-.void() th_raise;		//monster resurrection system
-.float targetid;		//numerical id for trigger_random
-.string messagestr;		//string version of message
-.string msg2str;		//string version of msg2
-.string no_puzzle_str;	//string version of no_puzzle_msg
-.float class_weaponvar;	//variable that can be used by each class for specific weapon purposes; used by paladin axe, crusader icemace, assassin dagger, necro magic missile
-.float safe_time_sunstaff;	//safe from sunstaff altfire seeking
-.entity menu;			//player stats menu entity
-.void() th_blasted;		//flymonsters: function to run when hit by disc of repulsion to simulate effect
-.void() minionfunc;
-.string minionname;
+vector	VEC_HULL2_MIN			= '-32 -32 -24';
+vector	VEC_HULL2_MAX			= '32 32 64';
 
-//rubicon 2 / arcane dimensions ladder system
-.float onladder;
-.entity ladder;
+// protocol bytes
+float SVC_SETVIEWPORT = 5;			// Net.Protocol 0x05- for camera
+float SVC_SETVIEWANGLES = 10;		// Net.Protocol 0x0A- for camera
+float SVC_SETANGLESINTER = 50;		// Interpolating camera angles  
+float	SVC_TEMPENTITY				= 23;
+float	SVC_KILLEDMONSTER			= 27;
+float	SVC_FOUNDSECRET				= 28;
+float	SVC_INTERMISSION			= 30;
+float	SVC_FINALE					= 31;
+float	SVC_CDTRACK					= 32;
+float	SVC_SELLSCREEN				= 33;
+float	SVC_SET_VIEW_FLAGS			= 40;
+float	SVC_CLEAR_VIEW_FLAGS		= 41;
+float	SVC_SET_VIEW_TINT			= 46;
+float	SVC_UPDATE_KINGOFHILL		= 51;
 
-// bmFbr switchable shadow code
-.entity		shadowcontroller;
+// Client Effects
+float	CE_RAIN						= 1;
+float	CE_FOUNTAIN					= 2;
+float	CE_QUAKE					= 3;
+float	CE_WHITE_SMOKE				= 4;
+float	CE_BLUESPARK				= 5;
+float	CE_YELLOWSPARK				= 6;
+float	CE_SM_CIRCLE_EXP			= 7;
+float	CE_BG_CIRCLE_EXP			= 8;
+float	CE_SM_WHITE_FLASH			= 9;
+float	CE_WHITE_FLASH				= 10;
+float	CE_YELLOWRED_FLASH			= 11;
+float	CE_BLUE_FLASH				= 12;
+float	CE_SM_BLUE_FLASH			= 13;
+float	CE_RED_FLASH				= 14;
+float	CE_SM_EXPLOSION				= 15;
+float	CE_LG_EXPLOSION				= 16;
+float	CE_FLOOR_EXPLOSION			= 17;
+float   CE_RIDER_DEATH				= 18;
+float	CE_BLUE_EXPLOSION 			= 19;
+float	CE_GREEN_SMOKE    			= 20;
+float	CE_GREY_SMOKE    			= 21;
+float	CE_RED_SMOKE    			= 22;
+float	CE_SLOW_WHITE_SMOKE			= 23;
+float   CE_REDSPARK					= 24;
+float   CE_GREENSPARK				= 25;
+float   CE_TELESMK1					= 26;
+float   CE_TELESMK2					= 27;
+float   CE_ICE_HIT					= 28;//	icehit.spr	0-5
+float   CE_MEDUSA_HIT				= 29;//	medhit.spr	0-6
+float   CE_MEZZO_REFLECT			= 30;//	mezzoref.spr	0-5
+float   CE_FLOOR_EXPLOSION2			= 31;//	flrexpl2.spr	0-19
+float   CE_XBOW_EXPLOSION			= 32;//	xbowexpl.spr	0-16
+float   CE_NEW_EXPLOSION			= 33;//	gen_expl.spr	0-13
+float   CE_MAGIC_MISSILE_EXPLOSION	= 34;//	mm_expld.spr
+float   CE_GHOST					= 35;//	ghost.spr- translucent
+float   CE_BONE_EXPLOSION			= 36;//	bonexpld.spr
+float   CE_REDCLOUD					= 37;//	rcloud.spr
+float   CE_TELEPORTERPUFFS			= 38;
+float   CE_TELEPORTERBODY			= 39;
+float	CE_BONESHARD				= 40;
+float	CE_BONESHRAPNEL				= 41;
+float	CE_FLAMESTREAM				= 42;
+float	CE_SNOW						= 43;
+float	CE_GRAVITYWELL				= 44;
+float	CE_BLDRN_EXPL				= 45;
+float	CE_ACID_MUZZFL				= 46;
+float	CE_ACID_HIT					= 47;
+float	CE_FIREWALL_SMALL			= 48;
+float	CE_FIREWALL_MEDIUM			= 49;
+float	CE_FIREWALL_LARGE			= 50;
+float	CE_LBALL_EXPL				= 51;
+float	CE_ACID_SPLAT				= 52;
+float	CE_ACID_EXPL				= 53;
+float	CE_FBOOM					= 54;
+float	CE_CHUNK					= 55;
+float	CE_BOMB						= 56;
+float	CE_BRN_BOUNCE				= 57;
+float	CE_LSHOCK					= 58;
+float	CE_FLAMEWALL				= 59;
+float	CE_FLAMEWALL2				= 60;
+float	CE_FLOOR_EXPLOSION3			= 61;
+float	CE_ONFIRE					= 62;
+// Temporary entities
+float	TE_SPIKE					= 0;
+float	TE_SUPERSPIKE				= 1;
+float	TE_GUNSHOT					= 2;
+float	TE_EXPLOSION				= 3;
+float	TE_TAREXPLOSION				= 4;
+float	TE_LIGHTNING1				= 5;
+float	TE_LIGHTNING2				= 6;
+float	TE_WIZSPIKE					= 7;
+float	TE_KNIGHTSPIKE				= 8;
+float	TE_LIGHTNING3				= 9;
+float	TE_LAVASPLASH				= 10;
+float	TE_TELEPORT					= 11;
+float	TE_STREAM_LIGHTNING_SMALL	= 24;
+float	TE_STREAM_CHAIN				= 25;
+float	TE_STREAM_SUNSTAFF1			= 26;
+float	TE_STREAM_SUNSTAFF2			= 27;
+float	TE_STREAM_LIGHTNING			= 28;
+float	TE_STREAM_COLORBEAM			= 29;
+float	TE_STREAM_ICECHUNKS			= 30;
+float	TE_STREAM_GAZE				= 31;
+float	TE_STREAM_FAMINE			= 32;
+
+// Stream flags
+float	STREAM_ATTACHED				= 16;
+float	STREAM_TRANSLUCENT			= 32;
+
+
+// sound channels
+// channel 0 never willingly overrides
+// other channels (1-7) always override a playing sound on that channel
+float	CHAN_AUTO					= 0;
+float	CHAN_WEAPON					= 1;
+float	CHAN_VOICE					= 2;
+float	CHAN_ITEM					= 3;
+float	CHAN_BODY					= 4;
+
+float	ATTN_NONE					= 0;
+float	ATTN_NORM					= 1;
+float	ATTN_IDLE					= 2;
+float	ATTN_STATIC					= 3;
+float	ATTN_LOOP					= 4;
+
+// update types
+//float	UPDATE_GENERAL				= 0;
+//float	UPDATE_STATIC				= 1;
+//float	UPDATE_BINARY				= 2;
+//float	UPDATE_TEMP					= 3;
+
+// entity effects
+float	EF_BRIGHTFIELD				= 1;
+float	EF_MUZZLEFLASH 				= 2;
+float	EF_BRIGHTLIGHT 				= 4;
+float	EF_TORCHLIGHT				= 6;
+float	EF_DIMLIGHT 				= 8;
+float	EF_DARKLIGHT				= 16;
+float	EF_DARKFIELD				= 32;
+float	EF_LIGHT					= 64;
+float	EF_NODRAW					= 128;
+float	EF_TEX_STOPF				= 256;
+float	EF_TEX_STOPL				= 528;
+
+// messages
+float	MSG_BROADCAST				= 0;		// unreliable to all
+float	MSG_ONE						= 1;		// reliable to one (msg_entity)
+float	MSG_ALL						= 2;		// reliable to all
+float	MSG_INIT						= 3;		// write to the init string
+
+float STEP_HEIGHT					= 18;		// Max step height
+
+// monster AI states
+float AI_DECIDE						=    0;		// An action was just finished - time to decide what to do
+float AI_STAND						=    1;		// Standing guard
+float AI_WALK						=    2;		// Walking
+float AI_CHARGE						=    4;     // Charging enemy
+float AI_WANDER						=    8;     // Wandering around mindlessly
+float AI_MELEE_ATTACK				=   16;     // 
+float AI_MISSILE_ATTACK				=   32;     // 
+float AI_MISSILE_REATTACK			=   64;		// Attacking again from attack stance (archer)
+float AI_PAIN						=  128;		// Monster has only 1 type of pain
+float AI_PAIN_CLOSE					=  256;		// Pain when close to enemy
+float AI_PAIN_FAR					=  512;		// Pain when far from enemy
+float AI_DEAD						= 1024;		// 
+float AI_TURNLOOK					= 2048;		// Turning to look for enemy
+float AI_DEAD_GIB					= 4096;		// Can be gibbed when killed
+float AI_DEAD_TWITCH				= 8192;		// Twitches while dead
+
+// Return values for AdvanceFrame()
+float AF_NORMAL		= 0;
+float AF_BEGINNING	= 1;
+float AF_END		= 2;
+
+float CHUNK_MAX		= 30;	// Max number of chunks (models) that can be alive at one time
+float MAX_LEVELS = 10;
+
+
+// server flags
+//float	SFL_EPISODE_1		= 1;
+//float	SFL_EPISODE_2		= 2;
+//float	SFL_EPISODE_3		= 4;
+//float	SFL_EPISODE_4		= 8;
+float	SFL_NEW_UNIT		= 16;
+//float	SFL_NEW_EPISODE		= 32;
+// = 64;
+// = 128;
+float	SFL_CROSS_TRIGGER_1 = 256;
+float	SFL_CROSS_TRIGGER_2	= 512;
+float	SFL_CROSS_TRIGGER_3	= 1024;
+float	SFL_CROSS_TRIGGER_4	= 2048;
+float	SFL_CROSS_TRIGGER_5	= 4096;
+float	SFL_CROSS_TRIGGER_6	= 8192;
+float	SFL_CROSS_TRIGGER_7	= 16384;
+float	SFL_CROSS_TRIGGER_8	= 32768;
+
+float	SFL_CROSS_TRIGGERS	= 65280;
+//float attck_cnt;
+
+float WF_NORMAL_ADVANCE = 0;		// States when using advanceweaponframe
+float WF_CYCLE_STARTED = 1;
+float WF_CYCLE_WRAPPED = 2;
+float WF_LAST_FRAME = 3;
+
+float WORLDTYPE_CASTLE = 0;
+float WORLDTYPE_EGYPT  = 1;
+float WORLDTYPE_MESO   = 2;
+float WORLDTYPE_ROMAN  = 3;
+
+//Spawnflags for monster spawners
+float IMP		= 1;
+float ARCHER	= 2;
+float WIZARD	= 4;
+float SCORPION	= 8;
+float SPIDER	= 16;
+float ONDEATH	= 32;
+float QUIET		= 64;
+float TRIGGERONLY  = 128;
+float DISCIPLE = 65536;
+float MUMMY = 131072;
+float KNIGHT = 262144;
+float AFRIT = 524288;
+float UNDYING = 1048576;
+float WEREBEAST = 2097152;
+float FANGEL = 4194304;
+float SPAWN_SUPER = 8388608;
+//Spawnflags for MP monster spawners
+float ICE_ARCHER 	= 1;
+float ICE_IMP		= 2;
+float SNOWLEOPARD	= 4;
+float WERETIGER		= 8;
+float YAKMAN		= 16;
+
+//spawnflag for all monsters
+float JUMP	= 4;	    //Gives monster the ability to jump
+float PLAY_DEAD	= 8;	//Makes a monster play dead at start
+float NO_DROP	= 32;	//Keeps them from dropping to the ground at spawntime
+float SF_FROZEN	= 64;	//Start frozen
+float SPAWNIN	= 128;	//Spawn in when triggered
+float SPAWNQUIET	= 65536;	//Spawn in without teleport fog/noise
+float DONTMORPH		= 131072;	//Not affected by polymorph spell
+
+float SLOPE = 16;		//Trains- follow angle for vec between path_corners
+
+//spawnflag for items, weapons, artifacts
+float FLOATING	=	1;	//Keeps them from dropping to the ground at spawntime
+
+//Spawnflags for barrels
+float BARREL_DOWNHILL		= 1;
+float BARREL_NO_DROP		= 2;
+float ON_SIDE				= 4;
+float BARREL_SINK			= 8;		
+float DROP_USE				= 16;//Barrel won't drop unless used
+float BARREL_RESPAWN				= 32;//Upon death, barrel will respawn at it's initial origin
+//Barrel types
+float BARREL_UNBREAKABLE	= 16;
+float BARREL_NORMAL			= 32;
+float BARREL_EXPLODING		= 64;
+float BARREL_INDESTRUCTIBLE = 128;		
+
+//For func_rotate
+float GRADUAL			= 32;
+float TOGGLE_REVERSE	= 64;
+float KEEP_START		= 128;
+
+float NO_RESPAWN		= 0;	// For the spawning of artifacts	
+float RESPAWN			= 1;	
+
+float RING_REGENERATION_MAX = 150;	// Number of health points ring gives you back
+float RING_FLIGHT_MAX = 60;			// Number of seconds you can fly
+float RING_WATER_MAX = 60;			// Number of seconds you can stay under water
+float RING_TURNING_MAX = 60;		// Number of seconds you can turn missiles
+
+float SVC_SETVIEWPORT = 5;			// Net.Protocol 0x05- for camera
+float SVC_SETVIEWANGLES = 10;		// Net.Protocol 0x0A- for camera
+
+//act_states - for player anim
+float ACT_STAND			= 0;
+float ACT_RUN			= 1;
+float ACT_SWIM_FLY		= 2;
+float ACT_ATTACK		= 3;
+float ACT_PAIN			= 4;
+float ACT_JUMP			= 5;
+float ACT_CROUCH_STAND	= 6;
+float ACT_CROUCH_MOVE	= 7;
+float ACT_DEAD			= 8;
+float ACT_DECAP			= 9;
+
+float MISSIONPACK		= 1;	//Spawnflag for world, telling us it's a Mission Pack map- used so certain code is used only for new levels
+float SHEEPHUNT			= 2;	//Spawnflag for world, enables special sheep hunter code...
+float WSF_SLIME_UNINHIBITIVE = 4;	//Slime doesn't slow player down more than water
+float WSF_WELCOMEMESSAGE = 8;		//Show SOC welcome message when this level begins
+
+//Inventory maximums
+float MAX_CUBE = 2;
+float MAX_FLASK = 5;
+float MAX_ICON = 2;
+float MAX_INV = 15;
+float MAX_GHOST = 2;
+float MAX_KRATER = 2;
+float MAX_POLY = 2;
+float MAX_SUMMON = 2;
+float MAX_TOME = 2;
+float MAX_URN = 2;
+
+//GoT wandering monster respawn
+float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
+float WANDERING_MONSTER_TIME_MAX = 300;	//5 minutes		//666; //11 minutes
+
+//Config flag parm system
+float PARM_RESPAWN	= 1;
+float PARM_FADE		= 2;
+float PARM_BUFF		= 4;
+float PARM_STATS	= 8;
+
+//impulse commands
+float IMPULSE_INFO = 50;
+float IMPULSE_RESPAWN = 51;
+float IMPULSE_FADE = 52;
+float IMPULSE_BUFF = 53;
+float IMPULSE_STATS = 54;
+float STATS_MENU = 80;
+float STATS_MOVEDOWN = 81;
+float STATS_MOVEUP = 82;
+float STATS_INCREASE = 83;
+float STATS_DUMP = 84;
+
+//rate of decceleration for effect of disc of repulsion on fly monsters
+float BLAST_DECEL = 4;
+
+//palette indices
+float COLOR_BLUE_DARK = 32;
+float COLOR_BLUE_MID = 40;
+float COLOR_BLUE_BRIGHT = 47;
+float COLOR_GREEN_DARK = 96;
+float COLOR_GREEN_MID = 104;
+float COLOR_GREEN_BRIGHT = 111;
+float COLOR_RED_DARK = 128;
+float COLOR_RED_MID = 136;
+float COLOR_RED_BRIGHT = 143;
+float COLOR_PURPLE_DARK = 144;
+float COLOR_PURPLE_MID = 152;
+float COLOR_PURPLE_BRIGHT = 159;
+float COLOR_YELLOW_DARK = 160;
+float COLOR_YELLOW_MID = 168;
+float COLOR_YELLOW_BRIGHT = 175;
+float COLOR_GREENSAT_DARK = 176;
+float COLOR_GREENSAT_MID = 184;
+float COLOR_GREENSAT_BRIGHT = 191;
+float COLOR_FB_BLUE1 = 247;
+float COLOR_FB_BLUE2 = 248;
+float COLOR_FB_BLUE3 = 249;
+float COLOR_FB_BLUE4 = 250;
