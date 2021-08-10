@@ -664,7 +664,7 @@ void poly_touch ()
 		self.velocity=normalize((self.owner.absmin+self.owner.absmax)*0.5-self.origin)*700;
 		self.owner=other;
 	}
-	else if(other.flags2&FL_ALIVE&&other.model!="models/sheep.mdl"&&other.classname!="monster_golem_crystal")
+	else if(other.flags2&FL_ALIVE&&other.model!="models/sheep.mdl"&&(!other.spawnflags&DONTMORPH))
 	{
 		self.touch=SUB_Null;
 		Polymorph(other);

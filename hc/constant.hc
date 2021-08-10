@@ -609,6 +609,7 @@ float PLAY_DEAD	= 8;	//Makes a monster play dead at start
 float NO_DROP	= 32;	//Keeps them from dropping to the ground at spawntime
 float SPAWNIN	= 128;	//Spawn in when triggered
 float SPAWNQUIET	= 65536;	//Spawn in without teleport fog/noise
+float DONTMORPH		= 131072;	//Not affected by polymorph spell
 
 //spawnflag for items, weapons, artifacts
 float FLOATING	=	1;	//Keeps them from dropping to the ground at spawntime
