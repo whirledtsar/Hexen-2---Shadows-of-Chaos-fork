@@ -114,8 +114,9 @@ entity oself;
 		if(loser.angles_x==0&&loser.angles_z==0)
 			loser.drawflags(+)SCALE_ORIGIN_BOTTOM;
 		loser.oldmovetype=loser.movetype;
-		loser.movetype=MOVETYPE_TOSS;
-        loser.health=1;
+		if (loser.movetype)
+			loser.movetype=MOVETYPE_TOSS;
+		loser.health=1;
 		loser.deathtype="ice melt";
 		loser.th_die=shatter;
 		AwardExperience(forwhom,loser,loser.experience_value);
