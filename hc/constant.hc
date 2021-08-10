@@ -36,8 +36,8 @@ float FL_MOVECHAIN_ANGLE		= 32768;    // when in a move chain, will update the a
 float FL_COLDHEAL				= 524288;	// healed by freezing
 float FL_HUNTFACE				= 65536;	//Makes monster go for enemy view_ofs thwn moving
 float FL_NOZ					= 131072;	//Monster will not automove on Z if flying or swimming
-float FL_SET_TRACE				= 262144;
-float FL_MISMATCHEDBOUNDS		= 524288;
+float FL_SET_TRACE				= 262144; // trace_ globals are set when monster calls movestep
+//float FL_MISMATCHEDBOUNDS		= 524288;
 float FL_ARCHIVE_OVERRIDE		= 1048576;	// quake 2 thingy
 float FL_CLASS_DEPENDENT		= 2097152;  // model will appear different to each player
 float FL_SPECIAL_ABILITY1		= 4194304;  // has 1st special ability
@@ -53,7 +53,7 @@ float FL_ALIVE					= 8;		//Dead or alive.
 //float FL_FAKE_WATER			= 16;		//Fake water
 float FL2_MENUACTIVE			= 16;		//SoC: player has stats menu active
 float FL_SUMMONED				= 32;		//Summoned monster, stops it from precaching
-float FL_LEDGEHOLD				= 64;		//Can realistically pull yourself up over ledges, etc.
+//float FL_LEDGEHOLD				= 64;		//Can realistically pull yourself up over ledges, etc.
 float FL_TORNATO_SAFE			= 512;
 float FL_CHAINED				= 2048;		//Held by chains
 float FL2_CROUCHED				= 4096;
@@ -719,7 +719,7 @@ float MAX_URN = 2;
 
 //GoT wandering monster respawn
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
-float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
+float WANDERING_MONSTER_TIME_MAX = 540; //9 minutes   //666; //11 minutes
 
 //Config flag parm system
 float PARM_RESPAWN	= 1;
