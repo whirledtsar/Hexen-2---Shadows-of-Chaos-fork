@@ -138,6 +138,15 @@ void(entity attacker, float damage)	death_knight_pain =
 
 //===========================================================================
 
+void() death_knight_gibs =
+{
+	ThrowGib ("models/footsoldierarm.mdl", self.health);
+	ThrowGib ("models/footsoldierleg.mdl", self.health);
+	ThrowGib ("models/footsoldierarm.mdl", self.health);
+	ThrowGib ("models/footsoldierleg.mdl", self.health);
+	ThrowGib ("models/footsoldieraxe.mdl", self.health);
+}
+
 void death_knight_dying () [++ 69 .. 88]
 {
 	self.think = death_knight_dying;
@@ -157,15 +166,6 @@ void death_knight_dying () [++ 69 .. 88]
 	}
 }
 
-void() death_knight_gibs =
-{
-	ThrowGib ("models/footsoldierarm.mdl", self.health);
-	ThrowGib ("models/footsoldierleg.mdl", self.health);
-	ThrowGib ("models/footsoldierarm.mdl", self.health);
-	ThrowGib ("models/footsoldierleg.mdl", self.health);
-	ThrowGib ("models/footsoldieraxe.mdl", self.health);
-}
-
 void() death_knight_die =
 {
 // check for gib
@@ -178,8 +178,7 @@ void() death_knight_die =
 		chunk_death();
 		return;		//remove(self);
 	}
-// regular death
-	sound (self, CHAN_VOICE, "death_knight/kdeath.wav", 1, ATTN_NORM);
+	
 	if (self.enemy.playerclass == CLASS_PALADIN && self.enemy.weapon == IT_WEAPON2 && random()<0.75)
 	{
 		setmodel (self, "models/footsoldiersplit.mdl");
@@ -197,13 +196,17 @@ void() death_knight_die =
 		self.headmodel = "";
 		bloodspew_create (2, 25, self.view_ofs);
 	}
+	// regular death
+	else
+		sound (self, CHAN_VOICE, "death_knight/kdeath.wav", 1, ATTN_NORM);
+	
 	sound (self, CHAN_AUTO, "player/megagib.wav", 1, ATTN_NORM);
 	
-	setsize (self, '-13 -13 -6', '13 13 6');
+	setsize (self, '-13 -13 0', '13 13 12');
 	death_knight_dying();
 };
 
-/*QUAKED monster_death_knight (1 0 0) (-16 -16 -24) (16 16 40) Ambush
+/*QUAKED monster_death_knight (1 0 0) (-16 -16 0) (16 16 56) Ambush
 */
 void() monster_death_knight =
 {
@@ -214,12 +217,13 @@ void() monster_death_knight =
 	}
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_knight();
-	
-	self.init_org = self.origin;
+
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
+
 	setmodel (self, "models/footsoldier.mdl");
-	setsize (self, '-13 -13 -12', '13 13 44');
+	//setsize (self, '-13 -13 -12', '13 13 44');
+	setsize (self, '-13 -13 0', '13 13 56');
 	
 	if (!self.health)
 		self.health = 62;
@@ -236,7 +240,7 @@ void() monster_death_knight =
 	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
-		self.experience_value = 15;
+		self.experience_value = 30;
 	self.init_exp_val = self.experience_value;
 	if(!self.mass)
 		self.mass = 11;
