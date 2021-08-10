@@ -2619,7 +2619,7 @@ string deathstring, deathstring2,iclass;
 			if (attacker.classname == "monster_roman")
 				bprint (" was exterminated by a Legionnaire!");
 			if (attacker.classname == "monster_roman_lord")
-				bprint (" was felt the sting of an Elite Legionnaire's spear!");
+				bprint (" felt the sting of an Elite Legionnaire's spear!");
 			if (attacker.classname == "monster_reiver")
 				bprint (" joined a Reiver in the graveyard!");
 			if (attacker.netname == "maulotaur")
