@@ -1573,14 +1573,14 @@ void init_imp (float which_skin)
 		self.hull=HULL_CROUCH;
 	}
 	self.headmodel = "models/h_imp.mdl";
-
+/*
 	if(which_skin==3)
 		self.flags2 (+) FL2_COLDHEAL|FL2_FIREHEAL;
 	else if(which_skin==1)
 		self.flags2 (+) FL2_COLDHEAL;
 	else
 		self.flags2 (+) FL2_FIREHEAL;
-
+*/
 	if(self.wait!=-1)
 	{
 		self.movetype = MOVETYPE_FLY;
