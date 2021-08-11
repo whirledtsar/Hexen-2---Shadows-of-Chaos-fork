@@ -1332,6 +1332,7 @@ void precache_soc()
 {
 //Stats menu
 	precache_model ("models/menustat.mdl");
+	precache_model ("models/menuoptn.mdl");
 	precache_sound ("misc/barmovup.wav");
 	precache_sound ("raven/menu3.wav");
 //BLOOD "DECALS" - models because transparency is glitchy
