@@ -292,6 +292,8 @@ void PlayerAdvanceLevel(float NewLevel)
 		else	//manual stat increases
 		{
 			self.statpoints += 8;
+			s2 = ftos(self.statpoints);
+			sprint(self, "Free stat points: "); sprint(self, s2); sprint(self, " (press home to distribute)\n");
 		}
 	}
 	
