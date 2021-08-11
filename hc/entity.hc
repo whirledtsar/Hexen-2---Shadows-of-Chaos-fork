@@ -768,7 +768,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 		float welcomeshown;
 		float whiptime;
 		float minionhealth;
-		float statselection;	//indicates current selection (wraps between 0 and 3)
+		float menuselection;	//indicates current selection (wraps between 0 and 3)
 		float statpoints; 		//counts stat points remaining
 	};
 	struct
