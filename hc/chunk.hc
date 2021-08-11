@@ -778,12 +778,11 @@ void chunk_death (void)
 	SUB_UseTargets();
 	SUB_ResetTarget();
 	
-	if (self.th_init && self.th_init != SUB_Null)
-	{	//set up respawn time
-		self.aflag = TRUE;		//tell MarkForRespawn not to gib this entity again
-		self.lifetime = time + random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
-		self.think = MarkForRespawn;
-		self.nextthink = time + 0.01;
+	if (self.th_init && !self.respawntime)
+	{
+		self.respawntime = random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
+		MarkForRespawn();
+		remove(self);
 	}
 	else if(self.headmodel!=""&&self.classname!="head")
 	{

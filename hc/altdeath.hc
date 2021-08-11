@@ -200,10 +200,11 @@ string type;
 		remove(self.movechain);
 	if(self.classname!="player")
 	{
-		if (CheckCfgParm(PARM_RESPAWN))
+		if (CheckCfgParm(PARM_RESPAWN) && !self.respawntime) {
+			self.respawntime = random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
 			MarkForRespawn();
-		else
-			remove(self);
+		}
+		remove(self);
 	}
 }
 

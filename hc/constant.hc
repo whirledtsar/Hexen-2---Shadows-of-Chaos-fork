@@ -3,10 +3,10 @@
  */
 
 #pragma warning disable F304	//shut the fuck up about unary operators
-
 //
 // constants
 //
+
 
 float FALSE					= 0;
 float TRUE					= 1;
@@ -47,10 +47,10 @@ float FL2_ADJUST_MON_DAM		= 1;		//Do more damage to monsters
 float FL_NODAMAGE				= 2;		//Special flag put on a missle to make it not do damage- used only by mezzoman
 float FL_SMALL					= 4;		//Small enough to be crsuhed underfoot
 float FL_ALIVE					= 8;		//Dead or alive.
-//float FL_FAKE_WATER				= 16;		//Fake water
+//float FL_FAKE_WATER			= 16;		//Fake water
 float FL2_MENUACTIVE			= 16;		//SoC: player has stats menu active
 float FL_SUMMONED				= 32;		//Summoned monster, stops it from precaching
-//float FL_LEDGEHOLD				= 64;		//Can realistically pull yourself up over ledges, etc.
+//float FL_LEDGEHOLD			= 64;		//Can realistically pull yourself up over ledges, etc.
 float FL_TORNATO_SAFE			= 512;
 float FL_CHAINED				= 2048;		//Held by chains
 float FL2_CROUCHED				= 4096;
@@ -64,8 +64,8 @@ float FL2_DEADMEAT				= 1024;		//Tagged for death
 float FL2_FIRERESIST			= 16384;	// resistant to fire and heat and lava
 float FL2_FIREHEAL				= 32768;	// healed by fire, heat, and lava
 float FL2_COLDRESIST			= 65536;	// healed by freezing
-float FL2_TEST_TRACE			= 131072; //
-float FL2_POISONED				= 262144; //
+float FL2_TEST_TRACE			= 131072;	// 
+float FL2_POISONED				= 262144;	// 
 float FL2_ONFIRE				= 4194304;  // on fire
 float FL2_SPAWNED				= 8388608;	// SoC: monster spawned with spawnin system
 float FL2_ITEMNOEXTRA			= 8388608;	// SoC: item is an extra or dropped item for coop and should not spawn another extra itself
@@ -286,11 +286,9 @@ float IT_WEAPON1					= 4096;
 float IT_WEAPON2					= 1;
 float IT_WEAPON3					= 2;
 float IT_WEAPON4					= 4;
-float IT_WEAPON5					= 8;
-float IT_WEAPON6					= 16;
-float IT_TESTWEAP					= 32;
-float IT_WEAPON4_1					= 64;		// First half of weapon
-float IT_WEAPON4_2					= 128;		// Second half of weapon
+float IT_TESTWEAP					= 8;
+float IT_WEAPON4_1					= 16;		// First half of weapon
+float IT_WEAPON4_2					= 32;		// Second half of weapon
 //possible extra weapons
 float IT_WEAPON5					= 64;
 float IT_WEAPON6					= 128;
@@ -674,7 +672,7 @@ float MAX_URN = 2;
 
 //GoT wandering monster respawn
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
-float WANDERING_MONSTER_TIME_MAX = 540; //9 minutes   //666; //11 minutes
+float WANDERING_MONSTER_TIME_MAX = 300;	//5 minutes		//666; //11 minutes
 
 //Config flag parm system
 float PARM_RESPAWN	= 1;
