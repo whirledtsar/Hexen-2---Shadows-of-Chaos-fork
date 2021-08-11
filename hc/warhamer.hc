@@ -168,8 +168,11 @@ float distance;
 		return;
     }
 //	HammerZap();
-    thinktime self : 0.1;
+	thinktime self : 0.1;
 	self.think = ThrowHammerThink;
+	
+	if (self.origin==VEC_ORIGIN)	//ws: not sure what causes this bug, but heres a band-aid
+		ThrowHammerReturn();
 };
 
 void HammerTouch ()
