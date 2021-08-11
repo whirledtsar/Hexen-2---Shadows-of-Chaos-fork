@@ -124,7 +124,7 @@ vector org;
 	org=self.origin;
 	if(pointcontents(org)==CONTENT_WATER||pointcontents(org)==CONTENT_SLIME||pointcontents(org)==CONTENT_LAVA&&(!self.spawnflags&BARREL_SINK))
 	{
-		self.classname=="barrel_floating";
+		self.classname="barrel_floating";
 		self.think=float;
 		thinktime self : 0;
 	}
