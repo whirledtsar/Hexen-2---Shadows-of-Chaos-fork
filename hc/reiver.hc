@@ -49,6 +49,7 @@ void() reiv_meleedrain;
 void() reiv_mis;
 void(entity attacker, float damg) reiv_pain;
 void() reiv_blasted;
+void() reiv_rise;
 void() reiv_run;
 void() reiv_stand;
 
@@ -59,36 +60,13 @@ void() precache_reiver
 	
 	precache_sound("assassin/chntear.wav");
 	precache_sound("imp/fireball.wav");
-	precache_sound("misc/rubble.wav");
+	precache_sound("fx/gravel2.wav");	//misc/rubble.wav
 	precache_sound("reiv/blood.wav");
 	precache_sound("reiv/die.wav");
 	precache_sound("reiv/idle.wav");
 	precache_sound("reiv/pain.wav");
 	precache_sound("reiv/see.wav");
 	precache_sound("weapons/drain.wav");
-}
-
-void reiv_check ()
-{	//self.enemy = reiver, self = dummy entity
-local entity amstuck, stuckent;
-	amstuck = findradius(self.enemy.origin, 80);
-	
-	while (amstuck)
-	{
-		if (amstuck!=world && (amstuck.solid==SOLID_BBOX || amstuck.solid==SOLID_SLIDEBOX))
-			stuckent = amstuck;
-		amstuck = amstuck.chain;
-	}
-	if (!stuckent) {
-		self.enemy.solid = SOLID_SLIDEBOX;
-		self.think = SUB_Remove;
-	}
-	else {
-		Knockback (stuckent, self.enemy, self.enemy, 5, 0.2);
-		self.enemy.solid = SOLID_NOT;
-		self.think = reiv_check;
-	}
-	thinktime self : HX_FRAME_TIME*0.5;
 }
 
 void reiv_risefx ()
@@ -111,40 +89,47 @@ void reiv_risefx ()
 	particle(org, randomv('-6 -6 2', '6 6 6'), rint(random(98,103)), 5);	//rint(random(85,88)
 }
 
+float reiv_canrise ()
+{
+	self.solid = SOLID_SLIDEBOX;
+	setorigin(self, self.origin);
+	if !(CanSpawnAtSpot (self.origin, self.mins*1.5, self.maxs*1.5, self)) {
+		if (trace_ent.health && trace_ent.solid && trace_ent.solid!=SOLID_PHASE)
+			Knockback (trace_ent, self, self, 8, 0.2);
+		self.frame = $000pose;
+		self.solid = SOLID_NOT;
+		self.effects(+)EF_NODRAW;
+		self.think = reiv_rise;
+		thinktime self : HX_FRAME_TIME;
+		return FALSE;
+	}
+	return TRUE;
+}
+
 void reiv_rise () [++ $001rise .. $024rise]
 {
+	if (!reiv_canrise())
+		return;
+	
 	if (cycle_wrapped)
 	{
 		self.attack_finished = time+2;
-		self.movetype = MOVETYPE_STEP;
+		self.takedamage = DAMAGE_YES;
 		self.th_pain = reiv_pain;
 		self.th_blasted = reiv_blasted;
-		setsize (self, REIV_MINS, REIV_MAXS);
-		self.hull = HULL_CROUCH;
-		//self.solid = SOLID_SLIDEBOX;		//handled in reiv_check
-		self.takedamage = DAMAGE_YES;
 		self.th_run = reiv_run;
 		self.think = reiv_run;
-		thinktime self : 0;
+		reiv_run();
 	}
 	
-	else if (self.frame == $001rise) {
-		setmodel (self, "models/reiver.mdl");
-		self.solid = SOLID_PHASE;
-		
-		local entity new;
-		new = spawn();
-		setorigin(new, self.origin);
-		new.enemy = self;
-		new.think = reiv_check;
-		thinktime new : 0;
-	}
+	else if (self.frame == $001rise)
+		self.effects(-)EF_NODRAW;
 	else if (self.frame == $002rise && (!self.spawnflags & REIV_NOFX))
-		sound (self, CHAN_BODY, "misc/rubble.wav", 1, 0.3);
+		sound (self, CHAN_BODY, "fx/gravel2.wav", 1, ATTN_NORM);
 	
 	if (self.frame < $012rise)
 		reiv_risefx();
-	else
+	else if (self.frame > $016rise)
 		reiv_fx();
 }
 
@@ -154,6 +139,7 @@ void reiv_buried ()
 		ai_stand();
 	else if (self.goalentity)	//activated by targeting
 	{
+		self.th_stand = reiv_stand;
 		self.think = reiv_rise;
 		self.think();
 	}
@@ -237,11 +223,12 @@ float moving;
 	self.think = reiv_dodge;
 	thinktime self : HX_FRAME_TIME;
 	
-	moving = movestep (0, 0, (REIV_SPEED*0.5+self.reivAcceleration) * self.reivDodgeDir, FALSE);	//height is -1 if going down, 1 if going up
-	++self.reivAcceleration;
+	moving = movestep (0, 0, (REIV_SPEED*0.25+self.reivAcceleration) * self.reivDodgeDir, FALSE);	//height is -1 if going down, 1 if going up
+	self.reivAcceleration += 0.75;
 	
 	if (!moving || self.reivChargeTime<time) {
-		self.reivDodgeTimer = time+1;	//dont dodge again until then
+		self.flags(+)FL_NOZ;	//without this flag, they just path back to their original position immediately
+		self.reivDodgeTimer = time+1.5;	//dont dodge again until then
 		self.think = reiv_run;
 	}
 }
@@ -310,7 +297,7 @@ void reiv_checkdef ()
 
 void reiv_fx ()
 {
-	particle4(self.origin, 1, rint (256 + 16*8 + random(9)), PARTICLETYPE_FASTGRAV, rint(random(1,2)));
+	particle4(self.origin, 1, rint (256 + 16*8 + random(9)), PARTICLETYPE_FASTGRAV, 1);
 	if (random()<0.1 && time > self.reivFXTimer) {
 		sound (self, CHAN_BODY, "reiv/blood.wav", 1, ATTN_IDLE);
 		self.reivFXTimer = time + 2;
@@ -340,7 +327,7 @@ float dist,damg;
 	if (dist > REIV_RANGE)
 		return;
 	
-	SUB_TraceRange(org1,org2,FALSE,self,30,15);
+	SUB_TraceRange(org1,org2,FALSE,self,30,20);
 	
 	if (trace_fraction == 0 || !trace_ent.takedamage)
 		return;
@@ -369,7 +356,7 @@ float dist,damg;
 void reiv_charge ()
 {
 	self.reivAcceleration+=0.5;
-	ai_charge(REIV_SPEED+self.reivAcceleration);
+	ai_charge(REIV_SPEED*0.5+self.reivAcceleration);
 }
 
 void reiv_meleeL () [++ $071meleel .. $088meleel]
@@ -477,7 +464,7 @@ void reiv_misfire () [++ $054fire .. $070fire]
 		diff = normalize(org2 - org1);
 		diff+=aim_adjust(self.enemy);
 
-		newmis.velocity = diff*800;
+		newmis.velocity = diff*700;
 		newmis.angles = vectoangles(newmis.velocity);
 		newmis.avelocity = '0 600 600';
 		
@@ -599,22 +586,32 @@ void reiv_run () [++ $025idle .. $038idle]
 	self.think = reiv_run;
 	thinktime self : HX_FRAME_TIME;
 	
+	if (self.spawnflags&SF_FLYABOVE) {
+		if (!visible(self.enemy))	//path normally to try to reach player
+			self.flags(-)FL_NOZ;
+		else
+			self.flags(+)FL_NOZ;
+	}
+	
 	ChangePitch();
 	reiv_fx();
 	self.reivAcceleration = 0;	//accelerator for charging
 	ai_run(REIV_SPEED);
-	reiv_checkdef();
 	
-	if (self.spawnflags & SF_FLYABOVE && self.enemy.origin_z < self.origin_z) {
-		//ai_face();
-		float height;
-		height = self.origin_z - self.enemy.origin_z;
-		if (height>0 && height<REIV_HEIGHT) {
-			movestep (0, 0, REIV_SPEED*2, FALSE);
-		}
+	if (self.spawnflags&SF_FLYABOVE && self.flags&FL_NOZ) {
+		local float diff;
+		diff = self.absmin_z - self.enemy.absmin_z;
+		if (diff < 32)
+			movestep(0, 0, REIV_SPEED, FALSE);
+		else if (diff > self.height)
+			movestep(0, 0, -REIV_SPEED, FALSE);
+		else
+			movestep (0, 0, random(0.5,2)*randomsign(), FALSE);		//slight up & down movement
 	}
-	if (self.th_stand == reiv_buried)
-		self.th_stand = reiv_stand;
+	else if (!self.spawnflags&SF_FLYABOVE && self.reivDodgeTimer < time)
+		self.flags(-)FL_NOZ;		//revert temp use of flag for dodging
+	
+	reiv_checkdef();
 }
 
 void reiv_stand2 () [++ $039look .. $053look]
@@ -646,12 +643,18 @@ void reiv_stand () [++ $025idle .. $038idle]
 void reiv_walk () [++ $025idle .. $038idle]
 {
 	ai_walk(REIV_SPEED*0.5);
+	reiv_fx();
+	
+	if (random()<0.05 && self.reivVoiceTimer < time) {
+		sound (self, CHAN_VOICE, "reiv/idle.wav", 1, ATTN_IDLE);
+		self.reivVoiceTimer = time + 2;
+	}
 }
 
 /*monster_reiver (1 0.3 0) (-20 -20 0) (20 20 32) AMBUSH 
 	
-	Experience: 40
-	Health: 120
+	Experience: 80
+	Health: 160
 */
 void monster_reiver ()
 {
@@ -664,31 +667,38 @@ void monster_reiver ()
 	if(!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_reiver();
 	
-	self.reivDrainTimer = time;			//timer for when to drain health again
-	self.reivSecondPhase = FALSE;	//in ranged phase or melee drain phase
-	self.reivIdleTimer = time+2;	//timer for look anim
-	self.reivChargeTime = time;	//timer for when to stop charging & dodging
+	if (self.spawnflags&SF_FLYABOVE)
+		self.flags(+)FL_NOZ;
+	
+	if (!self.health)
+		self.health = 160;
+	self.max_health = self.health;	//save spawn health for later checks
 	if (!self.experience_value)
 		self.experience_value = 80;
 	self.init_exp_val = self.experience_value;
+	
 	self.flags (+) FL_FLY;
-	self.reivVoiceTimer = time;		//timer for voice
-	if (!self.health)
-		self.health = 160;
-	self.reivFXTimer = time+1;			//timer for blood sound
-	self.max_health = self.health;	//save spawn health for later checks
 	self.mass = 10.1;	//not 10!
-	self.monsterclass = CLASS_GRUNT;
 	self.movetype = MOVETYPE_STEP;
+	self.solid = SOLID_SLIDEBOX;
+	
+	self.height = random(144,208);	//stay this far above player if SF_FLYABOVE
+	self.monsterclass = CLASS_GRUNT;
 	self.proj_ofs = '0 0 24';
 	self.sightsound = "reiv/see.wav";
-	self.solid = SOLID_SLIDEBOX;
-	self.reivDodgeTimer = time;	//timer for when we can dodge again
 	self.thingtype = THINGTYPE_FLESH;
 	self.turn_time = 6;		//change pitch at this speed
 	self.view_ofs = '0 0 32';
-	self.reivAcceleration = 0;	//accelerator for charge speed
 	self.yaw_speed = 12;
+	
+	self.reivAcceleration = 0;		//accelerator for charge speed
+	self.reivDodgeTimer = time;		//timer for when we can dodge again
+	self.reivDrainTimer = time;		//timer for when to drain health again
+	self.reivFXTimer = time+1;		//timer for blood sound
+	self.reivIdleTimer = time+2;	//timer for look anim
+	self.reivChargeTime = time;		//timer for when to stop charging & dodging
+	self.reivSecondPhase = FALSE;	//in ranged phase or melee drain phase
+	self.reivVoiceTimer = time;		//timer for voice
 	
 	setmodel (self, "models/reiver.mdl");
 	setsize (self, REIV_MINS, REIV_MAXS);
@@ -696,17 +706,15 @@ void monster_reiver ()
 	
 	if (self.spawnflags & REIV_BURIED)
 	{
-		self.mdl = self.model;
-		self.movetype = MOVETYPE_NOCLIP;
+		self.effects(+)EF_NODRAW;
 		self.solid = SOLID_NOT;
 		self.takedamage = DAMAGE_NO;
 		self.th_stand = reiv_buried;
 		self.th_run = reiv_rise;
 		self.th_pain = SUB_Null;
-		setmodel (self, "models/null.spr");
-		if (self.spawnflags&REIV_DORMANT && self.targetname == "") {
-			//self.spawnflags(-)REIV_DORMANT;
-			dprint ("Error: dormant Reiver has no targetname!\n");
+		if (self.spawnflags&REIV_DORMANT && !Sub_IsTargeted(self)) {
+			self.spawnflags(-)REIV_DORMANT;
+			dprint ("*Error: dormant Reiver has no targetname!*\n");
 		}
 	}
 	else
