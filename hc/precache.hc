@@ -4,7 +4,6 @@
 
 void() precache_spider;
 void() precache_scorpion;
-void() precache_knight;
 void() precache_mummy;
 void() precache_soc;
 
@@ -1471,6 +1470,7 @@ void precache_soc()
 	precache_sound ("necro/hum2.wav");
 	precache_sound ("necro/hum3.wav");
 	precache_sound ("necro/bonethit.wav");	//tomed shard ball
+	precache_sound ("assassin/core.wav");	//tomed magic mis altfire
 
 //demoness
 	precache_sound4 ("demoness/smack.wav");		//SoC: acid orb alt
