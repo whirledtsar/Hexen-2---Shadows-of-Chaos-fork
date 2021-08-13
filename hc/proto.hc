@@ -79,13 +79,15 @@ void SmallExplosion (void);
 float(float parm) CheckCfgParm;	//returns value of config flag
 float(float parm) SetCfgParm;	//reverses config flag and returns true if enabled, false if disabled
 
-//stats.hc
-void() StatsMenu_Toggle;
-void() StatsMenu_Disable;
+//menus.hc, stats.hc
+void(float type) Menu_Toggle;
+void() Menu_Disable;
 void() StatsMenu_Increase;
-void(float dir) StatsMenu_Choose;
+void(float dir) Menu_Move;
+void() Menu_Choose;
 void() StatsMenu_Dump;
 void(float statpool) StatsIncreaseRandom;
+void() OptionsMenu_Toggle;
 
 void() SUB_ResetTarget;
 

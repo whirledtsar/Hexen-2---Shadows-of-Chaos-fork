@@ -302,7 +302,7 @@ void end_sys_fields;
 .union	//must all be the same type!
 { // Entity type specific stuff
 	struct // player stuff
-	{		
+	{
 		float camera_time;      //
 		float weaponframe_cnt;  //
 		float attack_cnt;       // Shows which attack animation can be used
@@ -645,7 +645,7 @@ void end_sys_fields;
 .string noise4;
 
 // Monsters.
-.float pausetime;
+.float pausetime;		//also used by teleporters to stop players velocity
 .entity pathentity;
 
 // Doors.
@@ -678,7 +678,7 @@ void end_sys_fields;
 
 // Plats/doors/buttons
 .float lip;
-.float state;
+.float state;		// ws: reused for client config parm flags system
 .vector pos1, pos2; // Top and bottom positions
 .float height;
 
@@ -819,7 +819,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 		float welcomeshown;
 		float whiptime;
 		float minionhealth;
-		float statselection;	//indicates current selection (wraps between 0 and 3)
+		float menuselection;	//indicates current selection (wraps between 0 and 3)
 		float statpoints; 		//counts stat points remaining
 	};
 	struct

@@ -1016,7 +1016,7 @@ entity holdent,lastleader,newking;
 	if (targ.flags&FL_CLIENT && targ.flags2&FL2_MENUACTIVE) {
 		holdent = self;
 		self = targ;
-		StatsMenu_Disable();
+		Menu_Disable();
 		self = holdent;
 	}
 
