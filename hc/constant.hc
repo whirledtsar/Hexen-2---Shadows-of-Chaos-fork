@@ -730,17 +730,17 @@ float PARM_FADE		= 2;
 float PARM_BUFF		= 4;
 float PARM_STATS	= 8;
 
-//impulse commands
-float IMPULSE_INFO = 50;
-float IMPULSE_RESPAWN = 51;
-float IMPULSE_FADE = 52;
-float IMPULSE_BUFF = 53;
-float IMPULSE_STATS = 54;
-float STATS_MENU = 80;
-float STATS_MOVEDOWN = 81;
-float STATS_MOVEUP = 82;
-float STATS_INCREASE = 83;
-float STATS_DUMP = 84;
+//menu types
+float MENU_STATS = 0;
+float MENU_OPTIONS = 1;
+
+//menu impulse commands
+float IMPULSE_STATS = 80;
+float IMPULSE_MOVEDOWN = 81;
+float IMPULSE_MOVEUP = 82;
+float IMPULSE_CHOOSE = 83;
+float IMPULSE_STATS_DUMP = 84;
+float IMPULSE_OPTIONS = 85;
 
 //rate of decceleration for effect of disc of repulsion on fly monsters
 float BLAST_DECEL = 4;
