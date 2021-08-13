@@ -1125,10 +1125,10 @@
 		64 : "Frozen (PoP)" : 0 //Enemy is made out of ice
 		128 : "Spawn in" : 0 : "Spawns in when triggered"
 		65536 : "Spawn quiet" : 0 : "Spawns in without teleport fog/noise"
+		131072 : "Don't morph" : 0 : "Unaffected by polymorph spell"
 	]
 	health(integer) : "Health"
 	experience_value(integer) : "Experience"
-	//experience(integer) : "Experience (PoP)" //Doesn't seem to work
 	spawndelay(integer) : "Delay before triggered spawning"
 	waketarget(target_destination) : "Target fired upon waking up"
 ]
@@ -2453,6 +2453,7 @@ Will not work well with a func_rotating that already has the TOGGLE_REVERSE spaw
     button0(integer) : "Starting animation frame # within the [button1-button2] range (button1 by default)"
     button1(integer) : "First animation frame"
     button2(integer) : "Last animation frame"
+	health(integer) : "Health if breakable"
 	orgnl_mins(string) : "Bounding box minimum (x y z)"
 	orgnl_maxs(string) : "Bounding box maximum (x y z)"
     speed(integer) : "Animation frames duration; default 0.05" : 0.05
