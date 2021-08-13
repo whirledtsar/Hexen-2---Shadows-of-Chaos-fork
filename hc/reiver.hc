@@ -712,7 +712,7 @@ void monster_reiver ()
 		self.th_stand = reiv_buried;
 		self.th_run = reiv_rise;
 		self.th_pain = SUB_Null;
-		if (self.spawnflags&REIV_DORMANT && !Sub_IsTargeted(self)) {
+		if (self.spawnflags&REIV_DORMANT && !SUB_IsTargeted(self)) {
 			self.spawnflags(-)REIV_DORMANT;
 			dprint ("*Error: dormant Reiver has no targetname!*\n");
 		}
