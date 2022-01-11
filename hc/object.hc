@@ -1861,8 +1861,9 @@ void obj_statue_snake_coil (void)
 {
 	precache_model2 ("models/snake.mdl");
 	CreateEntityNew(self,ENT_STATUE_SNAKE_COIL,"models/snake.mdl",chunk_death);
-
-	self.scale = .5;
+	
+	if (!self.scale)
+		self.scale = .5;
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
 	self.use=self.th_die;
 }
