@@ -466,13 +466,13 @@ ANGLE_WAIT - Train will not change angles until it reached path_corner, and will
 void() func_train_mp =
 {
 entity targ;
-
+/*
 	if(!world.spawnflags&MISSIONPACK)
 	{
 		func_train();
 		return;
 	}
-
+*/
 	if(self.dmg==666)
 		if(mapname=="tibet9")
 			self.dmg=50;
