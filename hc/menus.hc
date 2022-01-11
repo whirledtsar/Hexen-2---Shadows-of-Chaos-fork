@@ -15,9 +15,10 @@ float ofsdir;
 	
 	makevectors(self.owner.v_angle);
 	source = self.owner.origin+self.owner.view_ofs+'0 0 2';
-	dest = source+v_forward*25.5;		//12 is perfect without fov compensation
+	dest = source+v_forward*25.5;				//12 is perfect without fov compensation
 	dest -= v_forward*(cvar("fov")*0.15);		//compensate for fov
-	dest += v_forward*(-self.owner.v_angle_x*0.04*(self.owner.v_angle_x<15));	//if player is aiming up, spawn graphic further away
+	dest += v_forward*(self.owner.v_angle_x*0.03*(self.owner.v_angle_x>15));		//if player is aiming down, spawn graphic further away
+	dest += v_forward*(self.owner.v_angle_x*0.03*(self.owner.v_angle_x<-15));		//if player is aiming up, spawn graphic closer
 	traceline(source, dest, TRUE, self);
 	dest = trace_endpos;
 	
@@ -47,8 +48,7 @@ float ofsdir;
 
 void Menu_Enable (float type)
 {
-	if (type==MENU_STATS && !self.statpoints)
-	{
+	if (type==MENU_STATS && !self.statpoints) {
 		centerprint (self, "You have no remaining stat points\n");
 		sprint(self, "You have no remaining stat points\n");
 		return;
