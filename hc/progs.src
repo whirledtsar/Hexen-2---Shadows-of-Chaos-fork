@@ -94,6 +94,7 @@ triggers.hc
 cat2.hc
 quake.hc
 plats.hc
+plats_mp.hc
 misc.hc
 torch.hc
 
