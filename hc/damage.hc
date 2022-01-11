@@ -984,7 +984,7 @@ entity holdent,lastleader,newking;
 		//damage += attacker.super_damage * damage;
 
 	// Calculating Damage to a player
-	if (targ.classname == "player")
+	if (targ.flags&FL_CLIENT && !(targ.air_finished < time && inflictor==world))	//ws: drowning ignores armor
 	{	// How much armor does he have
 		armor_damage = armor_calc(targ,damage);
 
@@ -1007,6 +1007,7 @@ entity holdent,lastleader,newking;
 // figure momentum add
 	if ( (inflictor != world) && (targ.movetype == MOVETYPE_WALK) )
 	{
+		targ.flags(-)FL_ONGROUND;
 		dir = targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
 		dir = normalize(dir);
 		targ.velocity = targ.velocity + dir*damage*8;
