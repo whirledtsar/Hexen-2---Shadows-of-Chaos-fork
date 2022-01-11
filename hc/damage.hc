@@ -1141,21 +1141,20 @@ entity holdent,lastleader,newking;
 		}
 	}
 
-	if (self.th_pain)
-		if(self.th_pain!=SUB_Null)
-		{
-			if(self.classname=="player"&&self.model!="models/sheep.mdl")
-				player_pain(attacker, total_damage);
-			else if(self.frozen<=0)
-				self.th_pain (attacker, total_damage);
-		// nightmare mode monsters don't go into pain frames often
-			if (skill >= 3)
-				self.pain_finished = time + 5;		
-		}
-	if (inflictor.classname=="blast" && self.th_blasted)
+	if (inflictor.classname=="blast" && self.th_blasted && self.health && self.think!=CorpseThink)
 	{
 		self.blasted = damage*4;
 		self.th_blasted();
+	}
+	else if (self.th_pain)
+	{
+		if(self.classname=="player"&&self.model!="models/sheep.mdl")
+			player_pain();
+		else
+			self.th_pain (attacker, total_damage);
+	// nightmare mode monsters don't go into pain frames often
+		if (skill == 3)
+			self.pain_finished = time + 5;	
 	}
 	
 	self = oldself;
