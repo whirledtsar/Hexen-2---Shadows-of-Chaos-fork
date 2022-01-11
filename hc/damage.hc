@@ -807,7 +807,12 @@ entity holdent;
 		}
 	}
 
-	if (self.th_pain)
+	if (inflictor.classname=="blast" && self.th_blasted && self.health && self.think!=CorpseThink)
+	{
+		self.blasted = damage*4;
+		self.th_blasted();
+	}
+	else if (self.th_pain)
 	{
 		if(self.classname=="player"&&self.model!="models/sheep.mdl")
 			player_pain();
@@ -815,12 +820,7 @@ entity holdent;
 			self.th_pain (attacker, total_damage);
 	// nightmare mode monsters don't go into pain frames often
 		if (skill == 3)
-			self.pain_finished = time + 5;		
-	}
-	if (inflictor.classname=="blast" && self.th_blasted)
-	{
-		self.blasted = damage*4;
-		self.th_blasted();
+			self.pain_finished = time + 5;	
 	}
 
 	self = oldself;
