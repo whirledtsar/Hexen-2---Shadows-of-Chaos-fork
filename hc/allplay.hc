@@ -425,7 +425,8 @@ void PlayerUnCrouching ()
 	tracearea (self.origin,self.origin+'0 0 28','-16 -16 0','16 16 28',FALSE,self);
 	if (trace_fraction < 1)
 	{
-		centerprint(self,STR_NOROOM);
+		if (self.waterlevel < 3)	//ws: dont print message if swimming
+			centerprint(self,STR_NOROOM);
 		self.crouch_stuck = 1;
 		return;
 	}
