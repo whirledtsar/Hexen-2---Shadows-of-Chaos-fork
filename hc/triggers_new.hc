@@ -440,7 +440,14 @@ entity found;
 
 		stopSound(found, 0);
 
-		if (found.classname == "train" || found.classname == "door_rotating")
+		if (found.classname == "func_train_mp")
+		{
+			if(found.level)
+				sound (found, CHAN_VOICE, found.noise, 1, ATTN_NONE);
+			else
+				sound (found, CHAN_VOICE, found.noise, 1, ATTN_NORM);
+		}
+		else if (found.classname == "train" || found.classname == "door_rotating")
 			sound (found, CHAN_VOICE, found.noise1, 1, ATTN_NORM);
 
 		found=find(found,targetname,self.target);
