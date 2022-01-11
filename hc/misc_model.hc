@@ -38,8 +38,8 @@ void() misc_model = {
 	if (!self.model || self.model=="")
 		objerror("misc_model: No model");
 	
-    precache_model(self.model);
-    setmodel(self, self.model);
+	precache_model(self.model);
+	setmodel(self, self.model);
 	self.mins = self.orgnl_mins;
 	self.maxs = self.orgnl_maxs;
 	setsize(self, self.orgnl_mins, self.orgnl_maxs);
@@ -70,6 +70,7 @@ void() misc_model = {
 	
 	self.mdl = self.model;
 	self.takedamage = TRUE;		//not really, but necessary for damage/impact particles
+	self.aflag = TRUE;			//model is currently animating?
 	
 	if (self.spawnflags&MODEL_STARTOFF) {
 		self.solid = SOLID_NOT;
@@ -83,12 +84,12 @@ void() misc_model = {
 	else if (self.spawnflags&MODEL_TRIGGERBREAK)
 		self.use = self.th_die;
 	
-    if (!self.frame) self.frame = self.button1;
+	if (!self.frame) self.frame = self.button1;
 
-    // Only animate if given a frame range
-    if (!self.button2) return;
-    if (self.button0) self.frame = self.button0;
-    if (!self.speed) self.speed = 0.05; // Default animation speed
+	// Only animate if given a frame range
+	if (!self.button2) return;
+	if (self.button0) self.frame = self.button0;
+	if (!self.speed) self.speed = 0.05; // Default animation speed
 	
 	self.check_ok = TRUE;	//indicates that this model is animated
 	
@@ -104,9 +105,9 @@ void() misc_model = {
  * Handles animation for misc_model entity.
  */
 void() misc_model_think = {
-    self.nextthink = time + fabs(self.speed);
-    self.frame = self.frame + sign(self.speed);
-    self.frame = wrap(self.frame, self.button1, self.button2);
+	self.nextthink = time + fabs(self.speed);
+	self.frame = self.frame + sign(self.speed);
+	self.frame = wrap(self.frame, self.button1, self.button2);
 };
 
 void misc_model_toggle ()
