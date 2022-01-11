@@ -404,6 +404,9 @@ void(entity attacker, float damage)	afrit_pain =
 
 	if (self.pain_finished > time)
 		return;
+	if (random() < 0.15)
+		return;
+	
 	if (random() < 0.85)
 		sound (self, CHAN_VOICE, "afrit/pain.wav", 1, ATTN_NORM);
 	else
