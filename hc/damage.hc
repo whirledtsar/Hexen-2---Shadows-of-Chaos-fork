@@ -729,16 +729,16 @@ float armor_calc(entity targ,float damage)
 	total_armor_protection = 0;
 
 	if (targ.armor_amulet)
-		total_armor_protection += ClassArmorProtection[targ.playerclass - 1]; 
+		total_armor_protection += ClassArmorProtection[(targ.playerclass - 1) * 4]; 
 
 	if (targ.armor_bracer)
-		total_armor_protection += ClassArmorProtection[targ.playerclass - 1 + 1];
+		total_armor_protection += ClassArmorProtection[(targ.playerclass - 1) * 4 + 1];
 
 	if (targ.armor_breastplate)
-		total_armor_protection += ClassArmorProtection[targ.playerclass - 1 + 2];
+		total_armor_protection += ClassArmorProtection[(targ.playerclass - 1) * 4 + 2];
 
 	if (targ.armor_helmet)
-		total_armor_protection += ClassArmorProtection[targ.playerclass - 1 + 3];
+		total_armor_protection += ClassArmorProtection[(targ.playerclass - 1) * 4 + 3];
 
 	total_armor_protection += targ.level * .001;
 
