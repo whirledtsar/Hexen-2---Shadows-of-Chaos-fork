@@ -82,6 +82,9 @@ $frame stomp18 stomp19 stomp20 stomp21 stomp22 stomp23 stomp24
 
 // CONSTANTS ---------------------------------------------------------------
 
+float GOLEM_DORMANT = 16;
+float GOLEM_STATUE = 262144;
+
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
 void GolemInit(void);
@@ -107,6 +110,8 @@ void GolemBStomp(void);
 void GolemIMissile(void);
 float GolemBCheckBeamAttack();
 float GolemICheckMissileAttack();
+void GolemDormant();
+void GolemWake();
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
@@ -161,12 +166,20 @@ void monster_golem_stone(void)
 		self.experience_value = 125;
 	self.mintel = 4;
 	self.th_melee = GolemSMeleeDecide;
-	self.th_pain = GolemSPain;
+	if (self.spawnflags&GOLEM_STATUE) {
+		self.th_save = GolemSPain;
+		self.th_pain = SUB_Null;
+	}
+	else
+		self.th_pain = GolemSPain;
 	self.th_init = monster_golem_stone;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	
 	self.buff=2;
 	walkmonster_start();
+	
+	if (self.spawnflags&GOLEM_DORMANT)
+		self.takedamage = DAMAGE_NO;	//set by walkmonster_start
 }
 
 //==========================================================================
@@ -217,12 +230,20 @@ void monster_golem_iron(void)
 		self.experience_value = 200;
 	self.mintel = 6;
 	self.th_melee = GolemIMeleeDecide;
-	self.th_pain = GolemIPain;
+	if (self.spawnflags&GOLEM_STATUE) {
+		self.th_save = GolemIPain;
+		self.th_pain = SUB_Null;
+	}
+	else
+		self.th_pain = GolemIPain;
 	self.th_init = monster_golem_iron;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	
 	self.buff=2;
 	walkmonster_start();
+	
+	if (self.spawnflags&GOLEM_DORMANT)
+		self.takedamage = DAMAGE_NO;	//set by walkmonster_start
 }
 
 //==========================================================================
@@ -275,12 +296,20 @@ void monster_golem_bronze(void)
 		self.experience_value = 275;
 	self.mintel = 8;
 	self.th_melee = GolemBMeleeDecide;
-	self.th_pain = GolemBPain;
+	if (self.spawnflags&GOLEM_STATUE) {
+		self.th_save = GolemBPain;
+		self.th_pain = SUB_Null;
+	}
+	else
+		self.th_pain = GolemBPain;
 	self.th_init = monster_golem_bronze;
 	self.view_ofs = self.proj_ofs='0 0 115';
 	
 	self.buff=2;
 	walkmonster_start();
+	
+	if (self.spawnflags&GOLEM_DORMANT)
+		self.takedamage = DAMAGE_NO;	//set by walkmonster_start
 }
 
 //==========================================================================
@@ -317,7 +346,7 @@ void monster_golem_crystal(void)
 		precache_sound3("golem/dthgroan.wav");
 	}
 	
-		self.spawnflags(+)DONTMORPH;
+	self.spawnflags(+)DONTMORPH;
 	
 	self.thingtype = THINGTYPE_ICE;
 	setmodel(self, "models/golem_s.mdl");
@@ -367,6 +396,41 @@ void GolemInit(void)
 		precache_sound3("golem/step.wav");
 		precache_sound3("golem/swing.wav");
 	}
+	
+	if (self.spawnflags&GOLEM_DORMANT) {
+		self.spawnflags(+)GOLEM_STATUE;
+		self.th_stand = GolemDormant;
+	}
+	
+	if (self.spawnflags&GOLEM_STATUE) {
+		self.frame = $wake1;
+		self.th_run = GolemWake;
+	}
+}
+
+//==========================================================================
+
+void GolemWake(void) [++ $wake1..$wake16]
+{
+	self.spawnflags(-)GOLEM_STATUE;
+	self.spawnflags(-)GOLEM_DORMANT;
+	if (self.frame==$wake16) {
+		if (self.th_pain == SUB_Null)
+			self.th_pain = self.th_save;
+		self.takedamage = DAMAGE_YES;
+		self.th_run = GolemRun;
+		self.think = self.th_run;
+	}
+	else if (self.frame==$wake1)
+		sound(self, CHAN_VOICE, "golem/awaken.wav", 1, ATTN_NORM);
+}
+
+void GolemDormant(void)
+{
+	if (self.goalentity) {
+		GolemWake();
+	}
+	thinktime self : 0.1;
 }
 
 //==========================================================================
@@ -391,11 +455,13 @@ void GolemStand(void)// [++ $rest1..$rest22]
 {
 	self.think = GolemStand;
 	ai_stand();
-	if (time > self.absorb_time) {		//slow animation speed
-		AdvanceFrame($rest1, $rest22);
-		self.absorb_time = time + HX_FRAME_TIME*4;
+	if (!self.spawnflags&GOLEM_STATUE) {
+		if (time > self.absorb_time) {		//slow animation speed
+			AdvanceFrame($rest1, $rest22);
+			self.absorb_time = time + HX_FRAME_TIME*4;
+		}
 	}
-	thinktime self : HX_FRAME_TIME;	//0.2
+	thinktime self : HX_FRAME_TIME;
 }
 
 //==========================================================================
@@ -1345,10 +1411,16 @@ void GolemChunkPlace(string gibname, vector pos, vector vel)
 		new.scale = 2.0;
 		new.skin = 2;
 	}
-
-	new.think = SUB_Remove;
+	
+	if (CheckCfgParm(PARM_FADE) || coop || deathmatch) {
+		new.think = SUB_Remove;
+		thinktime new : random(10,20);
+	}
+	else {
+		new.think = SUB_Null;
+		thinktime new : -1;
+	}
 	new.ltime = time;
-	new.nextthink = time + 10 + random()*10;
 	new.frame = 0;
 	new.flags = 0;
 }
@@ -1416,7 +1488,7 @@ void GolemDeathFinish(void) [++ $death12..$death22]
 			self.think = chunk_death;
 			thinktime self : 0.1;
 		}
-		*/
+*/
 		
 		GolemChunkDeath();
 		return;
@@ -1424,7 +1496,7 @@ void GolemDeathFinish(void) [++ $death12..$death22]
 	
 	if(self.frame == $death16)
 	{
-		self.solid = SOLID_NOT;
+		self.solid = SOLID_PHASE;
 	}
 	
 	if (self.frame > $death16)
@@ -1433,7 +1505,7 @@ void GolemDeathFinish(void) [++ $death12..$death22]
 		self.origin += v_forward * 4;
 	}
 
-	if(self.health < -50)
+	if(self.health < -60)
 	{
 		self.think = chunk_death;
 	}
