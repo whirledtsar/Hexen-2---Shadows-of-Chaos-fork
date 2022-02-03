@@ -267,7 +267,6 @@ float mezzo_check_duck (entity proj)	//PoP version
 entity proj_owner;
 vector proj_mins,duck_hite,proj_dir;
 vector temp_f,temp_r,temp_u;
-										 
 
 	duck_hite=self.origin;
 	duck_hite_z=self.origin_z + self.maxs_z/2;
@@ -658,7 +657,7 @@ float result;
 	
 	if (self.owner.classname=="monster_fallen_angel")
 		result = ReflectMissile (other, REFLECT_DEFLECT, CE_WHITE_FLASH, 1, 0, 90, TRUE, 0);
-	if (self.owner.classname=="monster_fallen_angel_lord")
+	else if (self.owner.classname=="monster_fallen_angel_lord")
 		result = ReflectMissile (other, REFLECT_AIMED, CE_WHITE_FLASH, 1, 0, 0, TRUE, 0);
 	else if(!self.owner.skin && self.owner.classname=="monster_mezzoman")	//Just block it
 		result = ReflectMissile (other, REFLECT_BLOCK, 0, 1, 0, 0, TRUE, 0);
@@ -876,21 +875,18 @@ void mezzo_pain (entity attacker, float damage)
 	if(self.health<=100)
 	{
 		self.th_pain=SUB_Null;
-		if(self.health<=100)
+		if(random()<0.75 && !self.aflag)
 		{
-			if(random()<0.5)
-			{
-				self.th_save=self.th_run;
-				self.think=mezzo_roar;
-				self.speed=15;
-				self.yaw_speed=20;
-				self.aflag=TRUE;//Berzerk!
-			}
-			else if(!self.flags&FL_ONGROUND)
-				self.think=mezzo_in_air;
-			else
-				self.think=self.th_run;
+			self.th_save=self.th_run;
+			self.think=mezzo_roar;
+			self.speed=15;
+			self.yaw_speed=20;
+			self.aflag=TRUE;//Berzerk!
 		}
+		else if(!self.flags&FL_ONGROUND)
+			self.think=mezzo_in_air;
+		else
+			self.think=self.th_run;
 	}
 	else
 	{
@@ -935,6 +931,7 @@ void mezzo_in_air ()
 				self.flags(+)FL_ONGROUND;
 		}
 	}
+
 	if(self.flags&FL_ONGROUND)
 	{
 		thinktime self : 0;
@@ -1166,8 +1163,10 @@ float skidspeed, anim_stretch;
 	else
 	{
 		thinktime self : 0;
-		if (self.frame==$block1)
+		if (self.frame==$block1) {
+			mezzo_reset_shield();
 			self.think=mezzo_run_loop;
+		}
 		else
 			self.think=mezzo_block_return;
 		return;
@@ -1194,7 +1193,8 @@ float skidspeed, anim_stretch;
 
 void mezzo_roar () [++ $roar1 .. $roar30] 
 {
-	self.health+=1.1;
+	if (self.aflag)		//berserk phase
+		self.health+=1.1;
 
 	if(self.frame==$roar30)
 	{
@@ -1209,9 +1209,8 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 	else if(self.frame==$roar1)
 	{
 		self.monster_awake=TRUE;
-		if(self.health<100)
+		if(self.aflag)
 		{
-			self.th_pain=SUB_Null;
 			self.takedamage=DAMAGE_NO;
 		}
 		sound(self,CHAN_VOICE,"mezzo/roar.wav",1,ATTN_NORM);
@@ -1219,6 +1218,8 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 	}
 	else if(self.frame==$roar19)
 		thinktime self : 1;		//2
+	else
+		thinktime self : HX_FRAME_TIME*0.5;
 
 	if(self.takedamage)
 		mezzo_check_defense();
