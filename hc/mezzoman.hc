@@ -849,21 +849,18 @@ void mezzo_pain (entity attacker, float damage)
 	if(self.health<=100)
 	{
 		self.th_pain=SUB_Null;
-		if(self.health<=100)
+		if(random()<0.75 && !self.aflag)
 		{
-			if(random()<0.5)
-			{
-				self.th_save=self.th_run;
-				self.think=mezzo_roar;
-				self.speed=15;
-				self.yaw_speed=20;
-				self.aflag=TRUE;//Berzerk!
-			}
-			else if(!self.flags&FL_ONGROUND)
-				self.think=mezzo_in_air;
-			else
-				self.think=self.th_run;
+			self.th_save=self.th_run;
+			self.think=mezzo_roar;
+			self.speed=15;
+			self.yaw_speed=20;
+			self.aflag=TRUE;//Berzerk!
 		}
+		else if(!self.flags&FL_ONGROUND)
+			self.think=mezzo_in_air;
+		else
+			self.think=self.th_run;
 	}
 	else
 	{
@@ -1140,8 +1137,12 @@ float skidspeed, anim_stretch;
 	}
 	else
 	{
-		thinktime self : 0;
-		self.think=mezzo_block_return;
+		if (self.frame==$block1) {
+			mezzo_reset_shield();
+			self.think=mezzo_run_loop;
+		}
+		else
+			self.think=mezzo_block_return;
 		return;
 	}
 
@@ -1169,7 +1170,8 @@ float skidspeed, anim_stretch;
 
 void mezzo_roar () [++ $roar1 .. $roar30] 
 {
-	self.health+=1.1;
+	if (self.aflag)		//berserk phase
+		self.health+=1.1;
 	if(self.health>self.max_health)
 		self.max_health=self.health;
 
@@ -1186,9 +1188,8 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 	else if(self.frame==$roar1)
 	{
 		self.monster_awake=TRUE;
-		if(self.health<100)
+		if(self.aflag)
 		{
-			self.th_pain=SUB_Null;
 			self.takedamage=DAMAGE_NO;
 		}
 		sound(self,CHAN_VOICE,"mezzo/roar.wav",1,ATTN_NORM);
@@ -1196,6 +1197,8 @@ void mezzo_roar () [++ $roar1 .. $roar30]
 	}
 	else if(self.frame==$roar19)
 		thinktime self : 1;		//2
+	else
+		thinktime self : HX_FRAME_TIME*0.5;
 
 	if(self.takedamage)
 		mezzo_check_defense();
@@ -1367,7 +1370,7 @@ void mezzo_stand2 () [-- $stand10 .. $stand1]
 
 	if(self.frame==$stand1)
 	{
-		if(random()<0.1||(self.monster_awake&&random()<0.5))
+		if(self.monster_awake&&random()<0.5) //(random()<0.1||(self.monster_awake&&random()<0.5))	ws: stopped him making sword swinging noises while inactive
 			self.think=mezzo_twirl;
 		else
 			self.think=mezzo_stand;
