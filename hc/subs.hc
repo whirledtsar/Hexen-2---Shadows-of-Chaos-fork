@@ -3,7 +3,6 @@
  */
 
 float SPAWNFLAG_ACTIVATED	= 8;
-float SPAWNFLAG_USESTRING = 131072;
 
 void SUB_Null() {}
 
@@ -411,7 +410,7 @@ string s;
 		else
 			s = getstring(self.message);
 		centerprint (activator, s);
-		if(!self.noise)
+		if(!self.noise && self.soundtype != -1)
 			sound (activator, CHAN_VOICE, "misc/comm.wav", 1, ATTN_NORM);
 	}
 
