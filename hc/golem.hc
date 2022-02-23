@@ -82,8 +82,8 @@ $frame stomp18 stomp19 stomp20 stomp21 stomp22 stomp23 stomp24
 
 // CONSTANTS ---------------------------------------------------------------
 
+float GOLEM_STATUE = 2;
 float GOLEM_DORMANT = 16;
-float GOLEM_STATUE = 262144;
 
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
@@ -164,6 +164,7 @@ void monster_golem_stone(void)
 	self.max_health = self.health;
 	if (!self.experience_value)
 		self.experience_value = 125;
+	self.init_exp_val = self.experience_value;
 	self.mintel = 4;
 	self.th_melee = GolemSMeleeDecide;
 	if (self.spawnflags&GOLEM_STATUE) {
@@ -177,9 +178,6 @@ void monster_golem_stone(void)
 	
 	self.buff=2;
 	walkmonster_start();
-	
-	if (self.spawnflags&GOLEM_DORMANT)
-		self.takedamage = DAMAGE_NO;	//set by walkmonster_start
 }
 
 //==========================================================================
@@ -228,6 +226,7 @@ void monster_golem_iron(void)
 	self.max_health = self.health;
 	if (!self.experience_value)
 		self.experience_value = 200;
+	self.init_exp_val = self.experience_value;
 	self.mintel = 6;
 	self.th_melee = GolemIMeleeDecide;
 	if (self.spawnflags&GOLEM_STATUE) {
@@ -241,9 +240,6 @@ void monster_golem_iron(void)
 	
 	self.buff=2;
 	walkmonster_start();
-	
-	if (self.spawnflags&GOLEM_DORMANT)
-		self.takedamage = DAMAGE_NO;	//set by walkmonster_start
 }
 
 //==========================================================================
@@ -294,6 +290,7 @@ void monster_golem_bronze(void)
 	self.max_health = self.health;
 	if (!self.experience_value)
 		self.experience_value = 275;
+	self.init_exp_val = self.experience_value;
 	self.mintel = 8;
 	self.th_melee = GolemBMeleeDecide;
 	if (self.spawnflags&GOLEM_STATUE) {
@@ -307,9 +304,6 @@ void monster_golem_bronze(void)
 	
 	self.buff=2;
 	walkmonster_start();
-	
-	if (self.spawnflags&GOLEM_DORMANT)
-		self.takedamage = DAMAGE_NO;	//set by walkmonster_start
 }
 
 //==========================================================================
@@ -358,6 +352,7 @@ void monster_golem_crystal(void)
 	self.skin = GLOBAL_SKIN_ICE;
 	self.health = 400;
 	self.experience_value = 650;
+	self.init_exp_val = self.experience_value;
 	self.th_melee = GolemSMeleeDecide;
 	self.th_pain = GolemSPain;
 	self.use = GolemCUse;
@@ -397,12 +392,9 @@ void GolemInit(void)
 		precache_sound3("golem/swing.wav");
 	}
 	
-	if (self.spawnflags&GOLEM_DORMANT) {
-		self.spawnflags(+)GOLEM_STATUE;
-		self.th_stand = GolemDormant;
-	}
-	
 	if (self.spawnflags&GOLEM_STATUE) {
+		if (world.model=="maps/tibet9.bsp")		//PoP Golem twins
+			self.spawnflags(+)GOLEM_DORMANT;
 		self.frame = $wake1;
 		self.th_run = GolemWake;
 	}
@@ -425,14 +417,6 @@ void GolemWake(void) [++ $wake1..$wake16]
 		sound(self, CHAN_VOICE, "golem/awaken.wav", 1, ATTN_NORM);
 }
 
-void GolemDormant(void)
-{
-	if (self.goalentity) {
-		GolemWake();
-	}
-	thinktime self : 0.1;
-}
-
 //==========================================================================
 //
 // GolemCUse
@@ -453,7 +437,12 @@ void GolemCUse(void)
 
 void GolemStand(void)// [++ $rest1..$rest22]
 {
-	self.think = GolemStand;
+	if (self.spawnflags&GOLEM_DORMANT) {
+		self.takedamage = DAMAGE_NO;
+		self.use = self.think = GolemWake;
+		self.nextthink = -1;
+		return;
+	}
 	ai_stand();
 	if (!self.spawnflags&GOLEM_STATUE) {
 		if (time > self.absorb_time) {		//slow animation speed
