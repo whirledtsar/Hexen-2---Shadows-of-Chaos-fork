@@ -654,8 +654,8 @@ float PLAY_DEAD	= 8;	//Makes a monster play dead at start
 float NO_DROP	= 32;	//Keeps them from dropping to the ground at spawntime
 float SF_FROZEN	= 64;	//Start frozen
 float SPAWNIN	= 128;	//Spawn in when triggered
-float SPAWNQUIET	= 65536;	//Spawn in without teleport fog/noise
-float DONTMORPH		= 131072;	//Not affected by polymorph spell
+float SPAWNQUIET	= 262144;	//Spawn in without teleport fog/noise
+float DONTMORPH		= 524288;	//Not affected by polymorph spell
 
 float SLOPE = 16;		//Trains- follow angle for vec between path_corners
 
