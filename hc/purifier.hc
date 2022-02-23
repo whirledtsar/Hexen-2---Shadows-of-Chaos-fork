@@ -599,7 +599,7 @@ purifier_fire - shoot purifier.
 
 void pflame_run (void) [ ++ 0 .. 26]
 {
-	self.height*=1.25;
+	self.height*=1.1;
 	self.velocity_z+=self.height;
 	if (self.lifetime < time)
 		pmissile_gone();
@@ -610,11 +610,16 @@ void pflame_touch ()
 	if(other.classname=="fball")
 		return;
 	if(other.takedamage)
+	{
+		if (other.health - self.dmg <= 0)	//need to do this before doing damage
+		{
+			AshSkin(other);
+			smolder(other.origin);
+		}
 		T_Damage(other,self,self.owner,self.dmg);
+	}
 	else
 		T_RadiusDamage(self,self.owner,self.dmg*2,self.owner);
-	if (other.health <= 0)
-		smolder(other.origin);
 	
 	makevectors(self.angles);
 	CreateGreySmoke(self.origin-v_forward*5,'0 0 5',HX_FRAME_TIME);
@@ -627,7 +632,8 @@ entity missile;
 	
 	self.attack_finished = time + 0.1;
 
-	if(self.t_width<time) {
+	if(self.t_width<time)
+	{
 		sound(self,CHAN_WEAPON,"eidolon/flambrth.wav",0.5,ATTN_NORM);
 		self.t_width=time+1.5;
 	}
@@ -650,9 +656,9 @@ entity missile;
 
 	setorigin (missile, self.origin + self.proj_ofs + v_forward*15 + v_right*1);
 	
-	missile.dmg = random(12,14);
-	missile.height = 3;		//initial z velocity
-	missile.lifetime = time + .75;
+	missile.dmg = 13;
+	missile.height = 2.25;		//initial z velocity
+	missile.lifetime = time + 1.25;
 	
 	thinktime missile : HX_FRAME_TIME;
 	missile.think = pflame_run;
@@ -664,56 +670,56 @@ entity missile;
 void purifier_tomeflamer()
 {
 	self.th_weapon=purifier_tomeflamer;
-	if (!self.altfiring)
+	if (!self.class_weaponvar) {
 		self.wfs = advanceweaponframe($bigshot1,$bigshot9);
-	else
-		self.wfs = advanceweaponframe($bigshot3,$bigshot4);
+		if (self.weaponframe == $bigshot4)
+			self.class_weaponvar = TRUE;
+	}
+	else {
+		//self.wfs = advanceweaponframe($bigshot3,$bigshot4);
+		if (time > self.cnt) {
+			self.cnt = time+HX_FRAME_TIME*2;
+			self.weaponframe = $bigshot3;
+		}
+		else
+			self.weaponframe = $bigshot4;
+	}
 	
 	if(self.weaponframe==$bigshot4)
 	{
 		self.effects(+)EF_MUZZLEFLASH;
-		self.punchangle_x= -4;
+		//self.punchangle_x= -4;
 		launch_pflamestream();
 		self.attack_finished = time + 0.1;
 		if (self.button1)
 			self.altfiring = TRUE;
 	}
-	if(self.weaponframe>=$bigshot4 && (!self.button1 || !self.artifact_active&ART_TOMEOFPOWER || (self.greenmana<PFLAME_COST || self.bluemana<PFLAME_COST) ) )
-	{	//stop cycle if button released, tome done, or out of mana
+	
+	if(self.weaponframe>=$bigshot4 && (!self.button1 || (self.greenmana<PFLAME_COST || self.bluemana<PFLAME_COST) || self.artifact_active&ART_TOMEOFPOWER) )
+	{	//stop cycle if button released or out of mana
 		self.altfiring = FALSE;
+		self.class_weaponvar = FALSE;
 		self.t_width = 0;	//sound timer
-		stopSound (self, CHAN_WEAPON);
 		sound(self,CHAN_WEAPON,"eidolon/flamend.wav",0.4,ATTN_NORM);
 		purifier_ready();
 	}
 }
-/*
-void purifier_tomeflamer()
-{
-	self.wfs = advanceweaponframe($bigshot1,$bigshot9);
-	self.th_weapon=purifier_tomeflamer;
-	if(self.weaponframe==$bigshot9)// && !self.button1)
-		sound(self,CHAN_WEAPON,"eidolon/flamend.wav",0.5,ATTN_NORM);
-	if(self.weaponframe==$bigshot1)
-	{
-		self.effects(+)EF_MUZZLEFLASH;
-		self.punchangle_x= -4;
-		launch_pflamestream();
-		self.attack_finished = time + 0.1;
-	}
-	else if(self.wfs==WF_CYCLE_WRAPPED)
-		purifier_ready();
-}*/
 
 void() pal_purifier_fire =
 {
-	if ((self.artifact_active & ART_TOMEOFPOWER) && self.button1 && self.greenmana >= PFLAME_COST && self.bluemana >= PFLAME_COST)
+	/*if ((self.artifact_active & ART_TOMEOFPOWER) && self.button1 && self.greenmana >= PFLAME_COST && self.bluemana >= PFLAME_COST)
 		purifier_tomeflamer();
-	else if ((self.artifact_active & ART_TOMEOFPOWER) &&
-		(self.greenmana >= 8) && (self.bluemana >= 8))
+	else if ((self.artifact_active & ART_TOMEOFPOWER) && (self.greenmana >= 8) && (self.bluemana >= 8))
 		purifier_tomefire();
 	else if (self.button1 && self.greenmana >= PFLOORFLAME_COST && self.bluemana >= PFLOORFLAME_COST)
+		purifier_flamefire();*/
+	
+	if (self.artifact_active & ART_TOMEOFPOWER && self.button1 && self.greenmana >= PFLOORFLAME_COST && self.bluemana >= PFLOORFLAME_COST)
 		purifier_flamefire();
+	else if (self.button1 && self.greenmana >= PFLAME_COST && self.bluemana >= PFLAME_COST)
+		purifier_tomeflamer();
+	else if ((self.artifact_active & ART_TOMEOFPOWER) && (self.greenmana >= 8) && (self.bluemana >= 8))
+		purifier_tomefire();
 	else if ((self.greenmana >= 1) && (self.bluemana >= 1))
 		purifier_rapidfire();
 
