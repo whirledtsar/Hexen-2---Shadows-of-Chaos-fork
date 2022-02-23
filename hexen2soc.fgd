@@ -100,6 +100,8 @@
 		8192 : "Not in Normal" : 0
 		16384 : "Not in Hard" : 0
 		32768 : "Not in Deathmatch" : 0
+		65536: "Not in coop" : 0
+		131072: "Not in singleplayer" : 0
 	]
 ]
 
@@ -760,6 +762,7 @@
 		32 : "Angle match" : 0
 		64 : "Use origin" : 0
 		128 : "Angle wait" : 0
+		262144 : "Animate when first triggered" : 0
 	]
 	speed(integer) : "Speed" : 100
 	dmg(integer) : "Damage when blocked" : 2
@@ -1119,18 +1122,18 @@
 		1 : "Ambush" : 0 : "Only wakes up when player is within this enemies line of sight"
 		2 : "Stuck" : 0 //Cannot move from original position (only some enemies)
 		4 : "Jump" : 0 //Has the ability to leap forward
-		8 : "Play dead (PoP)" : 0 //Possibly no useful effect?
+		8 : "" : 0 //Play dead
 		16 : "Dormant" : 0 //Possibly no useful effect?
 		32 : "No drop" : 0 : "Doesn't drop to floor on spawn"
 		64 : "Frozen (PoP)" : 0 //Enemy is made out of ice
 		128 : "Spawn in" : 0 : "Spawns in when triggered"
-		65536 : "Spawn quiet" : 0 : "Spawns in without teleport fog/noise"
-		131072 : "Don't morph" : 0 : "Unaffected by polymorph spell"
+		262144 : "Spawn quiet" : 0 : "Spawns in without teleport fog/noise"
+		524288 : "Don't morph" : 0 : "Unaffected by polymorph spell"
 	]
 	health(integer) : "Health"
 	experience_value(integer) : "Experience"
 	spawndelay(integer) : "Delay before triggered spawning"
-	waketarget(target_destination) : "Target fired upon waking up"
+	waketarget(target_destination) : "Target fired upon being alerted"
 ]
 
 @PointClass base(Monster) model(":models/archer.mdl") = monster_archer : "Archer" []
@@ -1140,10 +1143,18 @@
 @PointClass base(Monster) model(":models/fangel.mdl") size(-14 -14 -40, 14 14 24) = monster_fallen_angel : "Fallen angel" []
 @PointClass base(Monster) model({"path": ":models/fangel.mdl", "skin": 1}) size(-14 -14 -40, 14 14 24) = monster_fallen_angel_lord : "Fallen angel lord" []
 
-@PointClass base(Monster) model(":models/golem_s.mdl") size(-32 -32 0, 32 32 112) = monster_golem_stone : "Stone golem" []
-@PointClass base(Monster) model(":models/golem_i.mdl") size(-55 -55 0, 55 55 120) = monster_golem_iron : "Iron golem" []
-@PointClass base(Monster) model(":models/golem_b.mdl") size(-64 -64 0, 64 64 194) = monster_golem_bronze : "Bronze golem" []
-@PointClass base(Monster) model(":models/golem_b.mdl") size(-32 -32 -24, 32 32 64) = monster_golem_crystal : "Crystal golem" []
+@BaseClass base(Monster) = Golem
+[
+	spawnflags(flags) =
+	[
+		2 : "Statue"
+		16 : "Dormant statue"
+	]
+]
+@PointClass base(Golem) model(":models/golem_s.mdl") size(-32 -32 0, 32 32 112) = monster_golem_stone : "Stone golem" []
+@PointClass base(Golem) model(":models/golem_i.mdl") size(-55 -55 0, 55 55 120) = monster_golem_iron : "Iron golem" []
+@PointClass base(Golem) model(":models/golem_b.mdl") size(-64 -64 0, 64 64 194) = monster_golem_bronze : "Bronze golem" []
+@PointClass base(Golem) model(":models/golem_b.mdl") size(-32 -32 -24, 32 32 64) = monster_golem_crystal : "Crystal golem" []
 
 @PointClass base(Monster) model(":models/hydra.mdl") size(-30 -30 -24, 30 30 24) = monster_hydra : "Hydra" []
 
@@ -2036,6 +2047,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 	experience_value(integer) : "Experience awarded" : 0
 	soundtype(choices) : "Sounds" : 0 =
 	[
+		-1 : "No sound (even if message)"
 		0 : "No sound"
 		1 : "Secret"
 		2 : "Bell"
@@ -2063,16 +2075,7 @@ If it has a target, it will act like a relay and hurt that target when triggered
 ]
 
 @SolidClass base(Trigger, Puzzles, trigger_multiple) = trigger_once : "Single trigger"
-[
-	experience_value(integer) : "Experience awarded" : 0
-	soundtype(choices) : "Sounds" : 0 =
-	[
-		0 : "No sound"
-		1 : "Secret"
-		2 : "Bell"
-		3 : "Large switch"
-	]
-]
+[]
 
 @SolidClass base(Appearflags, Targetname) = trigger_push : "Push"
 [
