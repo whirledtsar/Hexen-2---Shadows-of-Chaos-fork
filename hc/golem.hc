@@ -110,7 +110,6 @@ void GolemBStomp(void);
 void GolemIMissile(void);
 float GolemBCheckBeamAttack();
 float GolemICheckMissileAttack();
-void GolemDormant();
 void GolemWake();
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
