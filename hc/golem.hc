@@ -82,6 +82,9 @@ $frame stomp18 stomp19 stomp20 stomp21 stomp22 stomp23 stomp24
 
 // CONSTANTS ---------------------------------------------------------------
 
+float GOLEM_STATUE = 2;
+float GOLEM_DORMANT = 16;
+
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
 void GolemInit(void);
@@ -107,6 +110,7 @@ void GolemBStomp(void);
 void GolemIMissile(void);
 float GolemBCheckBeamAttack();
 float GolemICheckMissileAttack();
+void GolemWake();
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
@@ -167,7 +171,12 @@ void monster_golem_stone(void)
 		self.experience_value = 125;
 	self.mintel = 4;
 	self.th_melee = GolemSMeleeDecide;
-	self.th_pain = GolemSPain;
+	if (self.spawnflags&GOLEM_STATUE) {
+		self.th_save = GolemSPain;
+		self.th_pain = SUB_Null;
+	}
+	else
+		self.th_pain = GolemSPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	self.init_exp_val = self.experience_value;
 	
@@ -229,7 +238,12 @@ void monster_golem_iron(void)
 	if(!self.experience_value)
 		self.experience_value = 200;
 	self.th_melee = GolemIMeleeDecide;
-	self.th_pain = GolemIPain;
+	if (self.spawnflags&GOLEM_STATUE) {
+		self.th_save = GolemIPain;
+		self.th_pain = SUB_Null;
+	}
+	else
+		self.th_pain = GolemIPain;
 	self.view_ofs = self.proj_ofs='0 0 64';
 	self.init_exp_val = self.experience_value;
 	
@@ -291,7 +305,12 @@ void monster_golem_bronze(void)
 	if(!self.experience_value)
 		self.experience_value = 275;
 	self.th_melee = GolemBMeleeDecide;
-	self.th_pain = GolemBPain;
+	if (self.spawnflags&GOLEM_STATUE) {
+		self.th_save = GolemBPain;
+		self.th_pain = SUB_Null;
+	}
+	else
+		self.th_pain = GolemBPain;
 	self.view_ofs = self.proj_ofs='0 0 115';
 	self.init_exp_val = self.experience_value;
 	
@@ -386,6 +405,47 @@ void GolemInit(void)
 		precache_sound3("golem/step.wav");
 		precache_sound3("golem/swing.wav");
 	}
+	
+	if (self.spawnflags&GOLEM_STATUE) {
+		if (world.model=="maps/tibet9.bsp")		//PoP Golem twins
+			self.spawnflags(+)GOLEM_DORMANT;
+		self.frame = $wake1;
+		self.th_run = GolemWake;
+	}
+}
+
+//==========================================================================
+
+void golem_awaken ()
+{
+	sound(self,CHAN_AUTO,"golem/awaken.wav",1,ATTN_NORM);
+	self.takedamage=DAMAGE_YES;
+	if(activator.classname=="player")
+	{
+		self.enemy = activator;
+		thinktime self : 0;
+		self.think = FoundTarget;
+	}
+	else
+		self.think=self.th_stand;
+}
+
+void GolemWake(void) [++ $wake1..$wake16]
+{
+	self.spawnflags(-)GOLEM_STATUE;
+	self.spawnflags(-)GOLEM_DORMANT;
+	if (self.frame==$wake16) {
+		if (self.th_pain == SUB_Null)
+			self.th_pain = self.th_save;
+		self.takedamage = DAMAGE_YES;
+		self.th_run = GolemRun;
+		self.think = self.th_run;
+	}
+	else if (self.frame==$wake1) {
+		if(activator.flags&FL_CLIENT)
+			self.enemy = activator;
+		sound(self, CHAN_VOICE, "golem/awaken.wav", 1, ATTN_NORM);
+	}
 }
 
 //==========================================================================
@@ -406,37 +466,22 @@ void GolemCUse(void)
 //
 //==========================================================================
 
-void golem_awaken ()
-{
-	sound(self,CHAN_AUTO,"golem/awaken.wav",1,ATTN_NORM);
-	self.takedamage=DAMAGE_YES;
-	if(activator.classname=="player")
-	{
-		self.enemy = activator;
-		thinktime self : 0;
-		self.think = FoundTarget;
-	}
-	else
-		self.think=self.th_stand;
-}
-
 void GolemStand(void)	//[++ $rest1..$rest22]
 {
-	if(self.spawnflags&2)
-	{
-		self.takedamage=DAMAGE_NO;
-		self.use=self.think=golem_awaken;
-		self.nextthink=-1;
+	if(self.spawnflags&GOLEM_DORMANT) {
+		self.takedamage = DAMAGE_NO;
+		self.use = self.think = GolemWake;
+		self.nextthink = -1;
+		return;
 	}
-	else
-	{
-		ai_stand();
+	ai_stand();
+	if (!self.spawnflags&GOLEM_STATUE) {
 		if (time > self.absorb_time) {		//slow animation speed
 			AdvanceFrame($rest1, $rest22);
 			self.absorb_time = time + HX_FRAME_TIME*4;
 		}
-		thinktime self : HX_FRAME_TIME;	//0.2;
 	}
+	thinktime self : HX_FRAME_TIME;
 }
 
 //==========================================================================
@@ -465,18 +510,25 @@ void GolemRun(void) [++ $run1..$run24]
 	float len;
 	float hdiff;
 	float dist, r;
+	float slide_ok;
 
 	check_pos_enemy();
 	checkenemy();
+	enemy_vis = visible(self.enemy);
 
-	if (coop && !visible(self.enemy))
+	if (coop && !enemy_vis)
 		LocateTarget();
+	
+	if (CanChargeForward(64) && enemy_vis)
+		slide_ok = TRUE;
+	else
+		slide_ok = FALSE;
 
 	if (self.classname == "monster_golem_stone" || self.classname == "monster_golem_crystal") 
 	{	
 		len = vlen(self.origin - self.enemy.origin);
 		hdiff = fabs(self.origin_z - self.enemy.origin_z);
-		if(len > 50 && len < 300 && hdiff < 80)
+		if(len > 50 && len < 300 && hdiff < 80 && slide_ok)
 		{
 			if(random() < 0.05)
 			{
@@ -1119,7 +1171,7 @@ void GolemBStompEffect(void)
 	MonsterQuake(350);	
 
 	if (dist < 350)
-		T_Damage(self.enemy, self, self, 1200/dist);	//vanilla: random(50/dist)
+		T_Damage(self.enemy, self, self, random(50/dist));
 }
 	
 //==========================================================================
