@@ -2,6 +2,8 @@ float SLOPE = 16;		//Trains- follow angle for vec between path_corners
 float ANGLEMATCH	= 32;
 float USE_ORIGIN	= 64;
 float ANGLE_WAIT	= 128;
+float TRAIN_NONSOLID = 262144;
+float TRAIN_TRIGANIMATE = 524288;
 
 void() train_next_mp;
 void() func_train_find_mp;
@@ -59,6 +61,14 @@ void() train_use_mp =
 		self.weaponmodel="";
 		self.movechain.think=rider_die;
 		thinktime self.movechain : 0.1;
+	}
+	
+	if (self.spawnflags&TRAIN_TRIGANIMATE) {
+		self.spawnflags(-)TRAIN_TRIGANIMATE;
+		if (self.movechain)
+			++self.movechain.frame;
+		else
+			self.frame = 1 - self.frame;
 	}
 
 	if(self.wait==-1)
@@ -487,7 +497,8 @@ entity targ;
 	}
 	else 
 	{
-		self.solid = SOLID_BSP;
+		if (!self.spawnflags&TRAIN_NONSOLID)
+			self.solid = SOLID_BSP;
 		setmodel (self, self.model);
 		if(self.weaponmodel)
 		{
