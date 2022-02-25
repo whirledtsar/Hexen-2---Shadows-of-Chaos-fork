@@ -397,6 +397,11 @@ string s;
 		t.messagestr = self.messagestr;
 		t.killtarget = self.killtarget;
 		t.target = self.target;
+		t.style = self.style;
+		t.mangle = self.mangle;
+		t.frags = self.frags;
+		if (self.solid == SOLID_TRIGGER)
+			t.soundtype = self.soundtype;
 		return;
 	}
 
