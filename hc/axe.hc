@@ -174,6 +174,7 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
+	/*
 	traceline (source, source + v_forward*80, FALSE, self);		//SoC: increased range from 64 to 80
 	
 	if (trace_fraction == 1.0)
@@ -194,7 +195,8 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 			}
 		}
 	}
-	
+	*/
+	SUB_TraceRange(source, source+v_forward*80, FALSE, self, 30, 15);
 	org = trace_endpos + (v_forward * 4);
 	
 	if (trace_ent.takedamage)
@@ -356,7 +358,7 @@ void axe_b ()
 		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
 		axeblade_fire(TRUE, tome);
 		self.weaponframe_cnt=0;
-		self.flags2=FALSE;
+		self.class_weaponvar=FALSE;
 	}
 	else if (self.weaponframe == $1stAxe2 || self.weaponframe == $1stAxe8)
 		++self.weaponframe;		//speed up animation
