@@ -140,11 +140,15 @@ void(entity attacker, float damage)	death_knight_pain =
 
 void() death_knight_gibs =
 {
-	ThrowGib ("models/footsoldierarm.mdl", self.health);
+	if (self.model != "models/footsoldiersplit.mdl")
+	{
+		ThrowGib ("models/footsoldierarm.mdl", self.health);
+		ThrowGib ("models/footsoldierarm.mdl", self.health);
+		ThrowGib ("models/footsoldieraxe.mdl", self.health);
+	}
+	
 	ThrowGib ("models/footsoldierleg.mdl", self.health);
-	ThrowGib ("models/footsoldierarm.mdl", self.health);
 	ThrowGib ("models/footsoldierleg.mdl", self.health);
-	ThrowGib ("models/footsoldieraxe.mdl", self.health);
 }
 
 void death_knight_dying () [++ 69 .. 88]
