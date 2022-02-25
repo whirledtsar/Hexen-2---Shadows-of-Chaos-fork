@@ -27,7 +27,7 @@ float ALWAYS_RETURN			= 4;//for trigger_counter
 float SPAWNFLAG_REMOVE_PP	= 16;
 float SPAWNFLAG_NO_PP		= 32;
 
-float SPAWNFLAG_ALLTOUCH	= 65536;
+float SPAWNFLAG_ALLTOUCH	= 262144;
 
 // the wait time has passed, so set back up for another activation
 void() multi_wait =
