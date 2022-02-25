@@ -137,34 +137,40 @@ void mummissile_touch (void)
 	self.think = pmissile_gone;
 }
 
-
-void mflame_runup (void)
+void mflame1_runup (void) [++ 0 .. 16 ]
 {
-float result;
-	if (self.style==0)
-		result = AdvanceFrame(0,16);
-	else if (self.style==1)
-		result = AdvanceFrame(17,33);
-	else
-		result = AdvanceFrame(34,50);
-	
-	if (result==AF_END)
+	if (cycle_wrapped)
 		if(self.cnt)
 		{
 			self.cnt-=1;
 			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
 		}
 		else
-		{
 			remove(self);
-			return;
+}
+
+void mflame2_runup (void) [++ 17 .. 33 ]
+{
+	if (cycle_wrapped)
+		if(self.cnt)
+		{
+			self.cnt-=1;
+			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
 		}
-	
-	
-	if (self.aflag) {
-		makevectors(self.o_angle);
-		setorigin(self, self.controller.origin+v_forward*100);
-	}
+		else
+			remove(self);
+}
+
+void mflame3_runup (void) [++ 34 .. 50 ]
+{
+	if (cycle_wrapped)
+		if(self.cnt)
+		{
+			self.cnt-=1;
+			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
+		}
+		else
+			remove(self);
 }
 
 void mflame_burn(void)
@@ -215,13 +221,12 @@ void SpawnMummyFlame(void)
 
 	chance = random();
 	if (chance < .33)
-		new.style = 0;
+		new.think = mflame1_runup;
 	else if (chance < .66)
-		new.style = 1;
+		new.think = mflame2_runup;
 	else
-		new.style = 2;
+		new.think = mflame3_runup;
 	
-	new.think = mflame_runup;
 	thinktime new : HX_FRAME_TIME;
 
 	new.touch = mflame_burn;
@@ -240,9 +245,9 @@ void SpawnMummyFlame(void)
 	else
 	{
 		particle2(new.origin,'0 0 25','0 0 25',168,7,5);
-
+		
 		thinktime self : .04;
-
+		
 		self.think = SpawnMummyFlame;
 	}
 }
@@ -292,7 +297,7 @@ void launch_mumshot (float life)
 
 	newmis.effects = EF_NODRAW;
 	sound (self, CHAN_WEAPON, "mummy/mislfire.wav", 1, ATTN_NORM);
-	
+
 	if (life <= 0)
 		life = 2.5;
 	newmis.lifetime = time + life;
@@ -305,6 +310,7 @@ void launch_mumshot (float life)
 
 }
 
+/*	not used
 void launch_mumshot2 (void)
 {
 	local vector diff;
@@ -336,6 +342,7 @@ void launch_mumshot2 (void)
 
 	newmis.think = SUB_Remove;
 }
+*/
 
 void mummy_die()
 {
@@ -457,7 +464,7 @@ void mummy_pain(void)
 
 	if (hold_parts != self.parts_gone)
 		sound (self, CHAN_BODY, "mummy/limbloss.wav", 1, ATTN_NORM);
-		
+	
 	self.pain_finished = time+random(0.3,0.9);
 }
 
@@ -922,7 +929,11 @@ void monster_mummy (void)
 
 	if(!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 		precache_mummy();
-
+	
+	if(!self.health)
+		self.health = 200;
+	if(!self.max_health)
+		self.max_health=self.health;
 	CreateEntityNew(self,ENT_MUMMY,"models/mummy.mdl",mummy_die);
 
 	self.mintel = 3;
@@ -934,13 +945,15 @@ void monster_mummy (void)
 	self.th_missile = mummymissile;
 	self.th_pain = mummy_pain;
 	self.th_init = monster_mummy;
+	
 	self.parts_gone = MUMMY_NONE;
 	self.skin = 0;
 
 	self.flags (+) FL_MONSTER;
 	self.yaw_speed = 10;
-	self.health = 200;
-	self.experience_value = 200;
+	if (!self.experience_value)
+		self.experience_value = 200;
+	self.init_exp_val = self.experience_value;
 	
 	self.buff=2;
 	walkmonster_start();
@@ -963,7 +976,11 @@ void monster_mummy_lord (void)
 
 	if(!self.flags2&FL_SUMMONED&&!self.flags2&FL2_RESPAWN)
 		precache_mummy();
-
+	
+	if(!self.health)
+		self.health = 400;
+	if(!self.max_health)
+		self.max_health=self.health;
 	CreateEntityNew(self,ENT_MUMMY,"models/mummy.mdl",mummy_die);
 
 	self.mintel = 3;
@@ -975,14 +992,16 @@ void monster_mummy_lord (void)
 	self.th_missile = mummylordchoice;
 	self.th_pain = mummy_pain;
 	self.th_init = monster_mummy_lord;
+	
 	self.parts_gone = MUMMY_NONE;
 	self.skin = 1;
 	self.headmodel="models/muhead.mdl";
 
 	self.flags (+) FL_MONSTER;
 	self.yaw_speed = 10;
-	self.health = 400;
-	self.experience_value = 300;
+	if (!self.experience_value)
+		self.experience_value = 300;
+	self.init_exp_val = self.experience_value;
 	
 	self.buff=2;
 	walkmonster_start();
