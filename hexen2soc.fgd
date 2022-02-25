@@ -762,7 +762,8 @@
 		32 : "Angle match" : 0
 		64 : "Use origin" : 0
 		128 : "Angle wait" : 0
-		262144 : "Animate when first triggered" : 0
+		262144 : "Non-solid" : 0
+		524288 : "Animate when first triggered" : 0
 	]
 	speed(integer) : "Speed" : 100
 	dmg(integer) : "Damage when blocked" : 2
@@ -1851,7 +1852,7 @@
 		8 : "Deactivated" : 0
 		64 : "light toggle" : 0
 		128 : "light start low" : 0
-		65536 : "Monster or player touch" : 0
+		262144 : "Monster or player touch" : 0
 	]
 ]
 
@@ -1861,6 +1862,7 @@
 	[
 		1 : "Once" : 0
 		2 : "Relay" : 0
+		4 : "No touch" : 0
 		8 : "Deactivated" : 0
 	]
 	soundtype(choices) : "Sound" : 2 =
