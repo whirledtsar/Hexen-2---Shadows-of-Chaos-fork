@@ -29,6 +29,8 @@ float SPAWNFLAG_NO_PP		= 32;
 
 float SPAWNFLAG_ALLTOUCH	= 262144;
 
+float ACTIVATE_NOTOUCH = 4;
+
 // the wait time has passed, so set back up for another activation
 void() multi_wait =
 {
@@ -419,8 +421,12 @@ void() trigger_multiple =
 		setorigin (self, self.origin);	// make sure it links into the world
 	}
 	else
-	{	//NOTE: was turning off touch for activate- is this necc?		
-		if ( !(self.spawnflags & SPAWNFLAG_NOTOUCH))// && !(self.spawnflags & SPAWNFLAG_ACTIVATED))
+	{	//NOTE: was turning off touch for activate- is this necc?
+		if (self.classname == "trigger_activate" || self.classname == "trigger_deactivate") {
+			if (!self.spawnflags & ACTIVATE_NOTOUCH)
+				self.touch = multi_touch;
+		}
+		else if ( !(self.spawnflags & SPAWNFLAG_NOTOUCH))// && !(self.spawnflags & SPAWNFLAG_ACTIVATED))
 		{
 			self.touch = multi_touch;
 		}
