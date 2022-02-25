@@ -460,6 +460,8 @@ string s;
 		t.frags = self.frags;
 		t.use=self.use;
 		t.inactive=self.inactive;
+		if (self.solid == SOLID_TRIGGER)
+			t.soundtype = self.soundtype;
 		if(self.check_ok)
 			t.level=TRUE;
 		return;
