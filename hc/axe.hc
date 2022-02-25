@@ -174,29 +174,11 @@ void axe_melee (float damg,float mode)	//ws: using FireMelee didn't work because
 
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
-	/*
-	traceline (source, source + v_forward*80, FALSE, self);		//SoC: increased range from 64 to 80
 	
-	if (trace_fraction == 1.0)
-	{
-		traceline (source, source + v_forward*80 - (v_up*30), FALSE, self);  // 30 down
-		if (trace_fraction == 1.0)
-		{
-			traceline (source, source + v_forward*80 + v_up*30, FALSE, self);  // 30 up
-			if (trace_fraction == 1.0)
-			{
-				traceline (source, source + v_forward*80 + v_right*15, FALSE, self);  // 15 right
-				if (trace_fraction == 1.0)
-				{
-					traceline (source, source + v_forward*80 - v_right*15, FALSE, self);  // 15 left
-					if (trace_fraction == 1.0)
-						return;
-				}
-			}
-		}
-	}
-	*/
 	SUB_TraceRange(source, source+v_forward*80, FALSE, self, 30, 15);
+	if (trace_fraction == 1)
+		return;
+	
 	org = trace_endpos + (v_forward * 4);
 	
 	if (trace_ent.takedamage)
