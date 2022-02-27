@@ -10,7 +10,7 @@ float DOOR_SLIDE		= 16;
 float DOOR_NORMAL		= 32;
 float DOOR_REMOVE_PP	= 64;
 float DOOR_NO_PP		= 128;
-float DOOR_ALWAYSTOUCH	= 65536;
+float DOOR_ALWAYSTOUCH	= 262144;
 
 /*
 Doors are similar to buttons, but can spawn a fat trigger field around them
