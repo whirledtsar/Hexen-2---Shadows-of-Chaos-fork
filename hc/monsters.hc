@@ -715,6 +715,8 @@ void() monster_spawn =
 	
 	CheckMonsterBuff();
 	
+	SUB_AttackFinished(1);	//dont attack immediately
+	
 	if (self.model=="models/imp.mdl")
 		impmonster_start();
 	else if (self.classname=="monster_hydra")
