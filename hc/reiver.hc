@@ -113,6 +113,7 @@ void reiv_rise () [++ $001rise .. $024rise]
 	
 	if (cycle_wrapped)
 	{
+		self.spawnflags(-)REIV_BURIED;
 		self.attack_finished = time+2;
 		self.takedamage = DAMAGE_YES;
 		self.th_pain = reiv_pain;
