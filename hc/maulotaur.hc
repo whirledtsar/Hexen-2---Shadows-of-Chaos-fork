@@ -389,13 +389,13 @@ void maul_pain (entity attacker, float damg)
 
 void maul_run () [++ $maulrn1 .. $maulrn18]
 {
+	if (self.enemy.classname=="player" && !self.enemy.flags2&FL_ALIVE)
+		maul_victory();
+	
 	ai_run(8*self.scale);
 	
 	if (self.frame == $maulrn9 || self.frame == $maulrn18)
 		sound (self, CHAN_BODY, "yakman/hoof.wav", 1, self.maulAtten+1);
-	
-	if (self.enemy.classname=="player" && !self.enemy.flags&FL_ALIVE)
-		maul_victory();
 	
 	if (random()<0.03)
 		maul_voice("pest/snort.wav");
@@ -604,15 +604,17 @@ void maul_walk () [++ $maulrn1 .. $maulrn18]
 
 void maul_victory () [++ $maulat19 .. $maulat32]
 {
-	self.think = maul_victory;
 	thinktime self : HX_FRAME_TIME;
 	
 	if (self.frame == $maulat19)
 		maul_voice("maul/see.wav");
 	else if (self.frame == $maulat29)
 		maul_smashmelee();
-	else if (self.frame==$maulat32)
+	
+	if (self.frame==$maulat32)
 		self.think = self.th_stand;
+	else
+		self.think = maul_victory;
 }
 
 void maul_voice (string snd) =
