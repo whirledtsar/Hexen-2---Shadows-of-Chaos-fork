@@ -170,7 +170,7 @@ float rad,stick;
 		if(self.classname=="bolt")
 			T_Damage(other,self,self.owner,self.dmg);
 		SpawnPuff(self.origin+v_forward*8,'0 0 0'-v_forward*24,10,other);
-		if(other.solid!=SOLID_BSP)
+		if(other.solid!=SOLID_BSP && !(other.drawflags&DRF_TRANSLUCENT))	//dont stick in translucent enemies eg. fallen angel lord, bishop, disciple
 		{
 		//Put it right below view of player
 			if(other.classname=="player")
