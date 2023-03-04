@@ -19,6 +19,9 @@ local entity	temp;
 	
 	if (other.enemy)
 		return;		// fighting, not following a path
+	
+	if (self.waketarget && self.waketarget!="")		//ws: path corners can fire their waketarget when a monster reaches them
+		SUB_UseWakeTargets();
 
 	if(self.wait==-2&&other.flags&FL_MONSTER)
 		remove(other);
