@@ -188,34 +188,66 @@ float dot;
 		return FALSE;
 }
 
+void skullwiz_gibinit()
+{
+	if (!self.flags&FL_ONGROUND  && !self.groundentity) {
+		self.think = skullwiz_gibinit;
+		thinktime self : HX_FRAME_TIME;
+		return;
+	}
+	
+	self.solid = SOLID_PHASE;
+	self.movetype = MOVETYPE_NONE;
+	setsize(self, self.mins, self.maxs);
+	
+	self.health = 15;
+	self.takedamage = DAMAGE_YES;
+	self.th_die = chunk_death;
+	
+	if (CheckCfgParm(PARM_FADE)) {
+		self.think=init_corpseblink;
+		thinktime self : random(30,20);
+	}
+	else {
+		self.think = SUB_Null;
+		thinktime self : 99999;
+	}
+}
+
 void skullwiz_throw(float part)
 {
 	entity new;
 	new = spawn();
 
-	if (part==SKULLBOOK)
+	if (part==SKULLBOOK) {
 		setmodel (new, "models/skulbook.mdl");
-	else
+		new.thingtype = THINGTYPE_CLOTH;
+	}
+	else {
 		setmodel (new, "models/skulhead.mdl");
+		new.thingtype = THINGTYPE_BONE;
+	}
 
 	new.origin_x = random(10,10);
 	new.origin_y = random(10,10);
 	new.origin_z = 40;
 
 	setorigin(new,self.origin + new.origin);
-	setsize (new, '0 0 0', '0 0 0');
+	setsize (new, '-5 -5 0', '5 5 2');		//setsize (new, '0 0 0', '0 0 0');
 	new.velocity_z = random(100,150);
-	new.velocity_x = random(100,150);
-	new.velocity_y = random(100,150);
+	new.velocity_x = random(100,150)*randomsign();
+	new.velocity_y = random(100,150)*randomsign();
 
 	new.movetype = MOVETYPE_BOUNCE;
 	new.solid = SOLID_NOT;
-	new.avelocity_x = random(400,600);
 	new.avelocity_y = random(400,600);
-	new.avelocity_z = random(400,600);
+	if (part!=SKULLBOOK) {	//book looks bad not flat
+		new.avelocity_x = random(400,600);
+		new.avelocity_z = random(400,600);
+	}
 	new.flags(-)FL_ONGROUND;
 
-	new.think=MakeSolidCorpse;
+	new.think=skullwiz_gibinit;
 	new.nextthink = time + HX_FRAME_TIME * 15;
 }
 
@@ -256,17 +288,6 @@ void skullwiz_die (void) [++ $skdeth1.. $skdeth15]
 			sound (self, CHAN_VOICE, "skullwiz/death.wav", 1, ATTN_NORM);
 		else
 			sound (self, CHAN_VOICE, "skullwiz/death2.wav", 1, ATTN_NORM);
-
-		spider_spawn(0);
-		if (random() < .5)
-			spider_spawn(1);
-
-		if (self.classname == "monster_skull_wizard_lord")  // Another two for the wizard lord
-		{
-			spider_spawn(0);
-//			if (random() < .5)
-//				spider_spawn(1);
-		}
 	}
 
 	if (self.frame == $skdeth6)
@@ -306,6 +327,17 @@ void skullwiz_die (void) [++ $skdeth1.. $skdeth15]
 			self = newent;
 			fx_smoke_generator();
 			self = holdent;
+		}
+		
+		spider_spawn(0);
+		if (random() < .5)
+			spider_spawn(1);
+
+		if (self.classname == "monster_skull_wizard_lord")  // Another two for the wizard lord
+		{
+			spider_spawn(0);
+//			if (random() < .5)
+//				spider_spawn(1);
 		}
 
 		MakeSolidCorpse();
@@ -362,7 +394,7 @@ vector spot;
 		if (!CanSpawnAtSpot(self.origin, self.mins*1.25, self.maxs*1.25, self.controller))
 		{
 			self.effects(+)EF_NODRAW;
-			spot = FindSpawnSpot(1, 30, 360, self.controller);
+			spot = FindSpawnSpot(10, 40, 360, self.controller);
 			if (spot!=VEC_ORIGIN)
 				self.origin = spot;
 			++self.counter;
@@ -486,7 +518,7 @@ void skullwiz_pain_anim () [++ $skpain1 .. $skpain12]
 	{
 		self.pain_finished = time + 3;
 
-		if (random() < .20)
+		if (random() < .30)
 			skullwiz_blink();
 		else
 			skullwiz_run();
@@ -744,8 +776,9 @@ void skullwiz_blinkin(void)
 		//restore monster effects
 		ApplyMonsterBuffEffect(self);
 		
-		self.teleportTime = time+1;			//ws: dont teleport again immediately, give player a little time to retaliate
-		self.raiseTime = time+1;	//also dont immediately revive corpses
+		self.teleportTime = time+1;		//ws: dont teleport again immediately, give player a little time to retaliate
+		self.raiseTime = time+0.5;		//also dont immediately revive corpses
+		self.summonTime = time+0.5;		//and dont summon spiders either
 		
 		skullwiz_run();
 	}
@@ -833,10 +866,16 @@ float loop_cnt,forward,dot;
 
 	} while (trace_fraction != 1);
 	
-	self.think=skullwiz_blinkin1;
-	self.nextthink = time;	
 	sound (self, CHAN_VOICE, "skullwiz/blinkin.wav", 1, ATTN_NORM);
 	CreateRedFlash(self.origin + '0 0 40');
+	
+	setmodel(self, "models/skullwiz.mdl");
+	self.frame = $skwalk1;
+	setsize (self, self.orgnl_mins, self.orgnl_maxs);
+	self.hull = HULL_PLAYER;
+	
+	self.think=skullwiz_blinkin;
+	self.nextthink = time;
 }
 
 /*-----------------------------------------
@@ -953,23 +992,12 @@ void skullwiz_melee (void) [++ $skspel2..$skspel30]
 	
 	if (self.frame == $skspel20)   // Push enemy away
 	{
-		if (self.classname == "monster_skull_wizard")
-		{
-			skullwiz_push();
-			if (random() < 0.5)
-				skullwiz_missile_init();
-		}
-		else  // Only the skull wizard lord can summon
-		{
-			if (random()<0.2 && time>self.summonTime)
-				skullwiz_summoninit();
-			else
-			{
-				skullwiz_push();
-				if (random() < 0.5)
-					skullwiz_missile_init();
-			}
-		}
+		skullwiz_push();
+		float r = random();
+		if (r < 0.5)
+			skullwiz_missile_init();
+		else if (self.classname == "monster_skull_wizard_lord" && r < 0.6)	//0.1 chance of summoning
+			skullwiz_summoninit();
 	}
 
 	if (cycle_wrapped)
@@ -1018,7 +1046,6 @@ void skullwiz_run (void) [++ $skwalk1..$skwalk24]
 
 	if (self.frame == $skwalk1)  // Decide if he should BLINK away
 	{
-
 		if (self.classname == "monster_skull_wizard")
 		{
 			if (random() < .20 && self.teleportTime < time)
@@ -1132,7 +1159,7 @@ void skullwizard_init(void)
 	setsize(self, '-24 -24 0', '24 24 64');
 	self.orgnl_mins = self.mins;
 	self.orgnl_maxs = self.maxs;
-	self.hull = 2;
+	self.hull = HULL_PLAYER;
 
 	self.flags(+)FL_MONSTER;
 	self.yaw_speed = 10;
