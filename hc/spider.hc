@@ -369,7 +369,8 @@ void SpiderInit(float type)
 	self.th_melee = SpiderMeleeBegin;
 	self.th_missile = SpiderJumpBegin;
 	self.th_pain = SpiderPain;
-	self.th_raise = spider_raise;
+	if (!self.flags2&FL_SUMMONED)		//dont let spiders summoned by enemies or player be raised
+		self.th_raise = spider_raise;	//ws: monster revival system
 
 	self.flags (+) FL_MONSTER;
 
