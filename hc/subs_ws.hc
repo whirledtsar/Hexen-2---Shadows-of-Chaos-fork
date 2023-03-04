@@ -159,16 +159,12 @@ void SUB_TraceThroughObstacles (vector source, vector dest, float ignoremonsters
 	trace_ent = world;
 	
 	traceline(source,dest,ignoremonsters,ignore);
-	loop {
-		if (trace_ent!=victim && trace_ent.takedamage && (trace_ent.thingtype==THINGTYPE_WEBS||trace_ent.thingtype==THINGTYPE_GLASS||trace_ent.thingtype==THINGTYPE_CLEARGLASS||trace_ent.thingtype==THINGTYPE_REDGLASS||trace_ent.thingtype==THINGTYPE_ICE || (trace_ent.thingtype==THINGTYPE_CLAY && trace_ent.solid!=SOLID_BSP)))
-		{
-		//	makevectors(dest-source);
-			traceline(trace_endpos,dest,ignoremonsters,trace_ent);
-			//SUB_TraceThroughObstacles (trace_endpos, dest, ignoremonsters, trace_ent, victim);
-		}
-		else
-			return;
+	if (trace_ent!=victim && (trace_ent.thingtype==THINGTYPE_WEBS||trace_ent.thingtype==THINGTYPE_GLASS||trace_ent.thingtype==THINGTYPE_CLEARGLASS||trace_ent.thingtype==THINGTYPE_REDGLASS|| (trace_ent.thingtype==THINGTYPE_ICE&&trace_ent.takedamage) || (trace_ent.thingtype==THINGTYPE_CLAY && trace_ent.solid!=SOLID_BSP)))
+	{
+		traceline(trace_endpos,dest,ignoremonsters,trace_ent);
 	}
+	else
+		return;
 }
 
 float SUB_IsTargeted (entity ent)
