@@ -146,13 +146,8 @@ vector	spot1, spot2;
 		spot2=(targ.absmax+targ.absmin)*0.5;
 	else
 		spot2 = targ.origin + targ.view_ofs;
-
-    traceline (spot1, spot2, TRUE, forent);   // see through other monsters
-
-	if(trace_ent.thingtype>=THINGTYPE_WEBS)
-		traceline (trace_endpos, spot2, TRUE, trace_ent);
-//	else if (trace_inopen && trace_inwater)//FIXME?  Translucent water?
-//		return FALSE;			// sight line crossed contents
+	
+	SUB_TraceThroughObstacles(spot1, spot2, TRUE, forent, targ);
 
 	if (trace_fraction == 1)
 	{
