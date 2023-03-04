@@ -164,8 +164,8 @@ entity oself;
 		spot2=(targ.absmax+targ.absmin)*0.5;
 	else
 		spot2 = targ.origin + targ.view_ofs;
-
-    traceline (spot1, spot2, TRUE, forent);   // see through other monsters
+	
+	SUB_TraceThroughObstacles(spot1, spot2, TRUE, forent, targ);
 
 /*
 	if(forent.classname=="monster_skull_wizard"&&trace_fraction==1&&self.think==self.th_stand)
@@ -186,17 +186,6 @@ entity oself;
 		}
 	}
 */
-
-	if(trace_ent.thingtype>=THINGTYPE_WEBS)
-		traceline (trace_endpos, spot2, TRUE, trace_ent);
-//	else if (trace_inopen && trace_inwater)//FIXME?  Translucent water?
-//		return FALSE;			// sight line crossed contents
-
-//	if (trace_allsolid)
-//		dprint("trace all solid\n");
-
-//	dprint(targ.classname);
-
 	if (trace_fraction == 1)
 	{
 		if(forent.flags&FL_MONSTER)
