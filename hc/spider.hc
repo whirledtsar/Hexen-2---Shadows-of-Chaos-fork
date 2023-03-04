@@ -377,6 +377,8 @@ void SpiderInit(float type)
 	self.th_pain = SpiderPain;
 	self.th_possum = spider_playdead;
 	self.th_possum_up = spider_possum_up;
+	if (!self.flags2&FL_SUMMONED)		//dont let spiders summoned by enemies or player be raised
+		self.th_raise = spider_raise;	//ws: monster revival system
 
 	self.flags (+) FL_MONSTER;
 
