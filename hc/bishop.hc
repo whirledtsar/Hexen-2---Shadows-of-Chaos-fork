@@ -454,11 +454,10 @@ void() monster_bishop =
 	self.flags (+) FL_MONSTER|FL_FLY;
 	self.flags2 (+) FL_ALIVE;
 	self.lefty = 1;	//-1 for left dodge, 1 for right dodge
+	self.mintel = 8;
+	self.monsterclass = CLASS_HENCHMAN;
 	self.sightsound = "bishop/sight.wav";
 	self.yaw_speed = 14;
-	
-	self.monsterclass = CLASS_HENCHMAN;
-	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
 		self.experience_value = 140;
