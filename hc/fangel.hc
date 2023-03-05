@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/uhexen2/gamecode/hc/portals/fangel.hc,v 1.2 2007-02-07 16:59:32 sezero Exp $
+ * $Header: /cvsroot/uhexen2/gamecode/hc/h2/fangel.hc,v 1.2 2007-02-07 16:57:01 sezero Exp $
  */
 
 /*
@@ -193,6 +193,11 @@ void fangel_find_spot (void)
 float crj, radius,dist;
 vector vec;
 
+	if (self.goalentity == self.pathentity) {	//if walking on path, dont move randomly, just fly straight there
+		self.monster_last_seen = self.pathentity.origin;
+		return;
+	}
+
 	crj=0;
 	while(crj < 50)
 	{
@@ -255,6 +260,7 @@ void() fangel_init =
 
 void fangel_wait (void)
 {
+	stopSound(self,CHAN_BODY);	//cut off wings sound
 	self.frame = $fhand1;
 	thinktime self : 0.15;
 	LocateTarget();
@@ -267,6 +273,12 @@ void fangel_wait (void)
 			sound(self,CHAN_AUTO,"fangel/ambi2.wav",random(0.75,1),ATTN_NORM);
 		else
 			sound(self,CHAN_AUTO,"fangel/ambi1.wav",random(0.75,1),ATTN_NORM);
+	}
+	
+	if (self.pathentity && time > self.pausetime) {
+		self.monster_stage = FANGEL_STAGE_FLY;
+		self.think = self.th_walk;
+		self.th_walk();
 	}
 }
 
@@ -335,7 +347,7 @@ float Length;
 	{
 		if (random() < 0.1)
 			fangel_find_spot();
-		else
+		else if (self.enemy)	//not while walking between paths
 		{
 			self.monster_stage = FANGEL_STAGE_FLOAT;
 			self.monster_duration = random(10,30);
@@ -524,7 +536,7 @@ float chance;
 	{
 		self.takedamage = DAMAGE_NO;
 		spawn_reflect();
-		stopSound(self,CHAN_WEAPON);//cut off wings sound
+		stopSound(self,CHAN_BODY);	//cut off wings sound
 	}
 };
 
@@ -536,7 +548,7 @@ void() fangel_deathframes =
 	{
 		ThrowGib ("models/blood.mdl", self.health);
 		ThrowGib ("models/blood.mdl", self.health);
-		stopSound(self,CHAN_WEAPON);//cut off wings sound
+		stopSound(self,CHAN_BODY);	//cut off wings sound
 		chunk_death();
 		return;
 	}
@@ -584,7 +596,7 @@ void() fangel_deathframes =
 	if (self.frame == $fdeth10)
 	{
 		if (self.classname == "monster_fallen_angel")
-			sound (self, CHAN_WEAPON, "fangel/death.wav", 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, "fangel/death.wav", 1, ATTN_NORM);
 		else
 			sound (self, CHAN_WEAPON, "fangel/death2.wav", 1, ATTN_NORM);
 	}
@@ -599,7 +611,7 @@ void fangel_flyforward (void)
 	fangel_move(3*fangel_fly_offsets[self.frame - $fmove1]);
 
 	if (self.frame == $fmove2)
-		sound (self, CHAN_WEAPON, "fangel/fly.wav", 1, ATTN_NORM);
+		sound (self, CHAN_BODY, "fangel/fly.wav", 1, ATTN_NORM);
 
 	if ((self.frame >= $fmove6 && self.frame <= $fmove8) ||
 	    (self.frame >= $fmove16 && self.frame <= $fmove18))
@@ -615,7 +627,7 @@ void fangel_flyother (void)
 	fangel_move(3*fangel_fly_offsets[rint((self.frame - $ffly1)*.65)]);
 
 	if (self.frame == $ffly1) 
-		sound (self, CHAN_WEAPON, "fangel/fly.wav", 1, ATTN_NORM);
+		sound (self, CHAN_BODY, "fangel/fly.wav", 1, ATTN_NORM);
 
 	if ((self.frame >= $ffly11 && self.frame <= $ffly13) ||
 	    (self.frame >= $ffly26 && self.frame <= $ffly28))
@@ -627,22 +639,29 @@ void fangel_flyother (void)
 
 void() fangel_flyframes =
 {
-	if (!EnemyIsValid(self.enemy)) {
-		stopSound(self,CHAN_WEAPON);//cut off wings sound
-		self.think = self.th_stand;
-		thinktime self : 0;
-		return;
-	}
-	
 	self.think = fangel_flyframes;
-	thinktime self : HX_FRAME_TIME;
-	
-	if (visible(self.enemy))
-		self.wallspot = (self.enemy.absmin+self.enemy.absmax)*0.5;
+	if (self.goalentity == self.pathentity) {
+		if (self.monster_stage == FANGEL_STAGE_WAIT)
+			self.monster_stage = FANGEL_STAGE_FLY;
+		thinktime self : HX_FRAME_TIME*2;	//move slower when walking on path
+	}
 	else
-		SetNextWaypoint();
+		thinktime self : HX_FRAME_TIME;
+	
+	if (self.enemy) {
+		if (!EnemyIsValid(self.enemy)) {
+			stopSound(self,CHAN_BODY);	//cut off wings sound
+			self.think = self.th_stand;
+			thinktime self : 0;
+			return;
+		}
+		if (visible(self.enemy))
+			self.wallspot = (self.enemy.absmin+self.enemy.absmax)*0.5;
+		else
+			SetNextWaypoint();
 
-	fangel_check_incoming();
+		fangel_check_incoming();
+	}
 
 	if(self.velocity!='0 0 0')
 		self.velocity=self.velocity*0.7;
@@ -695,6 +714,11 @@ void() fangel_painframes =
 	if (AdvanceFrame($fpain1,$fpain12) == AF_END)
 	{
 		fangel_check_incoming();
+		
+		if (self.enemy.flags&FL_NOTARGET) {
+			self.think = self.th_save;
+			return;
+		}
 
 		chance = random();
 		if (chance < .33)
@@ -720,7 +744,15 @@ void() fangel_prepare_beam =
 		self.finaldest = self.wallspot;		//if we cant see enemy, aim at last spot we saw them in
 	}
 	if (enemy_vis && !self.shoot_cnt) {		//if not yet firing, remember direction player is heading
-		self.finaldest = (self.enemy.absmin+self.enemy.absmax)*0.5;
+		vector org;
+		org=self.origin+self.view_ofs;
+		traceline(org,(self.enemy.absmin+self.enemy.absmax)*0.5,TRUE,self);
+		if (trace_fraction!=1) {	//can see enemy, but not center
+			traceline(org,(self.enemy.origin+self.enemy.view_ofs),TRUE,self);
+			if (trace_fraction!=1)	//can see enemy, but not top
+				traceline(org,(self.enemy.origin+'0 0 8'),TRUE,self);
+		}
+		self.finaldest = trace_endpos;		//(self.enemy.absmin+self.enemy.absmax)*0.5;
 		self.movedir = self.enemy.velocity;
 		if (!self.enemy.flags&FL_ONGROUND)
 			self.movedir_z = 0;		//ignore jumping
@@ -837,9 +869,9 @@ void(entity attacker, float damage) fangel_pain =
 	if (self.frame >= $ffly11 && self.frame <= $ffly28)
 	{
 		if (self.classname == "monster_fallen_angel")
-			sound (self, CHAN_WEAPON, "fangel/pain.wav", 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, "fangel/pain.wav", 1, ATTN_NORM);
 		else
-			sound (self, CHAN_WEAPON, "fangel/pain2.wav", 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, "fangel/pain2.wav", 1, ATTN_NORM);
 
 		self.fangel_SaveFrame = self.frame;
 		// didn't want to use self.think just in case we just began to attack
@@ -850,9 +882,9 @@ void(entity attacker, float damage) fangel_pain =
 	{
 		self.finaldest = self.movedir = VEC_ORIGIN;		//reset beam aim
 		if (self.classname == "monster_fallen_angel")
-			sound (self, CHAN_WEAPON, "fangel/pain.wav", 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, "fangel/pain.wav", 1, ATTN_NORM);
 		else
-			sound (self, CHAN_WEAPON, "fangel/pain2.wav", 1, ATTN_NORM);
+			sound (self, CHAN_VOICE, "fangel/pain2.wav", 1, ATTN_NORM);
 		self.pain_finished=time + 1 + self.skin;
 		ThrowGib ("models/blood.mdl", self.health);
 		if (self.health < 50)
@@ -873,24 +905,24 @@ void() init_fangel =
 		remove(self);
 		return;
 	}
+
+	self.monster_stage = FANGEL_STAGE_WAIT;
 	
 	self.init_org = self.origin;
 
-	self.monster_stage = FANGEL_STAGE_WAIT;
-
 	if (!self.flags2&FL_SUMMONED && !self.flags2&FL2_RESPAWN)
 	{
-		precache_model4 ("models/fangel.mdl");//converted for MP
+		precache_model2 ("models/fangel.mdl");
 		precache_model2 ("models/faspell.mdl");
 		precache_model2 ("models/fablade.mdl");
-		precache_model4 ("models/h_fangel.mdl");
+		precache_model2 ("models/h_fangel.mdl");
 
 		precache_sound2("fangel/fly.wav");
 		precache_sound2("fangel/deflect.wav");
 		precache_sound2("fangel/hand.wav");
 		precache_sound2("fangel/wing.wav");
 		precache_sound("mezzo/reflect.wav");	//SoC: bouncing missiles
-		precache_sound("golem/gbfire.wav");	//SoC: beam attack
+		precache_sound("golem/gbfire.wav");		//SoC: beam attack
 	}
 
 	if (self.classname == "monster_fallen_angel")
@@ -917,7 +949,7 @@ void() init_fangel =
 
 	if(!self.max_health)
 		self.max_health=self.health;
-
+self.init_org = self.origin;
 	self.th_stand = fangel_wait;	//fangel_flyframes;
 	self.th_walk = fangel_flyframes;
 	self.th_run = fangel_flyframes;
