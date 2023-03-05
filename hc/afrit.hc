@@ -539,11 +539,10 @@ void() monster_afrit =
 	self.flags (+) FL_FLY;
 	self.flags2 (+) FL_ALIVE;
 	self.counter = 0;	//counter for dodging
+	self.mintel = 5;
+	self.monsterclass = CLASS_GRUNT;
 	self.sightsound = "afrit/sight.wav";
 	self.yaw_speed = 14;
-	
-	self.monsterclass = CLASS_GRUNT;
-	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
 		self.experience_value = 40;
