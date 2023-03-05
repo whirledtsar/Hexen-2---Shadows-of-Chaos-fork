@@ -684,6 +684,7 @@ void monster_reiver ()
 	self.solid = SOLID_SLIDEBOX;
 	
 	self.height = random(144,208);	//stay this far above player if SF_FLYABOVE
+	self.mintel = 6;
 	self.monsterclass = CLASS_GRUNT;
 	self.proj_ofs = '0 0 24';
 	self.sightsound = "reiv/see.wav";
