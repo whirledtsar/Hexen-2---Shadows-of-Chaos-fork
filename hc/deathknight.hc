@@ -235,13 +235,12 @@ void() monster_death_knight =
 	
 	self.thingtype=THINGTYPE_FLESH;
 	
+	self.mintel = 5;
+	self.monsterclass = CLASS_GRUNT;
 	self.netname="footsoldier";
 	self.flags (+) FL_MONSTER;
 	self.flags2 (+) FL_ALIVE;
 	self.yaw_speed = 14;
-	
-	self.monsterclass = CLASS_GRUNT;
-	//self.hull=HULL_PLAYER;
 	
 	if(!self.experience_value)
 		self.experience_value = 30;
