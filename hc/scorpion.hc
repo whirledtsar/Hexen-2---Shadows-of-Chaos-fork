@@ -257,13 +257,17 @@ void ScorpionInit(float type)
 void ScorpionStand(void)
 {
 	self.think = ScorpionStand;
-	self.nextthink = time + 0.2;
-	self.scorpionRest += 2;
-	if(self.scorpionRest < 0 || self.scorpionRest > 5)
-	{
-		self.scorpionRest = 0;
+	self.nextthink = time + HX_FRAME_TIME;
+	if (self.scorpionAnimWait < time) {		//ws: decoupled animation from AI so their reaction isn't delayed
+		self.scorpionRest += 1;
+		if(self.scorpionRest < 0 || self.scorpionRest > 5)
+		{
+			self.scorpionRest = 0;
+		}
+		self.frame = ScorpionStandFrames[self.scorpionRest];
+		self.scorpionAnimWait = time+0.2;
+		dprint(ftos(self.frame));dprint("\n");
 	}
-	self.frame = ScorpionStandFrames[self.scorpionRest];
 	ai_stand();
 	if(self.think != ScorpionStand)
 	{ // Wake up
