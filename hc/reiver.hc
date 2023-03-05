@@ -31,9 +31,9 @@ $frame 127stun 128stun 129stun 130stun 131stun 132stun 133stun 134stun 135stun 1
 $frame 138death 139death 140death 141death 142death 143death 144death
 
 float REIV_BURIED = 2;
+float REIV_NOFX = 8;
 float REIV_DORMANT = 16;
-float SF_FLYABOVE = 262144;
-float REIV_NOFX = 524288;
+float SF_FLYABOVE = 1048576;
 
 float REIV_HEIGHT = 500;
 float REIV_RANGE = 60;
