@@ -351,6 +351,7 @@ void end_sys_fields;
 		float scorpionType;			// SCORPION_? types
 		float scorpionRest;			// Resting state counter
 		float scorpionWalkCount;	// Counts walking frames
+		float scorpionAnimWait;		// Delay between animation frames
 	};
 	struct
 	{ // Golem
