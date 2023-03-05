@@ -580,8 +580,10 @@ void() monster_spawn =
 	
 	SUB_AttackFinished(1);	//dont attack immediately
 	
-	if (self.model=="models/imp.mdl")
+	if (self.model=="models/imp.mdl") {
+		self.movetype = MOVETYPE_FLY;
 		impmonster_start();
+	}
 	else if (self.classname=="monster_hydra")
 		init_hydra();
 	else if (self.flags&FL_FLY)
