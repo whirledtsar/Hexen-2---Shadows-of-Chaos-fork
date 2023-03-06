@@ -643,7 +643,7 @@ void GolemSMeleeDecide(void)
 
 void GolemIMissileTouch(void)
 {
-	if (other.health > 0 && other.flags & FL_ALIVE)
+	if (other.health > 0 && other.flags2&FL_ALIVE)
 		T_Damage(other, self, self.owner, random(13,17));
 
 	remove(self);
