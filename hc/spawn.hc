@@ -113,8 +113,8 @@ float entity_spawnvalues[552] =//6 per entity
 		25,		3,		0,				0,				2,				1,	// ENT_WORLD		
 		25,		3,	   13,				3,				2,				1,	// ENT_CHAIR
 		25,		3,	   13,				3,				2,				1,	// ENT_BARSTOOL
-		20,		0,		0,				3,				1,				1,	// ENT_BOOKOPEN
-		20,		0,		0,				3,				1,				1,	// ENT_BOOKCLOSED
+		20,		0,		0,				3,				10,				1,	// ENT_BOOKOPEN
+		20,		0,		0,				3,				10,				1,	// ENT_BOOKCLOSED
 	  1000,	99999,		0,				2,				2,				1,	// ENT_TREEDEAD
 	  1000,	99999,		0,				2,			   11,				1,	// ENT_TREE
 	  1000,	99999,		0,				2,			    7,				1,	// ENT_TREETOP
