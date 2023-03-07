@@ -88,7 +88,7 @@ void MarkForRespawn (void)
 			newmis.bluemana = 15;
 		
 		newmis.think = wandering_monster_respawn;
-		thinktime newmis : self.respawntime + (self.monsterclass*60);
+		thinktime newmis : self.respawntime + (self.monsterclass*30);
 		
 		//mark for respawn buff chance
 		newmis.killerlevel = self.killerlevel;
