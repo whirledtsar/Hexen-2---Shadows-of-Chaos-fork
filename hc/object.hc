@@ -1330,6 +1330,7 @@ void obj_book_open (void)
 {
 	precache_model("models/bookopen.mdl");
 	CreateEntityNew(self,ENT_BOOKOPEN,"models/bookopen.mdl",chunk_death);
+	self.color = 6;		//paper colored cloth chunks
 	if(self.targetname)
 		self.use=chunk_death;
 }
@@ -1344,6 +1345,7 @@ void obj_book_closed (void)
 {
 	precache_model("models/bookclos.mdl");
 	CreateEntityNew(self,ENT_BOOKCLOSED,"models/bookclos.mdl",chunk_death);
+	self.color = 6;		//paper colored cloth chunks
 	if(self.targetname)
 		self.use=chunk_death;
 }
