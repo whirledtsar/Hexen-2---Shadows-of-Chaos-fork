@@ -36,6 +36,8 @@ float EnemyIsValid (entity ent)
 	if (!ent.flags&FL_CLIENT && !ent.flags2&FL_ALIVE)					return FALSE;
 	if (ent.artifact_active&ARTFLAG_FROZEN
 		&& self.classname!="monster_yakman")	return FALSE;
+	if (ent.artifact_active&ARTFLAG_STONED
+		&& self.classname!="monster_medusa")	return FALSE;
 	if (ent.artifact_active&ARTFLAG_ASH
 		|| ent.skin==GLOBAL_SKIN_ASH)			return FALSE;
 	if (self.playercontrolled
@@ -130,22 +132,46 @@ float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
 {
 vector dest;
 	makevectors(self.angles);
+	vector test;
 	
 	if (!self.flags&FL_SWIM && (pointcontents(spot)==CONTENT_WATER || pointcontents(spot)==CONTENT_SLIME))
 		return FALSE;
 	
 	dest = spot + ('0 0 1' * maxs_z*1.25);
 	
-	traceline (spot, dest, TRUE, ignore);	//try simple trace first
-	if (trace_fraction != 1 || trace_allsolid)
+	traceline (spot, dest, FALSE, ignore);	//try simple trace first
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot + v_forward*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot - v_forward*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot + v_right*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot - v_right*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
 		return FALSE;
 	
 	tracearea (spot, dest, mins, maxs, FALSE, ignore);	//if line wasnt blocked, trace with bbox
-	
-	if (trace_fraction == 1 && !trace_allsolid)
-		return TRUE;
-	else
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
 		return FALSE;
+	
+	return TRUE;
 }
 
 vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ignore)
@@ -235,7 +261,7 @@ void SetNewWanderPoint (float mindist, float maxdist)
 	do {
 		i++;
 		dest = FindSpawnSpot(mindist, maxdist, 360, self);
-		if (pointcontents(dest)==CONTENT_LAVA)
+		if (pointcontents(dest)==CONTENT_LAVA && (!self.flags2&FL2_FIRERESIST && !self.flags2&FL2_FIREHEAL))
 			dest = VEC_ORIGIN;
 	}
 	while (dest == VEC_ORIGIN && i<100);
