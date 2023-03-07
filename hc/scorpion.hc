@@ -266,7 +266,6 @@ void ScorpionStand(void)
 		}
 		self.frame = ScorpionStandFrames[self.scorpionRest];
 		self.scorpionAnimWait = time+0.2;
-		dprint(ftos(self.frame));dprint("\n");
 	}
 	ai_stand();
 	if(self.think != ScorpionStand)
