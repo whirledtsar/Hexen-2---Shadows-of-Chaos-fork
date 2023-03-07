@@ -702,6 +702,14 @@ void chunk_death (void)
 			for (i = 0; i < 10*self.scale; i++)
 				feathers();
 		}
+		
+		if (self.gibmdl1)
+			ThrowGib (self.gibmdl1, self.health);
+		if (self.gibmdl2)
+			ThrowGib (self.gibmdl2, self.health);
+		if (self.gibmdl3)
+			ThrowGib (self.gibmdl3, self.health);
+		
 		//Made temporary changes to make weapons look and sound
 		//better, more blood and gory sounds.
 		if(self.enemy.playerclass==CLASS_ASSASSIN && (self.enemy.weapon == IT_WEAPON4))
