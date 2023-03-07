@@ -127,27 +127,73 @@ float PlayerHasMelee (entity player)
 	
 	return FALSE;
 }
-
+/*
+float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
+{
+vector dest;
+	//spot = spot+'0 0 0.1';
+	makevectors(self.angles);
+	
+	if (!self.flags&FL_SWIM && (pointcontents(spot)==CONTENT_WATER || pointcontents(spot)==CONTENT_SLIME))
+		return FALSE;
+	
+	dest = spot + ('0 0 1' * maxs_z*1.2);
+	
+	traceline (spot, dest, FALSE, ignore);	//try simple trace first
+	if (trace_fraction != 1 || trace_allsolid)
+		return FALSE;
+	
+	tracearea (spot, dest, mins, maxs, FALSE, ignore);	//if line wasnt blocked, trace with bbox
+	if (trace_fraction != 1)
+		return FALSE;
+	
+	return FALSE;
+}
+*/
 float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
 {
 vector dest;
 	makevectors(self.angles);
+	vector test;
 	
 	if (!self.flags&FL_SWIM && (pointcontents(spot)==CONTENT_WATER || pointcontents(spot)==CONTENT_SLIME))
 		return FALSE;
 	
 	dest = spot + ('0 0 1' * maxs_z*1.25);
 	
-	traceline (spot, dest, TRUE, ignore);	//try simple trace first
-	if (trace_fraction != 1 || trace_allsolid)
+	traceline (spot, dest, FALSE, ignore);	//try simple trace first
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot + v_forward*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot - v_forward*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot + v_right*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
+		return FALSE;
+	
+	test = spot - v_right*maxs_x;
+	dest = test + ('0 0 1' * maxs_z*1.25);
+	traceline (test, dest, FALSE, ignore);
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
 		return FALSE;
 	
 	tracearea (spot, dest, mins, maxs, FALSE, ignore);	//if line wasnt blocked, trace with bbox
-	
-	if (trace_fraction == 1 && !trace_allsolid)
-		return TRUE;
-	else
+	if (trace_fraction != 1 || trace_allsolid || pointcontents(trace_endpos)==CONTENT_SKY)
 		return FALSE;
+	
+	return TRUE;
 }
 
 vector FindSpawnSpot (float rangemin, float rangemax, float anglemax, entity ignore)
@@ -210,7 +256,7 @@ float	away;
 void(float mindist, float maxdist) SetNewWanderPoint;
 
 void WanderPointTouch ()
-{	dprint("WanderPointTouch\n");
+{
 	if (!self.controller) {
 		remove(self);
 		return;
@@ -237,7 +283,7 @@ void SetNewWanderPoint (float mindist, float maxdist)
 	do {
 		i++;
 		dest = FindSpawnSpot(mindist, maxdist, 360, self);
-		if (pointcontents(dest)==CONTENT_LAVA)
+		if (pointcontents(dest)==CONTENT_LAVA && (!self.flags2&FL2_FIRERESIST && !self.flags2&FL2_FIREHEAL))
 			dest = VEC_ORIGIN;
 	}
 	while (dest == VEC_ORIGIN && i<100);
