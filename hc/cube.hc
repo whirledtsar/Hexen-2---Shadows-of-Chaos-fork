@@ -183,6 +183,7 @@ void CubeThinkerB(void)
 		self.effects=EF_NODRAW;
 		self.think = cube_reset;
 		thinktime self : HX_FRAME_TIME;
+		return;
 	}
 
 	if (self.adjust_velocity == '0 0 0')
