@@ -703,13 +703,6 @@ void chunk_death (void)
 				feathers();
 		}
 		
-		if (self.gibmdl1)
-			ThrowGib (self.gibmdl1, self.health);
-		if (self.gibmdl2)
-			ThrowGib (self.gibmdl2, self.health);
-		if (self.gibmdl3)
-			ThrowGib (self.gibmdl3, self.health);
-		
 		//Made temporary changes to make weapons look and sound
 		//better, more blood and gory sounds.
 		if(self.enemy.playerclass==CLASS_ASSASSIN && (self.enemy.weapon == IT_WEAPON4))
@@ -734,6 +727,13 @@ void chunk_death (void)
 		deathsound="misc/icestatx.wav";
 	else
 		deathsound="fx/wallbrk.wav";
+	
+	if (self.gibmdl1)
+		ThrowGib (self.gibmdl1, self.health);
+	if (self.gibmdl2)
+		ThrowGib (self.gibmdl2, self.health);
+	if (self.gibmdl3)
+		ThrowGib (self.gibmdl3, self.health);
 
 	if(self.level!=-666)
 		sound (self, CHAN_VOICE, deathsound, 1, ATTN_NORM);
