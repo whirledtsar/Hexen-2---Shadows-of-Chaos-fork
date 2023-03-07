@@ -291,6 +291,8 @@ void CreateModelChunks (vector space,float scalemod)
 			setmodel (chunk, "models/clthchk2.mdl");
 		else 
 			setmodel (chunk, "models/clthchk3.mdl");
+		if (self.color)
+			chunk.skin = self.color;
 	}
 	else if (self.thingtype==THINGTYPE_WOOD_LEAF)
 	{
