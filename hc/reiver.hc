@@ -93,7 +93,7 @@ float reiv_canrise ()
 {
 	self.solid = SOLID_SLIDEBOX;
 	setorigin(self, self.origin);
-	if !(CanSpawnAtSpot (self.origin, self.mins*1.5, self.maxs*1.5, self)) {
+	if !(CanSpawnAtSpot (self.origin, self.mins, self.maxs, self)) {
 		if (trace_ent.health && trace_ent.solid && trace_ent.solid!=SOLID_PHASE)
 			Knockback (trace_ent, self, self, 8, 0.2);
 		self.frame = $000pose;
@@ -136,6 +136,8 @@ void reiv_rise () [++ $001rise .. $024rise]
 
 void reiv_buried ()
 {
+	self.think = reiv_buried;
+	thinktime self : HX_FRAME_TIME;
 	if (!self.spawnflags & REIV_DORMANT)
 		ai_stand();
 	else if (self.goalentity)	//activated by targeting
@@ -144,7 +146,6 @@ void reiv_buried ()
 		self.think = reiv_rise;
 		self.think();
 	}
-	thinktime self : HX_FRAME_TIME;
 }
 
 void reiv_chargedrain () [++ $120leech .. $126leech]
