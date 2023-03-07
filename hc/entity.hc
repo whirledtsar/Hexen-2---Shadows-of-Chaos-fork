@@ -867,6 +867,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 .void() th_blasted;		//flymonsters: function to run when hit by disc of repulsion to simulate effect
 .void() minionfunc;
 .string minionname;
+.float last_groundz;	//used by client for new fall damage calculation
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
