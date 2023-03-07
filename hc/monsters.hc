@@ -279,14 +279,19 @@ void() walkmonster_start_go =
 	if (self.target)
 	{
 		sdprint("Summon monster start GO - Has a target", FALSE);					
-		self.goalentity = self.pathentity = find(world, targetname, self.target);
-		self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
-		if (!self.pathentity)
+		local entity e;
+		e = find(world, targetname, self.target);
+		if (e.classname == "path_corner") {
+			self.goalentity = self.pathentity = e;
+			self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
+		}
+/*		if (!self.pathentity)
 		{
 			dprint ("Monster can't find target at ");
 			dprint (vtos(self.origin));
 			dprint ("\n");
 		}
+*/
 // this used to be an objerror
 		if (self.pathentity.classname == "path_corner")
 			if(self.spawnflags&SF_FROZEN)
@@ -383,13 +388,19 @@ void() flymonster_start_go =
 
 	if (self.target)
 	{
-		self.goalentity = self.pathentity = find(world, targetname, self.target);
-		if (!self.pathentity)
+		local entity e;
+		e = find(world, targetname, self.target);
+		if (e.classname == "path_corner") {
+			self.goalentity = self.pathentity = e;
+			self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
+		}
+/*		if (!self.pathentity)
 		{
 			dprint ("Monster can't find target at ");
 			dprint (vtos(self.origin));
 			dprint ("\n");
 		}
+*/
 // this used to be an objerror
 
 		if (self.pathentity.classname == "path_corner")
