@@ -154,6 +154,16 @@ void cube_rotate(void)
 	self.v_angle += NewOffset;
 }
 
+void() CubeThinkerB;
+
+void cube_reset()
+{
+	if (!self.owner.flags&EF_NODRAW) {
+		self.effects(-)EF_NODRAW;
+		self.think = CubeThinkerB;
+	}
+}
+
 vector CubeFollowRate = '14 14 14';
 vector CubeAttackRate = '3 3 3';
 
@@ -167,6 +177,12 @@ void CubeThinkerB(void)
 	{
 		CubeDie();
 		return;
+	}
+	
+	if (self.owner.flags&FL_MONSTER && self.owner.effects&EF_NODRAW) {
+		self.effects=EF_NODRAW;
+		self.think = cube_reset;
+		thinktime self : HX_FRAME_TIME;
 	}
 
 	if (self.adjust_velocity == '0 0 0')
