@@ -2413,6 +2413,7 @@ void() PlayerPostThink =
 		self.weaponmodel="";
 
 // check to see if player landed and play landing sound	
+/*
 	if ((self.jump_flag*(self.mass/10) < -300) && (self.flags & FL_ONGROUND) && (self.health > 0))
 	{
 		if(self.absorb_time>=time)
@@ -2434,6 +2435,36 @@ void() PlayerPostThink =
 			MonsterQuake((self.mass/10)*self.jump_flag);
 		self.jump_flag = 0;
 	}
+*/
+//ws: new fall damage code with damage increasing exponentially based on fall distance
+	if (self.last_groundz && (self.flags & FL_ONGROUND) && self.flags2&FL_ALIVE) {
+		float height;
+		height = self.last_groundz - self.origin_z;
+		if (self.watertype == CONTENT_WATER || self.watertype == CONTENT_SLIME) {
+			if (height > 64)
+				sound (self, CHAN_BODY, "player/h2ojmp.wav", 1, ATTN_NORM);
+		}
+		else if (height > 128) {
+			float damg;
+			damg = ((height*0.5)*(height*0.25)*(height*0.125)*0.00000334);	//00000625
+			if (self.absorb_time>=time)
+				damg*=0.5;
+			if (damg>=1) {
+				self.deathtype = "falling";
+				T_Damage (self, world, world, damg);
+			}
+			if(self.playerclass==CLASS_ASSASSIN)
+				sound (self, CHAN_VOICE, "player/asslnd.wav", 1, ATTN_NORM);
+			else
+				sound (self, CHAN_VOICE, "player/pallnd.wav", 1, ATTN_NORM);
+		}
+		else if (height > 80)
+			sound (self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
+		
+		if(self.scale>1&&self.jump_flag*(self.mass/10) < -500)
+			MonsterQuake((self.mass/10)*self.jump_flag);
+		self.jump_flag = 0;
+	}
 
 	if (!(self.flags & FL_ONGROUND))
 	{
@@ -2450,8 +2481,10 @@ void() PlayerPostThink =
 					self.gravity=self.standard_grav;
 		self.jump_flag = self.velocity_z;
 	}
-	else
+	else {
 		self.last_onground=time;
+		self.last_groundz = self.origin_z;
+	}
 
 	CheckPowerups ();
 
