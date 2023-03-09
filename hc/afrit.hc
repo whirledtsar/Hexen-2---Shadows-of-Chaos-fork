@@ -262,27 +262,27 @@ void() afrit_run =
 void()	afrit_fly1	=[	35,		afrit_fly2	] {
 if (random() < 0.02)
 	sound (self, CHAN_VOICE, "afrit/idle.wav", 1,  ATTN_IDLE);
-AfritCheckDodge(0.9);
+AfritCheckDodge(0.95);
 ai_run(3);};
-void()	afrit_fly2	=[	36,		afrit_fly3	] {AfritCheckDodge(0.9); ai_run(3);};
-void()	afrit_fly3	=[	37,		afrit_fly4	] {AfritCheckDodge(0.9); ai_run(3); self.drawflags(+)MLS_FULLBRIGHT;};
-void()	afrit_fly4	=[	38,		afrit_fly5	] {AfritCheckDodge(0.9); ai_run(4);};
-void()	afrit_fly5	=[	39,		afrit_fly6	] {AfritCheckDodge(0.9); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_fly6	=[	40,		afrit_fly7	] {AfritCheckDodge(0.9); ai_run(3);};
-void()	afrit_fly7	=[	41,		afrit_fly8	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
-void()	afrit_fly8	=[	42,		afrit_fly9	] {AfritCheckDodge(0.9); ai_run(4);};
-void()	afrit_fly9	=[	43,		afrit_fly10	] {AfritCheckDodge(0.9); ai_run(3);};
-void()	afrit_fly10	=[	44,		afrit_fly11	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
-void()	afrit_fly11	=[	45,		afrit_fly12	] {AfritCheckDodge(0.9); ai_run(3); CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_fly12	=[	46,		afrit_fly13	] {AfritCheckDodge(0.9); ai_run(3);};
-void()	afrit_fly13	=[	47,		afrit_fly14	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects(); sound (self, CHAN_BODY, "afrit/hover.wav", 1, ATTN_IDLE);};
-void()	afrit_fly14	=[	48,		afrit_fly15	] {AfritCheckDodge(0.9); ai_run(4);};
-void()	afrit_fly15	=[	49,		afrit_fly16	] {AfritCheckDodge(0.9); ai_run(4);};
-void()	afrit_fly16	=[	50,		afrit_fly17	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
-void()	afrit_fly17	=[	51,		afrit_fly18	] {AfritCheckDodge(0.9); ai_run(3);};
-void()	afrit_fly18	=[	52,		afrit_fly19	] {AfritCheckDodge(0.9); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
-void()	afrit_fly19	=[	53,		afrit_fly20	] {AfritCheckDodge(0.9); ai_run(3); AfritEffects();};
-void()	afrit_fly20	=[	54,		afrit_fly1	] {AfritCheckDodge(0.9); ai_run(3);};
+void()	afrit_fly2	=[	36,		afrit_fly3	] {AfritCheckDodge(0.95); ai_run(3);};
+void()	afrit_fly3	=[	37,		afrit_fly4	] {AfritCheckDodge(0.95); ai_run(3); self.drawflags(+)MLS_FULLBRIGHT;};
+void()	afrit_fly4	=[	38,		afrit_fly5	] {AfritCheckDodge(0.95); ai_run(4);};
+void()	afrit_fly5	=[	39,		afrit_fly6	] {AfritCheckDodge(0.95); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_fly6	=[	40,		afrit_fly7	] {AfritCheckDodge(0.95); ai_run(3);};
+void()	afrit_fly7	=[	41,		afrit_fly8	] {AfritCheckDodge(0.95); ai_run(3); AfritEffects();};
+void()	afrit_fly8	=[	42,		afrit_fly9	] {AfritCheckDodge(0.95); ai_run(4);};
+void()	afrit_fly9	=[	43,		afrit_fly10	] {AfritCheckDodge(0.95); ai_run(3);};
+void()	afrit_fly10	=[	44,		afrit_fly11	] {AfritCheckDodge(0.95); ai_run(3); AfritEffects();};
+void()	afrit_fly11	=[	45,		afrit_fly12	] {AfritCheckDodge(0.95); ai_run(3); CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_fly12	=[	46,		afrit_fly13	] {AfritCheckDodge(0.95); ai_run(3);};
+void()	afrit_fly13	=[	47,		afrit_fly14	] {AfritCheckDodge(0.95); ai_run(3); AfritEffects(); sound (self, CHAN_BODY, "afrit/hover.wav", 1, ATTN_IDLE);};
+void()	afrit_fly14	=[	48,		afrit_fly15	] {AfritCheckDodge(0.95); ai_run(4);};
+void()	afrit_fly15	=[	49,		afrit_fly16	] {AfritCheckDodge(0.95); ai_run(4);};
+void()	afrit_fly16	=[	50,		afrit_fly17	] {AfritCheckDodge(0.95); ai_run(3); AfritEffects();};
+void()	afrit_fly17	=[	51,		afrit_fly18	] {AfritCheckDodge(0.95); ai_run(3);};
+void()	afrit_fly18	=[	52,		afrit_fly19	] {AfritCheckDodge(0.95); ai_run(3); particle4(self.origin + '0 0 18',random(5,10),254, PARTICLETYPE_FIRE,10);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
+void()	afrit_fly19	=[	53,		afrit_fly20	] {AfritCheckDodge(0.95); ai_run(3); AfritEffects();};
+void()	afrit_fly20	=[	54,		afrit_fly1	] {AfritCheckDodge(0.95); ai_run(3);};
 
 void afrit_charge ()
 {
@@ -328,9 +328,9 @@ void()	afrit_atk15=[	28,		afrit_atk16	] {afrit_atk_slide(); };
 void()	afrit_atk16=[	29,		afrit_atk17	] {afrit_atk_slide(); AfritEffects();};
 void()	afrit_atk17=[	30,		afrit_atk18	] {afrit_atk_slide(); AfritFire(0);CreateWhiteSmoke(self.origin + '0 0 16','0 0 8',HX_FRAME_TIME * 2);};
 void()	afrit_atk18=[	31,		afrit_atk19	] {ai_face(); };
-void()	afrit_atk19=[	32,		afrit_atk20	] {ai_face(); AfritCheckDodge(0.9);};
-void()	afrit_atk20=[	33,		afrit_atk21	] {AfritCheckDodge(0.9);};
-void()	afrit_atk21=[	34,		afrit_fly1	] {AfritEffects(); AfritCheckDodge(0.9);};
+void()	afrit_atk19=[	32,		afrit_atk20	] {ai_face(); AfritCheckDodge(0.95);};
+void()	afrit_atk20=[	33,		afrit_atk21	] {AfritCheckDodge(0.95);};
+void()	afrit_atk21=[	34,		afrit_fly1	] {AfritEffects(); SUB_AttackFinished(1); AfritCheckDodge(0.95);};
 
 
 //===========================================================================
