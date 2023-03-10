@@ -671,6 +671,8 @@ void Precache_wav (void)
 	precache_sound ("weapons/exphuge.wav");		//SHA-BOOOOMMM!!!
 	precache_sound ("weapons/hithurt2.wav");	// Damaging non-flesh with a melee weapon
 	precache_sound ("weapons/hitwall.wav");		// Hitting (not damaging) a wall with a melee weapon
+	precache_sound ("player/fall_c.wav");		// Falling sound	
+	precache_sound ("player/fall_a.wav");		// Falling sound (female)
 
 //PALADIN
 //Body sounds
