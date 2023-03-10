@@ -91,10 +91,10 @@ float SpiderHealth[4] =
 
 float SpiderExp[4] =
 {
-	150,	// SPIDER_RED_LARGE
-	50,		// SPIDER_RED_SMALL
-	100,	// SPIDER_YELLOW_LARGE
-	25		// SPIDER_YELLOW_SMALL
+	60,	// SPIDER_RED_LARGE
+	25,		// SPIDER_RED_SMALL
+	35,	// SPIDER_YELLOW_LARGE
+	15		// SPIDER_YELLOW_SMALL
 };
 
 // CODE --------------------------------------------------------------------
