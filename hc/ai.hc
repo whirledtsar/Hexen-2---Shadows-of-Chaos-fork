@@ -961,6 +961,44 @@ void(float dist) ai_run =
 // head straight in
 //	if(self.netname=="spider")
 //		check_climb();
+
+//ws: new AI for SoC flying enemies, attempts to fly a certain distance above enemy intead of automatically adjusting to their height
+	if (self.spawnflags&SF_FLYABOVE && (!self.enemy.flags&FL_FLY) && self.zmovetime < time) {
+		//dont try to fly above other flying enemies because they would rise to the skybox lol
+		if (!enemy_vis && self.flags&FL_NOZ) {
+			if (self.search_time < time+2)		//path normally to try to find enemy if we havent found them after a couple seconds
+				self.flags(-)FL_NOZ;
+		}
+		
+		traceline(self.origin, self.origin+('0 0 1'*self.maxs_z)+'0 0 32', FALSE, self);
+		//debug entity new; new = spawn(); setmodel(new, "models/h_imp.mdl"); setorigin(new, trace_endpos); new.think = SUB_Remove; thinktime new : 0.1;
+		if (trace_fraction < 1 || pointcontents(trace_endpos)<=CONTENT_SOLID) {
+			//dprint("ai_run: Flymonster won't hug ceiling\n");
+			self.flags(-)FL_NOZ;		//dont hug ceiling
+			self.zmovetime = time+3;	//move around to try to path to higher ceiling room
+		}
+		else if (enemy_vis && (self.enemy.flags&FL_ONGROUND||self.enemy.groundentity)) {
+			//try to fly above but dont follow jumping players exactly because it looks silly
+			self.flags(+)FL_NOZ;
+			
+			float diff;
+			diff = self.absmin_z - self.enemy.absmin_z;
+			
+			if (diff < self.hoverz)
+				movestep(0, 0, 5, FALSE);
+			else if (diff > self.hoverz + 16) {
+				traceline(self.origin, self.origin-('0 0 1'*8), FALSE, self);
+				if (trace_fraction<1 || pointcontents(trace_endpos)<=CONTENT_SOLID) {
+					//dprint("ai_run: Flymonster won't hug floor\n");
+					self.flags(-)FL_NOZ;		//also dont hug floor of wall if already above player
+					self.zmovetime = time+1;
+				}
+				else
+					movestep(0, 0, -5, FALSE);
+			}
+		}
+	}
+	
 	if (movedist)
 		self.flags2(+)FL2_MOVING;
 	if(self.classname=="monster_eidolon")

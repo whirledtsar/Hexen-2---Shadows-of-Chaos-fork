@@ -429,6 +429,14 @@ void() flymonster_start =
 	}
 	
 // spread think times so they don't all happen at same time
+	//ws: SoC flying monsters won't automatically descend to the player's height like in Quake, they will mainly hover a certain distance above them decided by the mapper or a random default range set in the monster spawn function or otherwise here
+	if (self.model!="models/fangel.mdl") {
+		self.spawnflags(+)SF_FLYABOVE;
+		self.flags(+)FL_NOZ;
+		if (!self.hoverz)
+			self.hoverz = random(112,192);
+		self.zmovetime = 0;
+	}
 	self.takedamage=DAMAGE_YES;
 	self.flags2(+)FL_ALIVE;
 	self.nextthink+=random(0.5);

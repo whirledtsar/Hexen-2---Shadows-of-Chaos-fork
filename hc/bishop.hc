@@ -453,6 +453,8 @@ void() monster_bishop =
 	self.netname="bishop";
 	self.flags (+) FL_MONSTER|FLY_FLY;
 	self.flags2 (+) FL_ALIVE;
+	if (!self.hoverz)
+		self.hoverz = random(56,128);
 	self.lefty = 1;	//-1 for left dodge, 1 for right dodge
 	self.mintel = 8;
 	self.monsterclass = CLASS_HENCHMAN;
