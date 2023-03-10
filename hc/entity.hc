@@ -318,6 +318,7 @@ void end_sys_fields;
 		float act_state;		// Anim info
 		float raven_cnt;		// Number of raven's this guys has in the world
 		float newclass;			// If doing a quick class change
+		float canscream;		// Dont scream more than once while falling
 	};
 	struct
 	{ // Fallen Angel
