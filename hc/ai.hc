@@ -985,7 +985,7 @@ void(float dist) ai_run =
 			diff = self.absmin_z - self.enemy.absmin_z;
 			
 			if (diff < self.hoverz)
-				movestep(0, 0, 5, FALSE
+				movestep(0, 0, 5, FALSE);
 			else if (diff > self.hoverz + 16) {
 				traceline(self.origin, self.origin-('0 0 1'*8), FALSE, self);
 				if (trace_fraction<1 || pointcontents(trace_endpos)<=CONTENT_SOLID) {
@@ -994,7 +994,7 @@ void(float dist) ai_run =
 					self.zmovetime = time+1;
 				}
 				else
-				movestep(0, 0, -5, FALSE);
+					movestep(0, 0, -5, FALSE);
 			}
 		}
 	}
