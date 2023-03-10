@@ -67,23 +67,31 @@ vector org;
 			self.velocity_y/=1.1;
 
 		org_z+= self.maxs_z*0.77;//float only 23% above waterlevel
-		if(pointcontents(org)==CONTENT_WATER||pointcontents(org)==CONTENT_SLIME||pointcontents(org)==CONTENT_LAVA)
-		{
-//			self.flags(+)FL_SWIM;
+		if(pointcontents(org)==CONTENT_WATER||pointcontents(org)==CONTENT_SLIME||pointcontents(org)==CONTENT_LAVA) {
+			//could also change movetype to movetype_pull temporarily to nullify gravity
+			self.gravity = 0.0000001;
 			self.flags(-)FL_ONGROUND;
-			if(self.velocity_z<77)
-				self.velocity_z=80;
-			else
-				self.velocity_z+=random(0,0.01);
+			
+			org_z+=self.maxs_z*0.23;
+			//rise faster when completely underwater
+			if(pointcontents(org)==CONTENT_WATER||pointcontents(org)==CONTENT_SLIME||pointcontents(org)==CONTENT_LAVA) {
+				self.velocity_z = clamp(self.velocity_z,6,14);
+				self.velocity_z += random(0.5,2);}
+			else {
+				self.velocity_z = clamp(self.velocity_z,2,8);
+				self.velocity_z += random(0,0.02);
+			}
 		}
-		else
-		{
-			self.velocity_z-=random(0,0.01);
+		else {
+			self.gravity = 0.03;
+			//self.velocity_z = clamp(self.velocity_z,-1,0);
 		}
-	
+		
+		const float anglemod = 0.15;
+		
 		if(random()<0.3)
 		{
-			y_mod=random(-0.15,0.15);
+			y_mod=random(-anglemod,anglemod);
 			if(random()<0.5)
 				self.angles_y+=y_mod;
 			else
@@ -92,7 +100,7 @@ vector org;
 	
 		if(random()<0.3)
 		{
-			x_mod=random(-0.15,0.15);
+			x_mod=random(-anglemod,anglemod);
 			if(fabs(self.angles_x+x_mod)>10)
 				self.angles_x-=x_mod;
 			else
@@ -101,17 +109,17 @@ vector org;
 	
 		if(random()<0.3)
 		{
-			z_mod=random(-0.15,0.15);
+			z_mod=random(-anglemod,anglemod);
 			if(fabs(self.angles_z+z_mod)>10)
 				self.angles_z-=z_mod;
 			else
 				self.angles_z+=z_mod;
 		}
-		thinktime self : 0.1;
+		thinktime self : 0.2;
 	}
 	else
 	{
-		self.angles_z=self.angles_z=0;
+		self.angles_x=self.angles_z=0;
 		self.classname="barrel";
 		self.think=barrel_check_float;
 		thinktime self : 0.5;
