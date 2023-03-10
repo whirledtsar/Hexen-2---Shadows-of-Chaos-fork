@@ -231,7 +231,7 @@ void monster_golem_iron(void)
 	setsize(self, '-32 -32 0', '32 32 80');
 	GolemInit();
 	if(!self.health)
-		self.health = 450;
+		self.health = 420;
 	if(!self.max_health)
 		self.max_health=self.health;
 	self.mintel = 6;
@@ -295,7 +295,7 @@ void monster_golem_bronze(void)
 	}
 	self.thingtype = THINGTYPE_METAL;
 	setmodel(self, "models/golem_b.mdl");
-	setsize(self, '-60 -60 0', '60 60 190');
+	setsize(self, '-60 -60 0', '60 60 120');
 	GolemInit();
 	if(!self.health)
 		self.health = 650;
@@ -416,20 +416,6 @@ void GolemInit(void)
 
 //==========================================================================
 
-void golem_awaken ()
-{
-	sound(self,CHAN_AUTO,"golem/awaken.wav",1,ATTN_NORM);
-	self.takedamage=DAMAGE_YES;
-	if(activator.classname=="player")
-	{
-		self.enemy = activator;
-		thinktime self : 0;
-		self.think = FoundTarget;
-	}
-	else
-		self.think=self.th_stand;
-}
-
 void GolemWake(void) [++ $wake1..$wake16]
 {
 	self.spawnflags(-)GOLEM_STATUE;
@@ -470,7 +456,7 @@ void GolemStand(void)	//[++ $rest1..$rest22]
 {
 	self.think = GolemStand;
 	thinktime self : HX_FRAME_TIME;
-	if(self.spawnflags&GOLEM_DORMANT) {
+	if (self.spawnflags&GOLEM_DORMANT) {
 		self.takedamage = DAMAGE_NO;
 		self.use = self.think = GolemWake;
 		self.nextthink = -1;
@@ -545,9 +531,9 @@ void GolemRun(void) [++ $run1..$run24]
 		dist = vlen(self.enemy.origin - self.origin);
 		r = random(0, 10);
 
-		if (dist < 100)
+		if (dist < 100 && slide_ok)
 			GolemBMeleeDecide();
-		else if (dist > 256 && visible(self.enemy) && r < 0.6)
+		else if (dist > 256 && enemy_vis && r < 1+skill)	//0.6
 		{
 			if (GolemBCheckBeamAttack() == 1)
 				GolemBBeamBegin();
@@ -563,9 +549,9 @@ void GolemRun(void) [++ $run1..$run24]
 		dist = vlen(self.enemy.origin - self.origin);
 		r = random(0, 10);
 
-		if (dist < 100)
+		if (dist < 100 && slide_ok)
 			GolemBMeleeDecide();
-		else if (dist > 100 && visible(self.enemy) && r < 0.4)
+		else if (dist > 100 && enemy_vis && r < 0.5+skill)
 			if (GolemICheckMissileAttack())
 				GolemIMissile();
 
@@ -644,6 +630,7 @@ void GolemSMeleeDecide(void)
 
 void GolemIMissileTouch(void)
 {
+	sound(self, CHAN_BODY, "golem/gbimp.wav", 1, ATTN_NORM);
 	if (other.health > 0 && other.flags2&FL_ALIVE)
 		T_Damage(other, self, self.owner, random(13,17));
 
@@ -741,6 +728,7 @@ void GolemIMissile(void) [++ $igem1..$igem24]
 		GolemISpawnMissile(v_up * -1, '0 0 75', 20);
 		GolemISpawnMissile(v_up, '0 0 75', 20);*/
 	
+		SUB_AttackFinished(1);
 		self.think = self.th_run;
 		self.colormap = 0;
 		thinktime self : 0.1;
@@ -964,6 +952,8 @@ float GolemICheckMissileAttack(void)
 {
 	vector p1, p2, off;
 	float dist;
+	if (time<self.attack_finished)
+		return;
 
 	makevectors(self.angles);
 
@@ -975,7 +965,8 @@ float GolemICheckMissileAttack(void)
 	p2 = p1 + (v_forward * dist);
 	p2_z = self.enemy.origin_z + self.enemy.proj_ofs_z;
 		
-	traceline(p1, p2, FALSE, self);
+	//traceline(p1, p2, FALSE, self);
+	SUB_TraceThroughObstacles(p1, p2, FALSE, self, self.enemy);
 
 	if (trace_ent == self.enemy) 
 		return 1;
@@ -1172,7 +1163,7 @@ void GolemBStompEffect(void)
 	MonsterQuake(350);	
 
 	if (dist < 350)
-		T_Damage(self.enemy, self, self, random(50/dist));
+		T_Damage(self.enemy, self, self, 1200/dist);	//vanilla: random(50/dist)
 }
 	
 //==========================================================================
@@ -1435,10 +1426,16 @@ void GolemChunkPlace(string gibname, vector pos, vector vel)
 		new.scale = 2.0;
 		new.skin = 2;
 	}
-
-	new.think = SUB_Remove;
+	if (CheckCfgParm(PARM_FADE) || coop || deathmatch) {
+		new.think = SUB_Remove;
+		thinktime new : random(10,20);
+	}
+	else {
+		new.think = SUB_Null;
+		thinktime new : -1;
+	}
+	
 	new.ltime = time;
-	new.nextthink = time + 10 + random()*10;
 	new.frame = 0;
 	new.flags = 0;
 }
@@ -1523,7 +1520,7 @@ void GolemDeathFinish(void) [++ $death12..$death22]
 		self.origin += v_forward * 4;
 	}
 
-	if(self.health < -50)
+	if(self.health < -60)
 	{
 		self.think = chunk_death;
 	}
