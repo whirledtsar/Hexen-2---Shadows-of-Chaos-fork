@@ -136,13 +136,14 @@ float have_monsters;
 		precache_afrit();
 		have_monsters=TRUE;
 	}
-	if (self.spawnflags & DISCIPLE) {
+/*	if (self.spawnflags & DISCIPLE) {
 		if (self.spawnflags & SPAWN_SUPER)
 			precache_bishop();
 		else
 			precache_disciple();
 		have_monsters=TRUE;
 	}
+*/
 	if (self.spawnflags & FANGEL) {
 		precache_fangel();
 		have_monsters=TRUE;
@@ -151,10 +152,11 @@ float have_monsters;
 		precache_knight();
 		have_monsters=TRUE;
 	}
-	if (self.spawnflags & MUMMY) {
+/*	if (self.spawnflags & MUMMY) {
 		precache_mummy();
 		have_monsters=TRUE;
 	}
+*/
 	if (self.spawnflags & SCORPION) {
 		precache_scorpion();
 		have_monsters=TRUE;
@@ -350,7 +352,7 @@ vector org;
 	}
 	else
 	{
-		if (rnd==DISCIPLE)
+/*		if (rnd==DISCIPLE)
 		{
 			if (self.controller.spawnflags&SPAWN_SUPER)
 			{
@@ -363,7 +365,7 @@ vector org;
 				newmis.think = monster_disciple;
 			}
 		}
-		else if (rnd==MUMMY)
+		else */if (rnd==MUMMY)
 		{
 			if (self.controller.spawnflags&SPAWN_SUPER)
 			{
