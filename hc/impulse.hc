@@ -201,8 +201,8 @@ float inertia, lift;
 	makevectors(self.v_angle);
 	dir=normalize(v_forward);
 
-	traceline(self.origin+self.proj_ofs,self.origin+self.proj_ofs+dir*48,FALSE,self);
-	if(trace_ent!=world&&trace_ent.movetype&&trace_ent.solid&&trace_ent.flags&FL_ONGROUND&&trace_ent.solid!=SOLID_BSP)
+	traceline(self.origin+self.proj_ofs,self.origin+self.proj_ofs+dir*72,FALSE,self);
+	if(trace_ent!=world&&trace_ent.movetype&&trace_ent.solid&&trace_ent.flags&FL_ONGROUND&&trace_ent.solid!=SOLID_BSP&&!trace_ent.flags2&FL_ALIVE)
 	{
 		if(!trace_ent.mass)
 			inertia = 1;
@@ -213,7 +213,17 @@ float inertia, lift;
 		lift=(self.strength/40+0.5)*300/inertia;
 		if(lift>300)
 			lift=300;
-		trace_ent.velocity_z+=lift;
+		//ws: made this lift it in the direction youre moving
+		if (vlen(self.velocity) > 10) {
+			trace_ent.velocity = normalize(self.velocity)*lift;
+			if (vlen(trace_ent.velocity) > 170)
+				trace_ent.velocity = normalize(trace_ent.velocity)*170;
+			trace_ent.velocity_z = lift*0.75;
+		}
+		else {
+			trace_ent.velocity = VEC_ORIGIN;	//need to reset horizontal velocity
+			trace_ent.velocity_z+=lift;
+		}
 
 		trace_ent.flags(-)FL_ONGROUND;
 
