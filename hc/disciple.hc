@@ -307,6 +307,8 @@ void() monster_disciple =
 		
 	self.netname="disciple";
 	self.flags (+) FL_FLY;
+	if (!self.hoverz)
+		self.hoverz = random(56,128);
 	self.mintel = 8;
 	self.monsterclass = CLASS_HENCHMAN;
 	self.proj_ofs = self.view_ofs = '0 0 40';
