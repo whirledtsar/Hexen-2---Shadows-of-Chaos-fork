@@ -684,7 +684,8 @@ void monster_reiver ()
 	self.movetype = MOVETYPE_STEP;
 	self.solid = SOLID_SLIDEBOX;
 	
-	self.height = random(144,208);	//stay this far above player if SF_FLYABOVE
+	if (!self.hoverz)
+		self.hoverz = random(112,160);
 	self.mintel = 6;
 	self.monsterclass = CLASS_GRUNT;
 	self.proj_ofs = '0 0 24';

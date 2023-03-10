@@ -538,9 +538,11 @@ void() monster_afrit =
 	self.flags (+) FL_MONSTER;
 	self.flags (+) FL_FLY;
 	self.flags2 (+) FL_ALIVE;
-	self.counter = 0;	//counter for dodging
+	if (!self.hoverz)
+		self.hoverz = random(128,208);
 	self.mintel = 5;
 	self.monsterclass = CLASS_GRUNT;
+	self.counter = 0;	//counter for dodging
 	self.sightsound = "afrit/sight.wav";
 	self.yaw_speed = 14;
 	
