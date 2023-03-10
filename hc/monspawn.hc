@@ -51,7 +51,7 @@ float have_monsters;
 		precache_archer();
 		have_monsters=TRUE;
 	}
-	if (self.spawnflags & DISCIPLE)
+/*	if (self.spawnflags & DISCIPLE)
 	{
 		if (self.spawnflags & SPAWN_SUPER)
 			precache_bishop();
@@ -59,6 +59,7 @@ float have_monsters;
 			precache_disciple();
 		have_monsters=TRUE;
 	}
+*/
 	if (self.spawnflags & FANGEL)
 	{
 		precache_fangel();
@@ -85,11 +86,12 @@ float have_monsters;
 		precache_knight();
 		have_monsters=TRUE;
 	}
-	if (self.spawnflags & MUMMY)
+/*	if (self.spawnflags & MUMMY)
 	{
 		precache_mummy();
 		have_monsters=TRUE;
 	}
+*/
 	if (self.spawnflags & SCORPION)
 	{
 		precache_scorpion();
@@ -216,7 +218,7 @@ vector org;
 		}
 	}
 
-	if (rnd==DISCIPLE)
+/*	if (rnd==DISCIPLE)
 	{
 		if (self.controller.spawnflags&SPAWN_SUPER)
 		{
@@ -242,7 +244,7 @@ vector org;
 			newmis.think = monster_mummy;
 		}
 	}
-	else if (rnd==KNIGHT)
+	else */if (rnd==KNIGHT)
 	{
 		newmis.classname = "monster_death_knight";
 		newmis.think = monster_death_knight;
