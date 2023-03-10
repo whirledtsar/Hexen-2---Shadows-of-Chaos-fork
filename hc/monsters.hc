@@ -650,6 +650,25 @@ void monster_raisedebuff()
 	self.experience_value *= 0.75;
 }
 
+void monster_raisecheck ()
+{
+entity stuck, stuckent;
+	stuck = findradius(self.origin, 64);
+	while (stuck)
+	{
+		if (stuck.health && (stuck.solid!=SOLID_PHASE && stuck.solid!=SOLID_NOT))
+			stuckent = stuck;
+		stuck = stuck.chain;
+	}
+	if (stuckent)
+		thinktime self : 0.1;
+	else
+	{
+		self.think = self.th_raise;
+		thinktime self : 0;
+	}
+}
+
 void monster_raiseinit(entity corpse)
 {
 	if (!corpse.th_raise || !corpse.th_init)
@@ -670,15 +689,10 @@ entity new;		//create new entity to avoid inheriting anything weird from corpse
 	new.classname = corpse.classname;
 	new.th_init = corpse.th_init;
 	new.th_raise = corpse.th_raise;
-	new.think = new.th_raise;
+	new.think = monster_raisecheck;
 	thinktime new : 0;
 	
 	remove(corpse);
-	/*corpse.buff = 0;					//dont apply monster variation
-	corpse.flags2 (+) FL_SUMMONED;		//dont precache
-	corpse.health = corpse.max_health*0.75;
-	corpse.think = corpse.th_raise;
-	thinktime corpse : 0;*/
 }
 
 void CheckMonsterBuff ()
