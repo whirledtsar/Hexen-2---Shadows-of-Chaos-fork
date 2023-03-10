@@ -127,7 +127,29 @@ float PlayerHasMelee (entity player)
 	
 	return FALSE;
 }
-
+/*
+float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
+{
+vector dest;
+	//spot = spot+'0 0 0.1';
+	makevectors(self.angles);
+	
+	if (!self.flags&FL_SWIM && (pointcontents(spot)==CONTENT_WATER || pointcontents(spot)==CONTENT_SLIME))
+		return FALSE;
+	
+	dest = spot + ('0 0 1' * maxs_z*1.2);
+	
+	traceline (spot, dest, FALSE, ignore);	//try simple trace first
+	if (trace_fraction != 1 || trace_allsolid)
+		return FALSE;
+	
+	tracearea (spot, dest, mins, maxs, FALSE, ignore);	//if line wasnt blocked, trace with bbox
+	if (trace_fraction != 1)
+		return FALSE;
+	
+	return FALSE;
+}
+*/
 float CanSpawnAtSpot (vector spot, vector mins, vector maxs, entity ignore)
 {
 vector dest;
@@ -231,22 +253,22 @@ float	away;
 	return (walkmove (away, dist,FALSE));
 };
 
-void(float mindist, float maxdist) SetNewWanderPoint;
+float(float mindist, float maxdist) SetNewWanderPoint;
 
 void WanderPointTouch ()
 {
-	if (!self.controller) {
+	if (!self.controller || !self.controller.flags2&FL_ALIVE) {
 		remove(self);
 		return;
 	}
 	if (other!=self.controller)
 		return;
 	
-	SetNewWanderPoint(self.t_width, self.t_length);
-	remove(self);
+	if (SetNewWanderPoint(self.t_width, self.t_length))
+		remove(self);
 }
 
-void SetNewWanderPoint (float mindist, float maxdist)
+float SetNewWanderPoint (float mindist, float maxdist)
 {
 	entity waypoint, us;
 	vector dest;
@@ -257,18 +279,17 @@ void SetNewWanderPoint (float mindist, float maxdist)
 	else
 		us = self;
 	
-	dest = FindSpawnSpot(mindist, maxdist, 360, self);
 	do {
 		i++;
 		dest = FindSpawnSpot(mindist, maxdist, 360, self);
 		if (pointcontents(dest)==CONTENT_LAVA && (!self.flags2&FL2_FIRERESIST && !self.flags2&FL2_FIREHEAL))
 			dest = VEC_ORIGIN;
 	}
-	while (dest == VEC_ORIGIN && i<100);
+	while (dest == VEC_ORIGIN && i<30);	//has to be low iteration count so the engine doesnt think its an infinite loop
 	
 	if (dest==VEC_ORIGIN) {
-		self.goalentity = world;
-		return;
+		//self.goalentity = world;
+		return FALSE;
 	}
 	
 	waypoint = spawn();
@@ -286,6 +307,8 @@ void SetNewWanderPoint (float mindist, float maxdist)
 	setorigin(waypoint, dest);
 	
 	us.enemy = us.goalentity = waypoint;
+	
+	return TRUE;
 }
 
 void NavigateWanderPoints ()
