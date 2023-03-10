@@ -456,6 +456,8 @@ void() monster_bishop =
 	self.lefty = 1;	//-1 for left dodge, 1 for right dodge
 	self.mintel = 8;
 	self.monsterclass = CLASS_HENCHMAN;
+	self.proj_ofs = '0 0 28';
+	self.view_ofs = '0 0 40';
 	self.sightsound = "bishop/sight.wav";
 	self.yaw_speed = 14;
 	
