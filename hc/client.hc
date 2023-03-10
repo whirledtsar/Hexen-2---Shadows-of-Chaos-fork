@@ -2173,9 +2173,25 @@ void() PlayerPostThink =
 		self.jump_flag = 0;
 	}
 
-	if (!(self.flags & FL_ONGROUND))
+	if (self.movetype==MOVETYPE_NOCLIP) {
+		self.last_onground=time;
+		self.last_groundz = self.origin_z;
+	}
+	else if (!(self.flags&FL_ONGROUND) && self.watertype==CONTENT_EMPTY) {
+		if (self.canscream && self.last_onground < time-1.8) {
+			traceline(self.origin, self.origin-'0 0 32',TRUE, self);	//dont scream if were about to hit ground anyways
+			if (trace_fraction==1) {
+				if (self.playerclass==CLASS_ASSASSIN)
+					sound (self, CHAN_VOICE, "player/fall_a.wav", 1, ATTN_NORM);
+				else
+					sound (self, CHAN_VOICE, "player/fall_c.wav", 1, ATTN_NORM);
+				self.canscream = FALSE;
+			}
+		}
 		self.jump_flag = self.velocity_z;
+	}
 	else {
+		self.canscream = TRUE;
 		self.last_onground=time;
 		self.last_groundz = self.origin_z;
 	}
