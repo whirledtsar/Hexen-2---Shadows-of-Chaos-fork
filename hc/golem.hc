@@ -436,6 +436,8 @@ void GolemCUse(void)
 
 void GolemStand(void)// [++ $rest1..$rest22]
 {
+	self.think = GolemStand;
+	thinktime self : HX_FRAME_TIME;
 	if (self.spawnflags&GOLEM_DORMANT) {
 		self.takedamage = DAMAGE_NO;
 		self.use = self.think = GolemWake;
@@ -449,7 +451,6 @@ void GolemStand(void)// [++ $rest1..$rest22]
 			self.absorb_time = time + HX_FRAME_TIME*4;
 		}
 	}
-	thinktime self : HX_FRAME_TIME;
 }
 
 //==========================================================================
