@@ -309,7 +309,7 @@ void() monster_disciple =
 	self.flags (+) FL_FLY;
 	self.mintel = 8;
 	self.monsterclass = CLASS_HENCHMAN;
-	self.proj_ofs = '0 0 40';
+	self.proj_ofs = self.view_ofs = '0 0 40';
 	self.thingtype=THINGTYPE_FLESH;
 	self.yaw_speed = 16;
 
