@@ -1836,7 +1836,7 @@ void obj_statue_snake_coil (void)
 	if (!self.scale)
 		self.scale = .5;
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-
+	self.use=self.th_die;
 }
 
 /*QUAKED obj_skull (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
