@@ -175,8 +175,15 @@ float ontop,pushed,inertia,force,walkforce;
 
 //	if (other.classname != "player"&&!(other.flags&FL_MONSTER)&&(!other.flags&FL_PUSH)&&other.movetype!=MOVETYPE_PUSHPULL)
 //		return;
-
-	if(other!=world&&other.absmin_z >= self.origin_z+self.maxs_z - 5&&other.velocity_z<1)
+	
+	//ws: account for pushable BSP objects origin
+	float ourtop;
+	if((self.solid==SOLID_BSP||self.solid==SOLID_TRIGGER)&&self.origin=='0 0 0')
+		ourtop=self.absmax_z;
+	else
+		ourtop=self.origin_z+self.maxs_z;
+	
+	if(other!=world&&other.absmin_z >= ourtop - 5&&other.velocity_z<1)
 	{		
 		if(!other.frozen&&
 			(
@@ -190,7 +197,7 @@ float ontop,pushed,inertia,force,walkforce;
 			other.velocity=v_forward*300;
 			other.flags(-)FL_ONGROUND;
 		}
-		if(other.flags&FL_CLIENT&&!other.frozen)
+		if(other.flags&FL_CLIENT&&!other.frozen&&self.movetype!=MOVETYPE_PUSHPULL)
 			ontop = FALSE;
 		else
 		{
@@ -420,6 +427,7 @@ void obj_chair()
 	CreateEntityNew(self,ENT_CHAIR,"models/chair.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -437,6 +445,7 @@ void obj_barstool()
 	CreateEntityNew(self,ENT_BARSTOOL,"models/stool.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -494,7 +503,7 @@ void obj_tree2()
 	if (self.scale)		// Move top according to scale
 		top.origin_z += top.scale * 104;
 	else 
-		top.origin_z += 104; 
+		top.origin_z += 104;
 
 	top.health = self.health;
 	top.classname = "tree2top";
@@ -515,6 +524,7 @@ void obj_bench()
 	CreateEntityNew(self,ENT_BENCH,"models/bench.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 }
 
 
@@ -531,6 +541,7 @@ void obj_cart()
 	self.hull=HULL_SCORPION;//HYDRA;
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -548,6 +559,7 @@ void obj_chest1()
 	CreateEntityNew(self,ENT_CHEST1,"models/chest1.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -566,6 +578,7 @@ void obj_chest2()
 	CreateEntityNew(self,ENT_CHEST2,"models/chest2.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 
 }
@@ -582,6 +595,7 @@ void obj_chest3()
 	CreateEntityNew(self,ENT_CHEST3,"models/chest3.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 
 }
@@ -1654,8 +1668,9 @@ abslight = default is 0.5
 */
 void ice_touch (void)
 {
-	if(random()>self.friction)
-		other.flags(-)FL_ONGROUND;
+	if(other.flags&FL_ONGROUND)
+		if(random()>self.friction)
+			other.flags(-)FL_ONGROUND;
 }
 
 /*
@@ -1868,6 +1883,7 @@ void obj_statue_snake_coil (void)
 		self.scale = .5;
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
 	self.use=self.th_die;
+
 }
 
 /*QUAKED obj_skull (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
