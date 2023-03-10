@@ -162,8 +162,15 @@ float ontop,pushed,inertia,force,walkforce;
 
 //	if (other.classname != "player"&&!(other.flags&FL_MONSTER)&&(!other.flags&FL_PUSH)&&other.movetype!=MOVETYPE_PUSHPULL)
 //		return;
-
-	if(other!=world&&other.absmin_z >= self.origin_z+self.maxs_z - 5&&other.velocity_z<1)
+	
+	//ws: account for pushable BSP objects origin
+	float ourtop;
+	if((self.solid==SOLID_BSP||self.solid==SOLID_TRIGGER)&&self.origin=='0 0 0')
+		ourtop=self.absmax_z;
+	else
+		ourtop=self.origin_z+self.maxs_z;
+	
+	if(other!=world&&other.absmin_z >= ourtop - 5&&other.velocity_z<1)
 	{		
 		if(!other.frozen&&
 			(
@@ -177,7 +184,7 @@ float ontop,pushed,inertia,force,walkforce;
 			other.velocity=v_forward*300;
 			other.flags(-)FL_ONGROUND;
 		}
-		if(other.flags&FL_CLIENT&&!other.frozen)
+		if(other.flags&FL_CLIENT&&!other.frozen&&self.movetype!=MOVETYPE_PUSHPULL)
 			ontop = FALSE;
 		else
 		{
@@ -412,6 +419,7 @@ void obj_chair()
 	CreateEntityNew(self,ENT_CHAIR,"models/chair.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -429,6 +437,7 @@ void obj_barstool()
 	CreateEntityNew(self,ENT_BARSTOOL,"models/stool.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -504,6 +513,7 @@ void obj_bench()
 	CreateEntityNew(self,ENT_BENCH,"models/bench.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 }
 
 
@@ -520,6 +530,7 @@ void obj_cart()
 	self.hull=HULL_SCORPION;
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -537,6 +548,7 @@ void obj_chest1()
 	CreateEntityNew(self,ENT_CHEST1,"models/chest1.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 }
 
@@ -555,6 +567,7 @@ void obj_chest2()
 	CreateEntityNew(self,ENT_CHEST2,"models/chest2.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 
 }
@@ -571,6 +584,7 @@ void obj_chest3()
 	CreateEntityNew(self,ENT_CHEST3,"models/chest3.mdl",chunk_death);
 
 	self.touch	= obj_push;
+	self.use = self.th_die;
 	self.flags	(+) FL_PUSH;
 
 }
@@ -1021,7 +1035,6 @@ mass - (default 5)
 */
 void brush_pushable()
 {
-
 	self.max_health = self.health;
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_PUSHPULL;
@@ -1520,7 +1533,7 @@ void obj_webs (void)
 	}
 
 	if(!self.spawnflags&32)
-		self.drawflags=DRF_TRANSLUCENT;
+		self.drawflags(+)DRF_TRANSLUCENT;
 
 //	self.use=chunk_death;
 	setorigin(self,self.origin);
@@ -1823,7 +1836,7 @@ void obj_statue_snake_coil (void)
 	if (!self.scale)
 		self.scale = .5;
 	self.drawflags += SCALE_ORIGIN_BOTTOM;
-	self.use=self.th_die;
+
 }
 
 /*QUAKED obj_skull (0.3 0.1 0.6) (-8 -8 0) (8 8 16)
@@ -1836,7 +1849,7 @@ void obj_skull (void)
 {
 	precache_model("models/skull.mdl");
 	CreateEntityNew(self,ENT_SKULL,"models/skull.mdl",chunk_death);
-	self.use=self.th_die;
+	self.use = self.th_die;
 }
 
 /*QUAKED obj_pew (0.3 0.1 0.6) (-16 -40 0) (16 40 50)
@@ -1959,7 +1972,7 @@ void obj_plant_generic (void)
 {
 	precache_model ("models/plantgen.mdl");
 	CreateEntityNew(self,ENT_PLANT_GENERIC,"models/plantgen.mdl",chunk_death);
-	self.use=self.th_die;
+	self.use = self.th_die;		//ws: plant can be destroyed when pot is broken
 }
 
 /*QUAKED obj_plant_meso (0.3 0.1 0.6) (-10 -10 0) (10 10 40)
@@ -1972,7 +1985,7 @@ void obj_plant_meso (void)
 {
 	precache_model2("models/plantmez.mdl");
 	CreateEntityNew(self,ENT_PLANT_MESO,"models/plantmez.mdl",chunk_death);
-	self.use=self.th_die;
+	self.use = self.th_die;
 }
 
 /*QUAKED obj_plant_rome (0.3 0.1 0.6) (-24 -24 0) (24 24 90)
@@ -1985,6 +1998,6 @@ void obj_plant_rome (void)
 {
 	precache_model2("models/plantrom.mdl");
 	CreateEntityNew(self,ENT_PLANT_ROME,"models/plantrom.mdl",chunk_death);
-	self.use=self.th_die;
+	self.use = self.th_die;
 }
 
