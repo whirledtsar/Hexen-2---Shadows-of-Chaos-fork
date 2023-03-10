@@ -321,6 +321,7 @@ void end_sys_fields;
 		float raven_cnt;		// Number of raven's this guys has in the world
 		float newclass;			// If doing a quick class change
 		float sheep_call;
+		float canscream;		// Dont scream more than once while falling
 	};
 /*	struct // Talking heads
 	{		
