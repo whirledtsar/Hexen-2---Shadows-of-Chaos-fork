@@ -641,6 +641,9 @@ void() fangel_flyframes =
 {
 	self.think = fangel_flyframes;
 	if (self.goalentity == self.pathentity) {
+		if (FindTarget (FALSE)) {
+			return;
+		}
 		if (self.monster_stage == FANGEL_STAGE_WAIT)
 			self.monster_stage = FANGEL_STAGE_FLY;
 		thinktime self : HX_FRAME_TIME*2;	//move slower when walking on path
