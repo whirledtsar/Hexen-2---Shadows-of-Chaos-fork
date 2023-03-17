@@ -100,7 +100,7 @@ vector	org1,org2,orgsave;
 		}
 	}
 	
-	if(trace_fraction == 1)
+	if(!trace_ent || trace_fraction == 1)
 		return;
 	
 	maul_chargehit (trace_ent);
@@ -176,8 +176,10 @@ void maul_die () [++ $mauldt1 .. $mauldt29]
 		MakeSolidCorpse();
 		return;
 	}
-	else if ( self.frame < $mauldt21 && self.health <= (-50*self.scale))
+	else if ( self.frame < $mauldt21 && self.health <= (-100*self.scale)) {
 		chunk_death();
+		return;
+	}
 	
 	if (self.frame == $mauldt1) {
 		stopSound(self,CHAN_WEAPON);
@@ -188,7 +190,7 @@ void maul_die () [++ $mauldt1 .. $mauldt29]
 		ThrowGib ("models/blood.mdl", self.health);
 	}
 	else if (self.frame == $mauldt27 && self.flags&FL_ONGROUND) {
-		MonsterQuake(96);
+		MonsterQuake(64);
 		sound (self, CHAN_BODY, "maul/fall.wav", 1, self.maulAtten);
 	}
 	
@@ -232,20 +234,44 @@ void maul_fballtouch ()
 	remove(self);
 }
 
+//ws: this is basically copied from Create_Missile, which looked bad because it automatically called aim_adjust, we want a clean spread attack not every missile randomly offset
+void mail_fballspawn (float ofs)
+{
+	newmis = spawn ();
+	newmis.owner = self;
+	newmis.movetype = MOVETYPE_FLYMISSILE;
+	newmis.solid = SOLID_BBOX;
+	
+	vector spot1, spot2, diff;
+	makevectors(self.angles);
+	spot1 = self.origin+self.proj_ofs;
+	spot2 = self.enemy.origin+self.enemy.proj_ofs+(v_right*ofs);
+	diff = normalize(spot2 - spot1);
+
+	newmis.velocity = diff*(800*self.scale+((skill>2)*200));
+	newmis.classname = "maul_fball";
+	newmis.angles = vectoangles(newmis.velocity);
+
+	newmis.touch = maul_fballtouch;
+
+	setmodel (newmis,"models/drgnball.mdl");
+	setsize (newmis, '0 0 0', '0 0 0');		
+	setorigin (newmis, self.origin+self.proj_ofs);
+
+	newmis.think = SUB_Remove;
+	newmis.nextthink = time + 2.5;
+}
+
 void maul_fballfire ()
 {
-	vector org1,org2;
 	float ofs;
 	float ofsmax;
-	ofsmax = 40;
 	if (self.scale>1)
-		ofsmax = 80;	//lord version fires larger spread with more missiles
-	
-	org1 = self.origin+self.proj_ofs;
-	org2 = self.enemy.origin+self.enemy.proj_ofs;
-	makevectors(self.angles);
-	for (ofs = -ofsmax; ofs <= ofsmax; ofs+=20)
-		Create_Missile (self, org1, org2+(v_right*ofs), "models/drgnball.mdl", "maul_fball", 0, 700*self.scale+(skill*100), maul_fballtouch);
+		ofsmax = 40;	//lord version fires larger spread with more missiles
+	else
+		ofsmax = 20;
+	for (ofs = -ofsmax; ofs <= ofsmax; ofs+=10)
+		mail_fballspawn(ofs);
 	
 	fx_light (self.origin+self.proj_ofs, EF_MUZZLEFLASH);	//creates quick flash of dynamic light
 	sound (self, CHAN_WEAPON, "weapons/fbfire.wav", 1, ATTN_NORM);
