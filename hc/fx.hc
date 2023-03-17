@@ -946,3 +946,69 @@ void fx_leaves ()
 	if (self.veer<=0 || self.veer>360)
 		self.veer = 45;
 }
+
+/*
+	~fx_particle_drip~
+Point entity that periodically spawns particles with gravity.
+*/
+
+void drip_drip ()
+{
+	particle2(self.origin, VEC_ORIGIN, VEC_ORIGIN, self.color, self.aflag, 1);
+	thinktime self : random(self.wait, self.count);
+}
+
+void drip_wait ()
+{
+	entity client;
+	client = checkclient();
+	if (client) {
+		self.think = drip_drip;
+		thinktime self : 0;
+	}
+	else {
+		self.think = drip_wait;
+		thinktime self : 1;
+	}
+}
+
+void drip_use ()
+{
+	if (self.spawnflags&8) {
+		self.spawnflags(-)8;
+		self.think = drip_drip;
+		thinktime self : 0;
+	}
+	else {
+		self.spawnflags(+)8;
+		self.think = SUB_Null;
+		self.nextthink = -1;
+	}
+}
+
+void fx_particle_drip ()
+{
+	setorigin (self, self.origin);
+	setmodel (self, self.model);
+	setsize (self, self.mins, self.maxs);
+
+	if ((!self.color) || (self.color>254))
+		self.color=47;
+	if (!self.aflag)
+		self.aflag = PARTICLETYPE_GRAV;
+	else if (self.aflag==1)
+		self.aflag = PARTICLETYPE_FASTGRAV;
+	else if (self.aflag=2)
+		self.aflag = PARTICLETYPE_SLOWGRAV;
+
+	if (!self.wait)
+		self.wait = 1;
+	if (!self.count)
+		self.count = 4;
+	
+	self.use = drip_use;
+	if (!self.spawnflags&8) {
+		self.think = drip_wait;
+		thinktime self : random(HX_FRAME_TIME,self.count);
+	}
+}
