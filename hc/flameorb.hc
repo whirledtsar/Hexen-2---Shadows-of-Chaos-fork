@@ -78,7 +78,7 @@ float FLAMECIRCLE_COST = 5;
 void burner_think ()
 {
 	vector org,vel;
-	if(self.lifetime<time||self.enemy.health<=0)
+	if(self.lifetime<time||self.enemy.health<=0||self.enemy.effects&EF_NODRAW||self.enemy.drawflags&DRF_TRANSLUCENT)
 	{
 		if (self.enemy.health<=0)
 			smolder(self.enemy.origin+'0 0 10');
@@ -112,16 +112,21 @@ void burner_think ()
 
 void spawn_burner (entity loser)
 {
+	if (loser.flags&FL_MONSTER)
+		if (loser.effects&EF_NODRAW||loser.drawflags&DRF_TRANSLUCENT)
+			return;
+	
 	if (loser.flags2 & FL2_ONFIRE)
 	{
 		loser.fire_damage += 2;
 		return;
 	}
 	
-	entity oself = self;
-	self = self.owner;
 	if (IsAlly(loser))
 		return;
+	
+	entity oself = self;
+	self = self.owner;
 	self = oself;
 
 	loser.fire_damage = 2;
