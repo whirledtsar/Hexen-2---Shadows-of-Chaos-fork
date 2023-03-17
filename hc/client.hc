@@ -2437,7 +2437,7 @@ void() PlayerPostThink =
 	}
 */
 //ws: new fall damage code with damage increasing exponentially based on fall distance
-	if (self.last_groundz && (self.flags & FL_ONGROUND) && self.flags2&FL_ALIVE) {
+	if (self.last_groundz && (self.flags & FL_ONGROUND) && self.flags2&FL_ALIVE && !self.onladder) {
 		float height;
 		height = self.last_groundz - self.origin_z;
 		if (self.watertype == CONTENT_WATER || self.watertype == CONTENT_SLIME) {
@@ -2470,7 +2470,7 @@ void() PlayerPostThink =
 		self.last_onground=time;
 		self.last_groundz = self.origin_z;
 	}
-	else if (!(self.flags & FL_ONGROUND))
+	else if (!(self.flags & FL_ONGROUND) && !self.onladder && self.movetype!=MOVETYPE_NONE)
 	{
 		if(self.playerclass==CLASS_SUCCUBUS) {
 			if(self.flags&FL_SPECIAL_ABILITY1)
