@@ -663,7 +663,7 @@ void SpiderRun(void) [++ $swalk1..$swalk16]
 		pitch_roll_for_slope('0 0 0');
 	}
 
-	if ((self.flags2 & FL_SUMMONED) && (self.lifetime < time) && !self.playercontrolled)  // Summoned spiders only live a little while
+	if ((self.flags2 & FL_SUMMONED) && (self.controller||self.owner) && (self.lifetime < time) && !self.playercontrolled)  // Summoned spiders only live a little while
 		SpiderDie();
 	thinktime self : SPIDER_FRAME_TIME;
 }
