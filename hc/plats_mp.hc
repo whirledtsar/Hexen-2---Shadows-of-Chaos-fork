@@ -356,7 +356,7 @@ Don't mod roll
 		}
 	}
 
-	if (self.spawnflags & TRAIN_WAITTRIG)
+	if (self.spawnflags & TRAIN_WAITTRIG || self.wait == -3)	//ws: support wait -3
 		self.decap = 2;
 };
 
