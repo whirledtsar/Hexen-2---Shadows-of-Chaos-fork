@@ -226,15 +226,18 @@ void skullwiz_throw(float part)
 		new.thingtype = THINGTYPE_BONE;
 	}
 
-	new.origin_x = random(10,10);
-	new.origin_y = random(10,10);
-	new.origin_z = 40;
-
-	setorigin(new,self.origin + new.origin);
+	do {
+		new.origin_x = random(10,10);
+		new.origin_y = random(10,10);
+		new.origin_z = 40;
+		setorigin(new,self.origin + new.origin);
+	} while (pointcontents(new.origin)==CONTENT_SOLID);
+	
 	setsize (new, '-5 -5 0', '5 5 2');		//setsize (new, '0 0 0', '0 0 0');
+	float dir = randomsign();
 	new.velocity_z = random(100,150);
-	new.velocity_x = random(100,150)*randomsign();
-	new.velocity_y = random(100,150)*randomsign();
+	new.velocity_x = random(100,150)*dir;
+	new.velocity_y = random(100,150)*dir;
 
 	new.movetype = MOVETYPE_BOUNCE;
 	new.solid = SOLID_NOT;
