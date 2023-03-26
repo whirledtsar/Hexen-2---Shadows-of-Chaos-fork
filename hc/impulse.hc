@@ -604,14 +604,6 @@ void() ImpulseCommands =
 		}
 		Menu_Toggle(MENU_STATS);
 	}
-	else if (self.impulse==IMPULSE_MOVEDOWN)
-		Menu_Move(-1);
-	else if (self.impulse==IMPULSE_MOVEUP)
-		Menu_Move(1);
-	else if (self.impulse==IMPULSE_CHOOSE)
-		Menu_Choose();
-	else if (self.impulse==IMPULSE_STATS_DUMP)
-		StatsMenu_Dump();
 	else if (self.impulse==IMPULSE_OPTIONS)
 		Menu_Toggle(MENU_OPTIONS);
 /*	else if (self.impulse == 99)
@@ -755,17 +747,19 @@ void() ImpulseCommands =
 		W_ChangeWeapon();
 	break;
 	case 10:
-		if (wp_deselect == 0)
+		if (self.flags2&FL2_MENUACTIVE)
+			Menu_Move(-1);
+		else if (wp_deselect == 0)
 			CycleWeaponCommand ();
 	break;
 //	case 11:
 //		ServerflagsCommand ();
 //	break;
 	case 12:
-		CycleWeaponReverseCommand ();
-	break;
-	case 13:
-		HeaveHo();
+		if (self.flags2&FL2_MENUACTIVE)
+			Menu_Move(1);
+		else
+			CycleWeaponReverseCommand ();
 	break;
 	case 14:
 		if(world.target=="sheep")
