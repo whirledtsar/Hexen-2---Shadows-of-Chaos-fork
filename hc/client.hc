@@ -1952,6 +1952,7 @@ void() PlayerPreThink =
 	else {
 		// Reset any ladder gravity settings
 		self.gravity = 1;
+		self.ladder = world;
 		// Original jump conditions
 		if (self.button2)
 			PlayerJump ();
