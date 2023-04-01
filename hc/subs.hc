@@ -393,6 +393,7 @@ string s;
 		// create a temp object to fire at a later time
 		t = spawn();
 		//t.classname = "DelayedUse";	ws: commented out because it seems to have no usage and only causes problems
+		t.classname = self.classname;
 		thinktime t : self.delay;
 		t.think = DelayThink;
 		t.enemy = activator;
