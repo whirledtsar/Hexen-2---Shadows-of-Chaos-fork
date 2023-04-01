@@ -347,8 +347,11 @@ float  len, alen;
 // scale the destdelta vector by the time spent traveling to get velocity
 		self.avelocity	= destdelta * (1 / self.angletime);
 	}
-//	if(synchronize&&self.angletime!=self.movetime)
-//		dprint("Whoops!\n");
+//ws - bandaid for rotating trains bug
+	if(synchronize&&self.angletime!=self.movetime) {
+		//dprint("Whoops!\n");
+		self.angletime=self.movetime;
+	}
 
 
 // set nextthink to trigger a think when dest is reached
