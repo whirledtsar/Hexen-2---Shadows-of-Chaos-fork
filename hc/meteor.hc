@@ -29,16 +29,16 @@ $frame Select16     Select17     Select18
 $frame fire1     fire2     fire3     fire4     fire5     
 $frame fire6     fire7     fire8     fire9     
 
-float BOUNCE_TOME_COST = 10;
-float BOUNCE_COST = 6;
+//float BOUNCE_TOME_COST = 10;
+//float BOUNCE_COST = 6;
 
 void() meteor_select;
 void() meteor_deselect;
-void() meteor_altfire;
+/*void() meteor_altfire;
 void() meteor_power_altfire;
 void(float tome) FireBounce;
 void(vector org) CometCreate;
-void() CometCheck;
+void() CometCheck;*/
 
 void MeteoriteFizzle (void)
 {
@@ -199,13 +199,30 @@ void() tornato_die = [++24 .. 47]
 		self.movechain.avelocity_y-=20;
 };
 
+//ws: attempt to not go through walls
+void tornato_checkorigin (float content)
+{
+	if (content!=CONTENT_SOLID && content!=CONTENT_SKY)
+		self.oldorigin = self.origin;
+	else {
+		self.velocity_y *= -1;
+		self.velocity_x *= -1;
+		self.origin = self.oldorigin;
+	}
+	makevectors(self.velocity);
+	traceline(self.origin+'0 0 4', self.origin+'0 0 4'+v_forward*4, TRUE, self);
+	if (trace_fraction<1)
+		if (trace_ent.solid==SOLID_BSP) {
+			self.velocity_y *= -1; self.velocity_x *= -1; }
+}
+
 void() tornato_spin = [++0 .. 23]
 {
 float distance,content;
 
 	if(time>self.lifetime||self.torncount<self.owner.torncount - 1)
 	{
-		self.movechain.drawflags(+)MLS_ABSLIGHT|SCALE_ORIGIN_BOTTOM|SCALE_TYPE_XYONLY;
+		self.movechain.drawflags(+)MLS_ABSLIGHT;	//ws: these flags break animation //|SCALE_ORIGIN_BOTTOM|SCALE_TYPE_XYONLY;
 		self.think=tornato_die;
 		thinktime self : 0;
 	}
@@ -217,18 +234,18 @@ float distance,content;
 	if(random()<0.2)
 	{
 		self.velocity_x+=random(-100*self.scale,100*self.scale);
-		if(fabs(self.velocity_x)>1000)
+		if(fabs(self.velocity_x)>800)
 			self.velocity_x/=2;
 	}
 	
 	if(random()<0.2)
 	{
 		self.velocity_y+=random(-100*self.scale,100*self.scale);
-		if(fabs(self.velocity_y)>1000)
+		if(fabs(self.velocity_y)>800)
 			self.velocity_y/=2;
 	}
 
-	content=pointcontents(self.origin);
+	content=pointcontents(self.origin+'0 0 0.1');
 	if(content==CONTENT_WATER||content==CONTENT_LAVA)
 	{
 		self.velocity_z+=random(33,200);
@@ -249,17 +266,21 @@ float distance,content;
 	if(self.enemy!=world)
 	{
 	vector org, dir;
-	float let_go;
+	float let_go, loops;
 		self.velocity=self.velocity*0.5;
 		org=self.origin;
-		if(self.enemy.size_z>=self.size_z)
-			org=self.origin;
-		else
-			org_z+=random(10)*self.scale+4*self.scale;
+		/*do {
+			if(self.enemy.size_z>=self.size_z)
+				org=self.origin;
+			else
+				org_z+=random(10)*self.scale+4*self.scale;
+			content = pointcontents(org);
+			loops++;
+		} while (content!=CONTENT_SOLID && content!=CONTENT_SOLID && loops<1000);
+		*/
 		if(!self.enemy.flags2&FL_TORNATO_SAFE)
 		{
-			self.enemy.velocity='0 0 0';
-			setorigin(self.enemy,org);
+			//setorigin(self.enemy,org);	//this is horrible because it can make monsters stuck in solid geometry
 		}
 		else
 		{
@@ -287,12 +308,13 @@ float distance,content;
 		{
 			if(!let_go)
 				if(self.pain_finished==-1)		//Throw it at my goal!
-					self.enemy.velocity=dir*350*self.scale;
+					self.enemy.velocity=dir*(375-self.enemy.mass*2)*self.scale;		//ws: factor in mass
 				else
 				{
 					self.enemy.velocity_z=random(200*self.scale);
 					self.enemy.velocity_x=random(200*self.scale,-200*self.scale);
 					self.enemy.velocity_y=random(200*self.scale,-200*self.scale);
+					self.enemy.velocity -= '1 1 1'*self.enemy.mass*2;
 				}
 			self.pain_finished=time;
 			self.enemy.safe_time=time+3+let_go*7;//let them get thrown away from the tornado for a full 3 seconds
@@ -306,7 +328,7 @@ float distance,content;
 				}
 			}
 			if(!let_go)
-				self.enemy.avelocity_y=random(200*self.scale);
+				self.enemy.avelocity_y=random(80*self.scale,200*self.scale);
 			self.enemy=self.movechain.movechain=world;
 		}
 		if(self.enemy.classname=="player")
@@ -328,7 +350,7 @@ float distance,content;
 			if(sucker.takedamage&&sucker.health&&sucker!=self.enemy&&sucker.mass<500*self.scale&&visible(sucker)&&sucker!=self.owner)
 				if(sucker.movetype&&sucker.movetype!=MOVETYPE_PUSH)
 				{
-					seekspeed=(500 - vlen(sucker.origin-self.origin));
+					seekspeed=(525 - vlen(sucker.origin-self.origin) - sucker.mass*2);	//ws: factor in mass
 					sucker.velocity=normalize(self.origin-sucker.origin)*seekspeed;
 					if(sucker.velocity_z<30)
 						sucker.velocity_z=30;
@@ -430,6 +452,9 @@ float distance,content;
 		sound(self,CHAN_VOICE,"crusader/tornado.wav",1,ATTN_NORM);
 		self.t_width=time+1;
 	}
+	
+	tornato_checkorigin(content);
+	
 };
 
 void()funnal_touch;
@@ -505,10 +530,22 @@ void funnal_touch (void)
 			if(!other.touch)
 				other.touch=obj_push;//Experimental
 			if(self.movechain==world&&other.safe_time<time)//&&self.scale>=1)
-			{		
+			{
 				self.movechain=other;
 				other.flags(+)FL_MOVECHAIN_ANGLE;
-				setorigin(other,self.origin+'0 0 4');//maybe need to take on bounding box of captured enemy too?
+				
+				entity oself, ogoal;
+				oself = self;
+				ogoal = other.goalentity;
+				other.goalentity = self;
+				self = self.enemy;
+				float dist = (vlen(oself.origin-(self.owner.origin+'0 0 16')));
+				if (dist > 0)
+					movetogoal(dist);
+				self = oself;
+				other.goalentity = ogoal;
+				//ws: horrible - could set enemy in wall
+				//setorigin(other,self.origin+'0 0 4');//maybe need to take on bounding box of captured enemy too?
 				other.velocity='0 0 0';
 				if(other.flags2&FL_ALIVE)
 					other.avelocity='0 0 0';
@@ -531,9 +568,9 @@ void funnal_touch (void)
 		}
 		vector dir;
 		dir=normalize(self.angles);
-		dir*=random(200,700)*self.scale;
+		dir*=((random(225,700)*self.scale)-other.mass*2);
 		other.velocity+=dir;
-		other.velocity_z=random(100,250)*self.scale;
+		other.velocity_z=(random(125,275)*self.scale)-other.mass*2;
 		other.flags(-)FL_ONGROUND;
 		if(other.takedamage)
 			T_Damage(other,self.owner,self.owner.controller,5*self.scale);
@@ -557,6 +594,8 @@ void() tornato_grow = [++48 .. 72]
 	if(self.movechain.frame>24)
 		self.movechain.frame=0;
 	self.movechain.scale+=0.04;
+	
+	tornato_checkorigin(pointcontents(self.origin+'0 0 0.1'));
 };
  
 void FireMeteorTornado (void)
@@ -592,9 +631,17 @@ vector org;
 	self.greenmana-=20;
 	sound(self,CHAN_WEAPON,"crusader/torngo.wav",1,ATTN_NORM);
 	makevectors(self.v_angle);
-	org=self.origin+normalize(v_forward)*16;
-	org_z=self.origin_z+1;
-		
+	org=self.origin+'0 0 1'+normalize(v_forward)*16;
+	
+	//ws: avoid spawning inside world if player is aiming at ground or slope
+	float content, loops;
+	content = pointcontents(org);
+	while (content==CONTENT_SOLID && loops<500) {
+		org+='0 0 0.5';
+		content = pointcontents(org);
+		++loops;
+	}
+	
 	tornato=spawn();
 	self.torncount+=1;
 	tornato.torncount=self.torncount;
@@ -604,9 +651,13 @@ vector org;
 	tornato.classname="tornato";
 	tornato.enemy=world;
 	setmodel(tornato,"models/tornato.mdl");
-	setsize(tornato,'-18 -18 -3','18 18 64');
-	tornato.hull=HULL_PLAYER;
+	//setsize(tornato,'-18 -18 -3','18 18 64');
+	//tornato.hull=HULL_PLAYER;
+	//ws: increased size to avoid tunneling through walls
+	setsize(tornato,'-40 -40 0','40 40 64');
+	tornato.hull = HULL_GOLEM;
 	setorigin(tornato,org);
+	tornato.origin = org;
 	tornato.velocity=normalize(v_forward)*250+'0 0 20';
 	tornato.velocity_z=0;
 	tornato.scale=1.4;
@@ -660,16 +711,17 @@ void meteor_fire (void)
 {
 	self.wfs = advanceweaponframe($fire1,$fire9);
 	self.th_weapon=meteor_fire;
-
+	
 	if((!self.button0||self.attack_finished>time)&&self.wfs==WF_CYCLE_WRAPPED)
 	{
 		self.last_attack=time;
 		meteor_ready_loop();
 	}
-	else if(self.weaponframe==$fire1 &&self.attack_finished<=time)
-			FireMeteor("meteor");
+	else if(self.weaponframe==$fire1 && self.attack_finished<=time)
+		FireMeteor("meteor");
 }
 
+/*
 void() MetGrenadeTouch =
 {	
 	if (other == self.owner || other == self.controller || 
@@ -848,7 +900,8 @@ void FireComet (void)
 	else
 		self.attack_finished=time+0.25;
 }
-
+*/
+/*
 void meteor_altfire (void)
 {
 	self.wfs = advanceweaponframe($fire1,$fire9);
@@ -877,6 +930,7 @@ void meteor_power_altfire (void)
 		FireComet();
 	}
 }
+*/
 /*
 void() Cru_Met_Attack =
 {
@@ -907,9 +961,9 @@ void() Cru_Met_Attack =
 
 void() Cru_Met_Attack =
 {
-	if(self.artifact_active&ART_TOMEOFPOWER)
+	if(self.artifact_active&ART_TOMEOFPOWER && self.greenmana>=20)
 		self.th_weapon=meteor_power_fire;
-	else
+	else if (self.greenmana>=8)
 		self.th_weapon=meteor_fire;
 	
 	thinktime self : 0;
