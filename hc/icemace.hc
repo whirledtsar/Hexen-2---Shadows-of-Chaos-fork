@@ -124,6 +124,7 @@ entity oself;
 		oself=self;
 		self=loser;
 		SUB_UseTargets();
+		SUB_ResetTarget();
 		self=oself;
 	}
 	else
@@ -143,7 +144,7 @@ entity oself;
     loser.flags(-)FL_SWIM;
 	if(loser.flags&FL_ONGROUND)
 		loser.last_onground=time;
-    loser.flags(-)FL_ONGROUND;
+    //loser.flags(-)FL_ONGROUND;	//ws: this made enemies fall through the ground when frozen by blizzard
 //need to be able to reverse this...
 	loser.oldtouch=loser.touch;
 	loser.touch=obj_push;
@@ -197,7 +198,7 @@ void() FreezeTouch=
 			}
 		}
 		if(other.flags2&FL2_COLDRESIST)//Had to take out cold heal, so cold resist
-	        	T_Damage(other,self,self.owner, damg / 3);
+	        T_Damage(other,self,self.owner, damg / 3);
 		else if ((other.health<=10||(other.classname=="player"&&other.frozen<=-5&&other.health<200))&&other.solid!=SOLID_BSP&&!other.artifact_active&ART_INVINCIBILITY&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
 			SnowJob(other,self.owner);
 		else
@@ -359,7 +360,60 @@ void FireShard (void)
 	setsize(newmis,'0 0 0','0 0 0');
 	setorigin(newmis,org);
 }
+
+void() blizzard_shrink=
+{
+	vector dir, top, bottom, beam_angle;
+	float beam_count;
 	
+	if (self.level<=16) {
+		remove(self);
+		return;
+	}
+	
+	self.color=random(15);
+	self.color=rint(self.color)+9*16+256;
+	dir_x=random(-100,100);
+	dir_y=random(-100,100);
+	top = '0 0 1'*self.level;
+	top_x=top_y=self.level+1;
+	rain_go(self.origin-top,self.origin+top,top*2,dir,self.color,77);
+	
+	self.level-=8;
+	
+	makevectors(self.angles);
+	beam_count=6;
+	while(beam_count)
+	{
+		beam_angle=self.angles;
+		beam_angle_y=self.angles_y+60*(6 - beam_count);
+		makevectors(beam_angle);
+		traceline(self.origin,self.origin+v_forward*self.level,TRUE,self);
+		dir=trace_endpos-v_forward*8;
+		traceline(dir,dir+'0 0 1'*self.level,TRUE,self);
+		top=trace_endpos;
+		traceline(dir,dir-'0 0 128',TRUE,self);
+		bottom=trace_endpos;
+		
+		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte (MSG_BROADCAST, TE_STREAM_ICECHUNKS);
+		WriteEntity (MSG_BROADCAST, self);
+		WriteByte (MSG_BROADCAST, beam_count+STREAM_ATTACHED);
+		WriteByte (MSG_BROADCAST, 2);
+		WriteCoord (MSG_BROADCAST, top_x);
+		WriteCoord (MSG_BROADCAST, top_y);
+		WriteCoord (MSG_BROADCAST, top_z);
+		WriteCoord (MSG_BROADCAST, bottom_x);
+		WriteCoord (MSG_BROADCAST, bottom_y);
+		WriteCoord (MSG_BROADCAST, bottom_z);
+
+		beam_count-=1;
+	}
+	
+	self.think = blizzard_shrink;
+	thinktime self : 0.1;
+};
+
 void() blizzard_think=
 {
 entity loser;
@@ -367,18 +421,22 @@ vector dir, top, bottom, beam_angle;
 float beam_count, wismod;
 	if(self.lifetime<time||self.blizzcount<self.owner.blizzcount - 1)
 	{
-		stopSound(self, CHAN_WEAPON);
+		sound(self, CHAN_WEAPON, "crusader/blizend.wav", 1, ATTN_NORM);
+		blizzard_shrink();
+		/*stopSound(self, CHAN_WEAPON);
 		remove(self);
-		return;
+		return;*/
 	}
 
 //	if(self.pain_finished<=time)
 //		self.effects=EF_NODRAW;
 	
+	loser = world;
+	
 	if (self.owner.wisdom)
-		wismod = self.owner.wisdom*0.4;
+		wismod = self.owner.wisdom;
 	else
-		wismod = 10;
+		wismod = 8;
 
 	self.color=random(15);
 	self.color=rint(self.color)+9*16+256;
@@ -390,7 +448,7 @@ float beam_count, wismod;
 	if(self.t_width<time)
 	{
 		sound(self,CHAN_WEAPON,"crusader/blizzard.wav",1,ATTN_NORM);
-		self.t_width=time + 0.7;
+		self.t_width=time + 1;	//0.7;
 	}
 
 	if(self.level<128)
@@ -424,38 +482,55 @@ float beam_count, wismod;
 
 		beam_count-=1;
 		traceline(top,bottom,FALSE,self.owner);
-		if(trace_ent.takedamage&&trace_ent.frozen<=0&&trace_ent.solid!=SOLID_BSP)
+		if(trace_ent.takedamage&&trace_ent.frozen<=0&&trace_ent.solid!=SOLID_BSP&&trace_ent.thingtype!=THINGTYPE_ICE)
 		{
+			loser = trace_ent;
 			trace_ent.frozen-=1;
-			if((trace_ent.frozen<-5||trace_ent.health<=10)&&!trace_ent.artifact_active&ART_INVINCIBILITY&&trace_ent.thingtype==THINGTYPE_FLESH&&trace_ent.health<100)
+			if((trace_ent.frozen<-50||trace_ent.health<10)&&trace_ent.monsterclass!=CLASS_BOSS&&!trace_ent.artifact_active&ART_INVINCIBILITY&&trace_ent.thingtype==THINGTYPE_FLESH&&trace_ent.health<50)
 				SnowJob(trace_ent,self.owner);
 			else
 				T_Damage(trace_ent,self,self.owner,wismod);
 		}
 	}
-	if(random()<0.3)
+	if(random()<0.3 && !loser)
 		self.velocity=randomv('-200 -200 0','200 200 0');
 	self.avelocity_y=500;
 	self.flags(-)FL_ONGROUND;
-
-	loser=findradius(self.origin,self.level);
-	while(loser)
-	{
-		if(loser.takedamage&&loser.health&&loser.frozen<=0&&loser!=self.owner&&loser.solid!=SOLID_BSP)
-			if(loser.flags2&FL2_COLDRESIST)
-				T_Damage(loser,self,self.owner,1);
-			else
-			{
-				if(random()<0.1)
-					loser.frozen-=1;
-				if((loser.frozen<-5||loser.health<15)&&loser.classname!="mjolnir"&&!loser.artifact_active&ART_INVINCIBILITY&&loser.thingtype==THINGTYPE_FLESH&&loser.health<100)
-					SnowJob(loser,self.owner);
+	
+	if (!loser) {
+		loser=findradius(self.origin,self.level);
+		while(loser)
+		{
+			if(loser.takedamage&&loser.health&&loser.frozen<=0&&loser!=self.owner&&loser.solid!=SOLID_BSP&&loser.thingtype!=THINGTYPE_ICE)
+				if(loser.flags2&FL2_COLDRESIST)
+					T_Damage(loser,self,self.owner,1);
 				else
-					T_Damage(loser,self,self.owner,wismod*0.5);
-			}
-		loser=loser.chain;
+				{
+					loser.frozen-=1;
+					if((loser.frozen<-50||loser.health<10)&&loser.monsterclass!=CLASS_BOSS&&loser.classname!="mjolnir"&&!loser.artifact_active&ART_INVINCIBILITY&&loser.thingtype==THINGTYPE_FLESH&&loser.health<50)
+						SnowJob(loser,self.owner);
+					else
+						T_Damage(loser,self,self.owner,wismod);
+				}
+			loser=loser.chain;
+		}
 	}
 	thinktime self : 0.1;
+	
+	//ws: attempt not to go through walls
+	float content = pointcontents(self.origin);
+	if (content!=CONTENT_SOLID && content!=CONTENT_SKY)
+		self.oldorigin = self.origin;
+	else
+		self.origin = self.oldorigin;
+	
+	makevectors(self.velocity);
+	traceline(self.origin+('0 0 1'*self.maxs_z*0.5), self.origin+('0 0 1'*self.maxs_z*0.5)+v_forward*8, TRUE, self);
+	if (trace_fraction < 1)
+		if (trace_ent.solid==SOLID_BSP) {
+			self.velocity_x *= -1;
+			self.velocity_y *= -1;
+		}
 };
 
 void() make_blizzard =
@@ -498,7 +573,7 @@ entity found;
 	thinktime self : 0;
 	
 	setmodel(self,"models/null.spr");
-	setsize(self,'-32 -32 -32','32 32 32');
+	setsize(self,'-48 -48 -32','48 48 32');	//setsize(self,'-32 -32 -32','32 32 32');
 	self.hull=HULL_GOLEM;
 	if(other.takedamage)
 		setorigin(self,(other.absmax+other.absmin)*0.5);
