@@ -3,12 +3,14 @@ float RANDOM_NOREPEAT		= 2;
 float RANDOM_IGNOREMISSING	= 4;
 float RANDOM_REMOVELOSER	= 16;
 
-/*	trigger_reflect
+/*
+	~trigger_reflect~
 Brush entity that reflects any missiles that hit it, with a slight random adjustment in angle. Can be used in conjunction with func_wall to block movement and un-reflectable attacks like lightning beams.
 Don't killtarget this entity - just target it to remove it.
 Speed: Modifier to missile's original speed. Less than 1 is recommended so the player has a better chance of dodging reflected missiles.
+Style: Type of reflection (0 for reflect, 1 for deflect, 2 for aimed)
 Spawnflags: Deactivated (8) to start deactivated and activate when used. Targetting it after this will remove it like normal.
-Issues: Behaves oddly with thrown Warhammer; doesn't account for Tornado
+Issues: Behaves oddly with thrown Warhammer
 */
 
 void reflect_touch ()
@@ -65,10 +67,11 @@ void trigger_reflect ()
 
 /*======================================================================
  Player ladder (originally from Rubicon2 codebase by JohnFitz)
- - This is a very simple system, jump to attach to the ladder brush
- - move up down via jumpping (hook in preplayer code)
- - Added multiple climbing sounds (works with player footsound state)
- - Modified to have on/off/toggle state via triggers
+ - Sock: This is a very simple system, jump to attach to the ladder brush
+ - Sock: move up down via jumpping (hook in preplayer code)
+ - Sock: Added multiple climbing sounds (works with player footsound state)
+ - Sock: Modified to have on/off/toggle state via triggers
+ - ws: Adapated to H2, added ability to crouch to move down
 
 ======================================================================
 QUAKED trigger_ladder (.5 .5 .5) x x x Deactivated
@@ -91,12 +94,14 @@ void trigger_ladder_touch (void)
 {	
 	if (self.inactive) return;
 	if (!other.flags&FL_CLIENT)	return;
+	if (!other.flags2&FL_ALIVE) return;
 	if (!other.health) return;
+	if (other.deadfla) return;
 	if (other.waterlevel > 1) return;
 	if (other.flags&FL_WATERJUMP) return;
 	if (other.flags2&FL_CHAINED) return;
 	
-	if (self.movedir != '0 0 0' && other.ladder!=self)
+	if (self.movedir != '0 0 0' && other.ladder!=self)	//if ladder has angle, and player isnt already climbing
 	{
 		makevectors (other.angles);
 		if (v_forward * self.movedir < 0)
@@ -111,7 +116,7 @@ void trigger_ladder ()
 {
 	if (!self.speed)
 		self.speed = 160;
-	if (self.soundtype) {		// Old Rope
+	if (self.soundtype == 1) {		// Old Rope
 		if(!self.count)
 			self.count = 0.7;
 		
@@ -139,7 +144,7 @@ void trigger_changefields ()
 	i = 0;
 	movercnt = 9;
 	string movers[9] =
-		{"func_crusher", "func_door", "func_door_rotating", "func_door_secret", "func_newplat", "func_plat", "func_rotating", "func_train", "func_train_mp"};
+		{"func_crusher", "door", "door_rotating", "func_door_secret", "func_newplat", "func_plat", "func_rotating", "func_train", "func_train_mp"};
 	for (i = 0; i < movercnt; i++) {
 		string name;
 		name = movers[i];
@@ -158,7 +163,7 @@ void trigger_changefields ()
 	if (ent.classname == "func_door")
 		if (self.angles_y)
 			ent.angles_y = self.angles_y;
-	if (ent.classname == "func_door_rotating")
+	if (ent.classname == "door_rotating")
 		if (self.flags)
 			ent.flags = self.flags;
 	if (ent.classname == "func_rotating" || ent.classname == "func_train" || ent.classname == "func_train_mp")
@@ -248,7 +253,7 @@ flags2: maximum target id
 spawnflags: 1 (RANDOM_SINGLETRIG): Only use target/killtarget once
 			2 (RANDOM_NOREPEAT) : Only use any random id once
 			4 (RANDOM_IGNOREMISSING) : Don't reorganize range if an id in range has no matching entities
-			16 (RANDOM_REMOVELOSER) : After triggering random entity, remove all other entities in trigger's range.
+			16 (RANDOM_REMOVELOSER) : After triggering random id, remove all other entities in trigger's range.
 									Possible useage: spawning random monster or activating random trigger and removing the ones not chosen. Implies single-use.
 */
 
@@ -373,23 +378,23 @@ float valid, i;
 	thinktime self : -1;
 	
 	if (!self.flags || !self.flags2) {
-		dprint("*\n*Error: trigger_random with missing min or max*\n");
+		dprint("*Error: trigger_random with missing min or max*\n");
 		remove(self);
 		return;
 	}
 	else {
 		if (self.flags>self.flags2) {
-			dprint("*\n*Error: trigger_random min greater than max*\n");
+			dprint("*Error: trigger_random min greater than max*\n");
 			self.flags = self.flags2;
 		}
 		if (self.flags2<self.flags) {
-			dprint("*\n*Error: trigger_random max less than min*\n");
+			dprint("*Error: trigger_random max less than min*\n");
 			self.flags2 = self.flags;
 		}
 	}
 	
 	for (i = self.flags; i <= self.flags2; i++)
-	{	dprint("*\n*Trigger_random: checking id ");dprint(ftos(i));dprint("*\n");
+	{	dprint("*Trigger_random: checking id ");dprint(ftos(i));dprint("*\n");
 		found = nextent(world);
 		while (found)
 		{
@@ -553,7 +558,7 @@ entity found, t;
 			}
 			else
 				reverse_door(found);
-		}	
+		}
 		else if (found.classname == "door_rotating") {
 			if (found.state != STATE_BOTTOM)
 			{	dprint("Reversing rotating door delayed\n");
