@@ -947,7 +947,7 @@ void fx_particle_drip ()
 		self.aflag = PARTICLETYPE_GRAV;
 	else if (self.aflag==1)
 		self.aflag = PARTICLETYPE_FASTGRAV;
-	else if (self.aflag=2)
+	else if (self.aflag==2)
 		self.aflag = PARTICLETYPE_SLOWGRAV;
 
 	if (!self.wait)
