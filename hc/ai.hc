@@ -385,8 +385,13 @@ float		r;
 	if (sight_entity_time >= time && sight_entity!=world && !(self.spawnflags & 1))
 	{
 		client = sight_entity;
-		if (client.enemy == self.enemy)
+		if (client.enemy == self.enemy) {
+			if (self.wallspot==VEC_ORIGIN) {
+				self.wallspot=(sight_entity.enemy.origin+sight_entity.enemy.absmax*0.5);
+				SetNextWaypoint();
+			}
 			return TRUE;
+		}
 	}
 	else
 	{
@@ -449,6 +454,14 @@ float		r;
 			self.enemy = world;
 			return FALSE;
 		}
+		//ws: when a monster alerts a monster to the players presence, transfer the former monster's waypoint spot to the alerted monster so they can path to them better
+		if (client==sight_entity && time<sight_entity_time) {
+			self.wallspot=(sight_entity.enemy.origin+sight_entity.enemy.absmax*0.5);
+			SetNextWaypoint();
+		}
+		SightSound ();
+		HuntTarget ();
+		return TRUE;
 	}
 
 /*	if(self.spawnflags&PLAY_DEAD)
