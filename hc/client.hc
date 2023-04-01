@@ -1912,6 +1912,8 @@ void() PlayerPreThink =
 	// Ported to Hexen 2 by whirledtsar
 	//----------------------------------------------------------------------
 	if (self.onladder) {
+		self.last_onground=time;
+		self.last_groundz = self.origin_z;
 		self.onladder = FALSE;	// Reset ladder touch function
 		float crouching;
 		crouching = self.flags2 & FL2_CROUCHED;
