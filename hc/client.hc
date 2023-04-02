@@ -1439,7 +1439,10 @@ void() WaterMove =
 				CreateSludgeSplashBig(org);
 			}
 			else {//if (self.watertype == CONTENT_WATER) {
-				sound (self, CHAN_BODY, "raven/inh2o.wav", 1, ATTN_NORM);
+				if (self.jump_flag*(self.mass/10) < -300)
+					sound (self, CHAN_BODY, "player/h2ojmp.wav", 1, ATTN_NORM);
+				else
+					sound (self, CHAN_BODY, "raven/inh2o.wav", 1, ATTN_NORM);
 				CreateWaterSplashBig(org);
 			}
 		}
@@ -2147,7 +2150,7 @@ void() PlayerPostThink =
 	}
 */
 //ws: new fall damage code with damage increasing exponentially based on fall distance
-	if (self.last_groundz && (self.flags & FL_ONGROUND) && self.flags2&FL_ALIVE && !self.onladder) {
+	if (self.last_groundz && (self.flags & FL_ONGROUND) && self.flags2&FL_ALIVE && !self.onladder && self.watertype==CONTENT_EMPTY) {
 		float height;
 		height = self.last_groundz - self.origin_z;
 		if (self.watertype == CONTENT_WATER || self.watertype == CONTENT_SLIME) {
@@ -2160,13 +2163,19 @@ void() PlayerPostThink =
 			if (self.absorb_time>=time)
 				damg*=0.5;
 			if (damg>=1) {
+				float ohealth = self.health;
 				self.deathtype = "falling";
+				if (self.flags2&FL2_IMPDROPPED)
+					self.deathtype = "impdrop";
 				T_Damage (self, world, world, damg);
+				
+				if (ohealth - self.health >= 1) {
+					if(self.playerclass==CLASS_ASSASSIN)
+						sound (self, CHAN_VOICE, "player/asslnd.wav", 1, ATTN_NORM);
+					else
+						sound (self, CHAN_VOICE, "player/pallnd.wav", 1, ATTN_NORM);
+				}
 			}
-			if(self.playerclass==CLASS_ASSASSIN)
-				sound (self, CHAN_VOICE, "player/asslnd.wav", 1, ATTN_NORM);
-			else
-				sound (self, CHAN_VOICE, "player/pallnd.wav", 1, ATTN_NORM);
 		}
 		else if (height > 80)
 			sound (self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
