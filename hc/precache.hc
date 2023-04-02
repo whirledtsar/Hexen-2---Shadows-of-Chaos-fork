@@ -1464,6 +1464,7 @@ void precache_soc()
 	precache_sound ("crusader/BOUNCE2.wav");	//SoC: meteor grenade
 	precache_sound ("weapons/bounceb.wav");		//SoC: meteor grenade
 	precache_sound ("eidolon/fireball.wav");	//SoC: sunstaff altfire tomed
+	precache_sound ("crusader/blizend.wav");	//SoC: icemace blizzard ending
 	
 //necro
 	precache_sound("skullwiz/gate.wav");	//sickle summon
