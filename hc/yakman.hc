@@ -548,6 +548,8 @@ void yakman_in_air ()
 //	dprint("in air\n");
 //	ai_face();
 	self.frame=$jump18;
+	if (self.takedamage==DAMAGE_NO)
+		self.takedamage==DAMAGE_YES;
 	if(!self.flags&FL_ONGROUND)
 	{
 		if(random()<0.1)
