@@ -591,6 +591,7 @@ void() monster_spawn =
 	self.use = monster_use;
 	setmodel (self, self.init_model);
 	setsize (self, self.orgnl_mins, self.orgnl_maxs);
+	self.hull = self.init_hull;
 	spawn_tdeath(self.origin, self);
 	if (!self.spawnflags&SPAWNQUIET)
 		GenerateTeleportEffect(self.origin, 0);	//spawn_tfog(self.origin);
@@ -617,6 +618,7 @@ void() monster_dormant =
 	self.movetype = MOVETYPE_NONE;
 	self.takedamage = DAMAGE_NO;
 	self.effects(+)EF_NODRAW;
+	self.init_hull = self.hull;
 	self.init_model = self.model;	//use pre-existing fields to save values for when its spawned; init_model is otherwise only used by clients afaik
 	self.orgnl_mins = self.mins;
 	self.orgnl_maxs = self.maxs;
