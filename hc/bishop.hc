@@ -49,30 +49,30 @@ void()	dark_bishop_walk1	=[	0,		dark_bishop_walk2	] {
 if (random() < 0.02)
 	sound (self, CHAN_VOICE, "bishop/idle2.wav", 1,  ATTN_IDLE);
 ai_walk(3);};
-void()	dark_bishop_walk2	=[	1,		dark_bishop_walk3	] {ai_walk(2);};
-void()	dark_bishop_walk3	=[	2,		dark_bishop_walk4	] {ai_walk(3);};
-void()	dark_bishop_walk4	=[	3,		dark_bishop_walk5	] {ai_walk(4);};
-void()	dark_bishop_walk5	=[	4,		dark_bishop_walk6	] {ai_walk(3);};
-void()	dark_bishop_walk6	=[	5,		dark_bishop_walk7	] {ai_walk(3);};
-void()	dark_bishop_walk7	=[	6,		dark_bishop_walk8	] {ai_walk(3);};
-void()	dark_bishop_walk8	=[	7,		dark_bishop_walk9	] {ai_walk(4);};
-void()	dark_bishop_walk9	=[	8,		dark_bishop_walk10	] {ai_walk(3);};
-void()	dark_bishop_walk10	=[	9,	dark_bishop_walk11	] {ai_walk(3);};
-void()	dark_bishop_walk11	=[	10,	dark_bishop_walk1	] {ai_walk(2);};
+void()	dark_bishop_walk2	=[	1,		dark_bishop_walk3	] {ai_walk(1);};
+void()	dark_bishop_walk3	=[	2,		dark_bishop_walk4	] {ai_walk(2);};
+void()	dark_bishop_walk4	=[	3,		dark_bishop_walk5	] {ai_walk(2);};
+void()	dark_bishop_walk5	=[	4,		dark_bishop_walk6	] {ai_walk(2);};
+void()	dark_bishop_walk6	=[	5,		dark_bishop_walk7	] {ai_walk(2);};
+void()	dark_bishop_walk7	=[	6,		dark_bishop_walk8	] {ai_walk(2);};
+void()	dark_bishop_walk8	=[	7,		dark_bishop_walk9	] {ai_walk(2);};
+void()	dark_bishop_walk9	=[	8,		dark_bishop_walk10	] {ai_walk(2);};
+void()	dark_bishop_walk10	=[	9,	dark_bishop_walk11	] {ai_walk(2);};
+void()	dark_bishop_walk11	=[	10,	dark_bishop_walk1	] {ai_walk(1);};
 
 
-void()	dark_bishop_run1	=[	0,		dark_bishop_run2	] {ai_run(4);};
-void()	dark_bishop_run2	=[	1,		dark_bishop_run3	] {ai_run(4);};
-void()	dark_bishop_run3	=[	2,		dark_bishop_run4	] {ai_run(3);};
-void()	dark_bishop_run4	=[	3,		dark_bishop_run5	] {ai_run(4);};
-void()	dark_bishop_run5	=[	4,		dark_bishop_run6	] {ai_run(4);if (random() < 0.05)
+void()	dark_bishop_run1	=[	0,		dark_bishop_run2	] {ai_run(2);};
+void()	dark_bishop_run2	=[	1,		dark_bishop_run3	] {ai_run(2);};
+void()	dark_bishop_run3	=[	2,		dark_bishop_run4	] {ai_run(1);};
+void()	dark_bishop_run4	=[	3,		dark_bishop_run5	] {ai_run(2);};
+void()	dark_bishop_run5	=[	4,		dark_bishop_run6	] {ai_run(2);if (random() < 0.05)
 	sound (self, CHAN_VOICE, "bishop/idle2.wav", 1,  ATTN_IDLE);};
-void()	dark_bishop_run6	=[	5,		dark_bishop_run7	] {ai_run(4);};
-void()	dark_bishop_run7	=[	6,		dark_bishop_run8	] {ai_run(3);if (random() < 0.4 && visible(self.enemy)) dark_bishop_warp1();};
-void()	dark_bishop_run8	=[	7,		dark_bishop_run9	] {ai_run(4);};
-void()	dark_bishop_run9	=[	8,		dark_bishop_run10	] {ai_run(3);if (random() < 0.03 && visible(self.enemy)) dark_bishop_dodge1();};
-void()	dark_bishop_run10	=[	9,		dark_bishop_run11	] {ai_run(4);};
-void()	dark_bishop_run11	=[	10,		dark_bishop_run1	] {ai_run(4);};
+void()	dark_bishop_run6	=[	5,		dark_bishop_run7	] {ai_run(2);};
+void()	dark_bishop_run7	=[	6,		dark_bishop_run8	] {ai_run(1);};
+void()	dark_bishop_run8	=[	7,		dark_bishop_run9	] {ai_run(2);};
+void()	dark_bishop_run9	=[	8,		dark_bishop_run10	] {ai_run(1);if (random() < 0.03 && enemy_vis) dark_bishop_dodge1();};
+void()	dark_bishop_run10	=[	9,		dark_bishop_run11	] {ai_run(2);if (random() < 0.2 && enemy_vis) dark_bishop_warp1();};
+void()	dark_bishop_run11	=[	10,		dark_bishop_run1	] {ai_run(2);if (random() < 0.2 && enemy_vis) dark_bishop_warp1();};
 
 void bishop_blur ()
 {
@@ -199,6 +199,7 @@ void(entity attacker, float damage)	dark_bishop_pain =
 
 	sound (self, CHAN_VOICE, "bishop/pain.wav", 1, ATTN_NORM);
 	ThrowGib ("models/blood.mdl", self.health);
+	self.drawflags(-)DRF_TRANSLUCENT;
 	self.pain_finished = time + 1;
 	dark_bishop_pain1();
 };
