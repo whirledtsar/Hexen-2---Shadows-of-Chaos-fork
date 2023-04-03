@@ -1140,33 +1140,54 @@ void() W_WeaponFrame =
 {
 if (!(deathmatch))
 {
-	if (world.model == "maps/demo1.bsp" || world.model == "maps/vil1.bsp" || world.spawnflags&WSF_WELCOMEMESSAGE)
+	if (!(deathmatch))
 	{
-	if (self.welcomeshown <= 12)		// set endtime of welcome message here
+		if (world.model == "maps/demo1.bsp" || world.model == "keep1.bsp" || world.model == "maps/vil1.bsp" || world.spawnflags&WSF_WELCOMEMESSAGE)
+		{
+			if (self.welcomeshown <= 12)		// set endtime of welcome message here
 			{
-			if (time > self.welcomeshown)	// needed to set delay for welcome message
+				if (time > self.welcomeshown)	// needed to set delay for welcome message
 				{
 				if (self.welcomeshown == 0)
 					self.welcomeshown = time + .2;	// set delay for welcome message here
 				else
 					{
 					self.welcomeshown = time + 1.9;
-					centerprint(self, "Welcome to Hexen II: Shadows of Chaos@@@Damage & abilities increase in power as you level@@@Default bindings (autoexec.cfg):@Altfire: right mouse@Stats menu: home @Selection down: pgdn@Selection up: pgup@Increase stat: enter@Dump all points: end");
+					centerprint(self, "Welcome to Hexen II: Shadows of Chaos@@Damage & abilities improve as you level@@@Default bindings (autoexec.cfg):@Altfire: right mouse@Stats: home@Options: end@Selection down: prev weapon@Selection up: next weapon@Select: fire");
 					}
 				}
 			}
-		
+		}
 	}
-}
 	ImpulseCommands ();
-	
 	if (self.playerclass==CLASS_ASSASSIN && self.button1 && self.weapon != IT_WEAPON2 && self.whiptime < time)
 	{
 		FireChainW();
 	}
-
+	if ((self.cameramode || self.flags2&FL2_MENUACTIVE) && self.weaponmodel && self.weaponmodel!="")
+	{
+		self.lastweapon=self.weaponmodel;
+		self.weaponmodel="";
+	}
+	
 	if (time < self.attack_finished)
 		return;
+	
+//hijak keybindings for SoC menu system
+	if (self.flags2&FL2_MENUACTIVE) {
+		if (self.button0) {
+			Menu_Choose();
+			self.button0 = FALSE;
+			self.attack_finished = time+0.25;	//prevent function running every frame button is held down
+		}
+		else if (self.button1)
+			if (self.menu.impulse==MENU_STATS) {
+				StatsMenu_Dump();
+				self.button1 = FALSE;
+				self.attack_finished = time+0.25;	//prevent function running every frame button is held down
+			}
+		return;
+	}
 
 // check for attack
 	if (self.button0)

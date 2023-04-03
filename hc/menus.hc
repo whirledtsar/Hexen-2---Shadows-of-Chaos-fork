@@ -126,6 +126,7 @@ void Menu_Choose ()
 		return;
 	
 	self.menu.th_run();
+	sound (self, CHAN_AUTO, "misc/invuse.wav", 1, ATTN_STATIC);
 }
 
 void StatsMenu_Increase ()
