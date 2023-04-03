@@ -825,6 +825,7 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float last_groundz;	//used by client for new fall damage calculation
 .string gibmdl1, gibmdl2, gibmdl3;
 .float zmovetime;		//flymonsters: wait this long to move up/down
+.float init_hull;
 
 //rubicon 2 / arcane dimensions ladder system
 .float onladder;
