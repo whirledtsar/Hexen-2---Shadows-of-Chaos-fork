@@ -21,10 +21,6 @@ void restore_weapon ()
 			self.weaponmodel = "models/axe.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/purifier.mdl";
-		else if (self.weapon == IT_WEAPON5)
-			self.weaponmodel = "models/gauntlet.mdl";
-		else if (self.weapon == IT_WEAPON6)
-			self.weaponmodel = "models/gauntlet.mdl";
 	}
 	else if (self.playerclass==CLASS_CRUSADER)
 	{
@@ -36,10 +32,6 @@ void restore_weapon ()
 			self.weaponmodel = "models/meteor.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/sunstaff.mdl";
-		else if (self.weapon == IT_WEAPON5)
-			self.weaponmodel = "models/warhamer.mdl";
-		else if (self.weapon == IT_WEAPON6)
-			self.weaponmodel = "models/warhamer.mdl";
 	}
 	else if (self.playerclass==CLASS_NECROMANCER)
 	{
@@ -51,10 +43,6 @@ void restore_weapon ()
 			self.weaponmodel = "models/sickle.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/ravenstf.mdl";
-		else if (self.weapon == IT_WEAPON5)
-			self.weaponmodel = "models/sickle.mdl";
-		else if (self.weapon == IT_WEAPON6)
-			self.weaponmodel = "models/sickle.mdl";
 	}
 	else if (self.playerclass==CLASS_ASSASSIN)
 	{
@@ -66,10 +54,6 @@ void restore_weapon ()
 			self.weaponmodel = "models/v_assgr.mdl";
 		else if (self.weapon == IT_WEAPON4)
 			self.weaponmodel = "models/scarabst.mdl";
-		else if (self.weapon == IT_WEAPON5)
-			self.weaponmodel = "models/punchdgr.mdl";
-		else if (self.weapon == IT_WEAPON6)
-			self.weaponmodel = "models/punchdgr.mdl";
 	}
 }
 
@@ -255,13 +239,6 @@ void() ImpulseCommands =
 	entity search;
 	float total;
 //	string s2;
-	
-	if (self.impulse>=STATS_MENU && self.impulse<=STATS_DUMP)	//dont open stats menu if manual stats arent enabled
-		if (CheckCfgParm(PARM_STATS)) {
-			sprint (self, "Manual stat increases are disabled. Type impulse 54 to toggle\n");
-			self.impulse = 0;
-			return;
-		}
 
 	if(self.flags2&FL_CHAINED&&self.impulse!=23)
 		return;
@@ -495,14 +472,6 @@ void() ImpulseCommands =
 		}
 		Menu_Toggle(MENU_STATS);
 	}
-	else if (self.impulse==IMPULSE_MOVEDOWN)
-		Menu_Move(-1);
-	else if (self.impulse==IMPULSE_MOVEUP)
-		Menu_Move(1);
-	else if (self.impulse==IMPULSE_CHOOSE)
-		Menu_Choose();
-	else if (self.impulse==IMPULSE_STATS_DUMP)
-		StatsMenu_Dump();
 	else if (self.impulse==IMPULSE_OPTIONS)
 		Menu_Toggle(MENU_OPTIONS);
 /*	else if (self.impulse == 99)
@@ -615,14 +584,22 @@ void() ImpulseCommands =
 		self.impulse=0;
 		return;
 	}
-	else if (self.impulse >= 1 && self.impulse <= 6)
+	else if (self.impulse >= 1 && self.impulse <= 4)
 		W_ChangeWeapon ();
-	else if ((self.impulse == 10) && (wp_deselect == 0))
-		CycleWeaponCommand ();
+	else if (self.impulse == 10) {
+		if (self.flags2&FL2_MENUACTIVE)
+			Menu_Move(-1);
+		else if (wp_deselect == 0)
+			CycleWeaponCommand ();
+	}
 //	else if (self.impulse == 11)
 //		ServerflagsCommand ();
-	else if (self.impulse == 12)
-		CycleWeaponReverseCommand ();
+	else if (self.impulse == 12) {
+		if (self.flags2&FL2_MENUACTIVE)
+			Menu_Move(1);
+		else
+			CycleWeaponReverseCommand ();
+	}
 	else if(self.impulse == 13)
 		HeaveHo();
 	else if (self.impulse == 22 &&!self.flags2 & FL2_CROUCHED)  // To crouch
