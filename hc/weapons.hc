@@ -1348,7 +1348,7 @@ void() W_WeaponFrame =
 				else
 					{
 					self.welcomeshown = time + 1.9;
-					centerprint(self, "Welcome to Hexen II: Shadows of Chaos@@@Damage & abilities increase in power as you level@@@Default bindings (autoexec.cfg):@Altfire: right mouse@Stats menu: home@Options menu: end@Selection down: previous weapon key@Selection up: next weapon key@Choose selection: fire key@Dump all stat points in selection: altfire key");
+					centerprint(self, "Welcome to Hexen II: Shadows of Chaos@@Damage & abilities improve as you level@@@Default bindings (autoexec.cfg):@Altfire: right mouse@Stats: home@Options: end@Selection down: prev weapon@Selection up: next weapon@Select: fire");
 					}
 				}
 			}
