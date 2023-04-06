@@ -938,6 +938,10 @@ float pclass;
 	setorigin(self, spot.origin + '0 0 1');
 	self.angles = spot.angles;
 	self.fixangle = TRUE;		// turn this way immediately
+	
+	//new fall damage: avoid taking fall damage because of height diff between last level
+	self.last_onground = time;
+	self.last_groundz = self.origin_z;
 
 	if(!self.weapon)
 	{
@@ -1140,6 +1144,10 @@ entity spot;
 	setorigin(self, spot.origin + '0 0 1');
 	self.angles = spot.angles;
 	self.fixangle = TRUE;		// turn this way immediately
+	
+	//new fall damage: avoid taking fall damage because of height diff between last level
+	self.last_onground = time;
+	self.last_groundz = self.origin_z;
 
 	self.velocity = '0 0 0';
 	self.avelocity = '0 0 0';
