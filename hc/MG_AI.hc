@@ -483,6 +483,8 @@ float dot,mod;
 			self.flags(-)FL_ONGROUND;
 		if(trace_fraction==1)
 			return;
+		if (trace_plane_normal == '0 0 1' && self.angles_x == 0 && self.angles_z == 0)	//ground is flat and monster is not angled so no need to do anything
+			return;
 		slope=trace_plane_normal;
 	}
 	new_angles=vectoangles(slope);
@@ -500,7 +502,7 @@ float dot,mod;
 
 	dot=v_forward*old_forward;
 	self.angles_x=dot*new_angles_x;
-	self.angles_z=(1-fabs(dot))*new_angles_x*mod;
+	self.angles_z=(1-fabs(dot))*new_angles_z*mod;	//ws: changed from new_angles_x to new_angles_z
 }
 
 /*
