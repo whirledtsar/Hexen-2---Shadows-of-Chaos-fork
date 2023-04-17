@@ -88,6 +88,7 @@ void Menu_Enable (float type)
 
 void Menu_Disable ()
 {
+	self.weaponmodel = self.lastweapon;
 	self.flags2(-)FL2_MENUACTIVE;
 	self.menuselection = 0;
 	if (self.menu)
