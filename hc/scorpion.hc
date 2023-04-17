@@ -305,7 +305,7 @@ void ScorpionWalk(void) [++ $ScWalk1..$ScWalk16]
 		sound(self, CHAN_BODY, "scorpion/walk.wav", random(0.9, 1), ATTN_NORM);
 	}
 	ai_walk(2);
-	if(random()<0.33)
+	if(random()<0.9)
 		pitch_roll_for_slope('0 0 0');
 }
 
@@ -364,7 +364,7 @@ void ScorpionRunBlack(void) [++ $ScWalk1..$ScWalk16]
 	else self.attack_state = AS_STRAIGHT;
 
 	ai_run(8);
-	if(random()<0.33)
+	if(random()<0.9)
 		pitch_roll_for_slope('0 0 0');
 }
 
@@ -424,7 +424,7 @@ void ScorpionRun(void) [++ $ScWalk1..$ScWalk16]
 	else self.attack_state = AS_STRAIGHT;
 
 	ai_run(6);
-	if(random()<0.33)
+	if(random()<0.9)
 		pitch_roll_for_slope('0 0 0');
 }
 //==========================================================================
