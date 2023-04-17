@@ -658,10 +658,8 @@ void SpiderRun(void) [++ $swalk1..$swalk16]
 		ai_run(self.speed/self.attack_state);
 	}
 	if(random()<0.2)
-	{
 		spider_noise();
-		pitch_roll_for_slope('0 0 0');
-	}
+	pitch_roll_for_slope('0 0 0');
 
 	if ((self.flags2 & FL_SUMMONED) && (self.controller||self.owner) && (self.lifetime < time) && !self.playercontrolled)  // Summoned spiders only live a little while
 		SpiderDie();
@@ -678,8 +676,6 @@ void SpiderWalk(void) [++ $swalk1..$swalk16]
 {
 	ai_walk(self.speed/2);
 	if(random()<0.1)
-	{
 		spider_noise();
-		pitch_roll_for_slope('0 0 0');
-	}
+	pitch_roll_for_slope('0 0 0');
 }
