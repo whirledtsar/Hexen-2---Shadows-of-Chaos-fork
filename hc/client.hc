@@ -2471,7 +2471,7 @@ void() PlayerPostThink =
 				T_Damage (self, world, world, damg);
 				
 				if (ohealth - self.health >= 1) {
-					if(self.playerclass==CLASS_ASSASSIN)
+					if(self.playerclass==CLASS_ASSASSIN||self.playerclass==CLASS_SUCCUBUS)
 						sound (self, CHAN_VOICE, "player/asslnd.wav", 1, ATTN_NORM);
 					else
 						sound (self, CHAN_VOICE, "player/pallnd.wav", 1, ATTN_NORM);
