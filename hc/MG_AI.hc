@@ -499,6 +499,8 @@ void pitch_roll_for_slope (vector slope, entity forwhom)
 			forwhom.flags(-)FL_ONGROUND;
 		if(trace_fraction==1)
 			return;
+		if (trace_plane_normal == '0 0 1' && self.angles_x == 0 && self.angles_z == 0)	//ground is flat and monster is not angled so no need to do anything
+			return;
 		slope=trace_plane_normal;
 	}
 
