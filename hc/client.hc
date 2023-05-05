@@ -2507,7 +2507,9 @@ void() PlayerPostThink =
 					self.gravity=self.standard_grav;
 		}
 		
-		if (self.watertype==CONTENT_EMPTY && !(self.flags&FL_WATERJUMP)) {
+		if (self.watertype<=CONTENT_WATER&&self.watertype>=CONTENT_LAVA)
+			self.last_onground = time;	//just to prevent screaming when coming up from water
+		else if (self.watertype==CONTENT_EMPTY && !(self.flags&FL_WATERJUMP)) {
 			if (self.canscream && self.last_onground < time-1.8) {
 				traceline(self.origin, self.origin-'0 0 32',TRUE, self);	//dont scream if were about to hit ground anyways
 				if (trace_fraction==1) {
