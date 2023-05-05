@@ -518,7 +518,7 @@ void flamestream_fire ()
 	newmis.solid=SOLID_BBOX;
 	newmis.abslight=1;
 	newmis.touch=flamestream_touch;
-	newmis.dmg=15+self.wisdom;	//40
+	newmis.dmg=16+(self.wisdom*0.7);	//wis starts at ~12
 	newmis.lifetime=time+2;
 	//newmis.o_angle=self.origin+self.proj_ofs+v_forward*16-v_right*16-v_up*16;
 	newmis.o_angle=self.origin+self.proj_ofs+v_forward*16-v_up*16;		//ws: centered projectile to match crosshair
