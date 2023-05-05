@@ -767,7 +767,7 @@ float goalheight,dot,goaldist;
 	if(dot<-0.7&&random()<0.3&&self.weaponframe_cnt+3<time)//on a almost flat surface, try to jump to cieling every three seconds
 	{//Make them do this if can't see enemy?
 		traceline(self.origin,self.origin+'0 0 512',FALSE,self);
-		if(trace_fraction<1&&trace_ent.solid==SOLID_BSP)//Roof within 132 above
+		if(trace_fraction<1&&trace_ent.solid==SOLID_BSP&&(pointcontents(trace_endpos)==CONTENT_SOLID))//Roof within 132 above
 		{//Jump to ceiling
 			self.weaponframe_cnt=time;
 			self.frags=trace_fraction*512;
