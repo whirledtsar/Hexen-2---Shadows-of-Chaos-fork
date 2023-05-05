@@ -330,8 +330,21 @@ void(float rightclick) Suc_Aorb_Fire;
 
 void acidorb_fire ()
 {
-	if(self.button0&&self.weaponframe==$normal60 &&!self.artifact_active&ART_TOMEOFPOWER)
-		self.weaponframe=$normal58;
+	if(self.button0 && self.weaponframe>=$normal57 && !self.artifact_active&ART_TOMEOFPOWER) {
+		//self.weaponframe = $normal58;
+		if (self.weaponframe>=$normal62) {	//reverse animation
+			self.lefty = TRUE;
+			self.weaponframe--;
+		}
+		else if (self.weaponframe == $normal57 && self.lefty) {
+			self.wfs = WF_CYCLE_WRAPPED;
+			self.lefty = FALSE;
+		}
+		else if (self.lefty)
+			self.weaponframe--;
+		else
+			self.wfs = advanceweaponframe($normal57,$normal62);
+	}
 	else
 		if(self.artifact_active&ART_TOMEOFPOWER)
 		{
@@ -342,12 +355,12 @@ void acidorb_fire ()
 		else
 		{
 			self.wfs = advanceweaponframe($normal51,$normal64);
-			if(self.weaponframe<$normal58)
-				self.weaponframe+=1;
+			//if(self.weaponframe<$normal58)
+				//self.weaponframe+=1;
 		}
 	self.th_weapon=acidorb_fire;
 	self.last_attack=time;
-	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<3||(self.bluemana<8&&self.artifact_active&ART_TOMEOFPOWER))
+	if((self.wfs==WF_CYCLE_WRAPPED&&!self.button0)||self.bluemana<3||(self.bluemana<8&&self.artifact_active&ART_TOMEOFPOWER))
 		if(self.artifact_active&ART_TOMEOFPOWER)
 			acidorb_ready_power();
 		else
