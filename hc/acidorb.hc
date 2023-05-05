@@ -273,7 +273,8 @@ vector spread;
 	newmis.solid=SOLID_BBOX;
 	newmis.touch=AcidMissileTouch;
 
-	newmis.dmg=random(27,33);
+	//newmis.dmg=random(27,33);
+	newmis.dmg=12+self.wisdom*0.7;	//wis starts at ~12
 
 //	newmis.speed=800;//Hardcoded so less info is sent over network
 	spread=normalize(v_right)*(offset*25);
