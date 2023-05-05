@@ -427,13 +427,13 @@ vector spot;
 	
 	self.skin = 1;
 	self.health = self.max_health = 10 + ((skill>2)*15);	//extra health on nightmare
-	self.init_exp_val = self.experience_value = SpiderExp[1];
+	self.init_exp_val = self.experience_value = SpiderExp[1]*0.5;
 	
 	self.drawflags = SCALE_ORIGIN_BOTTOM;
 	self.scale = 0.1;
 	self.spawnflags (+) JUMP|NO_DROP;
 	
-	self.attack_state = AS_STRAIGHT;
+	self.monster_awake = TRUE;
 	self.thingtype = THINGTYPE_FLESH;
 	self.spiderType = 1;
 	self.spiderGoPause = 35;
