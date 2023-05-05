@@ -838,6 +838,7 @@ float pclass;
 
 	self.whiptime =
 	self.movetime = 	/*timer for blood footsteps sound effect*/
+	self.search_time =	/*used for demoness blood rain charge*/
 	self.glyph_finished = 0; /*delay between glyph uses*/
 	
 	/*	if(spot.playerclass)  
@@ -1129,6 +1130,7 @@ entity spot;
 	
 	self.whiptime =
 	self.movetime = 	/*timer for blood footsteps sound effect*/
+	self.search_time =	/*used for demoness blood rain charge*/
 	self.glyph_finished = 0; /*delay between glyph uses*/
 
 	self.light_level = 128;		// So the assassin doesn't go invisible coming out of the teleporter
