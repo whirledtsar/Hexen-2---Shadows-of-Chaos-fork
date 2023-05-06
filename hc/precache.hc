@@ -1063,6 +1063,7 @@ void Precache_Demoness (void)
 	precache_sound4 ("succubus/flamend.wav");
 	precache_sound4 ("succubus/flamstrt.wav");
 	precache_sound4 ("succubus/flampow.wav");
+	precache_sound4 ("raven/flame1.wav");	//make sure this is precached
 	
 //Weapon 4
 	precache_sound4 ("succubus/firelght.wav");
